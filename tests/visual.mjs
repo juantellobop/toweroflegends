@@ -1,0 +1,226 @@
+import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import fs from 'node:fs/promises';
+import http from 'node:http';
+import path from 'node:path';
+import { chromium } from 'playwright';
+
+const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const PORT = 8091;
+const BASE = `http://127.0.0.1:${PORT}/`;
+const OUT = path.join(ROOT, '.cache', 'visual');
+
+function waitForServer(url, timeout = 8000) {
+  const start = Date.now();
+  return new Promise((resolve, reject) => {
+    function tick() {
+      const req = http.get(url, (res) => {
+        res.resume();
+        resolve();
+      });
+      req.on('error', () => {
+        if (Date.now() - start > timeout) reject(new Error(`Server did not start: ${url}`));
+        else setTimeout(tick, 120);
+      });
+      req.setTimeout(800, () => req.destroy());
+    }
+    tick();
+  });
+}
+
+async function playToBuild(page) {
+  await page.goto(BASE, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(350);
+  await page.click('.flag-opt');
+  await page.click('#start');
+  // El sobre llega sellado: abrirlo revela las cartas.
+  await page.waitForSelector('.pack-screen .pack-opener');
+  assert.ok(await page.locator('#confirmBar').isHidden(), 'Pack confirm bar must stay hidden before selection');
+  await page.click('#openBtn');
+  await page.waitForSelector('.pack-screen .player-card', { state: 'visible' });
+  await page.waitForTimeout(900);
+  await assertSquareBoxes(page, '.player-card .card-portrait', 'player card portraits');
+  await assertInsideCards(page, '.player-card', ['.card-head', '.card-portrait', '.card-name', '.card-meta', '.card-stats'], 'player cards');
+  await page.click('.deal-card:not(.disabled-deal)');
+  await page.click('#choose');
+  await page.waitForSelector('.pack-screen[data-kind="item"]');
+  await page.click('#openBtn');
+  await page.waitForSelector('.pack-screen .item-card', { state: 'visible' });
+  await page.waitForTimeout(700);
+  await assertInsideCards(page, '.item-card', ['.card-head', '.card-name', '.item-desc'], 'item cards');
+  await page.click('.deal-card');
+  await page.click('#choose');
+  await page.waitForSelector('.scouting-screen');
+  await page.click('#scout-continue');
+  await page.waitForSelector('.build-screen');
+  await page.waitForTimeout(350);
+}
+
+async function assertInsideCards(page, cardSelector, childSelectors, label) {
+  const failures = await page.locator(cardSelector).evaluateAll((cards, selectors) => {
+    const out = [];
+    for (const card of cards) {
+      const c = card.getBoundingClientRect();
+      for (const selector of selectors) {
+        const child = card.querySelector(selector);
+        if (!child) continue;
+        const r = child.getBoundingClientRect();
+        if (r.left < c.left - 2 || r.right > c.right + 2 || r.top < c.top - 2 || r.bottom > c.bottom + 2) {
+          out.push(`${selector}: ${Math.round(r.left)},${Math.round(r.top)},${Math.round(r.right)},${Math.round(r.bottom)} outside ${Math.round(c.left)},${Math.round(c.top)},${Math.round(c.right)},${Math.round(c.bottom)}`);
+        }
+      }
+    }
+    return out;
+  }, childSelectors);
+  assert.deepEqual(failures, [], `${label} overflow:\n${failures.join('\n')}`);
+}
+
+async function assertSquareBoxes(page, selector, label) {
+  const boxes = await page.locator(selector).evaluateAll((nodes) =>
+    nodes.map((node) => {
+      const rect = node.getBoundingClientRect();
+      return { width: rect.width, height: rect.height };
+    })
+  );
+  assert.ok(boxes.length > 0, `No boxes found for ${label}`);
+  for (const box of boxes) {
+    assert.ok(Math.abs(box.width - box.height) <= 2, `${label} must be square: ${box.width}x${box.height}`);
+  }
+}
+
+function intersects(a, b) {
+  const x = Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x));
+  const y = Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
+  return x * y;
+}
+
+async function assertBuildLayout(page, label) {
+  await assertSquareBoxes(page, '.build-screen .chip-face', `${label} field portraits`);
+  await assertSquareBoxes(page, '.build-screen .bench-face', `${label} bench portraits`);
+  assert.ok(await page.locator('.build-screen .flag-img').count(), `${label} must render country flags as images`);
+  const playPosition = await page.locator('.build-screen .play-bar').evaluate((node) => getComputedStyle(node).position);
+  assert.equal(playPosition, 'fixed', `${label} play button must be floating/fixed`);
+  const fieldBox = await page.locator('.build-screen .field').boundingBox();
+  const viewport = page.viewportSize();
+  assert.ok(fieldBox && viewport && fieldBox.height <= viewport.height, `${label} field height must fit viewport`);
+  await page.screenshot({ path: path.join(OUT, `${label}-build.png`), fullPage: true });
+}
+
+async function assertCenteredForwards(page) {
+  async function assertNoFieldChipOverlap(label) {
+    const overlaps = await page.locator('.chip-anchor').evaluateAll((nodes) => {
+      const out = [];
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i].getBoundingClientRect();
+        for (let j = i + 1; j < nodes.length; j++) {
+          const b = nodes[j].getBoundingClientRect();
+          const x = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
+          const y = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+          if (x * y > 4) {
+            out.push(`${nodes[i].dataset.line}${nodes[i].dataset.slot}/${nodes[j].dataset.line}${nodes[j].dataset.slot}: ${Math.round(x)}x${Math.round(y)}`);
+          }
+        }
+      }
+      return out;
+    });
+    assert.deepEqual(overlaps, [], `${label} field chips must not overlap:\n${overlaps.join('\n')}`);
+  }
+
+  for (const formation of ['4-4-2', '3-5-2']) {
+    await page.click(`.formation-seg .seg[data-formation="${formation}"]`);
+    await page.waitForTimeout(120);
+    const xs = await page.locator('.chip-anchor[data-line="FWD"]').evaluateAll((nodes) =>
+      nodes.map((node) => parseFloat(node.style.left))
+    );
+    assert.equal(xs.length, 2, `${formation} must have two forward slots`);
+    assert.ok(xs.every((x) => x >= 35 && x <= 65), `${formation} forwards must be centered, got ${xs.join(', ')}`);
+  }
+  await page.click('.formation-seg .seg[data-formation="4-3-3"]');
+  await page.waitForTimeout(120);
+  const xs433 = await page.locator('.chip-anchor[data-line="FWD"]').evaluateAll((nodes) =>
+    nodes.map((node) => parseFloat(node.style.left)).sort((a, b) => a - b)
+  );
+  assert.equal(xs433.length, 3, '4-3-3 must have three attacking slots');
+  assert.ok(xs433[0] <= 25 && xs433[1] >= 45 && xs433[1] <= 55 && xs433[2] >= 75, `4-3-3 forwards must be wide-center-wide, got ${xs433.join(', ')}`);
+
+  await page.click('.formation-seg .seg[data-formation="4-3-1-2"]');
+  await page.waitForTimeout(120);
+  const slots4312 = await page.locator('.chip-anchor').evaluateAll((nodes) =>
+    nodes.map((node) => ({
+      line: node.dataset.line,
+      slot: node.dataset.slot,
+      left: parseFloat(node.style.left),
+      top: parseFloat(node.style.top),
+    }))
+  );
+  const mids4312 = slots4312.filter((slot) => slot.line === 'MID');
+  const fwds4312 = slots4312.filter((slot) => slot.line === 'FWD');
+  const enganche = mids4312.find((slot) => slot.slot === '3');
+  assert.equal(mids4312.length, 4, '4-3-1-2 must have four midfield-line slots including enganche');
+  assert.equal(fwds4312.length, 2, '4-3-1-2 must have two forward slots');
+  assert.ok(enganche && enganche.left >= 45 && enganche.left <= 55 && enganche.top > 24 && enganche.top < 36, `4-3-1-2 enganche must be centered between lines, got ${JSON.stringify(enganche)}`);
+  assert.ok(fwds4312.every((slot) => slot.top <= 10), `4-3-1-2 forwards must move higher, got ${JSON.stringify(fwds4312)}`);
+  assert.ok(fwds4312.some((slot) => slot.left <= 30) && fwds4312.some((slot) => slot.left >= 70), `4-3-1-2 forwards must be separated, got ${JSON.stringify(fwds4312)}`);
+  await assertNoFieldChipOverlap('4-3-1-2');
+
+  await page.click('.formation-seg .seg[data-formation="3-4-3"]');
+  await page.waitForTimeout(120);
+  const defs343 = await page.locator('.chip-anchor[data-line="DEF"]').evaluateAll((nodes) =>
+    nodes.map((node) => parseFloat(node.style.left)).sort((a, b) => a - b)
+  );
+  const fwds343 = await page.locator('.chip-anchor[data-line="FWD"]').evaluateAll((nodes) =>
+    nodes.map((node) => parseFloat(node.style.left)).sort((a, b) => a - b)
+  );
+  assert.equal(defs343.length, 3, '3-4-3 must have three defender slots');
+  assert.ok(defs343[0] >= 20 && defs343[2] <= 80, `3-4-3 defenders must be central, got ${defs343.join(', ')}`);
+  assert.equal(fwds343.length, 3, '3-4-3 must have three attacking slots');
+  assert.ok(fwds343[0] <= 25 && fwds343[1] >= 45 && fwds343[1] <= 55 && fwds343[2] >= 75, `3-4-3 forwards must be wide-center-wide, got ${fwds343.join(', ')}`);
+
+  await page.click('.formation-seg .seg[data-formation="4-3-3"]');
+  await page.waitForTimeout(120);
+}
+
+async function assertDragAndDrop(page) {
+  const bench = page.locator('.team-roster .bench-item').first();
+  assert.ok(await bench.count(), 'Expected at least one bench player for drag test');
+  const uid = await bench.getAttribute('data-uid');
+  const line = await bench.getAttribute('data-line');
+  assert.ok(uid && line, 'Bench player needs uid and line');
+  const target = page.locator(`.chip-anchor[data-line="${line}"]`).first();
+  assert.ok(await target.count(), `No target slot for line ${line}`);
+  await bench.dragTo(target);
+  await page.waitForFunction((draggedUid) =>
+    !!document.querySelector(`.chip-anchor[data-uid="${draggedUid}"]`), uid
+  );
+}
+
+await fs.mkdir(OUT, { recursive: true });
+const server = spawn('python3', ['-m', 'http.server', String(PORT)], {
+  cwd: ROOT,
+  stdio: 'ignore',
+});
+
+let browser;
+try {
+  await waitForServer(BASE);
+  browser = await chromium.launch();
+
+  const desktop = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await playToBuild(desktop);
+  await assertBuildLayout(desktop, 'desktop');
+  await assertCenteredForwards(desktop);
+  await assertDragAndDrop(desktop);
+  await desktop.waitForTimeout(350);
+  await desktop.screenshot({ path: path.join(OUT, 'desktop-after-drag.png'), fullPage: true });
+  await desktop.close();
+
+  const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
+  await playToBuild(mobile);
+  await assertBuildLayout(mobile, 'mobile');
+  await mobile.close();
+
+  console.log('Visual checks: OK');
+} finally {
+  await browser?.close();
+  server.kill();
+}

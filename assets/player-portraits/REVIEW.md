@@ -1,0 +1,334 @@
+# Retratos para revisar
+
+Pasa una mejor foto en `tools/portrait_overrides.json` con la clave `source` (URL de Commons o ruta local) para los que aparezcan aqui.
+
+
+## Sin cara detectada (encuadre de respaldo; conviene mejor foto) (66)
+
+- **Abelardo Fernández** — https://upload.wikimedia.org/wikipedia/commons/e/e6/Abelardo_with_Sporting_Gij%C3%B3n_%28cropped%29.jpg
+- **Allan Nielsen** — https://upload.wikimedia.org/wikipedia/commons/4/49/JimmyNielsen_07JUL2012.jpg
+- **André Ayew** — https://upload.wikimedia.org/wikipedia/commons/d/db/20150331_Mali_vs_Ghana_170.jpg
+- **André Kana-Biyik** — https://upload.wikimedia.org/wikipedia/commons/9/95/Jean-Armel_Kana-Biyik.JPG
+- **Azzedine Ounahi** — https://upload.wikimedia.org/wikipedia/commons/3/31/Ounahi_vs_Paraguay_%28cropped%29.jpg
+- **Benjamin Massing** — https://upload.wikimedia.org/wikipedia/commons/a/a9/New_England_aviators_1914-1918%3B_their_portraits_and_their_records_%281919%29_%2814782242465%29.jpg
+- **Branco** — https://upload.wikimedia.org/wikipedia/commons/7/7b/RioBrancoAcreBRA.jpg
+- **Carlos Roa** — https://upload.wikimedia.org/wikipedia/commons/2/2a/Selecci%C3%B3n_Paraguaya_1972.jpg
+- **Carsten Ramelow** — https://upload.wikimedia.org/wikipedia/commons/8/86/Carsten_Ramelow_in_2014.jpg
+- **Claudio Morel** — https://upload.wikimedia.org/wikipedia/commons/a/ab/Claudio_Rodriguez.jpg
+- **Cody Gakpo** — https://upload.wikimedia.org/wikipedia/commons/4/4f/Cody_Gakpo_06042025_%282%29_%28cropped%29.jpg
+- **Cristian Riveros** — https://upload.wikimedia.org/wikipedia/commons/d/d3/Cristian_Riveros.jpg
+- **Cristiano Ronaldo** — https://upload.wikimedia.org/wikipedia/commons/3/33/C._Ronaldo_-_Ballon_d%27Or_2014.jpg
+- **DaMarcus Beasley** — https://upload.wikimedia.org/wikipedia/commons/4/42/DaMarcus_Beasley.jpg
+- **Daniel Prodan** — https://upload.wikimedia.org/wikipedia/commons/1/1f/Daniel_Prodan_1994.jpg
+- **Darío Verón** — https://upload.wikimedia.org/wikipedia/commons/c/ca/Dario_Veron.jpg
+- **Diego Pérez** — https://upload.wikimedia.org/wikipedia/commons/f/f6/Diego_P%C3%A9rez.jpg
+- **Enrique Vera** — https://upload.wikimedia.org/wikipedia/commons/0/06/Enrique_Vera.jpg
+- **Fagner** — https://upload.wikimedia.org/wikipedia/commons/e/e8/Paulist%C3%A3o_A1_-_S%C3%A3o_Bernardo_2x0_Corinthians_%2852681299548%29.jpg
+- **Fernando De Napoli** — https://upload.wikimedia.org/wikipedia/commons/b/b2/Borghi_vs_de_napoli.jpg
+- **Francisco López** — https://upload.wikimedia.org/wikipedia/commons/8/83/Antonio_L%C3%B3pez.jpg
+- **Giuseppe Giannini** — https://upload.wikimedia.org/wikipedia/commons/b/b6/Giuseppe_Giannini_1983.jpg
+- **Hasan Şaş** — https://upload.wikimedia.org/wikipedia/commons/b/ba/HasanSas.JPG
+- **Jens Jeremies** — https://upload.wikimedia.org/wikipedia/commons/9/90/Jens_Jeremies_%28cropped%29.jpg
+- **Joan Capdevila** — https://upload.wikimedia.org/wikipedia/commons/d/d4/Joan_Capdevila_2013_Catalonia.jpg
+- **Johan Cruyff** — https://upload.wikimedia.org/wikipedia/commons/2/22/Estadi_Johan_Cruyff.jpg
+- **Jonas Thern** — https://upload.wikimedia.org/wikipedia/commons/a/a0/SwedenU21_09_Simon_Thern_130606_Sve-Sch_3-2_172651_6339.jpg
+- **José Basualdo** — https://upload.wikimedia.org/wikipedia/commons/9/99/Velez_equipo_1995apertura.jpg
+- **José Luis Brown** — https://upload.wikimedia.org/wikipedia/commons/e/e4/Brown_camiseta_agujero_86.jpg
+- **José Luis Caminero** — https://upload.wikimedia.org/wikipedia/commons/3/31/Jos%C3%A9_Luis_P%C3%A9rez_Caminero.jpg
+- **Juan Sebastián Verón** — https://upload.wikimedia.org/wikipedia/commons/2/27/Juan_Sebastian_Veron_2017.jpg
+- **Klas Ingesson** — https://upload.wikimedia.org/wikipedia/commons/c/c5/Klas_Ingesson_%281994%29.jpg
+- **Lamine Diatta** — https://upload.wikimedia.org/wikipedia/commons/7/76/Lamine_Diatta.jpg
+- **Lucas Paquetá** — https://upload.wikimedia.org/wikipedia/commons/d/dc/Lucas_Paquet%C3%A1_of_West_Ham.jpeg
+- **Ludwig Augustinsson** — https://upload.wikimedia.org/wikipedia/commons/0/08/UEFA_EURO_qualifiers_Sweden_vs_Romaina_20190323_Ludwig_Augustinsson_2_%28cropped%29.jpg
+- **Luis Enrique** — https://upload.wikimedia.org/wikipedia/commons/f/f3/Luis_Enrique_2014.jpg
+- **Luis Fernández** — https://upload.wikimedia.org/wikipedia/commons/f/f4/Luis_Fernandez.jpg
+- **Luis Flores** — https://upload.wikimedia.org/wikipedia/commons/e/e2/Inter_Miami_CF_2-1_UANL_%2820_August_2025%29_26_%28cropped%29.jpg
+- **Marc Rieper** — https://upload.wikimedia.org/wikipedia/commons/a/a1/Marc_Rieper_with_Harry_Redknapp.jpg
+- **Mario Stanić** — https://upload.wikimedia.org/wikipedia/commons/e/e6/Mario_Stanic.jpg
+- **Mateo Vidal** — https://upload.wikimedia.org/wikipedia/commons/0/0c/Vidal_Coat_of_Arms.png
+- **Maxi Rodríguez** — https://upload.wikimedia.org/wikipedia/commons/1/1a/Suisse_vs_Argentine_-_Maximiliano_Rodriguez_%28cropped2%29.jpg
+- **Maxime Bossis** — https://upload.wikimedia.org/wikipedia/commons/3/3a/1978_FIFA_World_Cup_-_Italy_v_France_-_Maxime_Bossis.jpg
+- **Mick McCarthy** — https://upload.wikimedia.org/wikipedia/commons/5/54/MickMcCarthyBrCIps1.jpg
+- **Míchel González** — https://upload.wikimedia.org/wikipedia/commons/2/25/%C3%81lvaro_Gonz%C3%A1lez_Sober%C3%B3n_2019.jpg
+- **Nathan Aké** — https://upload.wikimedia.org/wikipedia/commons/3/34/Yokohama_F._Marinos_-_Manchester_City_%283-5%29_-_53075276224_%28Nathan_Ake%29.jpg
+- **Nico Claesen** — https://upload.wikimedia.org/wikipedia/commons/a/ad/Belgium_vs_ussr_1986.jpg
+- **Rafael Amador** — https://upload.wikimedia.org/wikipedia/commons/e/e1/Chapelle_de_Locadour_-_3654.JPG
+- **Roberto Mussi** — https://upload.wikimedia.org/wikipedia/commons/a/ac/Roberto_Mussi_-_Ned-AllStars_%282015%29.jpg
+- **Robin van Persie** — https://upload.wikimedia.org/wikipedia/commons/0/00/Feyenoord_Rotterdam_U19_vs._FC_Salburg_U19_%28Uefa_Youth_League_2024-11-06_Vierte_Runde%29_37_%28Shaqueel_van_Persie%29.jpg
+- **Rui Pereira** — https://upload.wikimedia.org/wikipedia/commons/3/3b/Danilo_Pereira_PSG.jpg
+- **Safet Sušić** — https://upload.wikimedia.org/wikipedia/commons/e/ee/SusicPSG_%28cropped%29.jpg
+- **Salif Diao** — https://upload.wikimedia.org/wikipedia/commons/5/56/Sali_Diao_Arsenal_v_Stoke_City_FC.jpg
+- **Sofiane Boufal** — https://upload.wikimedia.org/wikipedia/commons/c/cc/Sofiane_Boufal_v_Augsburg_2017.jpg
+- **Song Chong-gug** — https://upload.wikimedia.org/wikipedia/commons/c/c0/SongCG080413.jpg
+- **Stefan de Vrij** — https://upload.wikimedia.org/wikipedia/commons/6/64/FC_Salzburg_gegen_Inter_Mailand_%28Testspiel_2023-08-09%29_67_-_Stefan_de_Vrij_%28cropped%29.jpg
+- **Stéphane Guivarc’h** — https://upload.wikimedia.org/wikipedia/commons/7/7e/S._Guivarc%27h_EAG.jpg
+- **Sócrates** — https://upload.wikimedia.org/wikipedia/commons/5/56/Socrates_elgrafico_1983.jpg
+- **Terry Butcher** — https://upload.wikimedia.org/wikipedia/commons/3/39/TerryButcherMay2010.jpg
+- **Terry Fenwick** — https://upload.wikimedia.org/wikipedia/commons/a/a8/Maradona_vs_fenwick_1986.jpg
+- **Tomás Boy** — https://upload.wikimedia.org/wikipedia/commons/6/6d/MONARCASTEAM.jpg
+- **Viktor Claesson** — https://upload.wikimedia.org/wikipedia/commons/f/f3/UEFA_EURO_qualifiers_Sweden_vs_Romaina_20190323_Viktor_Claesson_28.jpg
+- **Walter Zenga** — https://upload.wikimedia.org/wikipedia/commons/b/b4/WalterZenga.jpg
+- **Álvaro Pereira** — https://upload.wikimedia.org/wikipedia/commons/2/29/U06_%C3%81lvaro_Pereira_3372.jpg
+- **Éric Abidal** — https://upload.wikimedia.org/wikipedia/commons/c/c8/%C3%89ric_Abidal_-_001.jpg
+- **Ľubomír Moravčík** — https://upload.wikimedia.org/wikipedia/commons/a/ac/Alan_Thompson_and_Lubomir_Moravcik%2C_John_Kennedy_testimonial_match.jpg
+
+## Posible foto reciente / post-carrera (revisar epoca) (209)
+
+- **Ahn Jung-hwan** — https://upload.wikimedia.org/wikipedia/commons/a/a8/Ahn_Jung-hwan_in_November_2021.png
+- **Alan Shearer** — https://upload.wikimedia.org/wikipedia/commons/b/ba/Alan_Shearer_2008.jpg
+- **Albin Ekdal** — https://upload.wikimedia.org/wikipedia/commons/d/dc/Albin_Ekdal_2018.jpg
+- **Aleksandr Samedov** — https://upload.wikimedia.org/wikipedia/commons/c/c9/Aleksandr_Samedov_2018_3.jpg
+- **Alemão** — https://upload.wikimedia.org/wikipedia/commons/4/42/28_12_2020_Jogo_Beneficente_Natal_Sem_Fome_%2850775547961%29_-_Alem%C3%A3o.jpg
+- **Alessandro Costacurta** — https://upload.wikimedia.org/wikipedia/commons/f/f4/Billy_Costacurta_AC_Milan_Glorie_2011.jpg
+- **Aliou Cissé** — https://upload.wikimedia.org/wikipedia/commons/b/bf/Aliou_Ciss%C3%A9_2018.jpg
+- **Alisson** — https://upload.wikimedia.org/wikipedia/commons/4/4f/20180610_FIFA_Friendly_Match_Austria_vs._Brazil_850_1625.jpg
+- **Anatoliy Tymoshchuk** — https://upload.wikimedia.org/wikipedia/commons/b/ba/Anatoliy_Tymoshchuk_2017.jpg
+- **Andoni Zubizarreta** — https://upload.wikimedia.org/wikipedia/commons/7/71/Andoni_Zubizarreta_en_2013-03_-_versi%C3%B3n_ampliada_%28cropped%29.JPG
+- **Andrea Pirlo** — https://upload.wikimedia.org/wikipedia/commons/6/6e/20150616_-_Portugal_-_Italie_-_Gen%C3%A8ve_-_Andrea_Pirlo_%28cropped%29.jpg
+- **Andreas Köpke** — https://upload.wikimedia.org/wikipedia/commons/a/a4/20180602_FIFA_Friendly_Match_Austria_vs._Germany_Andreas_K%C3%B6pke_850_0604.jpg
+- **Andreas Möller** — https://upload.wikimedia.org/wikipedia/commons/9/94/2018-09-17_Eintracht_Frankfurt_Golf_Open_Andreas_M%C3%B6ller-8877.jpg
+- **Andriy Nesmachnyi** — https://upload.wikimedia.org/wikipedia/commons/2/2c/%D0%9C%D0%B0%D1%82%D1%87_%C2%AB%D0%94%D0%B8%D0%BD%D0%B0%D0%BC%D0%BE%C2%BB_-_%C2%AB%D0%92%D0%BE%D0%BB%D1%8B%D0%BD%D1%8C%C2%BB_5-1._15_%D0%BC%D0%B0%D1%8F_2011_%D0%B3%D0%BE%D0%B4%D0%B0_%E2%80%94_163123.jpg
+- **Andriy Rusol** — https://upload.wikimedia.org/wikipedia/commons/c/ce/%D0%90%D0%BD%D0%B4%D1%80%D1%96%D0%B9_%D0%A0%D1%83%D1%81%D0%BE%D0%BB_%E2%80%94_%D0%9C%D0%B5%D0%BD%D0%B5%D0%B4%D0%B6%D0%BC%D0%B5%D0%BD%D1%82_%D0%A4%D0%9A_%D0%9A%D0%B0%D1%80%D0%BF%D0%B0%D1%82%D0%B8_%D0%9B%D1%8C%D0%B2%D1%96%D0%B2_%282024%29.jpg
+- **Andriy Voronin** — https://upload.wikimedia.org/wikipedia/commons/9/90/Andriy_Voronin_2019.jpg
+- **Andrés Iniesta** — https://upload.wikimedia.org/wikipedia/commons/5/57/Andr%C3%A9s_Iniesta_2019.jpg
+- **Anthony Annan** — https://upload.wikimedia.org/wikipedia/commons/d/d1/Anthony_Annan_2011-08-03.jpg
+- **Antolín Alcaraz** — https://upload.wikimedia.org/wikipedia/commons/1/1f/Antol%C3%ADn_Alcaraz_2014.jpg
+- **Arne Friedrich** — https://upload.wikimedia.org/wikipedia/commons/0/0f/Arne_Friedrich_2019_%28cropped%29.jpg
+- **Artem Dzyuba** — https://upload.wikimedia.org/wikipedia/commons/f/f8/Dzyuba_in_2021.jpg
+- **Arthur Numan** — https://upload.wikimedia.org/wikipedia/commons/1/17/Arthur_Numan_2013.jpg
+- **Axel Witsel** — https://upload.wikimedia.org/wikipedia/commons/6/61/Axel_Witsel_USMNT_v_Belgium_Mar_28_2026-34_%28cropped%29.jpg
+- **Benedikt Höwedes** — https://upload.wikimedia.org/wikipedia/commons/3/33/Benedikt_H%C3%B6wedes_2018.jpg
+- **Bruno Silva** — https://upload.wikimedia.org/wikipedia/commons/c/c8/20180610_FIFA_Friendly_Match_Austria_vs._Brazil_Thiago_Silva_850_1582.jpg
+- **Bryan Robson** — https://upload.wikimedia.org/wikipedia/commons/4/4e/Bryan_Robson_Thailand_2009-11-01_%282%29.jpg
+- **Bryan Roy** — https://upload.wikimedia.org/wikipedia/commons/b/b1/Bryan_Roy_-_2012_%28edited%29.jpg
+- **Cafú** — https://upload.wikimedia.org/wikipedia/commons/7/7a/14_06_2019_Abertura_da_Copa_Am%C3%A9rica_Brasil_2019_%2848064408836%29_%28cropped%29.jpg
+- **Carles Puyol** — https://upload.wikimedia.org/wikipedia/commons/6/65/Premios_Goya_2020_-_Carles_Pujol.jpg
+- **Carlos Sánchez** — https://upload.wikimedia.org/wikipedia/commons/1/1c/Hertha_BSC_vs._West_Ham_United_20190731_%28157%29.jpg
+- **Carlos Tevez** — https://upload.wikimedia.org/wikipedia/commons/3/31/Carlos_Tevez_with_Argentina_November_2014_%28cropped%29.jpg
+- **Celso Borges** — https://upload.wikimedia.org/wikipedia/commons/6/63/Celso_Borges_-_Gold_Cup_2015.jpg
+- **Chris Morris** — https://upload.wikimedia.org/wikipedia/commons/c/c5/2025%2C_President_Chris_Morris.jpg
+- **Chris Waddle** — https://upload.wikimedia.org/wikipedia/commons/f/ff/Chris_Waddle_2012.jpg
+- **Christian Bolaños** — https://upload.wikimedia.org/wikipedia/commons/0/06/Christian_Bola%C3%B1os_-_Jan._2018.jpg
+- **Christoph Metzelder** — https://upload.wikimedia.org/wikipedia/commons/2/29/2016-02-01_1054_Christoph_Metzelder_%28cropped%29.JPG
+- **Clarence Seedorf** — https://upload.wikimedia.org/wikipedia/commons/c/c2/Clarence_Seedorf_Introductory_Press_Conferences%2C_2_June_2025_-_40_%28cropped%29.jpg
+- **Clint Mathis** — https://upload.wikimedia.org/wikipedia/commons/6/6b/Clint_Mathis_2003.jpg
+- **Cláudio Taffarel** — https://upload.wikimedia.org/wikipedia/commons/3/30/Taffarel_2018.png
+- **Cristián Zapata** — https://upload.wikimedia.org/wikipedia/commons/4/40/FWC_2018_-_Round_of_16_-_COL_v_ENG_-_Photo_104_%28cropped%29.jpg
+- **Dani Navarro** — https://upload.wikimedia.org/wikipedia/commons/0/05/Tour_de_France_2017%2C_navarro_%2835326162064%29_%28cropped%29.jpg
+- **Darko Pančev** — https://upload.wikimedia.org/wikipedia/commons/b/b4/%D0%94%D0%B0%D1%80%D0%BA%D0%BE_%D0%9F%D0%B0%D0%BD%D1%87%D0%B5%D0%B2_2020.png
+- **David Ospina** — https://upload.wikimedia.org/wikipedia/commons/f/fd/David_Ospina%2C_2015-05-31.JPG
+- **Davor Šuker** — https://upload.wikimedia.org/wikipedia/commons/a/af/XVIII_%D0%9A%D0%BE%D0%BD%D0%B3%D1%80%D0%B5%D1%81%D1%81_%D0%A4%D0%A4%D0%A3._11_%D0%BC%D0%B0%D1%80%D1%82%D0%B0_2016_%D0%B3%D0%BE%D0%B4%D0%B0_%E2%80%94_672209_%28cropped%29.jpg
+- **Declan Rice** — https://upload.wikimedia.org/wikipedia/commons/e/ea/1_declan_rice_arsenal_2025_%28cropped%29.jpg
+- **Demetrio Albertini** — https://upload.wikimedia.org/wikipedia/commons/8/8c/Demetrio_Albertini_in_2016.jpg
+- **Denis Cheryshev** — https://upload.wikimedia.org/wikipedia/commons/4/48/Denis_Cheryshev_2019.jpg
+- **Dennis Bergkamp** — https://upload.wikimedia.org/wikipedia/commons/7/75/Dennis_Bergkamp_2014_%28cropped%29.jpg
+- **Dino Baggio** — https://upload.wikimedia.org/wikipedia/commons/4/4c/KL-2018_%2816%29_%28cropped%29.jpg
+- **Diogo Dalot** — https://upload.wikimedia.org/wikipedia/commons/1/1f/Diogo_Dalot_USMNT_v_Portugal_Mar_31_2026-12.jpg
+- **Divock Origi** — https://upload.wikimedia.org/wikipedia/commons/4/47/LFC_Parade_2019_01_Divock_Origi.jpg
+- **Domagoj Vida** — https://upload.wikimedia.org/wikipedia/commons/5/5d/Vida_2018_%28cropped%29.jpg
+- **Dragan Stojković** — https://upload.wikimedia.org/wikipedia/commons/0/07/Dragan_Stojkovic_Piksi_2024.png
+- **Ed de Goey** — https://upload.wikimedia.org/wikipedia/commons/f/fd/Jordan_De_Goey_2018.1.jpg
+- **Edwin van der Sar** — https://upload.wikimedia.org/wikipedia/commons/a/a1/Edwin_van_der_Sar_2015.jpg
+- **Egidio Arévalo Ríos** — https://upload.wikimedia.org/wikipedia/commons/2/26/Egidio_Arevalo_Rios_URU2011-11.jpg
+- **Eric Gerets** — https://upload.wikimedia.org/wikipedia/commons/2/29/Eric_Gerets_2012_1_%28cropped%29.jpg
+- **Fabio Cannavaro** — https://upload.wikimedia.org/wikipedia/commons/0/09/Fabio_Cannavaro_2011.jpg
+- **Fabio Grosso** — https://upload.wikimedia.org/wikipedia/commons/6/64/Frosinone_Calcio_-_Benito_Stirpe_-_vs_Genoa_14_5_2023_-_Fabio_Grosso_pugno_1_LAZ_5590_%28cropped%29.jpg
+- **Faruk Hadžibegić** — https://upload.wikimedia.org/wikipedia/commons/3/3d/Valenciennes_-_UNFP_FC_%2802-07-2016%29_12_%28cropped%29.jpg
+- **Felix Magath** — https://upload.wikimedia.org/wikipedia/commons/4/42/Felix_Magath_-_Kicken_mit_Herz_2024_01.jpg
+- **Felix Müller** — https://upload.wikimedia.org/wikipedia/commons/f/ff/Roland_M%C3%BCller_2012_1_%28cropped%29.jpg
+- **Fernando Redondo** — https://upload.wikimedia.org/wikipedia/commons/3/3e/%D0%A4%D0%B5%D1%80%D0%BD%D0%B0%D0%BD%D0%B4%D0%BE_%D0%A0%D0%B5%D0%B4%D0%BE%D0%BD%D0%B4%D0%BE_2019.png
+- **Florin Răducioiu** — https://upload.wikimedia.org/wikipedia/commons/e/e5/Florin_Raducioiu_-_16_June_2018_%28cropped%29.jpg
+- **Franco Baresi** — https://upload.wikimedia.org/wikipedia/commons/4/4a/Franco_Baresi_2012.jpg
+- **Frankie Hejduk** — https://upload.wikimedia.org/wikipedia/commons/8/85/Hejduk_Frankie_Columbus_Crew_SC_Meet_the_Team_2017.jpg
+- **Gabriel Heinze** — https://upload.wikimedia.org/wikipedia/commons/b/b8/Gabriel_Heinze_en_Newell%27s_Old_Boys_%282022%29.jpg
+- **Gary Neville** — https://upload.wikimedia.org/wikipedia/commons/c/c9/Gary_Neville_2014_%28cropped%29.jpg
+- **Gennaro Gattuso** — https://upload.wikimedia.org/wikipedia/commons/0/01/Lausanne_vs_Sion_27_february_2013_-_Gennaro_Gattuso.jpg
+- **Gheorghe Hagi** — https://upload.wikimedia.org/wikipedia/commons/b/b7/Ianis_Hagi_2015_%28cropped%29.JPG
+- **Gheorghe Popescu** — https://upload.wikimedia.org/wikipedia/commons/1/18/Genera%C8%9Bia_de_Aur_vs_Barcelona_Legends_%280-2%29_2018_Sports_Festival_-_meciul_amintirilor._%2852809831697%29.jpg
+- **Gianluigi Buffon** — https://upload.wikimedia.org/wikipedia/commons/d/d7/Norway_Italy_-_June_2025_A_44_%28Gianluigi_Buffon%29.jpg
+- **Gilberto Silva** — https://upload.wikimedia.org/wikipedia/commons/c/c0/2021_-_Press_conferences_SM7_0168_%2851649502936%29_%28cropped%29.jpg
+- **Giovanni van Bronckhorst** — https://upload.wikimedia.org/wikipedia/commons/0/0e/Giovanni_van_Brocnkhorst_20240803.jpg
+- **Glenn Hoddle** — https://upload.wikimedia.org/wikipedia/commons/e/e0/Glenn_Hoddle_2014_%28cropped%29.jpg
+- **Hans Sarpei** — https://upload.wikimedia.org/wikipedia/commons/9/9d/Hans_Sarpei_2019.jpg
+- **Hristo Stoichkov** — https://upload.wikimedia.org/wikipedia/commons/f/f3/Stoichkov_in_2016.jpg
+- **Hugo Moreau** — https://upload.wikimedia.org/wikipedia/commons/8/88/MargueriteMoreau2009.jpg
+- **Hulk** — https://upload.wikimedia.org/wikipedia/commons/4/4f/Spar-Zen2015_%283%29.jpg
+- **Igor Akinfeev** — https://upload.wikimedia.org/wikipedia/commons/c/c4/Igor_Akinfeev_2020.jpg
+- **Iker Casillas** — https://upload.wikimedia.org/wikipedia/commons/c/c8/Iker-Casillas-SportsTrade-2021-cropped.jpg
+- **Ilie Dumitrescu** — https://upload.wikimedia.org/wikipedia/commons/f/ff/Ilie_Dumitrescu_-_16_June_2018_%28cropped%29.jpg
+- **Ilya Kutepov** — https://upload.wikimedia.org/wikipedia/commons/8/85/Ilya_Kutepov_2022.jpg
+- **Ioan Lupescu** — https://upload.wikimedia.org/wikipedia/commons/a/a4/Genera%C8%9Bia_de_Aur_vs_Barcelona_Legends_%280-2%29_2018_Sports_Festival_-_meciul_amintirilor._%2852810598439%29_%28cropped%29.jpg
+- **Ivan Hašek** — https://upload.wikimedia.org/wikipedia/commons/c/ca/Lebanon_training%2C_2022_World_Cup_qualification_v_Iran_02.jpg
+- **Ivan Strinić** — https://upload.wikimedia.org/wikipedia/commons/2/21/Ivan_Strini%C4%87_2018_%28cropped%29.jpg
+- **Ivo Knoflíček** — https://upload.wikimedia.org/wikipedia/commons/4/47/Ivo_Knofl%C3%AD%C4%8Dek_2013.JPG
+- **Iván García** — https://upload.wikimedia.org/wikipedia/commons/4/4b/CE_Manresa_Alev%C3%AD_A%2C_amb_el_porter_Joan_Garcia%2C_abril_de_2012_%28cropped%29.jpg
+- **Jackson Martínez** — https://upload.wikimedia.org/wikipedia/commons/e/ed/Jackson_Martinez_2014.jpg
+- **Jan Vertonghen** — https://upload.wikimedia.org/wikipedia/commons/b/b5/Jan_Vertonghen_14_Jul_2018.jpg
+- **Jean-Marie Pfaff** — https://upload.wikimedia.org/wikipedia/commons/1/16/Jean-Marie_Pfaff_at_Runa_Ralley_2007_cropped.jpg
+- **Jens Lehmann** — https://upload.wikimedia.org/wikipedia/commons/7/74/Jens_Lehmann_-_2019202184453_2019-07-21_Champions_for_Charity_-_3017_-_B70I3052_%28cropped%29.jpg
+- **Joe Cole** — https://upload.wikimedia.org/wikipedia/commons/3/32/Joe_Cole2023.jpeg
+- **Joel Campbell** — https://upload.wikimedia.org/wikipedia/commons/e/e2/Joel_Campbell_-_Costa_Rica_%282015%29.jpg
+- **John Aldridge** — https://upload.wikimedia.org/wikipedia/commons/7/7a/John_Aldridge_in_Singapore%2C_2023_02.jpg
+- **John Barnes** — https://upload.wikimedia.org/wikipedia/commons/e/e4/John_Barnes_in_Singapore%2C_2023_01.jpg
+- **John O’Brien** — https://upload.wikimedia.org/wikipedia/commons/d/df/Lewis_O%27Brien_2018.jpg
+- **John Stones** — https://upload.wikimedia.org/wikipedia/commons/7/70/1_john_stones_2015_%28cropped%29.jpg
+- **John Terry** — https://upload.wikimedia.org/wikipedia/commons/c/c3/John_Terry_at_pro-am_Wentworth_golf_course_September_2023_%28cropped%29.jpg
+- **Jon Andoni Goikoetxea** — https://upload.wikimedia.org/wikipedia/commons/9/90/Jon_Andoni_Goikoetxea_2016.jpg
+- **Jon Dahl Tomasson** — https://upload.wikimedia.org/wikipedia/commons/e/e6/Dahl_Thomasson_2021_%28cropped%29.jpg
+- **Jordan Henderson** — https://upload.wikimedia.org/wikipedia/commons/7/79/Jordan_Henderson_29112025_%284%29.jpg
+- **Jordan Pickford** — https://upload.wikimedia.org/wikipedia/commons/8/86/Jordan_Pickford_2022-07-16_1.jpg
+- **Jorginho** — https://upload.wikimedia.org/wikipedia/commons/6/60/Jorginho%2C_2021_%28cropped%29.jpg
+- **Joris Mathijsen** — https://upload.wikimedia.org/wikipedia/commons/2/23/Joris_Mathijsen_2014.jpg
+- **Juan Simón** — https://upload.wikimedia.org/wikipedia/commons/b/ba/Unai_Sim%C3%B3n_2025_%28cropped%29.jpg
+- **Julio Salinas** — https://upload.wikimedia.org/wikipedia/commons/a/a3/Julio_Salinas_Fernandez_2016.jpg
+- **Jérôme Boateng** — https://upload.wikimedia.org/wikipedia/commons/2/22/Jerome_Boateng_Training_2019-04-10_FC_Bayern_Muenchen-2_%28cropped%29.jpg
+- **Júnior Baiano** — https://upload.wikimedia.org/wikipedia/commons/c/ca/Junior-Baiano-2008.jpg
+- **Jürgen Kohler** — https://upload.wikimedia.org/wikipedia/commons/1/10/J%C3%BCrgen_Kohler_2005.jpg
+- **Karl-Heinz Riedle** — https://upload.wikimedia.org/wikipedia/commons/e/e5/Karl-Heinz_Riedle%2C_2012.jpg
+- **Karl-Heinz Rummenigge** — https://upload.wikimedia.org/wikipedia/commons/f/fc/2015-02-06_Rummenigge_0370_%28cropped%29.JPG
+- **Kennet Andersson** — https://upload.wikimedia.org/wikipedia/commons/b/b9/Kennet_Andersson_in_Jan_2014.jpg
+- **Kenny Sansom** — https://upload.wikimedia.org/wikipedia/commons/f/fa/Kenny_Sansom_April_2011_TB.jpg
+- **Kevin De Bruyne** — https://upload.wikimedia.org/wikipedia/commons/4/40/Kevin_De_Bruyne_USMNT_v_Belgium_Mar_28_2026-64_%28cropped%29.jpg
+- **Kevin Moran** — https://upload.wikimedia.org/wikipedia/commons/2/23/Kevin_Boxer_Moran_TD_%282024%29.jpg
+- **Kim Tae-young** — https://upload.wikimedia.org/wikipedia/commons/f/fc/Kim_Tae-young_interview_in_2025_%28cropped%29.jpg
+- **Klaus Augenthaler** — https://upload.wikimedia.org/wikipedia/commons/d/d7/Klaus_Augenthaler_2021.jpg
+- **Kléberson** — https://upload.wikimedia.org/wikipedia/commons/f/f5/Kleberson_Fla_2010.jpg
+- **Krasimir Balakov** — https://upload.wikimedia.org/wikipedia/commons/2/22/Krasimir_Balakov_2015_%28cropped%29.JPG
+- **Landon Donovan** — https://upload.wikimedia.org/wikipedia/commons/6/6f/NC_Courage_vs_SD_Wave_%28Oct_2024%29_045.jpg
+- **Laurent Blanc** — https://upload.wikimedia.org/wikipedia/commons/b/be/Laurent_blanc_11_11_2013_reves_de_Clara.jpg
+- **Leandro** — https://upload.wikimedia.org/wikipedia/commons/1/13/Leandro_Paredes_2018_%28cropped%29.jpg
+- **Lilian Thuram** — https://upload.wikimedia.org/wikipedia/commons/2/24/Lilian_Thuram_-_F%C3%A9vrier_2013.jpg
+- **Lothar Matthäus** — https://upload.wikimedia.org/wikipedia/commons/8/84/2019_Lothar_Matth%C3%A4us.jpg
+- **Lubomír Kubík** — https://upload.wikimedia.org/wikipedia/commons/1/1f/Tom%C3%A1%C5%A1_Kub%C3%ADk_%282021%29.jpg
+- **Luca Toni** — https://upload.wikimedia.org/wikipedia/commons/4/46/FC_Zenit_Saint_Petersburg_vs._Juventus%2C_20_October_2021_33_%28Luca_Toni%29.jpg
+- **Luis Suárez** — https://upload.wikimedia.org/wikipedia/commons/f/f7/Luis_Su%C3%A1rez_2026_%28cropped%29.jpg
+- **Luís Figo** — https://upload.wikimedia.org/wikipedia/commons/1/15/Luis_Figo_2023.jpg
+- **Léo Dubois** — https://upload.wikimedia.org/wikipedia/commons/5/56/L%C3%A9o_Dubois_20191002.jpg
+- **Lúcio** — https://upload.wikimedia.org/wikipedia/commons/9/94/Lucio_2019_%28cropped%29.jpg
+- **Manuel Neuer** — https://upload.wikimedia.org/wikipedia/commons/1/10/20180602_FIFA_Friendly_Match_Austria_vs._Germany_Manuel_Neuer_850_0723.jpg
+- **Marcelo** — https://upload.wikimedia.org/wikipedia/commons/c/c6/Marcelo_Vieira_in_2022.jpg
+- **Marcelo Gallardo** — https://upload.wikimedia.org/wikipedia/commons/7/72/Palestino_-_River_Plate_20190424_32.jpg
+- **Marco Materazzi** — https://upload.wikimedia.org/wikipedia/commons/0/0d/Marco_Materazzi_2020.jpg
+- **Marcos Rojo** — https://upload.wikimedia.org/wikipedia/commons/e/e4/Marcos_Rojo_2018.jpg
+- **Marcus Berg** — https://upload.wikimedia.org/wikipedia/commons/e/ee/Marcus_Berg_2018.jpg
+- **Mark van Bommel** — https://upload.wikimedia.org/wikipedia/commons/8/86/2010_Mark_van_Bommel.jpg_%28cropped%29.jpg
+- **Martin Dahlin** — https://upload.wikimedia.org/wikipedia/commons/4/40/Martin_Dahlin_in_Jan_2014.jpg
+- **Mathieu Debuchy** — https://upload.wikimedia.org/wikipedia/commons/9/90/Mathieu_Debuchy%2C_2015-05-31.JPG
+- **Mats Hummels** — https://upload.wikimedia.org/wikipedia/commons/8/80/2023-08-12_TSV_Schott_Mainz_gegen_Borussia_Dortmund_%28DFB-Pokal_2023-24%29_by_Sandro_Halank%E2%80%93103.jpg
+- **Matías Vecino** — https://upload.wikimedia.org/wikipedia/commons/6/60/20171114_AUT_URU_4555_%28cropped%29.jpg
+- **Mauro Camoranesi** — https://upload.wikimedia.org/wikipedia/commons/c/c0/Camoranesi_2016.jpg
+- **Memphis Depay** — https://upload.wikimedia.org/wikipedia/commons/1/1c/Memphis_Depay_2019.jpg
+- **Michael Ballack** — https://upload.wikimedia.org/wikipedia/commons/5/5d/10._Tag_der_Legenden_2014_69.jpg
+- **Michel Bastos** — https://upload.wikimedia.org/wikipedia/commons/c/c9/Michel_Bastos_2013-06-29.jpg
+- **Michel Platini** — https://upload.wikimedia.org/wikipedia/commons/6/66/Michel_Platini_2010_%28cropped%29.jpg
+- **Miodrag Belodedici** — https://upload.wikimedia.org/wikipedia/commons/a/a9/Genera%C8%9Bia_de_Aur_vs_Barcelona_Legends_%280-2%29_2018_Sports_Festival_-_meciul_amintirilor._%2852810598539%29_%28cropped%29.jpg
+- **Miranda** — https://upload.wikimedia.org/wikipedia/commons/6/66/20180610_FIFA_Friendly_Match_Austria_vs._Brazil_Miranda_850_1585.jpg
+- **Miroslav Kadlec** — https://upload.wikimedia.org/wikipedia/commons/0/0f/Miroslav_Kadlec_2015.JPG
+- **Miroslav Klose** — https://upload.wikimedia.org/wikipedia/commons/8/8c/2016209185719_2016-07-27_Champions_for_Charity_-_Sven_-_1D_X_-_0149_-_DV3P4742_mod.jpg
+- **Márcio Santos** — https://upload.wikimedia.org/wikipedia/commons/4/48/28_12_2020_Jogo_Beneficente_Natal_Sem_Fome_%2850774798663%29_-_M%C3%A1rcio_Santos.jpg
+- **Niall Quinn** — https://upload.wikimedia.org/wikipedia/commons/6/6b/Niall_Quinn_2011_%28cropped%29.jpg
+- **Nico Bianchi** — https://upload.wikimedia.org/wikipedia/commons/0/03/Jules_Bianchi_2012-1.JPG
+- **Nicolás Burdisso** — https://upload.wikimedia.org/wikipedia/commons/9/97/Marcos_Rojo_%28L%29%2C_Nicol%C3%A1s_Burdisso_%28M%29%2C_Angel_di_Maria_%28R%29_%E2%80%93_Portugal_vs._Argentina%2C_9th_February_2011_%28cropped%29.jpg
+- **Nigel de Jong** — https://upload.wikimedia.org/wikipedia/commons/0/0c/Nigel_de_Jong_2011_%282%29.jpg
+- **Oleksandr Shovkovskyi** — https://upload.wikimedia.org/wikipedia/commons/1/1f/%D0%9C%D0%B0%D1%82%D1%87_%C2%AB%D0%94%D0%B8%D0%BD%D0%B0%D0%BC%D0%BE%C2%BB_%E2%80%93_%C2%AB%D0%92%D0%BE%D1%80%D1%81%D0%BA%D0%BB%D0%B0%C2%BB_3-1._18_%D0%B2%D0%B5%D1%80%D0%B5%D1%81%D0%BD%D1%8F_2024_%D1%80%D0%BE%D0%BA%D1%83_%E2%80%94_1559421_%28cropped%29.jpg
+- **Oliver Bierhoff** — https://upload.wikimedia.org/wikipedia/commons/7/79/2018-11-30_DFB_presentation_of_the_new_head_coach_of_the_National_Womens_Team_StP_6868_LR10_by_Stepro.jpg
+- **Oliver Kahn** — https://upload.wikimedia.org/wikipedia/commons/4/4b/2022-07-30_Fu%C3%9Fball%2C_M%C3%A4nner%2C_DFL-Supercup%2C_RB_Leipzig_-_FC_Bayern_M%C3%BCnchen_1DX_3179_by_Stepro.jpg
+- **Oliver Neuville** — https://upload.wikimedia.org/wikipedia/commons/f/f9/Gen%C3%A8ve_Indoors_2014_-_20140114_-_Oliver_Neuville_3.jpg
+- **Paolo Maldini** — https://upload.wikimedia.org/wikipedia/commons/0/0a/Paolo_Maldini_AC_Milan_Technical_director_2018.jpg
+- **Patrick Kluivert** — https://upload.wikimedia.org/wikipedia/commons/3/3c/Patrick_Kluivert_at_Web_Summit_2024_%28cropped_2%29.jpg
+- **Paul Gascoigne** — https://upload.wikimedia.org/wikipedia/commons/1/1d/Paul_Gascoigne_2021.png
+- **Paulinho** — https://upload.wikimedia.org/wikipedia/commons/8/8f/Paulinho-2018-08-19.jpg
+- **Pep Guardiola** — https://upload.wikimedia.org/wikipedia/commons/6/60/Josep_Guardiola_2023-10-04_Fu%C3%9Fball%2C_M%C3%A4nner%2C_UEFA_Champions_League%2C_RB_Leipzig_-_Manchester_City_FC_1DX_2797_%28cropped%29.jpg
+- **Peter Schmeichel** — https://upload.wikimedia.org/wikipedia/commons/2/24/Peter_Schmeichel_2012-01-25_001.jpg
+- **Philipp Lahm** — https://upload.wikimedia.org/wikipedia/commons/8/8a/Philipp_Lahm_auf_der_Berlinale_2024%2C_Ausschnitt.jpg
+- **Philippe Coutinho** — https://upload.wikimedia.org/wikipedia/commons/6/66/20180610_FIFA_Friendly_Match_Austria_vs._Brazil_Philippe_Coutinho_850_1692.jpg
+- **Phillip Cocu** — https://upload.wikimedia.org/wikipedia/commons/8/89/PSV_Eindhoven%2C_Teamcamp_Bad_Erlach%2C_July_2014_%28002%29.jpg
+- **Pierre Littbarski** — https://upload.wikimedia.org/wikipedia/commons/b/b8/Pierre_Littbarski_2006_%28cropped%29.jpg
+- **Rafael Márquez** — https://upload.wikimedia.org/wikipedia/commons/2/26/Rafael_M%C3%A1rquez_2014.jpg
+- **Raí** — https://upload.wikimedia.org/wikipedia/commons/0/02/Rai_em_2009_cropped.jpg
+- **René Higuita** — https://upload.wikimedia.org/wikipedia/commons/7/7a/Ren%C3%A9_Higuita%2C_2007.jpg
+- **Richard Witschge** — https://upload.wikimedia.org/wikipedia/commons/4/4f/Richard_Witschge_2013.jpg
+- **Roberto Di Matteo** — https://upload.wikimedia.org/wikipedia/commons/2/26/Roberto_Di_Matteo_S04_2015_%28cropped%29.jpg
+- **Roger Milla** — https://upload.wikimedia.org/wikipedia/commons/9/9a/Milla2008cropped.jpg
+- **Roman Zobnin** — https://upload.wikimedia.org/wikipedia/commons/b/b0/Roman_Zobnin_2022.jpg
+- **Ronald Koeman** — https://upload.wikimedia.org/wikipedia/commons/d/de/Ronald_Koeman_%282014%29_%28cropped%29.jpg
+- **Ronaldinho** — https://upload.wikimedia.org/wikipedia/commons/e/e8/Ronaldinho_in_2019.jpg
+- **Roy Keane** — https://upload.wikimedia.org/wikipedia/commons/0/0a/Roy_keane_2014.jpg
+- **Ruud Krol** — https://upload.wikimedia.org/wikipedia/commons/7/7a/Ruud_Krol_2005.jpg
+- **Sami Khedira** — https://upload.wikimedia.org/wikipedia/commons/4/4f/20180602_FIFA_Friendly_Match_Austria_vs._Germany_Sami_Khedira_850_0707.jpg
+- **Sergei Ignashevich** — https://upload.wikimedia.org/wikipedia/commons/b/bb/Sergei_Ignashevich_2021.jpg
+- **Sergio Goycochea** — https://upload.wikimedia.org/wikipedia/commons/8/80/Goycochea_tv_host_2015.jpg
+- **Sergio Ramos** — https://upload.wikimedia.org/wikipedia/commons/4/4b/Sergio_Ramos_Interview_2021_%28cropped%29.jpg
+- **Simone Perrotta** — https://upload.wikimedia.org/wikipedia/commons/4/47/Simone_Perrotta_2007.jpg
+- **Sol Campbell** — https://upload.wikimedia.org/wikipedia/commons/1/1f/Sol_Campbell_%2854921202604%29_%28cropped%29.jpg
+- **Srečko Katanec** — https://upload.wikimedia.org/wikipedia/commons/e/e8/Sre%C4%8Dko_Katanec_2015_%28cropped%29.jpg
+- **Stefan Reuter** — https://upload.wikimedia.org/wikipedia/commons/6/6e/Stefan-Reuter-2016-07.jpg
+- **Stefan Schwarz** — https://upload.wikimedia.org/wikipedia/commons/7/76/1_Stefan_Schwarz_2017_%28cropped%29_%28cropped%29.jpg
+- **Steven Gerrard** — https://upload.wikimedia.org/wikipedia/commons/d/d5/Steven_Gerrard_2018.jpg
+- **Thiago Silva** — https://upload.wikimedia.org/wikipedia/commons/c/c8/20180610_FIFA_Friendly_Match_Austria_vs._Brazil_Thiago_Silva_850_1582.jpg
+- **Thomas Berthold** — https://upload.wikimedia.org/wikipedia/commons/d/db/Thomas_Berthold_2014.JPG
+- **Thomas Høgh** — https://upload.wikimedia.org/wikipedia/commons/0/0a/Alex_hogh_andersen_2021_3.jpg
+- **Thomas Meunier** — https://upload.wikimedia.org/wikipedia/commons/5/50/Thomas_Meunier_USMNT_v_Belgium_Mar_28_2026-16_%28cropped%29.jpg
+- **Thomas Müller** — https://upload.wikimedia.org/wikipedia/commons/a/aa/FC_Red_Bull_Salzburg_gegen_Bayern_M%C3%BCnchen_%282025-01-06_Testspiel%29_19.jpg
+- **Thomas Ravelli** — https://upload.wikimedia.org/wikipedia/commons/4/41/Thomas_Ravelli_in_January_2014.jpg
+- **Tiago Costa** — https://upload.wikimedia.org/wikipedia/commons/f/fd/Antonio_Costa_Portrait_2024_%28cropped%29.jpg
+- **Tibor Selymes** — https://upload.wikimedia.org/wikipedia/commons/2/29/Tibor_Selymes_-_16_June_2018_%28cropped%29.jpg
+- **Toby Alderweireld** — https://upload.wikimedia.org/wikipedia/commons/9/98/2020-03-10_Fu%C3%9Fball%2C_M%C3%A4nner%2C_UEFA_Champions_League_Achtelfinale%2C_RB_Leipzig_-_Tottenham_Hotspur_1DX_3693_by_Stepro_%28cropped%29.jpg
+- **Tomáš Skuhravý** — https://upload.wikimedia.org/wikipedia/commons/d/d1/Tomas_Skuhravy_2008.jpg
+- **Toni Kroos** — https://upload.wikimedia.org/wikipedia/commons/6/64/Toni_Kroos_Real_Madrid_2021.jpg
+- **Trifon Ivanov** — https://upload.wikimedia.org/wikipedia/commons/b/b8/Ivan_Ivanov_-_2011.jpg
+- **Txiki Begiristain** — https://upload.wikimedia.org/wikipedia/commons/f/f0/Txiki_Begiristain_2016_%28cropped%29.jpg
+- **Ulf Kirsten** — https://upload.wikimedia.org/wikipedia/commons/8/89/Ulf_Kirsten_2019.jpg
+- **Victor Lindelöf** — https://upload.wikimedia.org/wikipedia/commons/1/1e/Sweden-Slovenia_Nations_League_2022-09-27_6_%28Victor_Lindelof%2C_cropped%29.jpg
+- **Zico** — https://upload.wikimedia.org/wikipedia/commons/e/e3/Zico_2012_3.jpg
+- **Álex Romero** — https://upload.wikimedia.org/wikipedia/commons/f/f3/Alex_Romero_%2806-09-2013%2C_ritagliato%29.jpg
+- **Éder Militão** — https://upload.wikimedia.org/wikipedia/commons/3/38/Eder_Militao_2021.jpg
+
+## Sin imagen encontrada en Wikimedia (42)
+
+- **Andriy Sviderskyi**
+- **Bertin Ebwelle**
+- **Caio Alves**
+- **Cyrille Makanaky**
+- **Ditmar Jakobs**
+- **Eloy Olaya**
+- **Emil Kremenliev**
+- **Emmanuel Kundé**
+- **François Omam-Biyik**
+- **Giuseppe Signori**
+- **Goran Vlaović**
+- **Gustavo Dezotti**
+- **Jan Stejskal**
+- **Javier de Pedro**
+- **Jonathan Santana**
+- **Jozef Chovanec**
+- **Juninho Paulista**
+- **Karlheinz Förster**
+- **Khalilou Fadiga**
+- **Louis-Paul Mfédé**
+- **Manuel Amoros**
+- **Morten Wieghorst**
+- **Norbert Eder**
+- **Nuno Valente**
+- **Packie Bonner**
+- **Pape Malick Diop**
+- **Patrick Battiston**
+- **Refik Šabanadžović**
+- **Riccardo Ferri**
+- **Robert Jarni**
+- **Roger Ljung**
+- **Stefan Effenberg**
+- **Stephen Tataw**
+- **Thierry Tusseau**
+- **Thomas Bein**
+- **Thomas Helveg**
+- **Tomislav Ivković**
+- **Tomás Reñones**
+- **Vujadin Stanojković**
+- **Yoo Sang-chul**
+- **Yıldıray Baştürk**
+- **Émile Mbouh**
+
+## Fallo al procesar (1)
+
+- **Trevor Sinclair** — cannot identify image file '/Users/juan/VSCode/torre-de-leyendas/.cache/player-p

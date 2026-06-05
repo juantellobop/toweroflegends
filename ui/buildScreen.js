@@ -1,0 +1,590 @@
+// Torre de Leyendas — Armar equipo (§4.3 del plan UI/UX, §8.4).
+// Cabecera de cristal fija con los cuatro ratings de equipo + química, en
+// numerales tabulares, que se actualizan en vivo (animación de conteo) al mover
+// jugadores. Cuerpo: campo en SVG con huecos por línea según la formación;
+// tocar hueco → selector; tocar ficha → la quita. Enlaces de química sutiles.
+// Suplentes en una tira inferior. Botón "Jugar" flotante (cristal).
+
+import { playerCardHTML, itemCardHTML, POSITION_LABEL, LINE_LABEL } from './cards.js';
+import {
+  liveRatings, liveChemistry, isLineupComplete, isStarter, formationSlots,
+  canPlacePlayerInSlot,
+} from '../state/run.js';
+import { playerOVR } from '../engine/ovr.js';
+import { FORMATIONS, LINES, formationLineSlots } from '../data/config.js';
+import { countTo } from '../match/feedback.js';
+import { playerInitials, portraitPathForPlayer } from '../data/playerAssets.js';
+import { UI_ASSETS } from '../data/uiAssets.js';
+import { flagSrcForNation } from '../data/flags.js';
+import { localizeOpponentName, t } from '../data/i18n.js';
+
+// Posición vertical (top %) de cada línea en el campo, de abajo (POR) a arriba (DEL).
+const LINE_TOP = { GK: 86, DEF: 65, MID: 43, ENG: 31, FWD: 20 };
+const FORMATION_LINE_TOP = {
+  '4-3-1-2': { GK: 92, DEF: 73, MID: 53, ENG: 31, FWD: 8 },
+};
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+function spreadLeft(n, line, formation) {
+  if (n <= 0) return [];
+  if (n === 1) return [50];
+  if (formation === '4-3-1-2' && line === 'FWD' && n === 2) return [28, 72];
+  if (formation === '4-3-1-2' && line === 'MID' && n === 3) return [18, 50, 82];
+  if (line === 'FWD') {
+    if (n === 2) return [42, 58];
+    if (n === 3) return [18, 50, 82];
+  }
+  if (line === 'DEF' && n === 3) return [28, 50, 72];
+  const margin = line === 'GK' ? 42 : 12;
+  return Array.from({ length: n }, (_, i) => margin + ((100 - margin * 2) * i) / (n - 1));
+}
+
+function assignPlayersToSlots(formation, line, players) {
+  const slots = formationLineSlots(formation, line).map((slot) => ({ ...slot, player: null }));
+  const remaining = players.slice();
+
+  function fill(slot, predicate) {
+    const idx = remaining.findIndex((player) => predicate(player, slot));
+    if (idx < 0) return;
+    slot.player = remaining.splice(idx, 1)[0];
+  }
+
+  slots
+    .filter((slot) => slot.accepts.length === 1)
+    .forEach((slot) => fill(slot, (player) => slot.accepts.includes(player.position)));
+  slots
+    .filter((slot) => !slot.player && slot.accepts.length > 1)
+    .forEach((slot) => fill(slot, (player) => slot.accepts.includes(player.position)));
+  slots
+    .filter((slot) => !slot.player)
+    .forEach((slot) => fill(slot, (player) => slot.accepts.includes(player.position)));
+
+  return slots;
+}
+
+function positionSlots(formation, line, slots) {
+  const byRole = new Map();
+  for (const slot of slots) {
+    const role = slot.role || line;
+    if (!byRole.has(role)) byRole.set(role, []);
+    byRole.get(role).push(slot);
+  }
+
+  for (const [role, roleSlots] of byRole.entries()) {
+    const xs = spreadLeft(roleSlots.length, role, formation);
+    const top = FORMATION_LINE_TOP[formation]?.[role] ?? LINE_TOP[role] ?? LINE_TOP[line];
+    roleSlots.forEach((slot, i) => {
+      slot.x = xs[i];
+      slot.y = top;
+    });
+  }
+
+  return slots;
+}
+
+function slotLabel(line, role) {
+  if (role === 'ENG') return 'ENG';
+  return POSITION_LABEL[line];
+}
+
+// Coordenadas (x%,y%) de cada jugador titular, por línea, para fichas y enlaces.
+function lineupPositions(state) {
+  const pos = [];
+  for (const line of LINES) {
+    const players = state.starting11[line] || [];
+    const slots = positionSlots(state.formation, line, assignPlayersToSlots(state.formation, line, players));
+    slots.forEach((slot) => pos.push(slot));
+  }
+  return pos;
+}
+
+// Enlaces de química: pares de la misma línea que comparten nación o época.
+function chemLinks(positions) {
+  const links = [];
+  const byLine = {};
+  positions.forEach((p) => { if (p.player) (byLine[p.line] ||= []).push(p); });
+  for (const line in byLine) {
+    const arr = byLine[line];
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = i + 1; j < arr.length; j++) {
+        const a = arr[i].player, b = arr[j].player;
+        if (a.nation === b.nation || a.era === b.era) {
+          links.push({ x1: arr[i].x, y1: arr[i].y, x2: arr[j].x, y2: arr[j].y, strong: a.nation === b.nation });
+        }
+      }
+    }
+  }
+  return links;
+}
+
+function fieldSVG(positions) {
+  const links = chemLinks(positions).map((l) =>
+    `<line x1="${l.x1}" y1="${l.y1}" x2="${l.x2}" y2="${l.y2}"
+       class="chem-link ${l.strong ? 'strong' : ''}" />`).join('');
+  return `
+    <svg class="field-bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <rect x="1" y="1" width="98" height="98" rx="3" class="fl" />
+      <line x1="1" y1="50" x2="99" y2="50" class="fl" />
+      <circle cx="50" cy="50" r="9" class="fl" />
+      <rect x="30" y="1" width="40" height="12" class="fl" />
+      <rect x="30" y="87" width="40" height="12" class="fl" />
+      <g class="chem-links">${links}</g>
+    </svg>`;
+}
+
+function chipHTML(p, line, slotIndex) {
+  const ovr = playerOVR(p);
+  return `
+    <button class="field-chip filled lineup-draggable rarity-${p.rarity}" data-uid="${p.uid}"
+            data-line="${line}" data-slot="${slotIndex}" draggable="true"
+            aria-label="${esc(t('build.playerDragAria', { name: p.name }))}">
+      <span class="chip-face" aria-hidden="true">
+        <img src="${esc(portraitPathForPlayer(p))}" alt="" loading="lazy" decoding="async" data-hide-on-error="true" />
+        <span>${esc(playerInitials(p.name))}</span>
+      </span>
+      <span class="chip-ovr">${ovr}</span>
+      <span class="chip-name">${esc(p.name)}</span>
+      <span class="chip-info" role="button" tabindex="0" data-info-uid="${p.uid}" aria-label="${esc(t('build.viewStatsAria', { name: p.name }))}">i</span>
+    </button>`;
+}
+function emptyHTML(line, slotIndex, role) {
+  const label = role === 'ENG' ? t('card.line.ENG').toLowerCase() : LINE_LABEL[line];
+  return `
+    <button class="field-chip empty" data-line="${line}" data-slot="${slotIndex}" aria-label="${esc(t('build.emptyAria', { label }))}">
+      <span class="chip-plus">+</span>
+      <span class="chip-name">${slotLabel(line, role)}</span>
+    </button>`;
+}
+
+function fieldNodes(positions) {
+  return positions.map((p) => {
+    const html = p.player ? chipHTML(p.player, p.line, p.slotIndex) : emptyHTML(p.line, p.slotIndex, p.role);
+    const uidAttr = p.player ? `data-uid="${p.player.uid}"` : '';
+    return `<div class="chip-anchor" data-line="${p.line}" data-slot="${p.slotIndex}" ${uidAttr} style="left:${p.x}%;top:${p.y}%">${html}</div>`;
+  }).join('');
+}
+
+function ratingsHeader(state) {
+  const r = liveRatings(state);
+  const chem = liveChemistry(state);
+  const rows = [
+    ['ATA', r.attack, UI_ASSETS.icons.attack],
+    ['MED', r.midfield, UI_ASSETS.icons.midfield],
+    ['DEF', r.defense, UI_ASSETS.icons.defense],
+    ['POR', r.gk, UI_ASSETS.icons.gk],
+  ];
+  const rowHTML = rows.map(([label, val, icon]) => `
+    <div class="rating-row">
+      <img src="${icon}" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      <span class="rt-label">${label}</span>
+      <span class="rt-bar"><span class="rt-fill" style="width:${Math.round(val)}%"></span></span>
+      <b class="rt-val tabular" data-val="${Math.round(val)}">0</b>
+    </div>`).join('');
+  return `
+    <div class="ratings-glass glass" id="ratingsHeader">
+      <div class="rt-grid">${rowHTML}</div>
+      <div class="chem-pill">
+        <span>${t('build.chemistry')}</span>
+        <b class="tabular" id="chemTotal" data-val="${chem.total}">0</b>
+      </div>
+    </div>`;
+}
+
+function bench(state) {
+  const subs = state.squad.filter((p) => !isStarter(state, p)).sort((a, b) => playerOVR(b) - playerOVR(a));
+  if (!subs.length) return `<p class="empty-note">${t('build.noSubs')}</p>`;
+  return `<div class="bench-strip">
+    ${subs.map((p) => `
+      <button class="bench-item lineup-draggable rarity-${p.rarity}" data-uid="${p.uid}" data-line="${p.position}" draggable="true"
+              aria-label="${esc(t('build.benchAria', { name: p.name }))}">
+        <span class="bench-face" aria-hidden="true">
+          <img src="${esc(portraitPathForPlayer(p))}" alt="" loading="lazy" decoding="async" data-hide-on-error="true" />
+          <span>${esc(playerInitials(p.name))}</span>
+        </span>
+        <span class="bench-ovr">${playerOVR(p)}</span>
+        <span class="bench-name">${esc(p.name)}</span>
+        <span class="bench-pos">${POSITION_LABEL[p.position]}</span>
+        <span class="chip-info bench-info" role="button" tabindex="0" data-info-uid="${p.uid}" aria-label="${esc(t('build.viewStatsAria', { name: p.name }))}">i</span>
+      </button>`).join('')}
+  </div>`;
+}
+
+export function renderBuild(root, state, handlers) {
+  const complete = isLineupComplete(state);
+  const positions = lineupPositions(state);
+  const formationSegs = Object.keys(FORMATIONS)
+    .map((f) => `<button class="seg ${f === state.formation ? 'active' : ''}" data-formation="${f}">${f}</button>`).join('');
+  const itemsHTML = state.items.length
+    ? `<div class="items-strip">${state.items.map((it) => itemCardHTML(it)).join('')}</div>`
+    : `<p class="empty-note">${t('build.noItems')}</p>`;
+  const opponentHTML = state.opponent ? `
+    <button class="opponent-brief" id="viewOpponent">
+      <img class="flag-img opponent-flag-img" src="${esc(flagSrcForNation(state.opponent.name, [state.opponent.colors.primary, state.opponent.colors.secondary]))}" alt="" loading="lazy" decoding="async" />
+      <span><small>${t('build.nextOpponent')}</small><b>${esc(localizeOpponentName(state.opponent))}</b></span>
+      <span class="opponent-view">${t('build.viewLineup')}</span>
+    </button>` : '';
+
+  root.innerHTML = `
+    <section class="screen build-screen pixel-screen team-select-screen">
+      <header class="nav-large build-nav">
+        <div class="level-badge">${t('generic.level', { level: state.level })}</div>
+        <h1 class="large-title">${t('build.title')}</h1>
+      </header>
+
+      ${opponentHTML}
+      ${ratingsHeader(state)}
+
+      <div class="team-layout">
+        <main class="team-field-panel arcade-panel">
+          <div class="team-panel-head">
+            <div>
+              <h2>${t('build.tacticalBoard')}</h2>
+              <p>${t('build.boardHint')}</p>
+            </div>
+            <div class="seg-control formation-seg" role="tablist" aria-label="${t('build.formationAria')}">${formationSegs}</div>
+          </div>
+
+          <div class="field" id="field" data-formation="${esc(state.formation)}">
+            ${fieldSVG(positions)}
+            ${fieldNodes(positions)}
+          </div>
+
+          <div class="slot-picker glass-thick" id="slotPicker" hidden></div>
+        </main>
+
+        <aside class="team-roster arcade-panel">
+          <div class="team-panel-head roster-head">
+            <div>
+              <h2>${t('build.roster')}</h2>
+              <p>${t('build.rosterCount', { total: state.squad.length, missing: countMissing(state) })}</p>
+            </div>
+          </div>
+          ${bench(state)}
+
+          <details class="items-fold">
+            <summary>${t('build.activeItems', { count: state.items.length })}</summary>
+            ${itemsHTML}
+          </details>
+        </aside>
+      </div>
+
+      <div class="play-bar">
+        <button id="play" class="primary big glass-cta" ${complete ? '' : 'disabled'}>
+          ${complete ? t('build.play') : t('build.missing', { count: countMissing(state) })}
+        </button>
+      </div>
+
+      <div class="player-modal" id="playerModal" hidden>
+        <div class="player-modal-backdrop" data-close></div>
+        <div class="player-modal-card" role="dialog" aria-modal="true" aria-label="${t('build.statsDialog')}">
+          <button class="player-modal-close" data-close aria-label="${t('generic.close')}">✕</button>
+          <div id="playerModalBody"></div>
+        </div>
+      </div>
+    </section>`;
+
+  // === Conteo en vivo de ratings/química (animación al cambiar) ===
+  root.querySelectorAll('.rt-val, #chemTotal').forEach((node) => {
+    countTo(node, parseInt(node.dataset.val, 10) || 0);
+  });
+  root.querySelector('#viewOpponent')?.addEventListener('click', () => handlers.onScout());
+  let suppressClick = false;
+  wireBuildDragDrop(root, state, handlers, () => {
+    suppressClick = true;
+    setTimeout(() => { suppressClick = false; }, 0);
+  });
+
+  // === Formación (segmented) ===
+  root.querySelectorAll('.formation-seg .seg').forEach((b) => {
+    b.addEventListener('click', () => handlers.onSetFormation(b.dataset.formation));
+  });
+
+  // === Fichas del campo: filled → quitar; empty → abrir selector ===
+  root.querySelectorAll('.field-chip.filled').forEach((node) => {
+    node.addEventListener('click', () => {
+      if (suppressClick) return;
+      const player = state.squad.find((p) => p.uid === node.dataset.uid);
+      if (player) handlers.onToggle(player);
+    });
+  });
+  root.querySelectorAll('.field-chip.empty').forEach((node) => {
+    node.addEventListener('click', () => {
+      if (suppressClick) return;
+      openPicker(root, state, node.dataset.line, parseInt(node.dataset.slot, 10) || 0, handlers);
+    });
+  });
+
+  // === Suplentes: alinear ===
+  root.querySelectorAll('.bench-item').forEach((node) => {
+    node.addEventListener('click', () => {
+      if (suppressClick) return;
+      const player = state.squad.find((p) => p.uid === node.dataset.uid);
+      if (player) handlers.onToggle(player);
+    });
+  });
+
+  // === Jugar ===
+  const playBtn = root.querySelector('#play');
+  if (complete) playBtn.addEventListener('click', () => handlers.onPlay());
+
+  // === Ver estadísticas del jugador (modal) ===
+  wirePlayerStats(root, state);
+}
+
+// Modal con la carta completa (atributos) del jugador. El disparador es el
+// botón "i"; detenemos la propagación para no arrastrar ni alinear/quitar.
+function wirePlayerStats(root, state) {
+  const modal = root.querySelector('#playerModal');
+  const body = root.querySelector('#playerModalBody');
+  if (!modal || !body) return;
+
+  const open = (uid) => {
+    const player = state.squad.find((p) => p.uid === uid);
+    if (!player) return;
+    body.innerHTML = playerCardHTML(player);
+    modal.hidden = false;
+  };
+  const close = () => { modal.hidden = true; body.innerHTML = ''; };
+
+  root.querySelectorAll('.chip-info[data-info-uid]').forEach((node) => {
+    // Bloquea el arranque del drag y el click de la ficha contenedora.
+    ['pointerdown', 'mousedown', 'touchstart'].forEach((ev) =>
+      node.addEventListener(ev, (e) => e.stopPropagation()));
+    node.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      open(node.dataset.infoUid);
+    });
+    node.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.stopPropagation();
+        e.preventDefault();
+        open(node.dataset.infoUid);
+      }
+    });
+  });
+
+  modal.querySelectorAll('[data-close]').forEach((node) =>
+    node.addEventListener('click', close));
+  modal.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  document.addEventListener('keydown', function onEsc(e) {
+    if (e.key === 'Escape' && !modal.hidden) close();
+    if (modal.hidden) document.removeEventListener('keydown', onEsc);
+  });
+}
+
+function wireBuildDragDrop(root, state, handlers, markDragged) {
+  const sources = Array.from(root.querySelectorAll('.lineup-draggable'));
+  const targets = Array.from(root.querySelectorAll('.chip-anchor[data-line][data-slot]'));
+  let htmlDragUid = null;
+  let pointerDrag = null;
+  let activeTarget = null;
+  let ghost = null;
+  let nativeDragging = false; // arrastre HTML5 nativo en curso (lo cierra dragend)
+
+  function playerForUid(uid) {
+    return state.squad.find((p) => p.uid === uid);
+  }
+  function setActiveTarget(target, player) {
+    if (activeTarget && activeTarget !== target) activeTarget.classList.remove('drop-ok', 'drop-bad');
+    activeTarget = target;
+    if (!target) return;
+    const ok = player && canPlacePlayerInSlot(
+      state,
+      player,
+      target.dataset.line,
+      parseInt(target.dataset.slot, 10) || 0
+    );
+    target.classList.toggle('drop-ok', ok);
+    target.classList.toggle('drop-bad', !ok);
+  }
+  function clearActiveTarget() {
+    targets.forEach((target) => target.classList.remove('drop-ok', 'drop-bad'));
+    activeTarget = null;
+  }
+  // Resalta con un brillo todas las posiciones que el jugador puede ocupar
+  // (al seleccionar/clicar/holdear un suplente). Ayuda a leer dónde encaja.
+  function highlightEligible(player) {
+    targets.forEach((target) => {
+      const ok = Boolean(player) && canPlacePlayerInSlot(
+        state, player, target.dataset.line, parseInt(target.dataset.slot, 10) || 0
+      );
+      target.classList.toggle('eligible-slot', ok);
+    });
+  }
+  function clearEligible() {
+    targets.forEach((target) => target.classList.remove('eligible-slot'));
+  }
+  function placeOn(target, player) {
+    const slotIndex = parseInt(target?.dataset.slot, 10) || 0;
+    if (!target || !player || !canPlacePlayerInSlot(state, player, target.dataset.line, slotIndex)) return false;
+    handlers.onPlace(player, target.dataset.line, slotIndex);
+    return true;
+  }
+  function makeGhost(source, x, y) {
+    const node = source.cloneNode(true);
+    node.classList.add('drag-ghost');
+    node.removeAttribute('id');
+    node.style.left = `${x}px`;
+    node.style.top = `${y}px`;
+    document.body.appendChild(node);
+    return node;
+  }
+  function moveGhost(x, y) {
+    if (!ghost) return;
+    ghost.style.left = `${x}px`;
+    ghost.style.top = `${y}px`;
+  }
+  function endPointerDrag({ place = false } = {}) {
+    if (!pointerDrag) return;
+    const { source, player } = pointerDrag;
+    if (place && activeTarget && placeOn(activeTarget, player)) markDragged();
+    source.classList.remove('drag-source');
+    ghost?.remove();
+    ghost = null;
+    pointerDrag = null;
+    clearActiveTarget();
+    // El brillo NO se limpia aquí: durante el arrastre nativo, pointercancel
+    // llama a esta función y el resaltado debe mantenerse hasta soltar (dragend).
+    document.body.classList.remove('lineup-dragging');
+  }
+
+  sources.forEach((source) => {
+    // Solo los suplentes muestran el brillo de posiciones compatibles.
+    const isBench = source.classList.contains('bench-item');
+
+    source.addEventListener('dragstart', (event) => {
+      htmlDragUid = source.dataset.uid;
+      nativeDragging = true;
+      event.dataTransfer?.setData('text/plain', htmlDragUid);
+      event.dataTransfer?.setDragImage(source, source.offsetWidth / 2, source.offsetHeight / 2);
+      source.classList.add('drag-source');
+      if (isBench) highlightEligible(playerForUid(source.dataset.uid));
+    });
+    source.addEventListener('dragend', () => {
+      htmlDragUid = null;
+      nativeDragging = false;
+      source.classList.remove('drag-source');
+      clearActiveTarget();
+      clearEligible(); // fin real del arrastre (soltado o devuelto al banco)
+    });
+
+    // Teclado: al enfocar un suplente, resalta dónde puede entrar.
+    if (isBench) {
+      source.addEventListener('focus', () => highlightEligible(playerForUid(source.dataset.uid)));
+      source.addEventListener('blur', clearEligible);
+    }
+
+    source.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0 || event.pointerType === 'mouse' && event.detail > 1) return;
+      const player = playerForUid(source.dataset.uid);
+      if (!player) return;
+      if (isBench) highlightEligible(player); // click o hold: pinta posiciones válidas
+      pointerDrag = {
+        source,
+        player,
+        startX: event.clientX,
+        startY: event.clientY,
+        dragging: false,
+      };
+      source.setPointerCapture?.(event.pointerId);
+    });
+    source.addEventListener('pointermove', (event) => {
+      if (!pointerDrag || pointerDrag.source !== source) return;
+      const dx = event.clientX - pointerDrag.startX;
+      const dy = event.clientY - pointerDrag.startY;
+      if (!pointerDrag.dragging && Math.hypot(dx, dy) < 8) return;
+      event.preventDefault();
+      if (!pointerDrag.dragging) {
+        pointerDrag.dragging = true;
+        document.body.classList.add('lineup-dragging');
+        source.classList.add('drag-source');
+        ghost = makeGhost(source, event.clientX, event.clientY);
+      }
+      moveGhost(event.clientX, event.clientY);
+      ghost.hidden = true;
+      const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('.chip-anchor[data-line][data-slot]');
+      ghost.hidden = false;
+      setActiveTarget(target, pointerDrag.player);
+    });
+    source.addEventListener('pointerup', (event) => {
+      if (!pointerDrag || pointerDrag.source !== source) return;
+      const didDrag = pointerDrag.dragging;
+      if (didDrag) {
+        event.preventDefault();
+        endPointerDrag({ place: true });
+        if (isBench) clearEligible(); // fin del arrastre por puntero (táctil)
+      } else {
+        pointerDrag = null;
+        if (isBench) clearEligible();
+      }
+    });
+    source.addEventListener('pointercancel', () => {
+      const wasNative = nativeDragging;
+      endPointerDrag();
+      // Si el navegador pasó a arrastre nativo, mantenemos el brillo: lo
+      // limpiará dragend al soltar. Si no, limpiamos aquí.
+      if (!wasNative && isBench) clearEligible();
+    });
+  });
+
+  targets.forEach((target) => {
+    target.addEventListener('dragover', (event) => {
+      const player = playerForUid(htmlDragUid);
+      if (player && canPlacePlayerInSlot(state, player, target.dataset.line, parseInt(target.dataset.slot, 10) || 0)) {
+        event.preventDefault();
+      }
+      setActiveTarget(target, player);
+    });
+    target.addEventListener('dragleave', () => {
+      if (activeTarget === target) clearActiveTarget();
+    });
+    target.addEventListener('drop', (event) => {
+      event.preventDefault();
+      const uid = event.dataTransfer?.getData('text/plain') || htmlDragUid;
+      const player = playerForUid(uid);
+      if (placeOn(target, player)) markDragged();
+      htmlDragUid = null;
+      clearActiveTarget();
+    });
+  });
+}
+
+function countMissing(state) {
+  const slots = formationSlots(state.formation);
+  return LINES.reduce((n, l) => n + Math.max(0, slots[l] - (state.starting11[l] || []).length), 0);
+}
+
+// Selector de hueco: lista los suplentes de esa línea para colocarlos.
+function openPicker(root, state, line, slotIndex, handlers) {
+  const picker = root.querySelector('#slotPicker');
+  const slot = formationLineSlots(state.formation, line)[slotIndex];
+  const label = slot?.role === 'ENG' ? t('card.line.ENG') : LINE_LABEL[line];
+  const candidates = state.squad
+    .filter((p) => !isStarter(state, p) && canPlacePlayerInSlot(state, p, line, slotIndex))
+    .sort((a, b) => playerOVR(b) - playerOVR(a));
+
+  if (!candidates.length) {
+    picker.innerHTML = `<p class="empty-note">${esc(t('build.noCandidates', { label }))}</p>
+      <button class="ctl" data-close>${t('generic.close')}</button>`;
+  } else {
+    picker.innerHTML = `
+      <div class="picker-head">${esc(t('build.pickerHead', { label }))}</div>
+      <div class="picker-grid">
+        ${candidates.map((p) => playerCardHTML(p, { idValue: p.uid, clickable: true })).join('')}
+      </div>
+      <button class="ctl" data-close>${t('generic.close')}</button>`;
+  }
+  picker.hidden = false;
+  picker.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  picker.querySelector('[data-close]')?.addEventListener('click', () => { picker.hidden = true; });
+  picker.querySelectorAll('.card.clickable').forEach((node) => {
+    node.addEventListener('click', () => {
+      const player = state.squad.find((p) => p.uid === node.dataset.id);
+      if (player) handlers.onPlace(player, line, slotIndex); // re-render cierra el selector
+    });
+  });
+}

@@ -1,0 +1,162 @@
+/* Torre de Leyendas — Sistema de diseño (§2 del plan UI/UX).
+   Tokens base: color (claro/oscuro), material de cristal Liquid Glass aproximado,
+   tipografía, espaciado, radios concéntricos, elevación y movimiento.
+   Todo lo demás (styles.css, /match) se construye encima de estos tokens. */
+
+:root {
+  /* === 2.1 Color (claro) — contenido limpio, sin cristal === */
+  --bg-primary:    #FFFFFF;
+  --bg-secondary:  #F2F2F7;
+  --bg-tertiary:   #FFFFFF;
+  --bg-grouped:    #F2F2F7;
+
+  --label-primary:   rgba(0,0,0,1);
+  --label-secondary: rgba(60,60,67,0.60);
+  --label-tertiary:  rgba(60,60,67,0.30);
+  --separator:       rgba(60,60,67,0.29);
+  --fill-secondary:  rgba(120,120,128,0.16);
+
+  /* Acentos del sistema */
+  --accent:        #007AFF;   /* systemBlue  */
+  --success:       #34C759;   /* systemGreen */
+  --danger:        #FF3B30;   /* systemRed   */
+  --warning:       #FF9500;   /* systemOrange*/
+
+  /* Tema fútbol */
+  --pitch:         #2E9E5B;   /* césped */
+  --pitch-dark:    #2A914F;   /* franja alterna del césped */
+  --pitch-line:    rgba(255,255,255,0.85);
+  --brand:         #D4AF37;   /* dorado "Leyendas" — guiño de marca, uso moderado */
+
+  /* Rarezas de carta */
+  --rarity-common: #8E8E93;
+  --rarity-rare:   #0A84FF;
+  --rarity-epic:   #BF5AF2;
+  --rarity-legend: #FFD60A;
+
+  /* Cristal sobre fondo claro (reflejo especular + hairline) */
+  --glass-bg:        rgba(255,255,255,0.55);
+  --glass-bg-thin:   rgba(255,255,255,0.35);
+  --glass-bg-thick:  rgba(255,255,255,0.75);
+  --glass-border:    rgba(255,255,255,0.30);
+  --glass-spec:      rgba(255,255,255,0.45);
+
+  /* === 2.3 Tipografía === */
+  --font-game: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --font-text:    var(--font-game);
+  --font-display: var(--font-game);
+  --font-rounded: var(--font-game);
+  --font-pixel:   var(--font-game);
+
+  /* === Pixelart premium arcade === */
+  --arcade-blue-900: #071459;
+  --arcade-blue-800: #0A2482;
+  --arcade-blue-700: #123AD1;
+  --arcade-blue-600: #2259F5;
+  --arcade-cyan: #25E6FF;
+  --arcade-yellow: #FFD42A;
+  --arcade-red: #FF3154;
+  --arcade-magenta: #FF4DFF;
+  --arcade-green: #40C864;
+  --arcade-pitch: #168B44;
+  --arcade-panel: #101B4B;
+  --arcade-panel-2: #17265F;
+  --arcade-paper: #F4F6FF;
+  --pixel-radius: 6px;
+  --pixel-border: 4px;
+
+  /* Escala iOS (en rem para soportar Dynamic Type al escalar la raíz) */
+  --t-large-title: 2.125rem;  /* 34 */
+  --t-title-1:     1.75rem;   /* 28 */
+  --t-title-2:     1.375rem;  /* 22 */
+  --t-title-3:     1.25rem;   /* 20 */
+  --t-headline:    1.0625rem; /* 17 semibold */
+  --t-body:        1.0625rem; /* 17 */
+  --t-callout:     1rem;      /* 16 */
+  --t-subhead:     0.9375rem; /* 15 */
+  --t-footnote:    0.8125rem; /* 13 */
+  --t-caption-1:   0.75rem;   /* 12 */
+  --t-caption-2:   0.6875rem; /* 11 */
+
+  /* === 2.4 Espaciado (rejilla de 8 pt, sub-incrementos de 4) === */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-7: 32px; --space-8: 40px;
+  --screen-margin: 16px;
+  --touch-min: 44px;
+
+  /* === 2.5 Forma y radios concéntricos === */
+  --radius-s: 10px; --radius-m: 16px; --radius-l: 20px; --radius-xl: 28px; --radius-pill: 999px;
+
+  /* === 2.6 Elevación / sombras suaves en capas === */
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-2: 0 4px 12px rgba(0,0,0,0.10);
+  --shadow-3: 0 10px 30px rgba(0,0,0,0.14);
+
+  /* === 2.7 Movimiento (muelles aproximados) === */
+  --ease-standard: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-emphasis: cubic-bezier(0.2, 0.9, 0.1, 1);
+  --dur-fast: 200ms; --dur-base: 320ms; --dur-slow: 480ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary:    #000000;
+    --bg-secondary:  #1C1C1E;
+    --bg-tertiary:   #2C2C2E;
+    --bg-grouped:    #000000;
+    --label-primary:   rgba(255,255,255,1);
+    --label-secondary: rgba(235,235,245,0.60);
+    --label-tertiary:  rgba(235,235,245,0.30);
+    --separator:       rgba(84,84,88,0.60);
+    --fill-secondary:  rgba(120,120,128,0.36);
+    --accent:        #0A84FF;
+    --success:       #30D158;
+    --danger:        #FF453A;
+    --warning:       #FF9F0A;
+    --pitch:         #1F7D45;
+    --pitch-dark:    #1B6E3C;
+
+    --glass-bg:        rgba(28,28,30,0.55);
+    --glass-bg-thin:   rgba(28,28,30,0.35);
+    --glass-bg-thick:  rgba(28,28,30,0.78);
+    --glass-border:    rgba(255,255,255,0.12);
+    --glass-spec:      rgba(255,255,255,0.16);
+  }
+}
+
+/* === 2.2 Material de cristal (Liquid Glass aproximado) ===
+   Usar SOLO en barras, botones flotantes, hojas y el marcador del partido. */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 0.5px solid var(--glass-border);                 /* hairline */
+  box-shadow: 0 1px 0 var(--glass-spec) inset,             /* reflejo especular sup. */
+              var(--shadow-3);
+}
+.glass-thin {
+  background: var(--glass-bg-thin);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 0.5px solid var(--glass-border);
+}
+.glass-thick {
+  background: var(--glass-bg-thick);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 0.5px solid var(--glass-border);
+  box-shadow: 0 1px 0 var(--glass-spec) inset, var(--shadow-3);
+}
+
+/* Numerales tabulares para marcador, reloj y ratings (§2.3) */
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Respeto a reduce-motion: sin traslados/escala, solo fundidos (§2.7) */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,69 @@
+import { JSDOM } from 'jsdom';
+import fs from 'fs';
+import path from 'path';
+
+const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+const dom = new JSDOM(html, { url: 'http://localhost/', pretendToBeVisual: true });
+const { window } = dom;
+global.window = window;
+global.document = window.document;
+global.localStorage = window.localStorage;
+// El UI usa setTimeout/setInterval/clearInterval globales → los de Node bastan.
+
+const errors = [];
+await import(path.join(ROOT, 'main.js')).catch(e => errors.push('import: ' + e.message));
+
+const root = document.getElementById('app');
+function click(el){ if(!el){ errors.push('click en null'); return; } el.dispatchEvent(new window.MouseEvent('click',{bubbles:true})); }
+function show(){ return root.querySelector('.screen')?.className; }
+const wait = (ms)=>new Promise(r=>setTimeout(r,ms));
+
+try {
+  console.log('1. Menú:', show(), '|', root.querySelector('h1')?.textContent);
+  const expectedFlags = [
+    'River Plate', 'Boca', 'Independiente', 'Racing', 'San Lorenzo', 'Vélez',
+    'Huracán', 'Estudiantes', 'Gimnasia', 'Central', "Newell's", 'Lanús',
+  ];
+  const menuFlags = [...root.querySelectorAll('.flag-opt')].slice(0, expectedFlags.length).map((el) => el.dataset.nation);
+  if (JSON.stringify(menuFlags) !== JSON.stringify(expectedFlags)) errors.push('orden de banderas inicial incorrecto');
+  if (root.querySelector('.flag-opt.is-active')) errors.push('hay bandera activa por defecto');
+  if (!root.querySelector('#start')?.disabled) errors.push('start habilitado sin bandera');
+  click(root.querySelector('.flag-opt'));
+  click(root.querySelector('#start'));
+  console.log('2. Sobre jugador:', show(), '| cartas:', root.querySelectorAll('.player-card').length);
+  if (!root.querySelector('.card-portrait')) errors.push('cartas sin bloque de retrato');
+
+  click(root.querySelector('#openBtn')); // abrir el sobre sellado de jugadores
+  click(root.querySelector('.deal-card:not(.disabled-deal)')); click(root.querySelector('#choose')); await wait(420);
+  console.log('3. Sobre objeto:', show(), '| objetos:', root.querySelectorAll('.item-card').length);
+
+  click(root.querySelector('#openBtn')); // abrir el sobre sellado de objetos
+  click(root.querySelector('.deal-card')); click(root.querySelector('#choose')); await wait(420);
+  console.log('4. Scouting:', show(), '| once rival:', root.querySelectorAll('.scout-chip').length, '| ratings:', root.querySelectorAll('.scout-rating').length);
+  click(root.querySelector('#scout-continue'));
+  console.log('5. Armar equipo:', show(), '| play activo:', !root.querySelector('#play')?.disabled, '| ratings:', root.querySelectorAll('.rating-row').length);
+
+  // toggle un suplente dentro/fuera para probar el handler
+  const sub = root.querySelector('.bench-item');
+  if (sub) { click(sub); console.log('   (toggle suplente ok, pantalla:', show()+')'); }
+
+  click(root.querySelector('#play'));
+  console.log('6. Partido:', show(), '| marcador:', root.querySelector('#scoreA')?.textContent+'-'+root.querySelector('#scoreB')?.textContent);
+  if (!root.querySelector('.scene-pitch')) errors.push('partido sin visor de escenas');
+  click(root.querySelector('#skip'));
+  console.log('   tras saltar:', root.querySelector('#scoreA')?.textContent+'-'+root.querySelector('#scoreB')?.textContent, '| jugadas mostradas:', root.querySelectorAll('.play').length);
+  click(root.querySelector('#continue'));
+  console.log('7. Resultado:', show(), '| final:', root.querySelector('.final-score')?.textContent?.replace(/\s+/g,' ').trim() || 'fin de run');
+
+  const next = root.querySelector('#next');
+  if (next) {
+    click(next);
+    console.log('8. Siguiente:', show());
+  } else {
+    console.log('8. Fin de run válido:', show());
+  }
+} catch(e) { errors.push('runtime: ' + e.message + '\n' + e.stack); }
+
+console.log('\nErrores:', errors.length ? errors : 'ninguno ✅');
+process.exit(errors.length ? 1 : 0);
