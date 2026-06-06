@@ -437,10 +437,21 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
     ghost.style.left = `${x}px`;
     ghost.style.top = `${y}px`;
   }
+  function switchToBenchScroll() {
+    if (!pointerDrag) return;
+    pointerDrag.mode = 'scroll';
+    pointerDrag.source.classList.remove('drag-source');
+    ghost?.remove();
+    ghost = null;
+    clearActiveTarget();
+    clearEligible();
+    document.body.classList.remove('lineup-dragging');
+  }
   function endPointerDrag({ place = false } = {}) {
     if (!pointerDrag) return;
-    const { source, player } = pointerDrag;
+    const { source, player, restoreNativeDrag } = pointerDrag;
     if (place && activeTarget && placeOn(activeTarget, player)) markDragged();
+    if (restoreNativeDrag) source.draggable = true;
     source.classList.remove('drag-source');
     ghost?.remove();
     ghost = null;
@@ -482,6 +493,8 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
       const player = playerForUid(source.dataset.uid);
       if (!player) return;
       if (isBench) highlightEligible(player); // click o hold: pinta posiciones válidas
+      const restoreNativeDrag = event.pointerType !== 'mouse' && source.draggable;
+      if (restoreNativeDrag) source.draggable = false;
       pointerDrag = {
         source,
         player,
@@ -489,6 +502,10 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
         startY: event.clientY,
         dragging: event.pointerType !== 'mouse',
         moved: false,
+        mode: event.pointerType === 'mouse' || !isBench ? 'drag' : null,
+        scrollContainer: isBench ? source.closest('.bench-strip') : null,
+        startScrollLeft: isBench ? source.closest('.bench-strip')?.scrollLeft || 0 : 0,
+        restoreNativeDrag,
       };
       try {
         source.setPointerCapture?.(event.pointerId);
@@ -505,6 +522,25 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
       if (!pointerDrag || pointerDrag.source !== source) return;
       const dx = event.clientX - pointerDrag.startX;
       const dy = event.clientY - pointerDrag.startY;
+      const distance = Math.hypot(dx, dy);
+
+      if (!pointerDrag.mode) {
+        event.preventDefault();
+        moveGhost(event.clientX, event.clientY);
+        if (distance < 5) return;
+        if (Math.abs(dx) > Math.abs(dy) * 1.15) switchToBenchScroll();
+        else pointerDrag.mode = 'drag';
+      }
+
+      if (pointerDrag.mode === 'scroll') {
+        event.preventDefault();
+        pointerDrag.moved = true;
+        if (pointerDrag.scrollContainer) {
+          pointerDrag.scrollContainer.scrollLeft = pointerDrag.startScrollLeft - dx;
+        }
+        return;
+      }
+
       if (!pointerDrag.dragging && Math.hypot(dx, dy) < 8) return;
       event.preventDefault();
       if (!pointerDrag.dragging) {
@@ -513,7 +549,7 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
         source.classList.add('drag-source');
         ghost = makeGhost(source, event.clientX, event.clientY);
       }
-      if (Math.hypot(dx, dy) >= (event.pointerType === 'mouse' ? 8 : 3)) {
+      if (distance >= (event.pointerType === 'mouse' ? 8 : 3)) {
         pointerDrag.moved = true;
       }
       moveGhost(event.clientX, event.clientY);
@@ -524,6 +560,12 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
     });
     source.addEventListener('pointerup', (event) => {
       if (!pointerDrag || pointerDrag.source !== source) return;
+      if (pointerDrag.mode === 'scroll') {
+        event.preventDefault();
+        if (pointerDrag.moved) markDragged();
+        endPointerDrag();
+        return;
+      }
       const didDrag = pointerDrag.dragging && pointerDrag.moved;
       if (didDrag) {
         event.preventDefault();

@@ -57,6 +57,7 @@ const MIME = {
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
 };
+const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.svg', '.ico']);
 
 function normalizedVersion(value) {
   return String(value || '').trim().replace(/[^a-zA-Z0-9._-]/g, '').slice(0, 40);
@@ -165,12 +166,13 @@ function cacheControlFor(filePath, url) {
   if (filePath === INDEX_FILE || path.extname(filePath).toLowerCase() === '.html') {
     return 'no-store, max-age=0';
   }
-  if (filePath.startsWith(PLAYER_PORTRAITS_DIR + path.sep)) {
-    return 'no-store, max-age=0';
-  }
 
   if (url.searchParams.get('v') === BUILD_VERSION) {
     return 'public, max-age=31536000, immutable';
+  }
+
+  if (IMAGE_EXTENSIONS.has(path.extname(filePath).toLowerCase())) {
+    return 'public, max-age=604800, stale-while-revalidate=2592000';
   }
 
   // ES module imports and CSS-referenced assets keep stable paths, so every

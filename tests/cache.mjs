@@ -60,6 +60,15 @@ try {
   assert.equal(revalidated.status, 304);
   assert.equal(revalidated.body, '');
 
+  const portrait = await request(port, '/assets/player-portraits/base_def_vidal.png');
+  assert.equal(portrait.status, 200);
+  assert.equal(portrait.headers['cache-control'], 'public, max-age=604800, stale-while-revalidate=2592000');
+  assert.ok(portrait.headers.etag);
+
+  const versionedImage = await request(port, `/assets/ui/background.jpg?v=${BUILD_VERSION}`);
+  assert.equal(versionedImage.status, 200);
+  assert.equal(versionedImage.headers['cache-control'], 'public, max-age=31536000, immutable');
+
   console.log(`Cache busting: OK (${BUILD_VERSION})`);
 } finally {
   await new Promise((resolve) => server.close(resolve));

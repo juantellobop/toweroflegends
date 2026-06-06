@@ -240,7 +240,18 @@ async function assertImmediateTouchDrag(page) {
   const bench = page.locator('.team-roster .bench-item').first();
   const box = await bench.boundingBox();
   assert.ok(box, 'Expected a visible substitute for touch drag test');
+  const uid = await bench.getAttribute('data-uid');
+  const line = await bench.getAttribute('data-line');
+  const target = page.locator(`.chip-anchor[data-line="${line}"]`).first();
+  const targetBox = await target.boundingBox();
+  assert.ok(uid && line && targetBox, 'Touch drag needs a compatible tactical slot');
+  assert.equal(
+    await bench.evaluate((node) => getComputedStyle(node).touchAction),
+    'none',
+    'Substitute cards must not let native panning cancel touch dragging'
+  );
   const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  const targetPoint = { x: targetBox.x + targetBox.width / 2, y: targetBox.y + targetBox.height / 2 };
   await bench.evaluate((node, coords) => {
     node.dispatchEvent(new PointerEvent('pointerdown', {
       bubbles: true,
@@ -253,9 +264,11 @@ async function assertImmediateTouchDrag(page) {
     }));
   }, point);
   assert.equal(await page.locator('.drag-ghost').count(), 1, 'Touch drag must show feedback immediately on pointerdown');
+  assert.equal(await bench.getAttribute('draggable'), 'false', 'Touch drag must disable delayed native dragging');
   await bench.evaluate((node, coords) => {
-    node.dispatchEvent(new PointerEvent('pointerup', {
+    node.dispatchEvent(new PointerEvent('pointermove', {
       bubbles: true,
+      cancelable: true,
       pointerId: 51,
       pointerType: 'touch',
       isPrimary: true,
@@ -263,8 +276,23 @@ async function assertImmediateTouchDrag(page) {
       clientX: coords.x,
       clientY: coords.y,
     }));
-  }, point);
+  }, targetPoint);
+  await bench.evaluate((node, coords) => {
+    node.dispatchEvent(new PointerEvent('pointerup', {
+      bubbles: true,
+      cancelable: true,
+      pointerId: 51,
+      pointerType: 'touch',
+      isPrimary: true,
+      button: 0,
+      clientX: coords.x,
+      clientY: coords.y,
+    }));
+  }, targetPoint);
   assert.equal(await page.locator('.drag-ghost').count(), 0, 'Touch drag feedback must clear on pointerup');
+  await page.waitForFunction((draggedUid) =>
+    !!document.querySelector(`.chip-anchor[data-uid="${draggedUid}"]`), uid
+  );
 }
 
 await fs.mkdir(OUT, { recursive: true });

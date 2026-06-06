@@ -2536,7 +2536,7 @@ select {
 
 .team-select-screen .chip-name {
   max-width: calc(var(--lineup-card) - 10px);
-  font-size: clamp(8px, 1vw, 10px);
+  font-size: clamp(8px, 1vw, 13px);
   line-height: 1.05;
 }
 
@@ -2689,7 +2689,6 @@ select {
   /* Centrado con inset+margen (no con transform): así no se descoloca cuando
      una pantalla en transición aplica transform a un ancestro (que pasaría a
      ser el bloque contenedor del elemento fixed). */
-  margin-inline: auto;
   padding: 8px;
   background: transparent;
   pointer-events: none;
@@ -4747,7 +4746,10 @@ button.primary:active:not(:disabled),
 }
 
 .lineup-draggable { touch-action: none; }
-.team-roster .bench-item { touch-action: pan-x; }
+.team-roster .bench-item {
+  touch-action: none;
+  -webkit-user-drag: none;
+}
 
 .scout-team-meta {
   display: flex;
@@ -4868,7 +4870,7 @@ button.primary:active:not(:disabled),
   }
 
   .team-select-screen .field-chip .chip-name {
-    font-size: 8px;
+    font-size: 12px;
   }
 
   .team-select-screen .chip-info {
