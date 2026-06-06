@@ -238,8 +238,9 @@ async function assertDragAndDrop(page) {
 
 async function assertImmediateTouchDrag(page) {
   const bench = page.locator('.team-roster .bench-item').first();
-  const box = await bench.boundingBox();
-  assert.ok(box, 'Expected a visible substitute for touch drag test');
+  const portrait = bench.locator('.bench-face img');
+  const box = await portrait.boundingBox();
+  assert.ok(box, 'Expected a visible substitute portrait for touch drag test');
   const uid = await bench.getAttribute('data-uid');
   const line = await bench.getAttribute('data-line');
   const target = page.locator(`.chip-anchor[data-line="${line}"]`).first();
@@ -250,10 +251,16 @@ async function assertImmediateTouchDrag(page) {
     'none',
     'Substitute cards must not let native panning cancel touch dragging'
   );
+  assert.equal(
+    await portrait.evaluate((node) => getComputedStyle(node).pointerEvents),
+    'none',
+    'Substitute portraits must delegate pointer gestures to the full card'
+  );
+  assert.equal(await portrait.getAttribute('draggable'), 'false', 'Substitute portraits must disable native image dragging');
   const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
   const targetPoint = { x: targetBox.x + targetBox.width / 2, y: targetBox.y + targetBox.height / 2 };
-  await bench.evaluate((node, coords) => {
-    node.dispatchEvent(new PointerEvent('pointerdown', {
+  await portrait.evaluate((node, coords) => {
+    document.elementFromPoint(coords.x, coords.y)?.dispatchEvent(new PointerEvent('pointerdown', {
       bubbles: true,
       pointerId: 51,
       pointerType: 'touch',

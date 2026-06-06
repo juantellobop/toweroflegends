@@ -141,7 +141,7 @@ function chipHTML(p, line, slotIndex) {
             data-line="${line}" data-slot="${slotIndex}" draggable="true"
             aria-label="${esc(t('build.playerDragAria', { name: p.name }))}">
       <span class="chip-face" aria-hidden="true">
-        <img src="${esc(portraitPathForPlayer(p))}" alt="" loading="lazy" decoding="async" data-hide-on-error="true" />
+        <img src="${esc(portraitPathForPlayer(p))}" alt="" draggable="false" loading="lazy" decoding="async" data-hide-on-error="true" />
         <span>${esc(playerInitials(p.name))}</span>
       </span>
       <span class="chip-ovr">${ovr}</span>
@@ -200,7 +200,7 @@ function bench(state) {
       <button class="bench-item lineup-draggable rarity-${p.rarity}" data-uid="${p.uid}" data-line="${p.position}" draggable="true"
               aria-label="${esc(t('build.benchAria', { name: p.name }))}">
         <span class="bench-face" aria-hidden="true">
-          <img src="${esc(portraitPathForPlayer(p))}" alt="" loading="lazy" decoding="async" data-hide-on-error="true" />
+          <img src="${esc(portraitPathForPlayer(p))}" alt="" draggable="false" loading="lazy" decoding="async" data-hide-on-error="true" />
           <span>${esc(playerInitials(p.name))}</span>
         </span>
         <span class="bench-ovr">${playerOVR(p)}</span>

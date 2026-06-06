@@ -4748,6 +4748,13 @@ button.primary:active:not(:disabled),
   touch-action: none;
   -webkit-user-drag: none;
 }
+.team-roster .bench-item > :not(.bench-info) {
+  pointer-events: none;
+}
+.team-roster .bench-face img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
 
 .scout-team-meta {
   display: flex;
