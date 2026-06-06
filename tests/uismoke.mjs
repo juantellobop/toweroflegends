@@ -35,11 +35,11 @@ try {
   if (!root.querySelector('.card-portrait')) errors.push('cartas sin bloque de retrato');
 
   click(root.querySelector('#openBtn')); // abrir el sobre sellado de jugadores
-  click(root.querySelector('.deal-card:not(.disabled-deal)')); click(root.querySelector('#choose')); await wait(420);
+  click(root.querySelector('.deal-card:not(.disabled-deal)')); await wait(420); // selección directa
   console.log('3. Sobre objeto:', show(), '| objetos:', root.querySelectorAll('.item-card').length);
 
   click(root.querySelector('#openBtn')); // abrir el sobre sellado de objetos
-  click(root.querySelector('.deal-card')); click(root.querySelector('#choose')); await wait(420);
+  click(root.querySelector('.deal-card')); await wait(420); // selección directa
   console.log('4. Scouting:', show(), '| once rival:', root.querySelectorAll('.scout-chip').length, '| ratings:', root.querySelectorAll('.scout-rating').length);
   click(root.querySelector('#scout-continue'));
   console.log('5. Armar equipo:', show(), '| play activo:', !root.querySelector('#play')?.disabled, '| ratings:', root.querySelectorAll('.rating-row').length);

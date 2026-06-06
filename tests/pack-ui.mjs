@@ -25,11 +25,14 @@ const disabled = root.querySelector('.disabled-deal');
 assert.ok(disabled);
 assert.match(disabled.textContent, /Ya en tu plantilla/);
 click(disabled);
-assert.ok(root.querySelector('#confirmBar').hidden);
+assert.equal(picked, null, 'una carta ya en plantilla no se puede elegir');
 
+// Selección directa: al tocar una carta válida se confirma sin botón aparte.
 const enabled = root.querySelector('.deal-card:not(.disabled-deal)');
 click(enabled);
-assert.ok(!root.querySelector('#confirmBar').hidden);
-assert.equal(picked, null);
+assert.ok(enabled.classList.contains('fly'), 'la carta elegida vuela al confirmarse');
+assert.equal(picked, null, 'el pick se difiere hasta terminar la animación');
+await new Promise((resolve) => setTimeout(resolve, 420));
+assert.equal(picked && picked.id, choices[1].id, 'tras la animación se entrega la carta elegida');
 
 console.log('UI de repetidas: OK');

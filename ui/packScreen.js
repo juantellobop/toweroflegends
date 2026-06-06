@@ -8,7 +8,7 @@
 import { playerCardHTML, itemCardHTML, esc } from './cards.js';
 import { haptic } from '../match/feedback.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
-import { localizeItem, t } from '../data/i18n.js';
+import { t } from '../data/i18n.js';
 
 const prefersReduced = () =>
   typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -63,11 +63,6 @@ function shell(state, kind, count, body) {
         <div class="pack-actions" id="openBar">
           <button id="openBtn" class="primary big glass-cta">${open}</button>
         </div>
-
-        <div class="pack-confirm glass" id="confirmBar" hidden>
-          <span class="confirm-label" id="confirmLabel"></span>
-          <button id="choose" class="primary big" disabled>${t('generic.choose')}</button>
-        </div>
       </div>
     </section>`;
 }
@@ -91,26 +86,23 @@ export function renderPlayerPack(root, state, choices, onPick) {
     dealCard(playerCardHTML(c, { idValue: c.id, disabled: c.selectable === false }), c.id, i, 'player', c.selectable !== false)
   ).join('');
   root.innerHTML = shell(state, 'player', choices.length, body);
-  wire(root, choices, onPick, (c) => c.name);
+  wire(root, choices, onPick);
 }
 
 export function renderItemPack(root, state, choices, onPick) {
   const body = choices.map((c, i) => dealCard(itemCardHTML(c, { idValue: c.id }), c.id, i, 'item')).join('');
   root.innerHTML = shell(state, 'item', choices.length, body);
-  wire(root, choices, onPick, (c) => localizeItem(c, 'name'));
+  wire(root, choices, onPick);
 }
 
-function wire(root, choices, onPick, nameOf) {
+function wire(root, choices, onPick) {
   const opener = root.querySelector('#opener');
   const openBar = root.querySelector('#openBar');
   const deal = root.querySelector('#deal');
-  const confirmBar = root.querySelector('#confirmBar');
-  const confirmLabel = root.querySelector('#confirmLabel');
-  const chooseBtn = root.querySelector('#choose');
   const cards = Array.from(root.querySelectorAll('.deal-card'));
   const reduce = prefersReduced();
   let opened = false;
-  let selected = null;
+  let chosen = false;
 
   // --- Apertura del sobre: sacudida + fogonazo, y las cartas brotan ---
   function openPack() {
@@ -149,42 +141,35 @@ function wire(root, choices, onPick, nameOf) {
   });
   root.querySelector('#openBtn').addEventListener('click', openPack);
 
-  // --- Selección de carta (solo tras abrir el sobre) ---
-  function select(card) {
-    if (!opened) return;
+  // --- Elección de carta (solo tras abrir el sobre) ---
+  // Al tocar una carta se confirma directamente: se eleva, las demás retroceden
+  // y la elegida "vuela" antes de avanzar. Sin botón de confirmación.
+  function choose(card) {
+    if (!opened || chosen) return;
     if (card.classList.contains('disabled-deal')) return;
-    if (card === selected) return;
-    selected = card;
+    const choice = choices.find((x) => x.id === card.dataset.id);
+    if (!choice || choice.selectable === false) return;
+    chosen = true;
     cards.forEach((c) => {
       c.classList.toggle('selected', c === card);
       c.classList.toggle('receded', c !== card);
+      if (c !== card) c.setAttribute('aria-disabled', 'true');
     });
-    const choice = choices.find((x) => x.id === card.dataset.id);
-    confirmLabel.textContent = nameOf(choice);
-    confirmBar.hidden = false;
-    chooseBtn.disabled = false;
-    haptic(12);
+    card.classList.add('chosen', 'fly');
+    haptic(16);
+    const delay = reduce ? 0 : 360;
+    setTimeout(() => onPick(choice), delay);
   }
 
   cards.forEach((card) => {
     if (!card.classList.contains('disabled-deal')) {
-      card.addEventListener('click', () => select(card));
+      card.addEventListener('click', () => choose(card));
       card.addEventListener('keydown', (event) => {
         if (event.key !== 'Enter' && event.key !== ' ') return;
         event.preventDefault();
-        select(card);
+        choose(card);
       });
       card.querySelector('.card')?.classList.add('clickable'); // compatibilidad
     }
-  });
-
-  chooseBtn.addEventListener('click', () => {
-    if (!selected) return;
-    const choice = choices.find((x) => x.id === selected.dataset.id);
-    if (!choice || choice.selectable === false) return;
-    chooseBtn.disabled = true;
-    selected.classList.add('chosen', 'fly');
-    const delay = reduce ? 0 : 360;
-    setTimeout(() => onPick(choice), delay);
   });
 }

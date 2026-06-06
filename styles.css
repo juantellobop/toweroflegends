@@ -2179,6 +2179,66 @@ select {
   border: 2px solid rgba(255,255,255,.34);
 }
 
+/* === Selector de cartas compacto en mobile (§4.2) ===
+   En pantallas pequeñas las cartas de jugador ocupaban demasiado alto y
+   obligaban a hacer scroll. Aquí se reducen para que las tres opciones
+   entren a la vez sin perder legibilidad. */
+@media (max-width: 640px) {
+  .pack-screen .pack-stage {
+    min-height: calc(100svh - 188px);
+    gap: 24px;
+  }
+  .pack-screen .pack-head { padding: 10px; }
+  .pack-screen .pack-deal { gap: 7px; }
+
+  .pack-screen .player-card.card {
+    width: min(30vw, 120px);
+    padding: 9px 8px 10px;
+    border-width: 3px;
+    box-shadow:
+      0 0 0 3px rgba(255,255,255,.7) inset,
+      0 6px 0 rgba(0,0,0,.3),
+      0 12px 16px rgba(0,0,0,.32);
+  }
+  .pack-screen .player-card .card-head { min-height: 20px; gap: 3px; }
+  .pack-screen .player-card .card-ovr { font-size: 22px; }
+  .pack-screen .player-card .card-pos { padding: 1px 4px; font-size: 9px; }
+  .pack-screen .player-card .card-rarity { font-size: 8px; letter-spacing: .2px; }
+  .pack-screen .player-card .card-portrait {
+    width: 60px;
+    height: 60px;
+    margin: 6px auto 5px;
+  }
+  .pack-screen .player-card .card-portrait span { font-size: 18px; }
+  .pack-screen .player-card .card-name {
+    min-height: 2.2em;
+    font-size: 11px;
+    line-height: 1.1;
+    margin: 2px 0 4px;
+  }
+  .pack-screen .player-card .card-meta { gap: 3px; margin-bottom: 5px; }
+  .pack-screen .player-card .chip { font-size: 8px; padding: 1px 4px; }
+  .pack-screen .player-card .chip.nation { gap: 3px; }
+  .pack-screen .player-card .chip.nation .flag-img { width: 14px; height: 9px; }
+  .pack-screen .player-card .card-stats { gap: 2px; }
+  .pack-screen .player-card .stat {
+    grid-template-columns: 22px minmax(0, 1fr) 18px;
+    gap: 4px;
+    font-size: 9px;
+  }
+  .pack-screen .player-card .stat-bar { height: 5px; }
+
+  /* Cartas de objeto: una sola columna estrecha y más baja. */
+  .pack-screen .item-card {
+    width: min(86vw, 320px);
+    min-height: 0;
+    padding: 16px 16px;
+    gap: 10px;
+  }
+  .pack-screen .item-card .card-name { font-size: 19px; }
+  .pack-screen .item-card .item-desc { font-size: 14px; line-height: 1.4; }
+}
+
 /* Build and scouting */
 .build-screen,
 .scouting-screen,

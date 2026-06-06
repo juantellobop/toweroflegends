@@ -35,21 +35,19 @@ async function playToBuild(page) {
   await page.click('#start');
   // El sobre llega sellado: abrirlo revela las cartas.
   await page.waitForSelector('.pack-screen .pack-opener');
-  assert.ok(await page.locator('#confirmBar').isHidden(), 'Pack confirm bar must stay hidden before selection');
   await page.click('#openBtn');
   await page.waitForSelector('.pack-screen .player-card', { state: 'visible' });
   await page.waitForTimeout(900);
   await assertSquareBoxes(page, '.player-card .card-portrait', 'player card portraits');
   await assertInsideCards(page, '.player-card', ['.card-head', '.card-portrait', '.card-name', '.card-meta', '.card-stats'], 'player cards');
+  // Selección directa: tocar la carta confirma sin botón aparte.
   await page.click('.deal-card:not(.disabled-deal)');
-  await page.click('#choose');
   await page.waitForSelector('.pack-screen[data-kind="item"]');
   await page.click('#openBtn');
   await page.waitForSelector('.pack-screen .item-card', { state: 'visible' });
   await page.waitForTimeout(700);
   await assertInsideCards(page, '.item-card', ['.card-head', '.card-name', '.item-desc'], 'item cards');
   await page.click('.deal-card');
-  await page.click('#choose');
   await page.waitForSelector('.scouting-screen');
   await page.click('#scout-continue');
   await page.waitForSelector('.build-screen');

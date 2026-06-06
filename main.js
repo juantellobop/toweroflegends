@@ -101,6 +101,13 @@ function snapshotOutgoing(screen, direction) {
   return snapshot;
 }
 
+function scrollToTop() {
+  // Reubica el scroll arriba de todo (desktop y mobile) al cambiar de pantalla.
+  window.scrollTo(0, 0);
+  if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
+  root.scrollTop = 0;
+}
+
 function renderRoute(route, draw, hint = 'auto') {
   const from = currentRoute || root.dataset.route || '';
   const direction = transitionDirection(from, route, hint);
@@ -113,6 +120,9 @@ function renderRoute(route, draw, hint = 'auto') {
   root.dataset.navDirection = direction;
   root.classList.toggle('app-route-changing', changingRoute);
   draw();
+
+  // Siempre que cambiamos de pestaña, el contenido nuevo arranca desde arriba.
+  if (from !== route) scrollToTop();
 
   const screen = activeScreen();
   if (screen) {
