@@ -252,6 +252,29 @@ async function assertImmediateTouchDrag(page) {
     'Substitute cards must not let native panning cancel touch dragging'
   );
   assert.equal(
+    await bench.evaluate((node) => getComputedStyle(node).userSelect),
+    'none',
+    'Substitute cards must disable text selection'
+  );
+  assert.equal(
+    await bench.evaluate((node) => {
+      const event = new Event('selectstart', { bubbles: true, cancelable: true });
+      node.querySelector('.bench-name').dispatchEvent(event);
+      return event.defaultPrevented;
+    }),
+    true,
+    'Substitute cards must prevent native selection gestures'
+  );
+  assert.equal(
+    await bench.evaluate((node) => {
+      const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+      node.querySelector('.bench-name').dispatchEvent(event);
+      return event.defaultPrevented;
+    }),
+    true,
+    'Substitute cards must prevent long-press context menus'
+  );
+  assert.equal(
     await portrait.evaluate((node) => getComputedStyle(node).pointerEvents),
     'none',
     'Substitute portraits must delegate pointer gestures to the full card'

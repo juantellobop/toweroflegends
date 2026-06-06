@@ -465,6 +465,8 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
   sources.forEach((source) => {
     // Solo los suplentes muestran el brillo de posiciones compatibles.
     const isBench = source.classList.contains('bench-item');
+    source.addEventListener('selectstart', (event) => event.preventDefault());
+    source.addEventListener('contextmenu', (event) => event.preventDefault());
 
     source.addEventListener('dragstart', (event) => {
       htmlDragUid = source.dataset.uid;

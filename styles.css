@@ -4743,16 +4743,19 @@ button.primary:active:not(:disabled),
   font-size: 24px;
 }
 
-.lineup-draggable { touch-action: none; }
-.team-roster .bench-item {
+.lineup-draggable {
   touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
   -webkit-user-drag: none;
 }
-.team-roster .bench-item > :not(.bench-info) {
+.lineup-draggable > :not(.chip-info) {
   pointer-events: none;
 }
-.team-roster .bench-face img {
+.lineup-draggable img {
   -webkit-user-drag: none;
+  -webkit-user-select: none;
   user-select: none;
 }
 
