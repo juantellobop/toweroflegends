@@ -2682,6 +2682,7 @@ select {
   position: fixed;
   left: 0;
   right: 0;
+  margin-inline: auto;
   bottom: calc(14px + env(safe-area-inset-bottom));
   z-index: 40;
   width: min(360px, calc(100vw - 32px));
@@ -4789,9 +4790,9 @@ button.primary:active:not(:disabled),
 
 @media (min-width: 761px) {
   .build-screen .play-bar {
-    left: auto;
-    right: 24px;
-    margin-inline: 0;
+    left: 0;
+    right: 0;
+    margin-inline: auto;
   }
 }
 
