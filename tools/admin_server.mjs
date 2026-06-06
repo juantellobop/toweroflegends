@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { spawn } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import crypto from 'node:crypto';
-import { createReadStream } from 'node:fs';
+import { createReadStream, readdirSync, readFileSync, statSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import http from 'node:http';
 import os from 'node:os';
@@ -28,6 +28,21 @@ const GK_STAT_KEYS = ['reflexes', 'handling', 'positioning'];
 const TACTICAL_TYPES = ['posesion', 'presion', 'contra'];
 const POSITIONS = new Set(LINES);
 const RARITY_SET = new Set(RARITIES);
+const INDEX_FILE = path.join(ROOT, 'index.html');
+const SOURCE_VERSION_PATHS = [
+  'index.html',
+  'main.js',
+  'styles.css',
+  'assets/flags',
+  'assets/ui',
+  'design',
+  'data',
+  'engine',
+  'match',
+  'scenes',
+  'state',
+  'ui',
+];
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -42,6 +57,126 @@ const MIME = {
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
 };
+
+function normalizedVersion(value) {
+  return String(value || '').trim().replace(/[^a-zA-Z0-9._-]/g, '').slice(0, 40);
+}
+
+function hashSourcePath(hash, absolutePath, relativePath) {
+  const stat = statSync(absolutePath);
+  if (stat.isDirectory()) {
+    for (const entry of readdirSync(absolutePath).sort()) {
+      hashSourcePath(hash, path.join(absolutePath, entry), path.join(relativePath, entry));
+    }
+    return;
+  }
+  if (!stat.isFile()) return;
+  hash.update(relativePath);
+  hash.update(readFileSync(absolutePath));
+}
+
+function sourceHashVersion() {
+  const hash = crypto.createHash('sha256');
+  for (const relativePath of SOURCE_VERSION_PATHS) {
+    hashSourcePath(hash, path.join(ROOT, relativePath), relativePath);
+  }
+  return hash.digest('hex').slice(0, 12);
+}
+
+function resolveBuildVersion() {
+  const deployVersion = [
+    process.env.RENDER_GIT_COMMIT,
+    process.env.VERCEL_GIT_COMMIT_SHA,
+    process.env.RAILWAY_GIT_COMMIT_SHA,
+    process.env.HEROKU_SLUG_COMMIT,
+    process.env.SOURCE_VERSION,
+    process.env.COMMIT_SHA,
+    process.env.GITHUB_SHA,
+  ].map(normalizedVersion).find(Boolean);
+  if (deployVersion) return deployVersion.slice(0, 12);
+
+  try {
+    const dirty = execFileSync(
+      'git',
+      ['status', '--porcelain', '--untracked-files=no'],
+      { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
+    ).trim();
+    if (dirty) return sourceHashVersion();
+
+    const gitVersion = normalizedVersion(execFileSync(
+      'git',
+      ['rev-parse', '--short=12', 'HEAD'],
+      { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
+    ));
+    if (gitVersion) return gitVersion;
+  } catch (_) {
+    // Production images often omit .git; the source hash below is deterministic.
+  }
+
+  return sourceHashVersion();
+}
+
+export const BUILD_VERSION = resolveBuildVersion();
+
+function versionedIndexHtml(source) {
+  return source.replace(
+    /\b(href|src)="(design\/tokens\.css|styles\.css|main\.js)(?:\?[^"]*)?"/g,
+    (_, attribute, asset) => `${attribute}="${asset}?v=${BUILD_VERSION}"`
+  );
+}
+
+function withBuildVersion(resource) {
+  if (!resource || /^(?:data:|https?:|#)/i.test(resource)) return resource;
+  const separator = resource.includes('?') ? '&' : '?';
+  return `${resource}${separator}v=${BUILD_VERSION}`;
+}
+
+function versionedJavaScript(source) {
+  const rewrite = (_, prefix, quote, specifier) =>
+    `${prefix}${quote}${withBuildVersion(specifier)}${quote}`;
+
+  return source
+    .replace(
+      /(\b(?:import|export)\s+[^;]*?\sfrom\s*)(['"])(\.{1,2}\/[^'"]+)\2/g,
+      rewrite
+    )
+    .replace(
+      /(\bimport\s*)(['"])(\.{1,2}\/[^'"]+)\2/g,
+      rewrite
+    )
+    .replace(
+      /(\bimport\s*\(\s*)(['"])(\.{1,2}\/[^'"]+)\2/g,
+      rewrite
+    )
+    .replace(
+      /(['"])((?:assets|scenes)\/[^'"`\s)]+\.(?:ico|jpe?g|png|svg|webp)(?:\?[^'"]*)?)\1/gi,
+      (_, quote, asset) => `${quote}${withBuildVersion(asset)}${quote}`
+    );
+}
+
+function versionedCss(source) {
+  return source.replace(
+    /url\(\s*(['"]?)(?!data:|https?:|#)([^'")]+)\1\s*\)/gi,
+    (_, quote, asset) => `url(${quote}${withBuildVersion(asset.trim())}${quote})`
+  );
+}
+
+function cacheControlFor(filePath, url) {
+  if (filePath === INDEX_FILE || path.extname(filePath).toLowerCase() === '.html') {
+    return 'no-store, max-age=0';
+  }
+  if (filePath.startsWith(PLAYER_PORTRAITS_DIR + path.sep)) {
+    return 'no-store, max-age=0';
+  }
+
+  if (url.searchParams.get('v') === BUILD_VERSION) {
+    return 'public, max-age=31536000, immutable';
+  }
+
+  // ES module imports and CSS-referenced assets keep stable paths, so every
+  // refresh must revalidate them even when the entry file has a build version.
+  return 'no-cache, must-revalidate';
+}
 
 function json(res, status, payload) {
   const body = JSON.stringify(payload);
@@ -445,12 +580,53 @@ async function serveStatic(req, res) {
   try {
     const stat = await fs.stat(filePath);
     if (!stat.isFile()) throw new Error('not a file');
+
+    if (filePath === INDEX_FILE) {
+      const body = versionedIndexHtml(await fs.readFile(filePath, 'utf8'));
+      res.writeHead(200, securityHeaders({
+        'Content-Type': MIME['.html'],
+        'Content-Length': Buffer.byteLength(body),
+        'Cache-Control': cacheControlFor(filePath, url),
+        'X-App-Version': BUILD_VERSION,
+      }));
+      if (req.method === 'HEAD') res.end();
+      else res.end(body);
+      return;
+    }
+
+    const extension = path.extname(filePath).toLowerCase();
+    const isCurrentVersion = url.searchParams.get('v') === BUILD_VERSION;
+    if (isCurrentVersion && ['.css', '.js', '.mjs'].includes(extension)) {
+      const source = await fs.readFile(filePath, 'utf8');
+      const body = extension === '.css'
+        ? versionedCss(source)
+        : versionedJavaScript(source);
+      res.writeHead(200, securityHeaders({
+        'Content-Type': MIME[extension],
+        'Content-Length': Buffer.byteLength(body),
+        'Cache-Control': cacheControlFor(filePath, url),
+        'ETag': `"${BUILD_VERSION}-${stat.size.toString(16)}"`,
+        'X-App-Version': BUILD_VERSION,
+      }));
+      if (req.method === 'HEAD') res.end();
+      else res.end(body);
+      return;
+    }
+
+    const etag = `"${stat.size.toString(16)}-${Math.trunc(stat.mtimeMs).toString(16)}"`;
     const headers = securityHeaders({
       'Content-Type': MIME[path.extname(filePath).toLowerCase()] || 'application/octet-stream',
       'Content-Length': stat.size,
+      'Cache-Control': cacheControlFor(filePath, url),
+      'ETag': etag,
+      'Last-Modified': stat.mtime.toUTCString(),
+      'X-App-Version': BUILD_VERSION,
     });
-    if (filePath.startsWith(PLAYER_PORTRAITS_DIR + path.sep)) {
-      headers['Cache-Control'] = 'no-store';
+    if (req.headers['if-none-match'] === etag) {
+      delete headers['Content-Length'];
+      res.writeHead(304, headers);
+      res.end();
+      return;
     }
     res.writeHead(200, headers);
     if (req.method === 'HEAD') res.end();
@@ -503,6 +679,7 @@ if (runningDirectly) {
 
   server.listen(PORT, '127.0.0.1', () => {
     console.log(`Torre de Leyendas admin server: http://127.0.0.1:${PORT}/`);
+    console.log(`Versión de assets: ${BUILD_VERSION}`);
     console.log(`Ranking persistente: ${RANKING_FILE}`);
     console.log(`Base directa de jugadores: ${PLAYER_DB_FILE}`);
     console.log('POST /api/admin/portrait usa tools/convert_admin_portrait.py');
