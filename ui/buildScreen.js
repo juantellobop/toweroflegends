@@ -259,7 +259,6 @@ export function renderBuild(root, state, handlers) {
           <div class="team-panel-head roster-head">
             <div>
               <h2>${t('build.roster')}</h2>
-              <p>${t('build.rosterCount', { total: state.squad.length, missing: countMissing(state) })}</p>
             </div>
           </div>
           ${bench(state)}

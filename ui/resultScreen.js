@@ -30,7 +30,7 @@ function packVisual(kind, label, count, muted = false) {
 // Pantalla tras un partido ganado/empatado (o derrota con vidas restantes).
 export function renderResult(root, state, reward, handlers) {
   const m = state.lastMatch;
-  const { scorers, saves } = summarize(m.eventos);
+  const { scorers } = summarize(m.eventos);
   const survived = reward.survivedLoss;
   const resultAsset = reward.result === 'loss' ? UI_ASSETS.results.loss : UI_ASSETS.results.win;
   const resultTitle = reward.result === 'loss'
@@ -78,6 +78,10 @@ export function renderResult(root, state, reward, handlers) {
             <small>${t('generic.vs')}</small>
             <span><img class="flag-img" src="${esc(flagSrcForNation(state.opponent.name, [state.opponent.colors.primary, state.opponent.colors.secondary]))}" alt="" />${esc(localizeOpponentName(state.opponent))}</span>
           </div>
+          <div class="result-scorers">
+            <span>${t('result.scorers')}</span>
+            <b>${scorers.length ? esc(scorers.join(', ')) : '—'}</b>
+          </div>
         </div>
       </div>
       <div class="result-progress-row">
@@ -86,16 +90,6 @@ export function renderResult(root, state, reward, handlers) {
           <span>${t('generic.floor', { floor: state.level })}</span>
         </div>
         ${rewardHTML}
-      </div>
-      <div class="result-stats">
-        <div class="result-stat-card">
-          <span>${t('result.scorers')}</span>
-          <b>${scorers.length ? esc(scorers.join(', ')) : '—'}</b>
-        </div>
-        <div class="result-stat-card">
-          <span>${t('result.saves')}</span>
-          <b>${saves}</b>
-        </div>
       </div>
       <div class="result-cta">
         <button id="next" class="primary big result-next">▶ ${nextLabel}</button>

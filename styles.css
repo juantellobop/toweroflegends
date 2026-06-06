@@ -3454,6 +3454,32 @@ select {
   text-transform: uppercase;
 }
 
+.result-scorers {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 3px solid rgba(37,230,255,.44);
+  color: #fff;
+  text-align: left;
+}
+
+.result-scorers span,
+.result-scorers b {
+  font-family: var(--font-pixel);
+}
+
+.result-scorers span {
+  color: rgba(255,255,255,.62);
+  text-transform: uppercase;
+}
+
+.result-scorers b {
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  line-height: 1.25;
+}
+
 .result-teams span {
   display: inline-flex;
   align-items: center;
@@ -3666,12 +3692,35 @@ select {
     flex-direction: column;
   }
 
-  .result-progress-row {
-    flex-direction: column;
+  .result-screen {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
+
+  .result-showcase,
+  .result-progress-row {
+    display: contents;
+  }
+
+  .result-score-card {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .result-poster {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
   .tower-next {
-    flex-direction: row;
+    grid-column: 2;
+    grid-row: 2;
     justify-content: center;
+  }
+
+  .result-reward-panel {
+    grid-column: 1 / -1;
+    grid-row: 3;
   }
 
   .ratings-glass,
@@ -3695,7 +3744,23 @@ select {
   }
 
   .result-poster {
-    min-height: 220px;
+    min-height: 180px;
+  }
+
+  .result-poster .result-art {
+    width: 100%;
+  }
+
+  .result-title-chip {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    padding: 6px;
+    font-size: 9px;
+  }
+
+  .tower-next .tower-next-img {
+    width: min(92px, 70%);
   }
 
   .result-reward-panel {
@@ -4749,8 +4814,8 @@ button.primary:active:not(:disabled),
   }
 
   .team-select-screen .team-field-panel { order: 1; }
-  .team-select-screen .ratings-glass { order: 2; }
-  .team-select-screen .team-roster { order: 3; }
+  .team-select-screen .team-roster { order: 2; }
+  .team-select-screen .ratings-glass { order: 3; }
   .team-select-screen .opponent-brief { order: 4; }
 
   .team-field-panel .team-panel-head {
@@ -4771,9 +4836,9 @@ button.primary:active:not(:disabled),
   .team-select-screen .field,
   .team-select-screen .field[data-formation="4-3-1-2"] {
     width: 100%;
-    height: auto;
+    height: min(calc((100vw - 36px) * 4 / 3 - 50px), calc(100svh - 330px));
     min-height: 0;
-    aspect-ratio: 3 / 4;
+    aspect-ratio: auto;
   }
 
   .team-select-screen,

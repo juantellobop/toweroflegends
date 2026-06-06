@@ -106,6 +106,7 @@ export function renderMatch(root, state, result, handlers) {
   let speedIdx = 0;
   let director = null;
   let finished = false;
+  let leavingMatch = false;
   let typeToken = 0;
 
   function anticipationText(ev) {
@@ -236,6 +237,13 @@ export function renderMatch(root, state, result, handlers) {
     });
   }
 
+  function openResult() {
+    if (leavingMatch) return;
+    leavingMatch = true;
+    director?.destroy();
+    handlers.onFinish();
+  }
+
   // === Controles ===
   playPause.addEventListener('click', () => {
     if (finished) return;
@@ -249,8 +257,8 @@ export function renderMatch(root, state, result, handlers) {
   });
   nextHLBtn.addEventListener('click', () => { if (director && !finished) director.skipHighlight(); });
   skipBtn.addEventListener('click', () => { if (director) director.skipToEnd(); });
-  viewResultBtn.addEventListener('click', () => { if (director) director.skipToEnd(); });
-  continueBtn.addEventListener('click', () => { if (director) director.destroy(); handlers.onFinish(); });
+  viewResultBtn.addEventListener('click', openResult);
+  continueBtn.addEventListener('click', openResult);
   root.querySelectorAll('.seg').forEach((b) => {
     b.addEventListener('click', () => buildDirector(b.dataset.mode));
   });

@@ -53,9 +53,10 @@ try {
   if (!root.querySelector('.scene-pitch')) errors.push('partido sin visor de escenas');
   if (!root.querySelector('#viewResult')) errors.push('partido sin botón flotante Ver resultado');
   click(root.querySelector('#viewResult'));
-  console.log('   tras saltar:', root.querySelector('#scoreA')?.textContent+'-'+root.querySelector('#scoreB')?.textContent, '| jugadas mostradas:', root.querySelectorAll('.play').length);
-  click(root.querySelector('#continue'));
   console.log('7. Resultado:', show(), '| final:', root.querySelector('.final-score')?.textContent?.replace(/\s+/g,' ').trim() || 'fin de run');
+  if (!root.querySelector('.result-screen, .gameover-screen')) errors.push('Ver resultado no navega directamente al resumen');
+  if (root.querySelector('.result-screen .result-scorers')?.closest('.result-score-card') == null) errors.push('goleadores fuera de la caja del resultado');
+  if (root.querySelector('.result-screen .result-stats')) errors.push('el resumen todavía incluye estadísticas separadas');
 
   const next = root.querySelector('#next');
   if (next) {

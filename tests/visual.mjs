@@ -129,7 +129,10 @@ async function assertBuildLayout(page, label) {
   if (label === 'mobile') {
     const ratingsBox = await page.locator('.build-screen .ratings-glass').boundingBox();
     const rosterBox = await page.locator('.build-screen .team-roster').boundingBox();
-    assert.ok(ratingsBox && rosterBox && fieldBox.y < ratingsBox.y && fieldBox.y < rosterBox.y, 'Mobile tactical board must appear before ratings and substitutes');
+    assert.ok(ratingsBox && rosterBox && fieldBox.y < rosterBox.y && rosterBox.y < ratingsBox.y, 'Mobile order must be tactical board, substitutes, then team strength');
+    assert.ok(fieldBox.height <= 430, `Mobile tactical field must be about 50px shorter, got ${fieldBox.height}px`);
+    assert.equal(await page.locator('.build-screen .roster-head h2').textContent(), 'Substitutes');
+    assert.equal(await page.locator('.build-screen .roster-head p').count(), 0, 'Substitutes summary must be removed');
 
     const ratingTops = await page.locator('.build-screen .rating-row').evaluateAll((nodes) =>
       nodes.map((node) => Math.round(node.getBoundingClientRect().top))
@@ -302,7 +305,16 @@ try {
   assert.ok(resultFabBox && resultFabBox.width >= 320 && resultFabBox.height >= 54, 'View result CTA must match the large floating buttons');
   await mobile.screenshot({ path: path.join(OUT, 'mobile-match.png') });
   await resultFab.click();
-  await mobile.waitForFunction(() => document.querySelector('#clock')?.textContent === '90');
+  await mobile.waitForSelector('.result-screen');
+  await mobile.waitForTimeout(500);
+  const scoreBox = await mobile.locator('.result-score-card').boundingBox();
+  const posterBox = await mobile.locator('.result-poster').boundingBox();
+  const floorBox = await mobile.locator('.tower-next').boundingBox();
+  assert.ok(scoreBox && posterBox && floorBox && scoreBox.y < posterBox.y, 'Mobile result score must appear first');
+  assert.ok(Math.abs(posterBox.y - floorBox.y) <= 4, 'Mobile cup and floor must share one row');
+  assert.ok(await mobile.locator('.result-score-card .result-scorers').count(), 'Scorers must be inside the score card');
+  assert.equal(await mobile.locator('.result-stats').count(), 0, 'Saves must not appear in the result summary');
+  await mobile.screenshot({ path: path.join(OUT, 'mobile-result.png'), fullPage: true });
   await mobile.close();
 
   console.log('Visual checks: OK');
