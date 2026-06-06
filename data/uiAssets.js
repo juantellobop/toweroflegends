@@ -34,22 +34,33 @@ export const UI_ASSETS = {
     cup: 'assets/ui/copa.png',     // copa (póster de victoria)
     tower: 'assets/ui/torre.png',  // torre (progreso / fin de run)
     win: 'assets/ui/copa.png',
+    winBadge: 'assets/ui/pixel/result-win.svg',
     loss: 'assets/ui/pixel/result-loss.svg',
   },
 };
 
+function collectAssetPaths(value, output) {
+  if (typeof value === 'string') {
+    if (/\.(?:ico|jpe?g|png|svg|webp)(?:\?|$)/i.test(value)) output.push(value);
+    return;
+  }
+  if (!value || typeof value !== 'object') return;
+  Object.values(value).forEach((entry) => collectAssetPaths(entry, output));
+}
+
 export function uiAssetList() {
-  return [
-    UI_ASSETS.backgrounds.title,
-    UI_ASSETS.backgrounds.pitch,
-    UI_ASSETS.backgrounds.celebration,
-    UI_ASSETS.packs.player,
-    UI_ASSETS.packs.item,
-    UI_ASSETS.cards.packBack,
-    UI_ASSETS.cards.backPlayer,
-    UI_ASSETS.cards.backItem,
-    ...Object.values(UI_ASSETS.cards.frames),
-    ...Object.values(UI_ASSETS.icons),
-    ...Object.values(UI_ASSETS.results),
-  ];
+  const paths = [];
+  collectAssetPaths(UI_ASSETS, paths);
+  return [...new Set(paths)];
+}
+
+export function preloadUiAssets(ImageCtor = globalThis.Image) {
+  if (typeof ImageCtor !== 'function') return [];
+  return uiAssetList().map((src) => {
+    const image = new ImageCtor();
+    image.decoding = 'async';
+    image.fetchPriority = src === UI_ASSETS.backgrounds.title ? 'high' : 'low';
+    image.src = src;
+    return image;
+  });
 }

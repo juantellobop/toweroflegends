@@ -497,6 +497,10 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
       if (isBench) highlightEligible(player); // click o hold: pinta posiciones válidas
       const restoreNativeDrag = event.pointerType !== 'mouse' && source.draggable;
       if (restoreNativeDrag) source.draggable = false;
+      const scrollContainer = isBench ? source.closest('.bench-strip') : null;
+      const canScrollHorizontally = Boolean(
+        scrollContainer && scrollContainer.scrollWidth > scrollContainer.clientWidth + 1
+      );
       pointerDrag = {
         source,
         player,
@@ -504,9 +508,9 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
         startY: event.clientY,
         dragging: event.pointerType !== 'mouse',
         moved: false,
-        mode: event.pointerType === 'mouse' || !isBench ? 'drag' : null,
-        scrollContainer: isBench ? source.closest('.bench-strip') : null,
-        startScrollLeft: isBench ? source.closest('.bench-strip')?.scrollLeft || 0 : 0,
+        mode: event.pointerType === 'mouse' || !canScrollHorizontally ? 'drag' : null,
+        scrollContainer,
+        startScrollLeft: scrollContainer?.scrollLeft || 0,
         restoreNativeDrag,
       };
       try {

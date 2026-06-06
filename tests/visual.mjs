@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
+import { uiAssetList } from '../data/uiAssets.js';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const PORT = 8091;
@@ -30,6 +31,14 @@ function waitForServer(url, timeout = 8000) {
 
 async function playToBuild(page) {
   await page.goto(BASE, { waitUntil: 'networkidle' });
+  const requestedUiAssets = new Set(await page.evaluate(() =>
+    performance.getEntriesByType('resource')
+      .map((entry) => new URL(entry.name).pathname.replace(/^\//, ''))
+      .filter((pathname) => pathname.startsWith('assets/ui/'))
+  ));
+  for (const asset of uiAssetList()) {
+    assert.ok(requestedUiAssets.has(asset), `UI asset must preload on initial page load: ${asset}`);
+  }
   await page.waitForTimeout(350);
   await page.click('.flag-opt');
   await page.click('#start');
@@ -144,6 +153,47 @@ async function assertBuildLayout(page, label) {
 
     const benchBox = await page.locator('.build-screen .bench-item').first().boundingBox();
     assert.ok(benchBox && benchBox.width <= 124 && benchBox.height <= 104, 'Mobile substitutes must use compact cards');
+
+    await page.locator('.build-screen .bench-strip').evaluate((strip) => {
+      const template = strip.querySelector('.bench-item');
+      if (!template) return;
+      while (strip.querySelectorAll('.bench-item').length < 7) {
+        strip.appendChild(template.cloneNode(true));
+      }
+    });
+    const benchLayout = await page.locator('.build-screen .bench-strip').evaluate((strip) => {
+      const stripRect = strip.getBoundingClientRect();
+      const cards = [...strip.querySelectorAll('.bench-item')].map((card) => {
+        const rect = card.getBoundingClientRect();
+        return {
+          left: Math.round(rect.left),
+          top: Math.round(rect.top),
+          right: Math.round(rect.right),
+          bottom: Math.round(rect.bottom),
+        };
+      });
+      return {
+        display: getComputedStyle(strip).display,
+        overflowX: getComputedStyle(strip).overflowX,
+        strip: {
+          left: Math.round(stripRect.left),
+          right: Math.round(stripRect.right),
+          bottom: Math.round(stripRect.bottom),
+        },
+        cards,
+      };
+    });
+    assert.equal(benchLayout.display, 'grid', 'Mobile substitutes must use a wrapping grid');
+    assert.equal(benchLayout.overflowX, 'visible', 'Mobile substitutes must not use a clipped horizontal carousel');
+    assert.equal(new Set(benchLayout.cards.slice(0, 3).map((card) => card.top)).size, 1, 'Mobile substitutes must show three cards per row');
+    assert.ok(benchLayout.cards[3].top > benchLayout.cards[0].top, 'Additional substitutes must wrap onto new rows');
+    assert.ok(benchLayout.cards.every((card) =>
+      card.left >= benchLayout.strip.left && card.right <= benchLayout.strip.right
+    ), 'Every mobile substitute card must fit fully inside the grid');
+    assert.ok(
+      benchLayout.strip.bottom >= benchLayout.cards.at(-1).bottom,
+      'Mobile substitutes grid must grow to contain every row'
+    );
   }
   await page.screenshot({ path: path.join(OUT, `${label}-build.png`), fullPage: true });
 }

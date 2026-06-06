@@ -4950,24 +4950,31 @@ button.primary:active:not(:disabled),
   }
 
   .team-roster .bench-strip {
-    gap: 8px;
-    scroll-snap-type: x proximity;
-    padding-bottom: 9px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+    padding: 2px 0 9px;
+    scroll-snap-type: none;
   }
 
   .team-roster .bench-item {
-    flex: 0 0 116px;
+    width: 100%;
+    min-width: 0;
     min-height: 92px;
-    grid-template-columns: 46px minmax(0, 1fr);
+    grid-template-columns: 42px minmax(0, 1fr);
     grid-template-rows: auto auto auto;
-    gap: 2px 6px;
-    padding: 7px;
-    scroll-snap-align: start;
+    gap: 2px 5px;
+    padding: 6px 5px;
+    overflow: hidden;
+    scroll-snap-align: none;
   }
 
   .team-roster .bench-face {
-    width: 46px;
-    height: 46px;
+    width: 42px;
+    height: 42px;
   }
 
   .team-roster .bench-ovr { font-size: 16px; }

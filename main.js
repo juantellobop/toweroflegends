@@ -16,7 +16,7 @@ import { renderAdminLogin } from './ui/adminLogin.js';
 import { getAdminToken, clearAdminToken } from './data/adminAuth.js';
 import { fetchLeaderboard, renderLeaderboard, submitLeaderboardEntry } from './ui/leaderboard.js';
 import { CONFIG } from './data/config.js';
-import { UI_ASSETS } from './data/uiAssets.js';
+import { preloadUiAssets, UI_ASSETS } from './data/uiAssets.js';
 import { flagSrcForNation, FLAG_NATIONS } from './data/flags.js';
 import { initAdminPlayerDatabase } from './data/adminPlayers.js';
 import {
@@ -27,6 +27,9 @@ import { LANGUAGES, getLanguage, initLanguage, localizeNation, setLanguage, t } 
 
 const root = document.getElementById('app');
 initLanguage();
+// Conservamos las referencias para que todas las descargas de UI iniciadas al
+// entrar terminen y queden disponibles en la caché HTTP del navegador.
+const preloadedUiImages = preloadUiAssets();
 const BEST_KEY = 'tdl_best';
 const ROUTE_ORDER = {
   menu: 0,
