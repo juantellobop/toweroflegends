@@ -49,9 +49,29 @@ async function playToBuild(page) {
   await assertInsideCards(page, '.item-card', ['.card-head', '.card-name', '.item-desc'], 'item cards');
   await page.click('.deal-card');
   await page.waitForSelector('.scouting-screen');
+  await assertScoutingLayout(page);
   await page.click('#scout-continue');
   await page.waitForSelector('.build-screen');
   await page.waitForTimeout(350);
+}
+
+async function assertScoutingLayout(page) {
+  const viewport = page.viewportSize();
+  await page.screenshot({
+    path: path.join(OUT, `${viewport && viewport.width <= 760 ? 'mobile' : 'desktop'}-scouting.png`),
+    fullPage: true,
+  });
+  if (!viewport || viewport.width > 760) return;
+
+  const flag = await page.locator('.scout-team-card').boundingBox();
+  const strength = await page.locator('.scout-strength').boundingBox();
+  assert.ok(flag && strength, 'Mobile scouting must show flag and strength');
+  assert.ok(Math.abs(flag.y - strength.y) <= 4, 'Mobile scouting flag and strength must share a row');
+
+  const ratingTops = await page.locator('.scout-rating').evaluateAll((nodes) =>
+    nodes.map((node) => Math.round(node.getBoundingClientRect().top))
+  );
+  assert.equal(new Set(ratingTops).size, 1, 'Mobile opponent ratings must fit in one row');
 }
 
 async function assertInsideCards(page, cardSelector, childSelectors, label) {
@@ -101,6 +121,27 @@ async function assertBuildLayout(page, label) {
   const fieldBox = await page.locator('.build-screen .field').boundingBox();
   const viewport = page.viewportSize();
   assert.ok(fieldBox && viewport && fieldBox.height <= viewport.height, `${label} field height must fit viewport`);
+  const fullNames = await page.locator('.build-screen .field-chip.filled .chip-name').evaluateAll((nodes) =>
+    nodes.filter((node) => node.title?.includes(' ')).map((node) => node.textContent.trim() === node.title.trim())
+  );
+  assert.ok(fullNames.every((same) => !same), `${label} tactical cards must use surnames instead of full names`);
+
+  if (label === 'mobile') {
+    const ratingsBox = await page.locator('.build-screen .ratings-glass').boundingBox();
+    const rosterBox = await page.locator('.build-screen .team-roster').boundingBox();
+    assert.ok(ratingsBox && rosterBox && fieldBox.y < ratingsBox.y && fieldBox.y < rosterBox.y, 'Mobile tactical board must appear before ratings and substitutes');
+
+    const ratingTops = await page.locator('.build-screen .rating-row').evaluateAll((nodes) =>
+      nodes.map((node) => Math.round(node.getBoundingClientRect().top))
+    );
+    assert.equal(new Set(ratingTops).size, 1, 'Mobile team ratings must fit in one row');
+
+    const playBox = await page.locator('.build-screen #play').boundingBox();
+    assert.ok(playBox && playBox.width >= 320 && playBox.height >= 54, 'Mobile play CTA must match the larger floating buttons');
+
+    const benchBox = await page.locator('.build-screen .bench-item').first().boundingBox();
+    assert.ok(benchBox && benchBox.width <= 124 && benchBox.height <= 104, 'Mobile substitutes must use compact cards');
+  }
   await page.screenshot({ path: path.join(OUT, `${label}-build.png`), fullPage: true });
 }
 
@@ -192,6 +233,37 @@ async function assertDragAndDrop(page) {
   );
 }
 
+async function assertImmediateTouchDrag(page) {
+  const bench = page.locator('.team-roster .bench-item').first();
+  const box = await bench.boundingBox();
+  assert.ok(box, 'Expected a visible substitute for touch drag test');
+  const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  await bench.evaluate((node, coords) => {
+    node.dispatchEvent(new PointerEvent('pointerdown', {
+      bubbles: true,
+      pointerId: 51,
+      pointerType: 'touch',
+      isPrimary: true,
+      button: 0,
+      clientX: coords.x,
+      clientY: coords.y,
+    }));
+  }, point);
+  assert.equal(await page.locator('.drag-ghost').count(), 1, 'Touch drag must show feedback immediately on pointerdown');
+  await bench.evaluate((node, coords) => {
+    node.dispatchEvent(new PointerEvent('pointerup', {
+      bubbles: true,
+      pointerId: 51,
+      pointerType: 'touch',
+      isPrimary: true,
+      button: 0,
+      clientX: coords.x,
+      clientY: coords.y,
+    }));
+  }, point);
+  assert.equal(await page.locator('.drag-ghost').count(), 0, 'Touch drag feedback must clear on pointerup');
+}
+
 await fs.mkdir(OUT, { recursive: true });
 const server = spawn('python3', ['-m', 'http.server', String(PORT)], {
   cwd: ROOT,
@@ -215,6 +287,22 @@ try {
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
   await playToBuild(mobile);
   await assertBuildLayout(mobile, 'mobile');
+  await assertImmediateTouchDrag(mobile);
+  await mobile.locator('.team-roster .bench-item').first().click();
+  assert.ok(await mobile.locator('.bench-target').count(), 'Tapping a substitute must show compatible tactical slots');
+  await mobile.screenshot({ path: path.join(OUT, 'mobile-sub-picker.png'), fullPage: true });
+  await mobile.locator('.bench-target').first().click();
+  await mobile.locator('#play').click();
+  await mobile.waitForSelector('.match-screen');
+  await mobile.waitForTimeout(600);
+  const resultFab = mobile.locator('#viewResult');
+  const resultFabBox = await resultFab.boundingBox();
+  const resultFabPosition = await resultFab.evaluate((node) => getComputedStyle(node.closest('.match-result-fab')).position);
+  assert.equal(resultFabPosition, 'fixed', 'View result CTA must float over highlights');
+  assert.ok(resultFabBox && resultFabBox.width >= 320 && resultFabBox.height >= 54, 'View result CTA must match the large floating buttons');
+  await mobile.screenshot({ path: path.join(OUT, 'mobile-match.png') });
+  await resultFab.click();
+  await mobile.waitForFunction(() => document.querySelector('#clock')?.textContent === '90');
   await mobile.close();
 
   console.log('Visual checks: OK');

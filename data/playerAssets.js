@@ -26,6 +26,22 @@ export function playerInitials(name) {
   return `${first}${last}`.toUpperCase();
 }
 
+const SURNAME_PARTICLES = new Set([
+  'da', 'das', 'de', 'del', 'der', 'di', 'do', 'dos', 'du',
+  'la', 'le', 'mac', 'van', 'von',
+]);
+
+export function playerSurname(name) {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+  if (parts.length <= 1) return parts[0] || '';
+
+  let start = parts.length - 1;
+  while (start > 0 && SURNAME_PARTICLES.has(normalizeName(parts[start - 1]))) {
+    start -= 1;
+  }
+  return parts.slice(start).join(' ');
+}
+
 // Indice nombre→jugador para resolver retratos cuando solo tenemos el nombre
 // (p. ej. los onces rivales en la escena de partido y el scouting). Cubre todo
 // el roster, asi que un rival resuelve a su id unico `gen_*` y su `{id}.png`.

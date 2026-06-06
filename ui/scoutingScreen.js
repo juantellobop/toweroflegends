@@ -2,7 +2,7 @@
 
 import { esc, POSITION_LABEL } from './cards.js';
 import { LINES } from '../data/config.js';
-import { playerInitials, portraitPathForName } from '../data/playerAssets.js';
+import { playerInitials, playerSurname, portraitPathForName } from '../data/playerAssets.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { localizeAchievement, localizeOpponentName, t } from '../data/i18n.js';
@@ -35,7 +35,7 @@ function field(opponent) {
         </span>
         <span class="chip-ovr">${player.ovr ?? '—'}</span>
         <span class="chip-init">${POSITION_LABEL[player.position]}</span>
-        <span class="chip-name">${esc(player.name)}</span>
+        <span class="chip-name" title="${esc(player.name)}">${esc(playerSurname(player.name))}</span>
       </div>
     </div>`).join('');
   return `
@@ -80,10 +80,12 @@ export function renderScouting(root, state, handlers) {
           <h1 class="large-title">${esc(localizeOpponentName(opponent))}</h1>
           <p class="scout-achievement">${esc(localizeAchievement(opponent.achievement))} · ${t('scouting.formation', { formation: opponent.formation })}</p>
         </div>
-        <div class="scout-team-card" aria-hidden="true">
-          <img class="scout-flag-img" src="${esc(flagSrcForNation(opponent.name, [opponent.colors.primary, opponent.colors.secondary]))}" alt="" loading="lazy" decoding="async" />
+        <div class="scout-team-meta">
+          <div class="scout-team-card" aria-hidden="true">
+            <img class="scout-flag-img" src="${esc(flagSrcForNation(opponent.name, [opponent.colors.primary, opponent.colors.secondary]))}" alt="" loading="lazy" decoding="async" />
+          </div>
+          <div class="scout-strength"><span>${t('scouting.strength')}</span><b>${opponent.strength}</b></div>
         </div>
-        <div class="scout-strength"><span>${t('scouting.strength')}</span><b>${opponent.strength}</b></div>
       </header>
       ${ratings(opponent)}
       <h2 class="section-title">${t('scouting.opponentEleven')}</h2>

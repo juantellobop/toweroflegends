@@ -80,6 +80,9 @@ export function renderMatch(root, state, result, handlers) {
         </div>
         <div class="match-modes seg-control" role="tablist" aria-label="${t('match.modesAria')}">${segs}</div>
       </div>
+      <div class="match-result-fab">
+        <button id="viewResult" class="primary big">${t('match.viewResult')}</button>
+      </div>
     </section>`;
 
   // === Render del campo ===
@@ -98,6 +101,7 @@ export function renderMatch(root, state, result, handlers) {
   const announcer = $('#announcer'), scoreboard = $('#scoreboard');
   const playPause = $('#playPause'), speedBtn = $('#speed');
   const continueBtn = $('#continue'), skipBtn = $('#skip'), nextHLBtn = $('#nextHL');
+  const viewResultBtn = $('#viewResult');
 
   let speedIdx = 0;
   let director = null;
@@ -174,6 +178,7 @@ export function renderMatch(root, state, result, handlers) {
     pitch.reset();
     continueBtn.disabled = true; continueBtn.classList.remove('ready');
     skipBtn.disabled = false; nextHLBtn.disabled = false;
+    viewResultBtn.hidden = false;
     playPause.textContent = '⏸';
 
     director = new MatchDirector({
@@ -208,6 +213,7 @@ export function renderMatch(root, state, result, handlers) {
     scoreB.textContent = result.golesB;
     clockEl.textContent = '90';
     skipBtn.disabled = true; nextHLBtn.disabled = true;
+    viewResultBtn.hidden = true;
     playPause.textContent = '▶';
     continueBtn.disabled = false;
     continueBtn.classList.add('ready');
@@ -243,6 +249,7 @@ export function renderMatch(root, state, result, handlers) {
   });
   nextHLBtn.addEventListener('click', () => { if (director && !finished) director.skipHighlight(); });
   skipBtn.addEventListener('click', () => { if (director) director.skipToEnd(); });
+  viewResultBtn.addEventListener('click', () => { if (director) director.skipToEnd(); });
   continueBtn.addEventListener('click', () => { if (director) director.destroy(); handlers.onFinish(); });
   root.querySelectorAll('.seg').forEach((b) => {
     b.addEventListener('click', () => buildDirector(b.dataset.mode));

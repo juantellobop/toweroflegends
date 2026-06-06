@@ -4509,3 +4509,491 @@ button.primary:active:not(:disabled),
 .admin-player-row.is-pressing {
   transform: none !important;
 }
+
+/* ============================================================
+   Tactical boards and mobile team management
+   ============================================================ */
+.team-select-screen {
+  display: flex;
+  flex-direction: column;
+}
+
+.team-select-screen .build-nav { order: 0; }
+.team-select-screen .opponent-brief { order: 1; }
+.team-select-screen .ratings-glass { order: 2; }
+.team-select-screen .team-layout { order: 3; }
+
+.field {
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse at 50% 48%, rgba(255,255,255,.12), transparent 58%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(180deg, #168b44 0 28px, #1b9b49 28px 56px);
+  box-shadow:
+    0 0 0 4px #071459,
+    0 0 0 7px rgba(255,255,255,.18),
+    0 18px 0 rgba(0,0,0,.28),
+    0 28px 54px rgba(0,0,0,.34);
+}
+
+.field::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 5px rgba(233,255,223,.14),
+    inset 0 0 54px rgba(3,29,20,.38);
+}
+
+.field-bg { z-index: 1; }
+.field .chip-anchor { z-index: 2; }
+
+.field-chip {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(24,55,132,.94), rgba(7,20,89,.94));
+  border-color: rgba(255,255,255,.92);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.16) inset,
+    0 5px 0 rgba(3,8,38,.62),
+    0 9px 18px rgba(0,0,0,.26);
+}
+
+.field-chip.filled::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 4px;
+  background: var(--common);
+}
+
+.field-chip.filled.rarity-rare::after { background: var(--rare); }
+.field-chip.filled.rarity-epic::after { background: var(--epic); }
+.field-chip.filled.rarity-legend::after { background: var(--legend); }
+
+.field-chip .chip-ovr {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 3;
+  min-width: 24px;
+  padding: 3px 4px;
+  color: #071459;
+  background: var(--arcade-yellow);
+  border: 2px solid #071459;
+  line-height: 1;
+  text-align: center;
+}
+
+.field-chip .chip-name {
+  width: calc(100% - 4px);
+  max-width: none;
+  padding: 3px 2px 5px;
+  color: #fff;
+  background: rgba(3,8,38,.52);
+  font-weight: 900;
+  text-align: center;
+  text-shadow: 1px 1px 0 #071459;
+}
+
+.field-chip.scout-chip .chip-init {
+  color: var(--arcade-cyan);
+  font-size: 8px;
+}
+
+.bench-add {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  color: #071459;
+  background: var(--arcade-yellow);
+  border: 2px solid #071459;
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  line-height: 1;
+  box-shadow: 0 2px 0 rgba(0,0,0,.35);
+}
+
+.bench-target-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.bench-target {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 5px;
+  min-height: 112px;
+  padding: 9px 6px;
+  color: #fff;
+  background: #071459;
+  border: 3px solid var(--arcade-cyan);
+  font-family: var(--font-pixel);
+  font-size: 9px;
+}
+
+.bench-target-role {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  color: var(--arcade-yellow);
+  font-size: 8px;
+}
+
+.bench-target-face {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  overflow: hidden;
+  border: 2px solid rgba(255,255,255,.8);
+}
+
+.bench-target-face img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  image-rendering: pixelated;
+}
+
+.bench-target-empty {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  color: var(--arcade-yellow);
+  border: 2px dashed var(--arcade-cyan);
+  font-size: 24px;
+}
+
+.lineup-draggable { touch-action: none; }
+.team-roster .bench-item { touch-action: pan-x; }
+
+.scout-team-meta {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.scout-team-meta .scout-strength {
+  justify-content: center;
+}
+
+.match-screen {
+  padding-bottom: calc(108px + env(safe-area-inset-bottom));
+}
+
+.match-result-fab {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  z-index: 45;
+  width: min(360px, calc(100vw - 32px));
+  margin-inline: auto;
+  padding: 8px;
+  pointer-events: none;
+}
+
+.match-result-fab[hidden] { display: none; }
+
+.match-result-fab button {
+  width: 100%;
+  min-height: 56px;
+  pointer-events: auto;
+  box-shadow:
+    0 0 0 2px #FFF5A8 inset,
+    0 6px 0 #071459,
+    0 0 0 7px rgba(7,20,89,.76),
+    0 18px 34px rgba(0,0,0,.42);
+}
+
+@media (min-width: 761px) {
+  .build-screen .play-bar {
+    left: auto;
+    right: 24px;
+    margin-inline: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .team-select-screen .build-nav {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .team-select-screen .build-nav .large-title {
+    font-size: clamp(1.35rem, 7vw, 1.8rem);
+    text-align: left;
+  }
+
+  .team-select-screen .team-layout {
+    display: contents;
+  }
+
+  .team-select-screen .team-field-panel { order: 1; }
+  .team-select-screen .ratings-glass { order: 2; }
+  .team-select-screen .team-roster { order: 3; }
+  .team-select-screen .opponent-brief { order: 4; }
+
+  .team-field-panel .team-panel-head {
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .team-field-panel .team-panel-head p {
+    display: none;
+  }
+
+  .team-field-panel .formation-seg .seg {
+    min-height: 38px;
+    padding: 5px 3px;
+    font-size: 9px;
+  }
+
+  .team-select-screen .field,
+  .team-select-screen .field[data-formation="4-3-1-2"] {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 3 / 4;
+  }
+
+  .team-select-screen,
+  .team-select-screen .field[data-formation="4-3-1-2"] {
+    --lineup-card: 54px;
+  }
+
+  .team-select-screen .field-chip {
+    min-height: 76px;
+    padding: 4px 2px 3px;
+  }
+
+  .team-select-screen .chip-face {
+    width: 46px;
+    height: 46px;
+    min-width: 0;
+    min-height: 0;
+    margin-bottom: 0;
+  }
+
+  .team-select-screen .field-chip .chip-ovr {
+    top: 2px;
+    left: 2px;
+    min-width: 21px;
+    padding: 2px 3px;
+    font-size: 9px;
+  }
+
+  .team-select-screen .field-chip .chip-name {
+    font-size: 8px;
+  }
+
+  .team-select-screen .chip-info {
+    top: 2px;
+    right: 2px;
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
+  }
+
+  .team-select-screen .ratings-glass {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 8px;
+    margin: 14px 0 0;
+  }
+
+  .team-select-screen .rt-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .team-select-screen .ratings-glass .rating-row {
+    display: grid;
+    grid-template-columns: 17px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    gap: 0 3px;
+    min-width: 0;
+  }
+
+  .team-select-screen .ratings-glass .rating-row img {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    width: 17px;
+    height: 17px;
+  }
+
+  .team-select-screen .rt-label {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 7px;
+  }
+
+  .team-select-screen .rt-val {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+    font-size: 11px;
+  }
+
+  .team-select-screen .rt-bar { display: none; }
+
+  .team-select-screen .chem-pill {
+    flex: 0 0 auto;
+    padding-left: 7px;
+    gap: 1px;
+  }
+
+  .team-select-screen .chem-pill span { font-size: 7px; }
+  .team-select-screen .chem-pill b { font-size: 12px; }
+
+  .team-roster {
+    margin-top: 14px;
+  }
+
+  .build-screen .items-fold summary {
+    color: rgba(255,255,255,.84);
+  }
+
+  .team-roster .bench-strip {
+    gap: 8px;
+    scroll-snap-type: x proximity;
+    padding-bottom: 9px;
+  }
+
+  .team-roster .bench-item {
+    flex: 0 0 116px;
+    min-height: 92px;
+    grid-template-columns: 46px minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    gap: 2px 6px;
+    padding: 7px;
+    scroll-snap-align: start;
+  }
+
+  .team-roster .bench-face {
+    width: 46px;
+    height: 46px;
+  }
+
+  .team-roster .bench-ovr { font-size: 16px; }
+  .team-roster .bench-name {
+    max-height: 2.2em;
+    overflow: hidden;
+    font-size: 8px;
+  }
+  .team-roster .bench-pos { font-size: 8px; }
+  .team-roster .bench-info {
+    top: 4px;
+    right: 4px;
+  }
+  .team-roster .bench-add {
+    right: 4px;
+    bottom: 4px;
+    width: 21px;
+    height: 21px;
+  }
+
+  .build-screen .play-bar {
+    width: min(360px, calc(100vw - 24px));
+    padding: 8px;
+  }
+
+  .build-screen .play-bar .glass-cta {
+    min-height: 56px;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .scout-hero {
+    gap: 12px;
+  }
+
+  .scout-team-meta {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 10px;
+  }
+
+  .scout-team-card {
+    min-width: 92px;
+    padding: 8px;
+  }
+
+  .scout-team-card .scout-flag-img {
+    width: 68px;
+    height: 44px;
+  }
+
+  .scout-team-meta .scout-strength {
+    min-width: 92px;
+    padding: 7px 10px;
+  }
+
+  .scout-team-meta .scout-strength b {
+    font-size: 1.45rem;
+  }
+
+  .scouting-screen .scout-ratings {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    padding: 8px;
+  }
+
+  .scouting-screen .scout-rating {
+    grid-template-columns: 18px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    gap: 0 3px;
+  }
+
+  .scouting-screen .scout-rating img {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    width: 18px;
+    height: 18px;
+  }
+
+  .scouting-screen .scout-rating > span {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 7px;
+  }
+
+  .scouting-screen .scout-rating b {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+    font-size: 11px;
+  }
+
+  .scouting-screen .scout-rating i { display: none; }
+
+  .scouting-screen .section-title {
+    margin-top: 18px;
+    text-align: center;
+  }
+
+  .scouting-screen .scout-field {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+  }
+}

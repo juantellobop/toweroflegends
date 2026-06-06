@@ -51,7 +51,8 @@ try {
   click(root.querySelector('#play'));
   console.log('6. Partido:', show(), '| marcador:', root.querySelector('#scoreA')?.textContent+'-'+root.querySelector('#scoreB')?.textContent);
   if (!root.querySelector('.scene-pitch')) errors.push('partido sin visor de escenas');
-  click(root.querySelector('#skip'));
+  if (!root.querySelector('#viewResult')) errors.push('partido sin botón flotante Ver resultado');
+  click(root.querySelector('#viewResult'));
   console.log('   tras saltar:', root.querySelector('#scoreA')?.textContent+'-'+root.querySelector('#scoreB')?.textContent, '| jugadas mostradas:', root.querySelectorAll('.play').length);
   click(root.querySelector('#continue'));
   console.log('7. Resultado:', show(), '| final:', root.querySelector('.final-score')?.textContent?.replace(/\s+/g,' ').trim() || 'fin de run');

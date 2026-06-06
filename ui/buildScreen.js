@@ -13,7 +13,7 @@ import {
 import { playerOVR } from '../engine/ovr.js';
 import { FORMATIONS, LINES, formationLineSlots } from '../data/config.js';
 import { countTo } from '../match/feedback.js';
-import { playerInitials, portraitPathForPlayer } from '../data/playerAssets.js';
+import { playerInitials, playerSurname, portraitPathForPlayer } from '../data/playerAssets.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { localizeOpponentName, t } from '../data/i18n.js';
@@ -145,7 +145,7 @@ function chipHTML(p, line, slotIndex) {
         <span>${esc(playerInitials(p.name))}</span>
       </span>
       <span class="chip-ovr">${ovr}</span>
-      <span class="chip-name">${esc(p.name)}</span>
+      <span class="chip-name" title="${esc(p.name)}">${esc(playerSurname(p.name))}</span>
       <span class="chip-info" role="button" tabindex="0" data-info-uid="${p.uid}" aria-label="${esc(t('build.viewStatsAria', { name: p.name }))}">i</span>
     </button>`;
 }
@@ -206,6 +206,7 @@ function bench(state) {
         <span class="bench-ovr">${playerOVR(p)}</span>
         <span class="bench-name">${esc(p.name)}</span>
         <span class="bench-pos">${POSITION_LABEL[p.position]}</span>
+        <span class="bench-add" aria-hidden="true">+</span>
         <span class="chip-info bench-info" role="button" tabindex="0" data-info-uid="${p.uid}" aria-label="${esc(t('build.viewStatsAria', { name: p.name }))}">i</span>
       </button>`).join('')}
   </div>`;
@@ -321,7 +322,7 @@ export function renderBuild(root, state, handlers) {
     node.addEventListener('click', () => {
       if (suppressClick) return;
       const player = state.squad.find((p) => p.uid === node.dataset.uid);
-      if (player) handlers.onToggle(player);
+      if (player) openTargetPicker(root, state, player, handlers);
     });
   });
 
@@ -487,9 +488,19 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
         player,
         startX: event.clientX,
         startY: event.clientY,
-        dragging: false,
+        dragging: event.pointerType !== 'mouse',
+        moved: false,
       };
-      source.setPointerCapture?.(event.pointerId);
+      try {
+        source.setPointerCapture?.(event.pointerId);
+      } catch (_) {
+        // Algunos entornos sintéticos no registran el pointer como activo.
+      }
+      if (pointerDrag.dragging) {
+        document.body.classList.add('lineup-dragging');
+        source.classList.add('drag-source');
+        ghost = makeGhost(source, event.clientX, event.clientY);
+      }
     });
     source.addEventListener('pointermove', (event) => {
       if (!pointerDrag || pointerDrag.source !== source) return;
@@ -503,6 +514,9 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
         source.classList.add('drag-source');
         ghost = makeGhost(source, event.clientX, event.clientY);
       }
+      if (Math.hypot(dx, dy) >= (event.pointerType === 'mouse' ? 8 : 3)) {
+        pointerDrag.moved = true;
+      }
       moveGhost(event.clientX, event.clientY);
       ghost.hidden = true;
       const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('.chip-anchor[data-line][data-slot]');
@@ -511,13 +525,13 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
     });
     source.addEventListener('pointerup', (event) => {
       if (!pointerDrag || pointerDrag.source !== source) return;
-      const didDrag = pointerDrag.dragging;
+      const didDrag = pointerDrag.dragging && pointerDrag.moved;
       if (didDrag) {
         event.preventDefault();
         endPointerDrag({ place: true });
         if (isBench) clearEligible(); // fin del arrastre por puntero (táctil)
       } else {
-        pointerDrag = null;
+        endPointerDrag();
         if (isBench) clearEligible();
       }
     });
@@ -557,6 +571,45 @@ function countMissing(state) {
   return LINES.reduce((n, l) => n + Math.max(0, slots[l] - (state.starting11[l] || []).length), 0);
 }
 
+function openTargetPicker(root, state, player, handlers) {
+  const picker = root.querySelector('#slotPicker');
+  const targets = lineupPositions(state)
+    .filter((slot) => canPlacePlayerInSlot(state, player, slot.line, slot.slotIndex));
+
+  picker.innerHTML = `
+    <div class="picker-head">${esc(t('build.targetPickerHead', { name: playerSurname(player.name) }))}</div>
+    <div class="bench-target-grid">
+      ${targets.map((slot) => {
+        const current = slot.player;
+        const role = slot.role === 'ENG' ? t('card.position.ENG') : POSITION_LABEL[slot.line];
+        return `
+          <button class="bench-target" data-line="${slot.line}" data-slot="${slot.slotIndex}">
+            <span class="bench-target-role">${esc(role)}</span>
+            ${current ? `
+              <span class="bench-target-face" aria-hidden="true">
+                <img src="${esc(portraitPathForPlayer(current))}" alt="" loading="lazy" decoding="async" data-hide-on-error="true" />
+                <span>${esc(playerInitials(current.name))}</span>
+              </span>
+              <span>${esc(playerSurname(current.name))}</span>
+            ` : `
+              <span class="bench-target-empty" aria-hidden="true">+</span>
+              <span>${t('build.openSlot')}</span>
+            `}
+          </button>`;
+      }).join('')}
+    </div>
+    <button class="ctl" data-close>${t('generic.close')}</button>`;
+  picker.hidden = false;
+  picker.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+
+  picker.querySelector('[data-close]')?.addEventListener('click', () => { picker.hidden = true; });
+  picker.querySelectorAll('.bench-target').forEach((node) => {
+    node.addEventListener('click', () => {
+      handlers.onPlace(player, node.dataset.line, parseInt(node.dataset.slot, 10) || 0);
+    });
+  });
+}
+
 // Selector de hueco: lista los suplentes de esa línea para colocarlos.
 function openPicker(root, state, line, slotIndex, handlers) {
   const picker = root.querySelector('#slotPicker');
@@ -578,7 +631,7 @@ function openPicker(root, state, line, slotIndex, handlers) {
       <button class="ctl" data-close>${t('generic.close')}</button>`;
   }
   picker.hidden = false;
-  picker.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  picker.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
 
   picker.querySelector('[data-close]')?.addEventListener('click', () => { picker.hidden = true; });
   picker.querySelectorAll('.card.clickable').forEach((node) => {
