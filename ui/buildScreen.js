@@ -247,7 +247,7 @@ export function renderBuild(root, state, handlers) {
         </aside>
       </div>
 
-      <div class="play-bar">
+      <div class="play-bar action-bar">
         <button id="play" class="primary big glass-cta" ${complete ? '' : 'disabled'}>
           ${complete ? t('build.play') : t('build.missing', { count: countMissing(state) })}
         </button>

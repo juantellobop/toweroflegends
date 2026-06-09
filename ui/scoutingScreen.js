@@ -95,7 +95,7 @@ export function renderScouting(root, state, handlers) {
       <h2 class="section-title">${t('scouting.opponentEleven')}</h2>
       ${field(opponent)}
       <p class="scout-note">${t('scouting.note')}</p>
-      <div class="play-bar">
+      <div class="play-bar action-bar">
         <button id="scout-continue" class="primary big glass-cta">${t('scouting.continue')}</button>
       </div>
     </section>`;

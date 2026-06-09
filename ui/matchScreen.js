@@ -80,8 +80,8 @@ export function renderMatch(root, state, result, handlers) {
         </div>
         <div class="match-modes seg-control" role="tablist" aria-label="${t('match.modesAria')}">${segs}</div>
       </div>
-      <div class="match-result-fab">
-        <button id="viewResult" class="primary big">${t('match.viewResult')}</button>
+      <div class="match-result-fab action-bar">
+        <button id="viewResult" class="primary big glass-cta">${t('match.viewResult')}</button>
       </div>
     </section>`;
 

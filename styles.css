@@ -63,8 +63,13 @@ h1, h2, h3, h4 { margin: 0 0 8px; }
   position: relative;
   transform-origin: 50% 48%;
 }
+/* IMPORTANTE: las transiciones de pantalla solo animan OPACIDAD (sin filter ni
+   transform y sin will-change de ellos). Un ancestro con transform/filter/
+   will-change se convierte en bloque contenedor de los elementos `position:
+   fixed` descendientes y descoloca la barra de acción (que es fixed). Mantener
+   .screen "limpio" permite que el botón de avanzar quede anclado al viewport. */
 .screen-enter {
-  will-change: opacity, transform, filter;
+  will-change: opacity;
 }
 .screen-enter-forward { animation: screen-in-forward 420ms var(--ease-emphasis) both; }
 .screen-enter-back { animation: screen-in-back 420ms var(--ease-emphasis) both; }
@@ -72,30 +77,30 @@ h1, h2, h3, h4 { margin: 0 0 8px; }
   box-sizing: border-box;
   overflow: hidden;
   isolation: isolate;
-  will-change: opacity, transform, filter;
+  will-change: opacity;
 }
 .screen-exit-forward { animation: screen-out-forward 360ms var(--ease-standard) both; }
 .screen-exit-back { animation: screen-out-back 360ms var(--ease-standard) both; }
 .screen-refresh { animation: screen-refresh 180ms var(--ease-standard) both; }
 @keyframes screen-in-forward {
-  from { opacity: 0; filter: saturate(.92) brightness(.92); }
-  to { opacity: 1; filter: none; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 @keyframes screen-out-forward {
-  from { opacity: 1; filter: none; }
-  to { opacity: 0; filter: saturate(.86) brightness(.82); }
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 @keyframes screen-in-back {
-  from { opacity: 0; filter: saturate(.92) brightness(.92); }
-  to { opacity: 1; filter: none; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 @keyframes screen-out-back {
-  from { opacity: 1; filter: none; }
-  to { opacity: 0; filter: saturate(.86) brightness(.82); }
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 @keyframes screen-refresh {
-  from { opacity: .92; filter: brightness(1.08); }
-  to { opacity: 1; filter: none; }
+  from { opacity: .92; }
+  to { opacity: 1; }
 }
 [hidden] { display: none !important; }
 
@@ -876,11 +881,35 @@ select {
 }
 
 /* Barra de acción para abrir el sobre (en flujo, bajo el sobre/cartas). */
-.pack-actions {
-  display: flex; justify-content: center;
-  width: 100%;
+/* ===================================================================== *
+ *  Barra de acción ÚNICA — el botón para avanzar de pantalla.           *
+ *  Es EXACTAMENTE el mismo botón en todas las pantallas (abrir sobre,    *
+ *  jugar, continuar scouting, siguiente, jugar de nuevo, ver resultado): *
+ *  mismo largo, radio, posición (fija a 50px del fondo), sombra y        *
+ *  colores. Solo cambia el texto. El contenedor no aporta fondo alguno.  *
+ * ===================================================================== */
+.action-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 50px;
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 0 var(--space-4);
+  background: none;
+  pointer-events: none;
 }
-.pack-actions .glass-cta { max-width: 460px; }
+.action-bar[hidden] { display: none; }
+/* El largo, el redondeado y los colores/sombra (de button.primary) son
+   idénticos en todas. pointer-events:auto solo en el botón. */
+.glass-cta {
+  width: min(360px, calc(100vw - 32px));
+  border-radius: var(--radius-pill);
+  pointer-events: auto;
+}
+
 /* [hidden] debe ganar al display:flex de estos contenedores. */
 .pack-screen .pack-deal[hidden],
 .pack-screen .pack-actions[hidden],
@@ -1010,14 +1039,9 @@ select {
 .items-fold { margin: var(--space-4) 0; }
 .items-fold summary { cursor: pointer; color: var(--label-secondary); font-size: var(--t-subhead); padding: var(--space-2) 0; }
 
-.play-bar {
-  position: sticky; bottom: 0; z-index: 9; padding: var(--space-3) 0 calc(var(--space-3) + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, transparent, var(--bg-grouped) 40%);
-}
-.glass-cta { width: 100%; border-radius: var(--radius-pill); }
 
 /* --- Scouting del rival --- */
-.scouting-screen { max-width: 720px; margin: 0 auto; padding-bottom: 80px; }
+.scouting-screen { max-width: 720px; margin: 0 auto; }
 .scout-hero {
   display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4);
   margin-bottom: var(--space-4); padding: var(--space-5); border-radius: var(--radius-l);
@@ -1197,7 +1221,9 @@ select {
 
 .pixel-screen {
   min-height: calc(100vh - 28px);
-  padding-bottom: calc(82px + env(safe-area-inset-bottom));
+  /* Reserva uniforme para la barra de acción fija (botón a 50px del fondo),
+     idéntica en todas las pantallas. */
+  padding-bottom: calc(120px + env(safe-area-inset-bottom));
 }
 
 .large-title,
@@ -2431,20 +2457,11 @@ select {
   color: var(--arcade-yellow);
 }
 
-.play-bar {
-  background: linear-gradient(180deg, transparent, rgba(7,20,89,.86) 42%, rgba(7,20,89,.96));
-}
-
-.glass-cta {
-  border-radius: var(--radius-pill);
-}
-
 .team-select-screen {
   --lineup-card: clamp(72px, 8vw, 96px);
   padding-top: 8px;
-  /* El botón "Jugar" es sticky y vuelve a ocupar su espacio en el flujo, así
-     que ya no hace falta reservar el alto de una barra fija. */
-  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  /* Reserva el alto de la barra de acción fija (botón a 50px del fondo). */
+  padding-bottom: calc(120px + env(safe-area-inset-bottom));
 }
 
 .team-select-screen .build-nav {
@@ -2686,35 +2703,6 @@ select {
 
 .build-screen .items-fold {
   margin: 12px 0 0;
-}
-
-.build-screen .play-bar {
-  position: sticky;
-  bottom: calc(14px + env(safe-area-inset-bottom));
-  z-index: 40;
-  display: flex;
-  justify-content: center;
-  margin-top: var(--space-3);
-  padding: 8px;
-  /* Sticky, no fixed: las animaciones de pantalla (.screen-enter y, sobre todo,
-     el .screen-refresh que se dispara en CADA cambio de alineación) aplican
-     transform/filter al ancestro .screen. Un ancestro con transform/filter/
-     will-change convierte a un elemento `fixed` en su bloque contenedor y lo
-     descoloca (el botón "saltaba para cualquier lado", visible en Safari
-     antiguo). Sticky vive en el flujo y es inmune a esa trampa; el centrado por
-     flexbox es estable en toda la gama de navegadores. */
-  background: transparent;
-  pointer-events: none;
-}
-
-.build-screen .play-bar .glass-cta {
-  width: min(360px, calc(100vw - 32px));
-  pointer-events: auto;
-  box-shadow:
-    0 0 0 2px #FFF5A8 inset,
-    0 6px 0 #071459,
-    0 0 0 7px rgba(7,20,89,.76),
-    0 18px 34px rgba(0,0,0,.42);
 }
 
 .scout-hero {
@@ -3280,7 +3268,7 @@ select {
   flex-direction: column;
   gap: 14px;
   min-height: calc(100vh - 24px);
-  padding-bottom: calc(92px + env(safe-area-inset-bottom));
+  /* Reserva de la barra de acción fija — la aporta .pixel-screen (120px). */
 }
 
 .gameover-hero {
@@ -3336,34 +3324,11 @@ select {
   text-transform: uppercase;
 }
 
-/* CTA siempre visible, fijado al borde inferior (centrado con inset+margen
-   para que no se descoloque durante las transiciones de pantalla). */
-.go-actions,
-.result-cta {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 30;
-  display: flex;
-  justify-content: center;
-  margin: 0;
-  padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, transparent, rgba(7,20,89,.92) 42%, rgba(7,20,89,.98));
-  pointer-events: none;
-}
-.go-actions #again,
-.result-cta .result-next {
-  width: min(360px, 100%);
-  margin: 0;
-  pointer-events: auto;
-}
-
 .result-screen {
   max-width: 960px;
   display: grid;
   gap: 18px;
-  padding-bottom: calc(92px + env(safe-area-inset-bottom));
+  /* Reserva de la barra de acción fija — la aporta .pixel-screen (120px). */
 }
 
 .result-showcase {
@@ -3657,11 +3622,6 @@ select {
 .result-stat-card b {
   font-size: clamp(1rem, 2vw, 1.35rem);
   line-height: 1.25;
-}
-
-.result-next {
-  justify-self: center;
-  width: min(360px, 100%);
 }
 
 @media (max-width: 760px) {
@@ -4289,7 +4249,7 @@ select {
 }
 
 .pack-confirm:not([hidden]),
-.play-bar,
+.action-bar,
 .match-command-deck,
 .player-modal-card {
   animation: action-bar-in 260ms var(--ease-emphasis) both;
@@ -4352,7 +4312,7 @@ select {
   .screen-enter .result-stat-card,
   .screen-enter .scout-rating,
   .pack-confirm:not([hidden]),
-  .play-bar,
+  .action-bar,
   .match-command-deck,
   .player-modal-card,
   .screen-refresh .ratings-glass,
@@ -4581,9 +4541,6 @@ button.primary:active:not(:disabled),
 .team-select-screen .opponent-brief { order: 1; }
 .team-select-screen .ratings-glass { order: 2; }
 .team-select-screen .team-layout { order: 3; }
-/* El .play-bar es sticky (en el flujo): necesita el order más alto para quedar
-   al final de la columna y fijarse abajo. Antes era fixed y el order no influía. */
-.team-select-screen .play-bar { order: 4; }
 
 .field {
   isolation: isolate;
@@ -4812,31 +4769,6 @@ button.primary:active:not(:disabled),
   padding-bottom: calc(108px + env(safe-area-inset-bottom));
 }
 
-.match-result-fab {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: calc(14px + env(safe-area-inset-bottom));
-  z-index: 45;
-  width: min(360px, calc(100vw - 32px));
-  margin-inline: auto;
-  padding: 8px;
-  pointer-events: none;
-}
-
-.match-result-fab[hidden] { display: none; }
-
-.match-result-fab button {
-  width: 100%;
-  min-height: 56px;
-  pointer-events: auto;
-  box-shadow:
-    0 0 0 2px #FFF5A8 inset,
-    0 6px 0 #071459,
-    0 0 0 7px rgba(7,20,89,.76),
-    0 18px 34px rgba(0,0,0,.42);
-}
-
 @media (max-width: 760px) {
   .team-select-screen .build-nav {
     flex-direction: row;
@@ -4858,7 +4790,6 @@ button.primary:active:not(:disabled),
   .team-select-screen .team-roster { order: 2; }
   .team-select-screen .ratings-glass { order: 3; }
   .team-select-screen .opponent-brief { order: 4; }
-  .team-select-screen .play-bar { order: 5; }
 
   .team-field-panel .team-panel-head {
     gap: 8px;
@@ -5025,17 +4956,6 @@ button.primary:active:not(:disabled),
     bottom: 4px;
     width: 21px;
     height: 21px;
-  }
-
-  .build-screen .play-bar {
-    padding: 8px;
-  }
-
-  .build-screen .play-bar .glass-cta {
-    width: min(360px, calc(100vw - 24px));
-    min-height: 56px;
-    padding: 10px 14px;
-    font-size: 12px;
   }
 
   .scout-hero {

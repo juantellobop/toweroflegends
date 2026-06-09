@@ -59,10 +59,10 @@ function shell(state, kind, count, body) {
           </div>
           <div class="pack-deal" id="deal" hidden>${body}</div>
         </div>
+      </div>
 
-        <div class="pack-actions" id="openBar">
-          <button id="openBtn" class="primary big glass-cta">${open}</button>
-        </div>
+      <div class="pack-actions action-bar" id="openBar">
+        <button id="openBtn" class="primary big glass-cta">${open}</button>
       </div>
     </section>`;
 }

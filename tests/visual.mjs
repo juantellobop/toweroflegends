@@ -125,10 +125,10 @@ async function assertBuildLayout(page, label) {
   await assertSquareBoxes(page, '.build-screen .chip-face', `${label} field portraits`);
   await assertSquareBoxes(page, '.build-screen .bench-face', `${label} bench portraits`);
   assert.ok(await page.locator('.build-screen .flag-img').count(), `${label} must render country flags as images`);
-  // El botón "Jugar" es sticky (no fixed): así no lo descoloca el transform/
-  // filter que las animaciones de pantalla aplican al ancestro .screen.
+  // Barra de acción única: fija al fondo. Las transiciones de pantalla solo
+  // animan opacidad, así que el ancestro .screen no la descoloca.
   const playPosition = await page.locator('.build-screen .play-bar').evaluate((node) => getComputedStyle(node).position);
-  assert.equal(playPosition, 'sticky', `${label} play button must stay pinned to the bottom (sticky)`);
+  assert.equal(playPosition, 'fixed', `${label} play button bar must be fixed to the bottom`);
   const fieldBox = await page.locator('.build-screen .field').boundingBox();
   const viewport = page.viewportSize();
   assert.ok(fieldBox && viewport && fieldBox.height <= viewport.height, `${label} field height must fit viewport`);

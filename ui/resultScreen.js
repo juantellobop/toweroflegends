@@ -91,8 +91,8 @@ export function renderResult(root, state, reward, handlers) {
         </div>
         ${rewardHTML}
       </div>
-      <div class="result-cta">
-        <button id="next" class="primary big result-next">▶ ${nextLabel}</button>
+      <div class="result-cta action-bar">
+        <button id="next" class="primary big glass-cta">▶ ${nextLabel}</button>
       </div>
     </section>`;
 
@@ -148,8 +148,8 @@ export function renderGameOver(root, state, best, handlers) {
       <ul class="path">${path}</ul>
       <h3>${t('result.finalSquad')}</h3>
       <div class="squad-final">${squad}</div>
-      <div class="go-actions">
-        <button id="again" class="primary big">${t('result.playAgain')}</button>
+      <div class="go-actions action-bar">
+        <button id="again" class="primary big glass-cta">${t('result.playAgain')}</button>
       </div>
     </section>`;
 
