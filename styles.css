@@ -1035,7 +1035,6 @@ select {
 .scout-rating b { justify-self: end; font-family: var(--font-rounded); }
 .scout-rating i { grid-column: 1 / -1; height: 4px; overflow: hidden; border-radius: 2px; background: var(--fill-secondary); }
 .scout-rating i span { display: block; height: 100%; background: linear-gradient(90deg, var(--accent2), var(--brand)); }
-.scout-field { max-width: 520px; }
 .field-chip.scout-chip { cursor: default; border-color: rgba(255,255,255,.8); }
 .field-chip.scout-chip:hover { transform: none; box-shadow: none; }
 .scout-note { color: var(--label-secondary); font-size: var(--t-caption-1); text-align: center; }
@@ -2497,6 +2496,14 @@ select {
 .team-field-panel .formation-seg {
   flex: 0 0 min(360px, 48%);
   margin: 0;
+}
+/* Con 6 formaciones, las etiquetas (p. ej. "4-3-1-2") deben caber en una línea
+   sin desbordar al estrecharse cada segmento. */
+.formation-seg .seg {
+  padding-inline: 4px;
+  white-space: nowrap;
+  letter-spacing: -0.2px;
+  font-variant-numeric: tabular-nums;
 }
 
 .team-select-screen .field {
@@ -4574,6 +4581,9 @@ button.primary:active:not(:disabled),
 .team-select-screen .opponent-brief { order: 1; }
 .team-select-screen .ratings-glass { order: 2; }
 .team-select-screen .team-layout { order: 3; }
+/* El .play-bar es sticky (en el flujo): necesita el order más alto para quedar
+   al final de la columna y fijarse abajo. Antes era fixed y el order no influía. */
+.team-select-screen .play-bar { order: 4; }
 
 .field {
   isolation: isolate;
@@ -4654,6 +4664,45 @@ button.primary:active:not(:disabled),
 .field-chip.scout-chip .chip-init {
   color: var(--arcade-cyan);
   font-size: 8px;
+}
+
+/* === Once rival (scouting): chips grandes y vistosos =====================
+   El tablero rival usaba los chips base (pequeños), dejando mucho césped
+   vacío. Aquí, scopeado a .scout-field para no tocar el armado propio, se
+   agrandan retrato y nombre y se ensancha el campo para llenar el tablero. */
+.scout-field {
+  --scout-card: clamp(76px, 7.4vw, 94px);
+  width: min(100%, 560px);
+  max-width: 560px;
+  aspect-ratio: 3 / 4;
+  margin: 0 auto;
+}
+.scout-field .field-chip.scout-chip {
+  width: var(--scout-card);
+  padding: 7px 4px 6px;
+  gap: 2px;
+}
+.scout-field .scout-chip .chip-face {
+  width: calc(var(--scout-card) - 16px);
+  height: calc(var(--scout-card) - 4px);
+  margin-bottom: 3px;
+  border-radius: 11px;
+  border: 2px solid rgba(255,255,255,.88);
+  font-size: clamp(11px, 1.3vw, 14px);
+}
+.scout-field .scout-chip .chip-ovr {
+  top: 5px;
+  left: 5px;
+  min-width: 26px;
+  padding: 3px 5px;
+  font-size: clamp(12px, 1.5vw, 16px);
+}
+.scout-field .scout-chip .chip-init {
+  font-size: clamp(8px, 0.95vw, 11px);
+}
+.scout-field .scout-chip .chip-name {
+  padding: 4px 3px 5px;
+  font-size: clamp(10px, 1.15vw, 13px);
 }
 
 .bench-add {
@@ -4809,6 +4858,7 @@ button.primary:active:not(:disabled),
   .team-select-screen .team-roster { order: 2; }
   .team-select-screen .ratings-glass { order: 3; }
   .team-select-screen .opponent-brief { order: 4; }
+  .team-select-screen .play-bar { order: 5; }
 
   .team-field-panel .team-panel-head {
     gap: 8px;
@@ -5057,7 +5107,9 @@ button.primary:active:not(:disabled),
   }
 
   .scouting-screen .scout-field {
+    --scout-card: clamp(54px, 15.5vw, 78px);
     width: 100%;
+    max-width: 560px;
     aspect-ratio: 3 / 4;
   }
 }

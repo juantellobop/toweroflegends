@@ -355,6 +355,9 @@ function wirePlayerStats(root, state) {
 function wireBuildDragDrop(root, state, handlers, markDragged) {
   const sources = Array.from(root.querySelectorAll('.lineup-draggable'));
   const targets = Array.from(root.querySelectorAll('.chip-anchor[data-line][data-slot]'));
+  const field = root.querySelector('#field');
+  // Limpia cualquier ghost huérfano de un arrastre anterior que no se cerrara.
+  document.querySelectorAll('.drag-ghost').forEach((node) => node.remove());
   let htmlDragUid = null;
   let pointerDrag = null;
   let activeTarget = null;
@@ -399,6 +402,32 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
     if (!target || !player || !canPlacePlayerInSlot(state, player, target.dataset.line, slotIndex)) return false;
     handlers.onPlace(player, target.dataset.line, slotIndex);
     return true;
+  }
+  function pointInField(x, y) {
+    if (!field) return false;
+    const r = field.getBoundingClientRect();
+    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+  }
+  // Hueco válido cuyo centro está más cerca de (x,y). Permite soltar en el
+  // tablero sin acertar un hueco: el jugador se ajusta al más cercano que pueda
+  // ocupar (y si no hay ninguno, devuelve null → el arrastre se cancela).
+  function nearestValidTarget(x, y, player) {
+    let best = null;
+    let bestDist = Infinity;
+    for (const target of targets) {
+      if (!canPlacePlayerInSlot(state, player, target.dataset.line, parseInt(target.dataset.slot, 10) || 0)) continue;
+      const r = target.getBoundingClientRect();
+      const dist = Math.hypot(x - (r.left + r.width / 2), y - (r.top + r.height / 2));
+      if (dist < bestDist) { bestDist = dist; best = target; }
+    }
+    return best;
+  }
+  // Hueco efectivo bajo el puntero: el exacto si lo hay; si no, el más cercano
+  // cuando se está dentro del tablero.
+  function resolveTarget(x, y, player) {
+    const exact = document.elementFromPoint(x, y)?.closest('.chip-anchor[data-line][data-slot]');
+    if (exact) return exact;
+    return pointInField(x, y) ? nearestValidTarget(x, y, player) : null;
   }
   function makeGhost(source, x, y) {
     const node = source.cloneNode(true);
@@ -537,7 +566,7 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
       }
       moveGhost(event.clientX, event.clientY);
       ghost.hidden = true;
-      const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('.chip-anchor[data-line][data-slot]');
+      const target = resolveTarget(event.clientX, event.clientY, pointerDrag.player);
       ghost.hidden = false;
       setActiveTarget(target, pointerDrag.player);
     });
@@ -588,6 +617,30 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
       clearActiveTarget();
     });
   });
+
+  // Drag nativo (ratón) sobre el tablero pero no sobre un hueco concreto: ajusta
+  // al hueco válido más cercano. Los aciertos exactos los gestiona el listener
+  // del propio hueco (y aquí salimos para no duplicar).
+  if (field) {
+    field.addEventListener('dragover', (event) => {
+      if (event.target?.closest?.('.chip-anchor[data-line][data-slot]')) return;
+      const player = playerForUid(htmlDragUid);
+      const near = player && nearestValidTarget(event.clientX, event.clientY, player);
+      if (near) {
+        event.preventDefault();
+        setActiveTarget(near, player);
+      }
+    });
+    field.addEventListener('drop', (event) => {
+      if (event.target?.closest?.('.chip-anchor[data-line][data-slot]')) return;
+      event.preventDefault();
+      const player = playerForUid(htmlDragUid);
+      const near = player && nearestValidTarget(event.clientX, event.clientY, player);
+      if (near && placeOn(near, player)) markDragged();
+      htmlDragUid = null;
+      clearActiveTarget();
+    });
+  }
 }
 
 function countMissing(state) {

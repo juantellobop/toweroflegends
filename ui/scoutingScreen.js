@@ -7,13 +7,17 @@ import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { localizeAchievement, localizeOpponentName, t } from '../data/i18n.js';
 
-const LINE_TOP = { GK: 86, DEF: 65, MID: 43, FWD: 20 };
+// Reparto vertical de las líneas: extremos cerca de las áreas para que el once
+// ocupe casi todo el alto del tablero (menos césped vacío arriba y abajo).
+const LINE_TOP = { GK: 89, DEF: 67, MID: 43, FWD: 16 };
 
 function spreadLeft(n) {
   if (n <= 1) return [50];
   // Cuantos menos jugadores en la línea, más centrados (no pegados a la banda).
   // Una pareja (p. ej. los dos delanteros del 4-4-2) debe ir hacia el centro.
-  const margin = n <= 2 ? 30 : n === 3 ? 18 : 12;
+  // Márgenes ajustados para que las líneas llenas (4-5 jugadores) abran casi
+  // todo el ancho y el once ocupe más tablero.
+  const margin = n <= 2 ? 27 : n === 3 ? 15 : 9;
   return Array.from({ length: n }, (_, i) => margin + ((100 - margin * 2) * i) / (n - 1));
 }
 
