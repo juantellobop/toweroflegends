@@ -68,19 +68,23 @@ export function playerCardHTML(player, opts = {}) {
   </div>`;
 }
 
-// Carta de objeto.
+// Carta de objeto. `opts.stack` (>1) muestra un badge ×N: en el sobre indica
+// cuántas copias acumularías al elegirlo; en la plantilla, cuántas ya tienes.
 export function itemCardHTML(item, opts = {}) {
   const idAttr = opts.idValue ? `data-id="${esc(opts.idValue)}"` : '';
   const cls = ['card', 'item-card', `rarity-${item.rarity}`];
   if (opts.clickable) cls.push('clickable');
+  const stack = opts.stack > 1 ? `<div class="item-stack" title="${esc(t('card.itemStack', { n: opts.stack }))}">×${opts.stack}</div>` : '';
   return `
   <div class="${cls.join(' ')}" ${idAttr} style="--card-frame:url('${esc(cardFrame(item.rarity))}')">
     <div class="card-head">
       <div class="card-rarity">${RARITY_LABEL[item.rarity]}</div>
       <div class="item-type">${esc(localizeItem(item, 'type'))}</div>
     </div>
+    ${stack}
     <div class="card-name">${esc(localizeItem(item, 'name'))}</div>
     <div class="item-desc">${esc(localizeItem(item, 'desc'))}</div>
+    ${opts.stack > 1 ? `<div class="item-stack-note">${esc(t('card.itemStackNote'))}</div>` : ''}
   </div>`;
 }
 

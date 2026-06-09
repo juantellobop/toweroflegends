@@ -7,7 +7,7 @@
 
 import { playerCardHTML, itemCardHTML, POSITION_LABEL, LINE_LABEL } from './cards.js';
 import {
-  liveRatings, liveChemistry, isLineupComplete, isStarter, formationSlots,
+  liveRatings, liveChemistry, liveItemDelta, isLineupComplete, isStarter, formationSlots,
   canPlacePlayerInSlot, assignLineToSlots,
 } from '../state/run.js';
 import { playerOVR } from '../engine/ovr.js';
@@ -157,21 +157,44 @@ function tacticPill(state) {
     </div>`;
 }
 
+// "+N" verde / "−N" rojo: cuánto aporta el conjunto de objetos a ese rating.
+function itemDeltaHTML(d) {
+  if (!d || Math.abs(d) < 0.05) return '';
+  const up = d > 0;
+  const val = Math.abs(Math.round(d * 10) / 10);
+  return `<span class="rt-delta ${up ? 'up' : 'down'}" title="${esc(t('build.fromItems'))}">${up ? '+' : '−'}${val}</span>`;
+}
+
+// Leyenda + desglose por línea: explica qué significan las líneas del campo
+// (nación / época) y dónde tienes química, para que no se perciba como "0".
+function chemLegend(state) {
+  const bl = liveChemistry(state).byLine;
+  const line = (label, v) => `<span class="cl-line ${v > 0 ? 'has' : ''}">${label} <b>${v}</b></span>`;
+  return `
+    <div class="chem-legend">
+      <span class="cl-key"><i class="cl-swatch nation"></i>${t('build.chemNation')}</span>
+      <span class="cl-key"><i class="cl-swatch era"></i>${t('build.chemEra')}</span>
+      <span class="cl-sep" aria-hidden="true"></span>
+      ${line('DEF', bl.DEF)}${line('MED', bl.MID)}${line('ATA', bl.FWD)}
+    </div>`;
+}
+
 function ratingsHeader(state) {
   const r = liveRatings(state);
   const chem = liveChemistry(state);
+  const itemD = liveItemDelta(state);
   const rows = [
-    ['ATA', r.attack, UI_ASSETS.icons.attack],
-    ['MED', r.midfield, UI_ASSETS.icons.midfield],
-    ['DEF', r.defense, UI_ASSETS.icons.defense],
-    ['POR', r.gk, UI_ASSETS.icons.gk],
+    ['ATA', r.attack, UI_ASSETS.icons.attack, itemD.attack],
+    ['MED', r.midfield, UI_ASSETS.icons.midfield, itemD.midfield],
+    ['DEF', r.defense, UI_ASSETS.icons.defense, itemD.defense],
+    ['POR', r.gk, UI_ASSETS.icons.gk, itemD.gk],
   ];
-  const rowHTML = rows.map(([label, val, icon]) => `
+  const rowHTML = rows.map(([label, val, icon, d]) => `
     <div class="rating-row">
       <img src="${icon}" alt="" aria-hidden="true" loading="lazy" decoding="async" />
       <span class="rt-label">${label}</span>
       <span class="rt-bar"><span class="rt-fill" style="width:${Math.round(val)}%"></span></span>
-      <b class="rt-val tabular" data-val="${Math.round(val)}">0</b>
+      <span class="rt-valwrap"><b class="rt-val tabular" data-val="${Math.round(val)}">0</b>${itemDeltaHTML(d)}</span>
     </div>`).join('');
   return `
     <div class="ratings-glass glass" id="ratingsHeader">
@@ -211,8 +234,15 @@ export function renderBuild(root, state, handlers) {
   const positions = lineupPositions(state);
   const formationSegs = Object.keys(FORMATIONS)
     .map((f) => `<button class="seg ${f === state.formation ? 'active' : ''}" data-formation="${f}">${f}</button>`).join('');
-  const itemsHTML = state.items.length
-    ? `<div class="items-strip">${state.items.map((it) => itemCardHTML(it)).join('')}</div>`
+  // Agrupa objetos idénticos para mostrarlos una vez con ×N (copias acumuladas).
+  const grouped = [];
+  const byId = new Map();
+  for (const it of state.items) {
+    if (byId.has(it.id)) byId.get(it.id).count += 1;
+    else { const g = { item: it, count: 1 }; byId.set(it.id, g); grouped.push(g); }
+  }
+  const itemsHTML = grouped.length
+    ? `<div class="items-strip">${grouped.map((g) => itemCardHTML(g.item, { stack: g.count })).join('')}</div>`
     : `<p class="empty-note">${t('build.noItems')}</p>`;
   const opponentHTML = state.opponent ? `
     <button class="opponent-brief" id="viewOpponent">
@@ -245,6 +275,7 @@ export function renderBuild(root, state, handlers) {
             ${fieldSVG(positions)}
             ${fieldNodes(positions)}
           </div>
+          ${chemLegend(state)}
 
           <div class="slot-picker glass-thick" id="slotPicker" hidden></div>
         </main>

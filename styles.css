@@ -928,6 +928,45 @@ select {
   .pack-flash { display: none; }
 }
 
+/* === Mobile (§4.2): NINGUNA capa de fondo se mueve al abrir el sobre ========
+   En mobile, las capas decorativas detrás del sobre —rayos giratorios, halo
+   pulsante y su estallido, destellos titilantes— se percibían como "el fondo
+   se mueve". Aquí se eliminan o se congelan por completo, tanto en reposo como
+   durante la apertura. Solo el sobre y las cartas (primer plano) se revelan,
+   con un movimiento limpio; el fondo queda totalmente quieto y sólido. */
+@media (max-width: 760px) {
+  /* Capas de fondo puramente decorativas: fuera (solo aportaban movimiento). */
+  .pack-rays,
+  .pack-sparks,
+  .pack-flash,
+  .pack-opener.is-opening .pack-rays,
+  .pack-opener.is-opening .pack-sparks,
+  .pack-opener.is-opening .pack-flash { display: none; }
+
+  /* Halo: estático (sin pulso ni estallido), sin escalas que muevan el fondo. */
+  .pack-glow,
+  .pack-opener.is-opening .pack-glow {
+    animation: none;
+    transform: none;
+    opacity: .4;
+  }
+
+  /* Sobre sellado quieto (sin flotación). */
+  .pack-sobre { animation: none; }
+  .pack-opener:focus-visible .pack-sobre,
+  .pack-opener:hover .pack-sobre { transform: none; }
+
+  /* Apertura limpia: el sobre se desvanece con un leve zoom; sin sacudida ni
+     vuelo agresivo (scale 1.6 + brillo) que parecía un salto del fondo. */
+  .pack-opener.is-opening .pack-sobre {
+    animation: pack-open-soft 300ms var(--ease-standard) forwards;
+  }
+}
+@keyframes pack-open-soft {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(1.06); }
+}
+
 /* --- §4.3 Armar equipo --- */
 .ratings-glass {
   position: sticky; top: calc(env(safe-area-inset-top) + 6px); z-index: 8;

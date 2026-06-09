@@ -456,6 +456,21 @@ export function liveChemistry(state) {
   return { byLine: computeChemistry(state.starting11), total: totalChemistry(state.starting11, state.formation) };
 }
 
+// Aporte neto de los objetos a cada rating de equipo (con objetos − sin objetos),
+// para mostrar al jugador cómo le mejoran el equipo. Incluye ya el efecto del
+// modificador de formación sobre el boost (es la mejora real en el número final).
+export function liveItemDelta(state) {
+  const withItems = liveRatings(state);
+  const noItems = calcularRatings({ formation: state.formation, starting11: state.starting11, items: [] });
+  const round = (n) => Math.round(n * 10) / 10;
+  return {
+    attack: round(withItems.attack - noItems.attack),
+    midfield: round(withItems.midfield - noItems.midfield),
+    defense: round(withItems.defense - noItems.defense),
+    gk: round(withItems.gk - noItems.gk),
+  };
+}
+
 // === Sobres ===
 
 // Genera el sobre de jugador del nivel actual (cartas a elegir).

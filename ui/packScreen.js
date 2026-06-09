@@ -90,7 +90,11 @@ export function renderPlayerPack(root, state, choices, onPick) {
 }
 
 export function renderItemPack(root, state, choices, onPick) {
-  const body = choices.map((c, i) => dealCard(itemCardHTML(c, { idValue: c.id }), c.id, i, 'item')).join('');
+  const ownedCount = (id) => (state.items || []).filter((it) => it.id === id).length;
+  const body = choices.map((c, i) =>
+    // stack = copias que tendrías al elegirlo (las que ya tienes + 1).
+    dealCard(itemCardHTML(c, { idValue: c.id, stack: ownedCount(c.id) + 1 }), c.id, i, 'item')
+  ).join('');
   root.innerHTML = shell(state, 'item', choices.length, body);
   wire(root, choices, onPick);
 }
