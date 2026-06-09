@@ -8,7 +8,7 @@
 import { playerCardHTML, itemCardHTML, POSITION_LABEL, LINE_LABEL } from './cards.js';
 import {
   liveRatings, liveChemistry, isLineupComplete, isStarter, formationSlots,
-  canPlacePlayerInSlot,
+  canPlacePlayerInSlot, assignLineToSlots,
 } from '../state/run.js';
 import { playerOVR } from '../engine/ovr.js';
 import { FORMATIONS, LINES, formationLineSlots } from '../data/config.js';
@@ -41,29 +41,6 @@ function spreadLeft(n, line, formation) {
   return Array.from({ length: n }, (_, i) => margin + ((100 - margin * 2) * i) / (n - 1));
 }
 
-function assignPlayersToSlots(formation, line, players) {
-  const slots = formationLineSlots(formation, line).map((slot) => ({ ...slot, player: null }));
-  const remaining = players.slice();
-
-  function fill(slot, predicate) {
-    const idx = remaining.findIndex((player) => predicate(player, slot));
-    if (idx < 0) return;
-    slot.player = remaining.splice(idx, 1)[0];
-  }
-
-  slots
-    .filter((slot) => slot.accepts.length === 1)
-    .forEach((slot) => fill(slot, (player) => slot.accepts.includes(player.position)));
-  slots
-    .filter((slot) => !slot.player && slot.accepts.length > 1)
-    .forEach((slot) => fill(slot, (player) => slot.accepts.includes(player.position)));
-  slots
-    .filter((slot) => !slot.player)
-    .forEach((slot) => fill(slot, (player) => slot.accepts.includes(player.position)));
-
-  return slots;
-}
-
 function positionSlots(formation, line, slots) {
   const byRole = new Map();
   for (const slot of slots) {
@@ -94,7 +71,7 @@ function lineupPositions(state) {
   const pos = [];
   for (const line of LINES) {
     const players = state.starting11[line] || [];
-    const slots = positionSlots(state.formation, line, assignPlayersToSlots(state.formation, line, players));
+    const slots = positionSlots(state.formation, line, assignLineToSlots(state.formation, line, players));
     slots.forEach((slot) => pos.push(slot));
   }
   return pos;

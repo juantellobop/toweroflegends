@@ -1,0 +1,98 @@
+// Torre de Leyendas — Selección/colocación de jugadores en el once.
+// Ejecuta: `npm run lineup` o `node tests/lineup.mjs`.
+// Cubre: intercambio titular↔titular, rechazo de huecos incompatibles y que
+// nunca se expulse a un titular al arrastrar entre titulares.
+
+import {
+  placePlayerInLineup, canPlacePlayerInSlot, isLineupComplete, isStarter,
+} from '../state/run.js';
+
+let pass = 0;
+let fail = 0;
+function check(name, cond) {
+  if (cond) { pass++; console.log('  ✅', name); }
+  else { fail++; console.log('  ❌', name); }
+}
+
+let n = 0;
+function P(position, id) {
+  n += 1;
+  const uid = `${id || position}__${n}`;
+  return { uid, id: id || uid, position, name: uid, rarity: 'common', stats: {} };
+}
+function emptyEleven() { return { GK: [], DEF: [], MID: [], FWD: [] }; }
+function uids(line) { return line.map((p) => p.uid); }
+
+// === A. Intercambio dentro de la misma línea (4-3-3, MID con 3 huecos) ===
+{
+  const m = [P('MID'), P('MID'), P('MID')];
+  const state = { formation: '4-3-3', starting11: { ...emptyEleven(), MID: m.slice() }, squad: m.slice() };
+  const r = placePlayerInLineup(state, m[0], 'MID', 2);
+  console.log('A) Intercambio misma línea');
+  check('marca swapped', r.placed && r.swapped === true);
+  check('m0 pasa al hueco 2', state.starting11.MID[2].uid === m[0].uid);
+  check('m2 pasa al hueco 0', state.starting11.MID[0].uid === m[2].uid);
+  check('ambos siguen titulares', isStarter(state, m[0]) && isStarter(state, m[2]));
+  check('hueco intermedio intacto', state.starting11.MID[1].uid === m[1].uid);
+}
+
+// === B. Huecos incompatibles se rechazan (un DEF no entra en MID) ===
+{
+  const d = P('DEF');
+  const state = { formation: '4-3-3', starting11: { ...emptyEleven(), DEF: [d] }, squad: [d] };
+  console.log('B) Hueco incompatible');
+  check('canPlace(DEF→MID) es false', canPlacePlayerInSlot(state, d, 'MID', 0) === false);
+  const r = placePlayerInLineup(state, d, 'MID', 0);
+  check('placePlayer lo rechaza', r.placed === false);
+  check('el DEF sigue en su línea', state.starting11.DEF[0].uid === d.uid && state.starting11.MID.length === 0);
+}
+
+// === C. Titular sobre titular sin swap posible → se rechaza (no expulsa) ===
+// 4-3-1-2: el hueco 3 de MID (ENG) admite FWD; los huecos 0-2 solo MID.
+{
+  const m = [P('MID'), P('MID'), P('MID')];
+  const eng = P('FWD', 'fwd_eng');
+  const state = {
+    formation: '4-3-1-2',
+    starting11: { ...emptyEleven(), MID: [...m, eng], FWD: [P('FWD'), P('FWD')] },
+    squad: [],
+  };
+  console.log('C) Titular sin swap válido');
+  const before = uids(state.starting11.MID);
+  // El FWD del hueco ENG intenta ir al hueco 0 (solo admite MID).
+  check('canPlace(ENG-FWD→MID#0) es false', canPlacePlayerInSlot(state, eng, 'MID', 0) === false);
+  const r = placePlayerInLineup(state, eng, 'MID', 0);
+  check('se rechaza', r.placed === false);
+  check('la línea MID queda intacta (nadie al banco)', JSON.stringify(uids(state.starting11.MID)) === JSON.stringify(before));
+}
+
+// === D. Sustitución desde el banco sí reemplaza al titular ===
+{
+  const m = [P('MID'), P('MID'), P('MID')];
+  const sub = P('MID');
+  const state = { formation: '4-3-3', starting11: { ...emptyEleven(), MID: m.slice() }, squad: [...m, sub] };
+  console.log('D) Sustitución desde el banco');
+  check('canPlace(suplente→hueco lleno) es true', canPlacePlayerInSlot(state, sub, 'MID', 0) === true);
+  const r = placePlayerInLineup(state, sub, 'MID', 0);
+  check('marca replaced', r.placed && r.replaced === true);
+  check('el suplente entra en el hueco 0', state.starting11.MID[0].uid === sub.uid);
+  check('el titular saliente deja de ser titular', !isStarter(state, m[0]));
+}
+
+// === E. El intercambio conserva la integridad del once ===
+{
+  const eleven = {
+    GK: [P('GK')],
+    DEF: [P('DEF'), P('DEF'), P('DEF'), P('DEF')],
+    MID: [P('MID'), P('MID'), P('MID')],
+    FWD: [P('FWD'), P('FWD'), P('FWD')],
+  };
+  const state = { formation: '4-3-3', starting11: eleven, squad: [] };
+  console.log('E) Integridad tras swap');
+  check('once completo antes', isLineupComplete(state));
+  placePlayerInLineup(state, eleven.FWD[0], 'FWD', 2);
+  check('once completo después', isLineupComplete(state));
+}
+
+console.log(`\n=== Selección de jugadores: ${pass} OK / ${fail} fallos ===`);
+process.exit(fail ? 1 : 0);

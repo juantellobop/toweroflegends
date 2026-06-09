@@ -182,6 +182,37 @@ function canAssignPlayersToLine(formation, line, players) {
   return place(0);
 }
 
+// Asigna los jugadores de una línea a los huecos de la formación tal como los
+// pinta la pantalla de armado, para saber qué jugador ocupa cada slotIndex
+// visible (importante en 4-3-1-2, donde el slot ENG admite MID/FWD y el índice
+// de array no coincide con el índice de hueco). Compartida con buildScreen.
+export function assignLineToSlots(formation, line, players) {
+  const slots = formationLineSlots(formation, line).map((slot) => ({ ...slot, player: null }));
+  const remaining = (players || []).filter(Boolean);
+  function fill(slot, predicate) {
+    const idx = remaining.findIndex((player) => predicate(player, slot));
+    if (idx < 0) return;
+    slot.player = remaining.splice(idx, 1)[0];
+  }
+  slots.filter((s) => s.accepts.length === 1).forEach((s) => fill(s, (p) => s.accepts.includes(p.position)));
+  slots.filter((s) => !s.player && s.accepts.length > 1).forEach((s) => fill(s, (p) => s.accepts.includes(p.position)));
+  slots.filter((s) => !s.player).forEach((s) => fill(s, (p) => s.accepts.includes(p.position)));
+  return slots;
+}
+
+// Jugador que ocupa el hueco visible (line, slotIndex), o null si está vacío.
+function occupantAt(state, line, slotIndex) {
+  const slot = assignLineToSlots(state.formation, line, state.starting11[line])
+    .find((s) => s.slotIndex === slotIndex);
+  return slot ? slot.player : null;
+}
+// Hueco visible que ocupa un jugador dentro de su línea, o -1 si no está.
+function slotIndexOfPlayer(state, line, player) {
+  const slot = assignLineToSlots(state.formation, line, state.starting11[line])
+    .find((s) => s.player && s.player.uid === player.uid);
+  return slot ? slot.slotIndex : -1;
+}
+
 function starterLineFor(state, player) {
   return LINES.find((line) =>
     (state.starting11[line] || []).some((p) => p.uid === player.uid)
@@ -244,9 +275,75 @@ function firstOpenSlotForPlayer(state, player) {
   return null;
 }
 
+// Evalúa (sin mutar) el resultado de colocar `player` en (line, slotIndex).
+// Devuelve un plan { kind, changes } con las líneas resultantes, o null si la
+// jugada no es válida. Lo usan tanto canPlacePlayerInSlot (resaltado/validación)
+// como placePlayerInLineup (commit), de modo que ambos coinciden siempre.
+//   · hueco vacío           → 'place'
+//   · mismo jugador (no-op) / reordenar misma línea → 'move'
+//   · titular sobre titular → 'swap'  (intercambian posición; nadie al banco)
+//   · suplente sobre titular → 'replace' (sustitución: el titular va al banco)
+function evaluatePlacement(state, player, line, slotIndex = 0) {
+  if (!player || !LINES.includes(line)) return null;
+  const currentLine = starterLineFor(state, player);
+  // Un suplente no puede entrar si ya hay otra copia suya alineada.
+  if (!currentLine && hasAlignedDuplicate(state, player)) return null;
+
+  const cap = formationSlots(state.formation)[line] || 0;
+  if (!cap) return null;
+  const targetIndex = Math.max(0, Math.min(cap - 1, Number(slotIndex) || 0));
+  if (!slotAcceptsPosition(state.formation, line, targetIndex, player.position)) return null;
+
+  const occupant = occupantAt(state, line, targetIndex);
+
+  // --- Titular A sobre otro titular B → intercambio de posiciones ---
+  // Solo es válido si B puede jugar en el hueco que deja A; si no, se rechaza
+  // (no expulsamos a un titular al banco al arrastrar entre titulares).
+  if (occupant && occupant.uid !== player.uid && currentLine) {
+    const sourceIndex = slotIndexOfPlayer(state, currentLine, player);
+    if (sourceIndex < 0) return null;
+    if (!slotAcceptsPosition(state.formation, currentLine, sourceIndex, occupant.position)) return null;
+
+    if (currentLine === line) {
+      const arr = state.starting11[line].slice();
+      const ia = arr.findIndex((p) => p.uid === player.uid);
+      const ib = arr.findIndex((p) => p.uid === occupant.uid);
+      if (ia < 0 || ib < 0) return null;
+      [arr[ia], arr[ib]] = [arr[ib], arr[ia]];
+      if (!canAssignPlayersToLine(state.formation, line, arr)) return null;
+      return { kind: 'swap', changes: { [line]: arr } };
+    }
+    const arrSrc = state.starting11[currentLine].slice();
+    const arrDst = state.starting11[line].slice();
+    const ia = arrSrc.findIndex((p) => p.uid === player.uid);
+    const ib = arrDst.findIndex((p) => p.uid === occupant.uid);
+    if (ia < 0 || ib < 0) return null;
+    arrSrc[ia] = occupant;
+    arrDst[ib] = player;
+    if (!canAssignPlayersToLine(state.formation, currentLine, arrSrc)) return null;
+    if (!canAssignPlayersToLine(state.formation, line, arrDst)) return null;
+    return { kind: 'swap', changes: { [currentLine]: arrSrc, [line]: arrDst } };
+  }
+
+  // --- Hueco vacío, reordenar misma línea o sustitución desde el banco ---
+  const wasFull = (state.starting11[line] || []).length >= cap;
+  const nextLine = targetLineAfterPlacement(state, player, line, targetIndex);
+  if (!nextLine) return null;
+  const changes = { [line]: nextLine };
+  if (currentLine && currentLine !== line) {
+    const srcArr = state.starting11[currentLine].slice();
+    const si = srcArr.findIndex((p) => p.uid === player.uid);
+    if (si >= 0) srcArr.splice(si, 1);
+    changes[currentLine] = srcArr;
+  }
+  let kind = 'place';
+  if (currentLine === line) kind = 'move';
+  else if (!currentLine && occupant && wasFull) kind = 'replace';
+  return { kind, changes };
+}
+
 export function canPlacePlayerInSlot(state, player, line, slotIndex = 0) {
-  if (hasAlignedDuplicate(state, player)) return false;
-  return Boolean(targetLineAfterPlacement(state, player, line, slotIndex));
+  return Boolean(evaluatePlacement(state, player, line, slotIndex));
 }
 
 // Crea un once vacío acorde a la formación.
@@ -322,26 +419,20 @@ export function togglePlayerInLineup(state, player) {
 // Coloca un jugador en un slot concreto de su línea. Sirve para drag & drop:
 // desde banquillo coloca/reemplaza; desde el campo reordena dentro de la línea.
 export function placePlayerInLineup(state, player, line = player.position, slotIndex = 0) {
-  if (!player || !LINES.includes(line)) {
+  const plan = evaluatePlacement(state, player, line, slotIndex);
+  if (!plan) {
+    if (!player || !LINES.includes(line)) return { placed: false, invalidPosition: true };
+    if (!starterLineFor(state, player) && hasAlignedDuplicate(state, player)) {
+      return { placed: false, duplicate: true };
+    }
     return { placed: false, invalidPosition: true };
   }
-  const currentLine = starterLineFor(state, player);
-  if (!currentLine && hasAlignedDuplicate(state, player)) return { placed: false, duplicate: true };
-
-  const nextLine = targetLineAfterPlacement(state, player, line, slotIndex);
-  if (!nextLine) return { placed: false, invalidPosition: true };
-
-  if (currentLine && currentLine !== line) {
-    const currentArr = state.starting11[currentLine];
-    const sourceIndex = currentArr.findIndex((p) => p.uid === player.uid);
-    if (sourceIndex >= 0) currentArr.splice(sourceIndex, 1);
-  }
-
-  state.starting11[line] = nextLine;
+  for (const [ln, arr] of Object.entries(plan.changes)) state.starting11[ln] = arr;
   return {
     placed: true,
-    moved: currentLine === line,
-    replaced: !currentLine && (state.starting11[line] || []).length >= formationSlots(state.formation)[line],
+    swapped: plan.kind === 'swap',
+    moved: plan.kind === 'move',
+    replaced: plan.kind === 'replace',
   };
 }
 
