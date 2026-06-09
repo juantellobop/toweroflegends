@@ -453,7 +453,7 @@ export function liveRatings(state) {
   return calcularRatings({ formation: state.formation, starting11: state.starting11, items: state.items });
 }
 export function liveChemistry(state) {
-  return { byLine: computeChemistry(state.starting11), total: totalChemistry(state.starting11) };
+  return { byLine: computeChemistry(state.starting11), total: totalChemistry(state.starting11, state.formation) };
 }
 
 // === Sobres ===

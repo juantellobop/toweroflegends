@@ -1,7 +1,7 @@
 // Torre de Leyendas — Scouting previo: identidad, ratings y once del rival.
 
 import { esc, POSITION_LABEL } from './cards.js';
-import { LINES } from '../data/config.js';
+import { LINES, formationType, typeThatBeats } from '../data/config.js';
 import { playerInitials, playerSurname, portraitPathForName } from '../data/playerAssets.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
@@ -75,6 +75,9 @@ function ratings(opponent) {
 
 export function renderScouting(root, state, handlers) {
   const opponent = state.opponent;
+  const rivalType = formationType(opponent.formation);
+  const typeName = (ty) => (ty ? t(`admin.tactical.${ty}`) : '');
+  const counter = rivalType ? typeThatBeats(rivalType) : null;
   root.innerHTML = `
     <section class="screen scouting-screen pixel-screen">
       <header class="scout-hero" style="--team-primary:${opponent.colors.primary};--team-secondary:${opponent.colors.secondary}">
@@ -82,7 +85,8 @@ export function renderScouting(root, state, handlers) {
           <div class="level-badge">${t('generic.level', { level: state.level })}</div>
           <p class="scout-kicker">${t('scouting.report')}</p>
           <h1 class="large-title">${esc(localizeOpponentName(opponent))}</h1>
-          <p class="scout-achievement">${esc(localizeAchievement(opponent.achievement))} · ${t('scouting.formation', { formation: opponent.formation })}</p>
+          <p class="scout-achievement">${esc(localizeAchievement(opponent.achievement))} · ${t('scouting.formation', { formation: opponent.formation })}${rivalType ? ` · ${esc(typeName(rivalType))}` : ''}</p>
+          ${counter ? `<p class="scout-counter-hint">${esc(t('tactics.counterWith', { type: typeName(counter) }))}</p>` : ''}
         </div>
         <div class="scout-team-meta">
           <div class="scout-team-card" aria-hidden="true">

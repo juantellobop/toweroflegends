@@ -725,11 +725,18 @@ select {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;   /* cartas + botón centrados verticalmente */
-  gap: var(--space-4);
-  min-height: calc(100vh - 220px);
-  margin-top: var(--space-4);
+  /* Anclado arriba (no centrado al viewport): así el sobre y las cartas no
+     "saltan" cuando en mobile aparece/desaparece la barra del navegador y
+     cambia la altura visible. El diseño queda sólido y sin movimientos. */
+  justify-content: flex-start;
   gap: 48px;
+  /* Contenido anclado ARRIBA (flex-start), no centrado al viewport: así el
+     sobre y las cartas no "saltan" cuando en mobile aparece/desaparece la
+     barra del navegador. El min-height sólo reserva el alto (mantiene el botón
+     fijo abajo) sin mover el contenido superior. */
+  min-height: calc(100vh - 220px);
+  padding-top: clamp(20px, 6vh, 64px);
+  margin-top: var(--space-4);
 }
 /* Sobre y cartas comparten celda de la rejilla → al ocultarse el sobre, las
    cartas quedan en su lugar sin saltos de layout durante la animación. */
@@ -762,7 +769,7 @@ select {
   filter: drop-shadow(0 20px 26px rgba(0,0,0,.55));
   transform-origin: 50% 60%;
   transition: transform var(--dur-base) var(--ease-emphasis);
-  animation: pack-float 3.8s ease-in-out infinite;
+  animation: pack-float 5s ease-in-out infinite;
 }
 
 /* Halo dorado-cian que respira detrás del sobre. */
@@ -837,14 +844,14 @@ select {
   animation-delay: calc(var(--i) * 110ms + 80ms);
 }
 @keyframes deal-burst {
-  from { opacity: 0; transform: translateY(-96px) scale(.42); }
+  from { opacity: 0; transform: translateY(-52px) scale(.6); }
   55%  { opacity: 1; }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes pack-float {
-  0%, 100% { transform: translateY(0) rotate(-1deg); }
-  50%      { transform: translateY(-10px) rotate(1deg); }
+  0%, 100% { transform: translateY(0) rotate(-0.5deg); }
+  50%      { transform: translateY(-5px) rotate(0.5deg); }
 }
 @keyframes pack-pulse {
   0%, 100% { opacity: .55; transform: scale(1); }
@@ -940,6 +947,14 @@ select {
 }
 .chem-pill span { font-size: var(--t-caption-2); color: var(--label-secondary); }
 .chem-pill b { font-family: var(--font-rounded); font-size: var(--t-title-3); color: var(--success); }
+
+.header-pills { display: flex; align-items: stretch; gap: var(--space-3); }
+.tactic-pill b { color: var(--label-primary); font-size: var(--t-callout); }
+.tactic-pill .tactic-edge { font-size: var(--t-caption-2); font-weight: 700; letter-spacing: 0.3px; }
+.tactic-pill.matchup-edge b, .tactic-pill.matchup-edge .tactic-edge { color: var(--success); }
+.tactic-pill.matchup-weak b, .tactic-pill.matchup-weak .tactic-edge { color: var(--danger); }
+.tactic-pill.matchup-even .tactic-edge { color: var(--label-secondary); }
+.scout-counter-hint { margin: var(--space-1) 0 0; font-size: var(--t-caption-1); color: var(--success); font-weight: 600; }
 
 .formation-seg { margin-bottom: var(--space-4); }
 
@@ -2210,8 +2225,9 @@ select {
    entren a la vez sin perder legibilidad. */
 @media (max-width: 640px) {
   .pack-screen .pack-stage {
-    min-height: calc(100svh - 188px);
+    min-height: calc(100svh - 260px);
     gap: 24px;
+    padding-top: clamp(12px, 3vh, 32px);
   }
   .pack-screen .pack-head { padding: 10px; }
   .pack-screen .pack-deal { gap: 7px; }
@@ -2458,7 +2474,7 @@ select {
 }
 
 .team-select-screen {
-  --lineup-card: clamp(72px, 8vw, 96px);
+  --lineup-card: clamp(82px, 8.4vw, 104px);
   padding-top: 8px;
   /* Reserva el alto de la barra de acción fija (botón a 50px del fondo). */
   padding-bottom: calc(120px + env(safe-area-inset-bottom));
@@ -2524,22 +2540,22 @@ select {
 }
 
 .team-select-screen .field {
-  width: min(100%, 58vh, 690px);
-  height: min(68vh, 720px, calc(100vh - 260px));
-  min-height: 500px;
+  width: min(100%, 66vh, 760px);
+  height: min(76vh, 800px, calc(100vh - 200px));
+  min-height: 520px;
   aspect-ratio: 4 / 5;
   margin: 0 auto;
 }
 
 .team-select-screen .field[data-formation="4-3-1-2"] {
-  --lineup-card: clamp(64px, 6.8vw, 86px);
-  height: min(76vh, 760px, calc(100vh - 220px));
-  min-height: 560px;
+  --lineup-card: clamp(74px, 7.6vw, 94px);
+  height: min(82vh, 820px, calc(100vh - 180px));
+  min-height: 580px;
 }
 
 .team-select-screen .field-chip {
   width: var(--lineup-card);
-  min-height: calc(var(--lineup-card) + 30px);
+  min-height: calc(var(--lineup-card) + 34px);
   padding: 7px 4px 6px;
   gap: 2px;
   touch-action: none;
@@ -2548,22 +2564,22 @@ select {
 }
 
 .team-select-screen .chip-face {
-  width: calc(var(--lineup-card) - 30px);
-  height: calc(var(--lineup-card) - 30px);
-  min-width: 42px;
-  min-height: 42px;
-  margin-bottom: 2px;
+  width: calc(var(--lineup-card) - 22px);
+  height: calc(var(--lineup-card) - 22px);
+  min-width: 52px;
+  min-height: 52px;
+  margin-bottom: 3px;
   border: 2px solid rgba(255,255,255,.82);
 }
 
 .team-select-screen .chip-ovr {
-  font-size: clamp(11px, 1.4vw, 15px);
+  font-size: clamp(12px, 1.5vw, 17px);
   color: var(--arcade-yellow);
 }
 
 .team-select-screen .chip-name {
-  max-width: calc(var(--lineup-card) - 10px);
-  font-size: clamp(8px, 1vw, 13px);
+  max-width: var(--lineup-card);
+  font-size: clamp(11px, 1.2vw, 15px);
   line-height: 1.05;
 }
 
@@ -4255,9 +4271,12 @@ select {
   animation: action-bar-in 260ms var(--ease-emphasis) both;
 }
 
+/* Sin `filter` aquí: la barra de acción es position:fixed y aplicarle un
+   filter (aunque sea momentáneo durante la animación) rompe su anclaje al
+   viewport en Chromium/WebKit y lanza el botón fuera de pantalla. Solo opacity. */
 @keyframes action-bar-in {
-  from { opacity: 0; filter: brightness(.88); }
-  to { opacity: 1; filter: none; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .pack-confirm:not([hidden]) {
@@ -4610,12 +4629,19 @@ button.primary:active:not(:disabled),
 .field-chip .chip-name {
   width: calc(100% - 4px);
   max-width: none;
-  padding: 3px 2px 5px;
+  padding: 3px 3px 5px;
   color: #fff;
-  background: rgba(3,8,38,.52);
+  background: rgba(3,8,38,.62);
   font-weight: 900;
   text-align: center;
   text-shadow: 1px 1px 0 #071459;
+  /* Apellido en una sola línea (sin cortar a mitad de palabra): el chip más
+     grande y la tipografía más marcada hacen que el nombre destaque, y si no
+     entra se recorta limpio con puntos suspensivos. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.05;
 }
 
 .field-chip.scout-chip .chip-init {
@@ -4806,42 +4832,43 @@ button.primary:active:not(:disabled),
     font-size: 9px;
   }
 
+  /* Más alto = más cancha aprovechada y caras/nombres más grandes. */
   .team-select-screen .field,
   .team-select-screen .field[data-formation="4-3-1-2"] {
     width: 100%;
-    height: min(calc((100vw - 36px) * 4 / 3 - 50px), calc(100svh - 330px));
-    min-height: 0;
+    height: min(calc((100vw - 24px) * 4 / 3), calc(100svh - 250px));
+    min-height: 440px;
     aspect-ratio: auto;
   }
 
   .team-select-screen,
   .team-select-screen .field[data-formation="4-3-1-2"] {
-    --lineup-card: 54px;
+    --lineup-card: 64px;
   }
 
   .team-select-screen .field-chip {
-    min-height: 76px;
-    padding: 4px 2px 3px;
+    min-height: 92px;
+    padding: 5px 2px 3px;
   }
 
   .team-select-screen .chip-face {
-    width: 46px;
-    height: 46px;
+    width: 56px;
+    height: 56px;
     min-width: 0;
     min-height: 0;
-    margin-bottom: 0;
+    margin-bottom: 1px;
   }
 
   .team-select-screen .field-chip .chip-ovr {
     top: 2px;
     left: 2px;
-    min-width: 21px;
+    min-width: 22px;
     padding: 2px 3px;
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .team-select-screen .field-chip .chip-name {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .team-select-screen .chip-info {

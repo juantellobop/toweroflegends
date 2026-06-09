@@ -6,6 +6,7 @@ export const CONFIG = {
   THETA: 1.6, // dominio del rating frente a la suerte
   BASE_SEQUENCES: 22, // jugadas de ataque totales por partido
   COUNTER_CHANCE: 0.2, // prob. de contraataque tras una pérdida
+  W_DUEL: 0.3, // peso del duelo individual en cada jugada (0.7 sigue siendo el equipo)
 
   // --- Vidas / fin de run ---
   LIVES: 1, // 1 = perder termina la run; 3 = sistema de vidas
@@ -40,11 +41,15 @@ export const CONFIG = {
 
   // --- Química ---
   CHEM_NATION: 2, // bonus por par de misma nación en una línea
-  CHEM_ERA: 1, // bonus por par de misma época en una línea
+  CHEM_ERA: 1, // bonus por par de misma época (década exacta) en una línea
+  CHEM_ERA_ADJACENT: 0.5, // bonus por par de décadas contiguas (1960↔1970)
   CHEM_CAP: 10, // tope de química por línea
+  CHEM_CORE: 1, // bonus global por escalón de núcleo nacional (ver computeTeamChem)
+  CHEM_CORE_CAP: 3, // tope del bonus de núcleo nacional
+  CHEM_TACTIC: 1, // bonus a ataque+medio si tu plantilla encaja con el tipo del dibujo
 
-  // --- Tipos tácticos (mejora futura) ---
-  TYPE_BONUS: 0.1, // +10% si tu tipo cuenta el del rival
+  // --- Tipos tácticos (counter piedra-papel-tijera) ---
+  TYPE_BONUS: 0.06, // ventaja a ataque+medio si tu tipo cuenta el del rival
 
   // --- Recompensas (tamaño de sobre por resultado) ---
   PACK_GOLEADA: 5, // dif >= 5
@@ -82,6 +87,52 @@ export const FORMATIONS = {
   '4-3-1-2': { GK: 1, DEF: 4, MID: 4, FWD: 2 },
   '3-4-3': { GK: 1, DEF: 3, MID: 4, FWD: 3 },
 };
+
+// Identidad de cada formación: multiplicadores modestos (±2-6%) a los ratings de
+// equipo, con su contrapartida. Da trade-off táctico real (5-3-2 defensivo, 3-4-3
+// volcado) y hace que apilar una línea cueste/premie, no solo promedie.
+export const FORMATION_MODIFIERS = {
+  '4-4-2': { attack: 1.0, midfield: 1.0, defense: 1.0 }, // equilibrio puro
+  '4-3-3': { attack: 1.04, midfield: 1.0, defense: 0.98 }, // ofensivo
+  '3-4-3': { attack: 1.06, midfield: 1.01, defense: 0.94 }, // todo al ataque
+  '3-5-2': { attack: 0.99, midfield: 1.05, defense: 0.98 }, // control de medio
+  '5-3-2': { attack: 0.95, midfield: 0.99, defense: 1.06 }, // defensivo
+  '4-3-1-2': { attack: 1.02, midfield: 1.04, defense: 0.97 }, // creativo (enganche)
+};
+
+// Tipo táctico que proyecta cada dibujo. Alimenta el counter (TYPE_COUNTER) y la
+// cohesión de química. Las formaciones de rival con formas raras caen a null.
+export const FORMATION_TYPE = {
+  '3-5-2': 'posesion', '4-3-1-2': 'posesion',
+  '4-3-3': 'presion', '3-4-3': 'presion',
+  '5-3-2': 'contra', '4-4-2': 'contra',
+};
+
+// Triángulo piedra-papel-tijera: el valor es el tipo al que VENCES.
+// posesión vence a presión (mantienes el balón lejos del pressing),
+// presión vence a contra (asfixias al repliegue),
+// contra vence a posesión (castigas al rival volcado).
+export const TYPE_COUNTER = { posesion: 'presion', presion: 'contra', contra: 'posesion' };
+
+// Devuelve el tipo táctico de un dibujo, o null si no tiene identidad conocida.
+export function formationType(formation) {
+  return FORMATION_TYPE[formation] || null;
+}
+
+// Tipo que VENCE a `type` (el inverso de TYPE_COUNTER). Útil para sugerir en el
+// scouting con qué estilo contrarrestar al rival.
+export function typeThatBeats(type) {
+  return Object.keys(TYPE_COUNTER).find((k) => TYPE_COUNTER[k] === type) || null;
+}
+
+// Resultado del cruce de estilos desde la perspectiva de `myType`:
+// 'edge' (cuentas al rival), 'weak' (te cuenta), 'even' (neutro o sin tipo).
+export function matchupVs(myType, rivalType) {
+  if (!myType || !rivalType || myType === rivalType) return 'even';
+  if (TYPE_COUNTER[myType] === rivalType) return 'edge';
+  if (TYPE_COUNTER[rivalType] === myType) return 'weak';
+  return 'even';
+}
 
 export const LINES = ['GK', 'DEF', 'MID', 'FWD'];
 export const RARITIES = ['common', 'rare', 'epic', 'legend'];

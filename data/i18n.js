@@ -351,6 +351,15 @@ const DICTIONARIES = {
       note: 'Ratings de juego para la Copa de Leyendas. Once histórico representativo del torneo.',
       continue: 'Armar mi equipo',
     },
+    tactics: {
+      style: 'Estilo',
+      yours: 'Tu estilo',
+      rival: 'Estilo rival',
+      edge: 'Ventaja táctica',
+      even: 'Estilo neutral',
+      weak: 'Desventaja táctica',
+      counterWith: ({ type }) => `Contrarréstalo con ${type}`,
+    },
     match: {
       plays: ({ count }) => `${count} jugadas`,
       tickerStart: ({ level }) => `Nivel ${level} · Highlights en directo.`,
@@ -601,6 +610,15 @@ const DICTIONARIES = {
       opponentEleven: 'Opponent starting XI',
       note: 'Game ratings for the Legends Cup. Representative historical XI for the tournament.',
       continue: 'Build my team',
+    },
+    tactics: {
+      style: 'Style',
+      yours: 'Your style',
+      rival: 'Opponent style',
+      edge: 'Tactical edge',
+      even: 'Neutral style',
+      weak: 'Tactical disadvantage',
+      counterWith: ({ type }) => `Counter it with ${type}`,
     },
     match: {
       plays: ({ count }) => `${count} plays`,

@@ -11,7 +11,7 @@ import {
   canPlacePlayerInSlot, assignLineToSlots,
 } from '../state/run.js';
 import { playerOVR } from '../engine/ovr.js';
-import { FORMATIONS, LINES, formationLineSlots } from '../data/config.js';
+import { FORMATIONS, LINES, formationLineSlots, formationType, matchupVs } from '../data/config.js';
 import { countTo } from '../match/feedback.js';
 import { playerInitials, playerSurname, portraitPathForPlayer } from '../data/playerAssets.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
@@ -143,6 +143,20 @@ function fieldNodes(positions) {
   }).join('');
 }
 
+function tacticPill(state) {
+  const myType = formationType(state.formation);
+  if (!myType) return '';
+  const rivalType = state.opponent ? formationType(state.opponent.formation) : null;
+  const matchup = matchupVs(myType, rivalType); // 'edge' | 'weak' | 'even'
+  const typeName = t(`admin.tactical.${myType}`);
+  return `
+    <div class="chem-pill tactic-pill matchup-${matchup}">
+      <span>${t('tactics.style')}</span>
+      <b>${esc(typeName)}</b>
+      ${rivalType ? `<small class="tactic-edge">${t(`tactics.${matchup}`)}</small>` : ''}
+    </div>`;
+}
+
 function ratingsHeader(state) {
   const r = liveRatings(state);
   const chem = liveChemistry(state);
@@ -162,9 +176,12 @@ function ratingsHeader(state) {
   return `
     <div class="ratings-glass glass" id="ratingsHeader">
       <div class="rt-grid">${rowHTML}</div>
-      <div class="chem-pill">
-        <span>${t('build.chemistry')}</span>
-        <b class="tabular" id="chemTotal" data-val="${chem.total}">0</b>
+      <div class="header-pills">
+        <div class="chem-pill">
+          <span>${t('build.chemistry')}</span>
+          <b class="tabular" id="chemTotal" data-val="${chem.total}">0</b>
+        </div>
+        ${tacticPill(state)}
       </div>
     </div>`;
 }

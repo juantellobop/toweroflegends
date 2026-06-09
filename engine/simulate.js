@@ -3,12 +3,33 @@
 // un evento compacto. La presentación se apoya en escenas pixelart estáticas,
 // no en una simulación continua de jugadores.
 
-import { CONFIG } from '../data/config.js';
+import { CONFIG, formationType, TYPE_COUNTER } from '../data/config.js';
 import { buildBattleTeam } from './teamRatings.js';
 import { matchStealBonus } from './items.js';
 import { ratio, simulateHighlight } from './highlights.js';
 
 export { ratio };
+
+const clampRating = (v) => Math.max(1, Math.min(99, Math.round(v * 10) / 10));
+
+// Ventaja de tipo táctico (counter piedra-papel-tijera): si el dibujo de un equipo
+// cuenta el del rival, sube su ataque y su medio en TYPE_BONUS. Se aplica antes de
+// repartir la posesión para que también pese ahí. Sin tipo conocido → sin efecto.
+function applyTypeEdge(team, bonus) {
+  team.ratings = {
+    ...team.ratings,
+    attack: clampRating(team.ratings.attack * (1 + bonus)),
+    midfield: clampRating(team.ratings.midfield * (1 + bonus)),
+  };
+}
+
+function applyTypeCounter(A, B) {
+  const typeA = formationType(A.formation);
+  const typeB = formationType(B.formation);
+  if (!typeA || !typeB || typeA === typeB) return;
+  if (TYPE_COUNTER[typeA] === typeB) applyTypeEdge(A, CONFIG.TYPE_BONUS);
+  else if (TYPE_COUNTER[typeB] === typeA) applyTypeEdge(B, CONFIG.TYPE_BONUS);
+}
 
 // Reparte seqA jugadas de "A" y seqB de "B" a lo largo de 90 minutos.
 function interleaveOverTime(seqA, seqB, rng) {
@@ -46,6 +67,8 @@ function makeHighlight({ id, minute, side, A, B, score, rng, phaseHint }) {
 export function simularPartido(teamA, teamB, rng) {
   const A = buildBattleTeam(teamA);
   const B = buildBattleTeam(teamB);
+
+  applyTypeCounter(A, B);
 
   const possessionA = ratio(A.ratings.midfield, B.ratings.midfield);
   const seqA = Math.round(CONFIG.BASE_SEQUENCES * possessionA);
