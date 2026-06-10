@@ -24,7 +24,17 @@
 
 * { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  /* Viewport estable durante las animaciones:
+     - overflow-y: scroll reserva SIEMPRE el hueco de la barra de scroll; si
+       aparece/desaparece a mitad de una animación (al crecer el contenido),
+       la columna centrada entera se desplaza de lado.
+     - overflow-x: hidden evita que los efectos escalados (fogonazo, rayos,
+       cartas que vuelan) creen overflow horizontal y muevan el fondo. */
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
 
 body {
   margin: 0;
@@ -687,6 +697,11 @@ select {
   -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
   will-change: transform; /* capa estable durante el volteo (evita parpadeo WebKit) */
+}
+/* El volteo se dispara con .dealing (al abrir el sobre): las cartas existen
+   en el layout desde la carga (ocultas con visibility) y sin esta guarda la
+   animación correría invisible nada más cargar. */
+.pack-deal.dealing .deal-inner {
   animation: deal-flip var(--dur-slow) var(--ease-emphasis) backwards;
   animation-delay: calc(var(--i) * 110ms + 120ms);
 }
@@ -771,6 +786,14 @@ select {
 }
 .pack-reveal > .pack-opener,
 .pack-reveal > .pack-deal { grid-area: 1 / 1; }
+/* Ocultos con visibility (no display): sobre y cartas RESERVAN su hueco
+   desde el principio, de modo que el alto de la pantalla no cambia en ningún
+   momento de la apertura. Si el hueco apareciera al revelar las cartas, el
+   contenido se recoloca y puede aparecer la barra de scroll a mitad de la
+   animación (todo se desplaza de lado). visibility:hidden además saca el
+   elemento del foco/hit-testing igual que display:none. */
+.pack-reveal > .pack-opener[hidden] { display: block !important; visibility: hidden; }
+.pack-reveal > .pack-deal[hidden] { display: flex !important; visibility: hidden; }
 
 .pack-opener {
   position: relative;
@@ -950,8 +973,8 @@ select {
   pointer-events: auto;
 }
 
-/* [hidden] debe ganar al display:flex de estos contenedores. */
-.pack-screen .pack-deal[hidden],
+/* [hidden] debe ganar al display:flex de estos contenedores. (El .pack-deal
+   oculto NO va aquí: reserva su hueco con visibility, ver .pack-reveal.) */
 .pack-screen .pack-actions[hidden],
 .pack-screen .pack-confirm[hidden] { display: none; }
 
