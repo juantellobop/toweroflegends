@@ -67,11 +67,15 @@ export function playerCardHTML(player, opts = {}) {
 
 // Carta de objeto. `opts.stack` (>1) muestra un badge ×N: en el sobre indica
 // cuántas copias acumularías al elegirlo; en la plantilla, cuántas ya tienes.
+// Si el ítem tiene sinergia táctica, se muestra como chip ("Sinergia: Presión").
 export function itemCardHTML(item, opts = {}) {
   const idAttr = opts.idValue ? `data-id="${esc(opts.idValue)}"` : '';
   const cls = ['card', 'item-card', `rarity-${item.rarity}`];
   if (opts.clickable) cls.push('clickable');
   const stack = opts.stack > 1 ? `<div class="item-stack" title="${esc(t('card.itemStack', { n: opts.stack }))}">×${opts.stack}</div>` : '';
+  const synergy = item.synergyType
+    ? `<div class="item-synergy"><span class="chip synergy">${esc(t('card.synergy', { type: t(`admin.tactical.${item.synergyType}`) }))}</span></div>`
+    : '';
   return `
   <div class="${cls.join(' ')}" ${idAttr} style="--card-frame:url('${esc(cardFrame(item.rarity))}')">
     <div class="card-head">
@@ -81,6 +85,7 @@ export function itemCardHTML(item, opts = {}) {
     ${stack}
     <div class="card-name">${esc(localizeItem(item, 'name'))}</div>
     <div class="item-desc">${esc(localizeItem(item, 'desc'))}</div>
+    ${synergy}
     ${opts.stack > 1 ? `<div class="item-stack-note">${esc(t('card.itemStackNote'))}</div>` : ''}
   </div>`;
 }

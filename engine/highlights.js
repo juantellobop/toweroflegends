@@ -1,5 +1,6 @@
 import { CONFIG } from '../data/config.js';
 import { t } from '../data/i18n.js';
+import { duelBonus, penaltyConvertBonus, phaseShooterMultiplier } from './traits.js';
 
 export const TERMINAL_TYPES = [
   'gol', 'parada', 'tiro_fuera', 'bloqueo', 'perdida',
@@ -52,11 +53,13 @@ function actorFrom(pool, rng, fallback) {
   return weightedPick(pool.map((p) => ({ value: p, weight: p.weight || p.rating || 1 })), rng);
 }
 
-function shooterFrom(team, rng) {
+// El rematador se elige según la fase: el Penalero pide el penalti y el
+// Especialista se adueña del balón parado (peso por rasgo).
+function shooterFrom(team, rng, phase) {
   const pool = [
     ...(team.shooters || []).map((p) => ({ ...p, rating: p.shooting || p.weight || team.ratings.attack })),
     ...(team.attackers || []).map((p) => ({ ...p, shooting: p.shooting || p.rating || team.ratings.attack })),
-  ];
+  ].map((p) => ({ ...p, weight: (p.weight || p.rating || 1) * phaseShooterMultiplier(p, phase) }));
   return actorFrom(pool, rng, `${team.name} ${t('narrator.player')}`);
 }
 
@@ -68,7 +71,8 @@ function choosePhase(att, def, rng, phaseHint) {
     { value: 'corner', weight: 8 + Math.max(0, att.ratings.attack - def.ratings.defense) * 0.08 },
     { value: 'free_kick', weight: 9 },
     { value: 'throw_in', weight: 7 },
-    { value: 'penalty', weight: 1.0 },
+    // "Pena máxima": el equipo provoca más penaltis a favor.
+    { value: 'penalty', weight: 1.0 + (att.matchBonuses?.penaltyChance || 0) },
   ], rng);
 }
 
@@ -125,16 +129,26 @@ function scoreAfter(score, side, terminal) {
 export function simulateHighlight(ctx) {
   const { id, minute, side, att, def, score, rng, phaseHint } = ctx;
   const phase = choosePhase(att, def, rng, phaseHint);
+  // Desventaja del equipo atacante en este momento (0 = empate): activa al
+  // Killer y los objetos de remontada.
+  const deficit = side === 'A' ? score.B - score.A : score.A - score.B;
+  // "Cerrojo final": la defensa con ese objeto crece en el tramo final.
+  const lateDefense = minute >= 75 ? (def.matchBonuses?.lateDefense || 0) : 0;
+  const defR = lateDefense ? { ...def.ratings, defense: def.ratings.defense + lateDefense } : def.ratings;
   const keeperActor = def.keepers && def.keepers[0];
-  const keeper = { name: def.gkName, rating: def.ratings.gk, weight: def.ratings.gk };
+  const keeper = { name: def.gkName, rating: defR.gk, weight: defR.gk };
   // Mano a mano: reflejos mandan en el disparo, colocación en el ángulo/colocada.
-  const keeperSkill = 0.6 * statOf(keeperActor, 'reflexes', def.ratings.gk) +
-    0.4 * statOf(keeperActor, 'positioning', def.ratings.gk);
+  const keeperSkill = 0.6 * statOf(keeperActor, 'reflexes', defR.gk) +
+    0.4 * statOf(keeperActor, 'positioning', defR.gk);
   const carrier = actorFrom([...(att.midfielders || []), ...(att.attackers || [])], rng, `${att.name} ${t('narrator.player')}`);
   const passer = actorFrom(att.assisters || att.midfielders || [], rng, nameOf(carrier));
   const receiver = actorFrom(att.attackers || att.shooters || [], rng, `${att.name} ${t('narrator.player')}`);
-  const shooter = shooterFrom(att, rng);
+  const shooter = shooterFrom(att, rng, phase);
   const defender = actorFrom([...(def.defenders || []), ...(def.midfielders || [])], rng, `${def.name} ${t('narrator.player')}`);
+  // Rasgos condicionales en el duelo: el Garra defiende mejor al final;
+  // Killer/Velocista/Especialista definen mejor en su situación.
+  const defenderEdge = duelBonus(defender, { role: 'defender', phase, minute });
+  const shooterEdge = duelBonus(shooter, { role: 'shooter', phase, minute, deficit });
 
   const actors = {
     carrier: nameOf(carrier),
@@ -150,8 +164,10 @@ export function simulateHighlight(ctx) {
 
   if (phase === 'penalty') {
     xg = 0.76;
-    const effGk = blend(def.ratings.gk, keeperSkill);
-    terminal = rng.bernoulli(clamp(0.72 + (att.ratings.attack - effGk) / 220, 0.55, 0.86))
+    const effGk = blend(defR.gk, keeperSkill);
+    // El Penalero y "Pena máxima" mejoran la conversión desde los once metros.
+    const convertEdge = (att.matchBonuses?.penaltyConvert || 0) + penaltyConvertBonus(shooter);
+    terminal = rng.bernoulli(clamp(0.72 + (att.ratings.attack - effGk) / 220 + convertEdge, 0.55, 0.9))
       ? 'gol'
       : rng.bernoulli(0.75) ? 'parada' : 'tiro_fuera';
   } else {
@@ -162,12 +178,12 @@ export function simulateHighlight(ctx) {
     // ponderadas (misma escala): equipos iguales → 50%.
     const attBuildStat = 0.5 * statOf(carrier, 'dribbling', att.ratings.midfield) +
       0.5 * statOf(passer, 'passing', att.ratings.midfield);
-    const defBuildStat = 0.5 * statOf(defender, 'defending', def.ratings.midfield) +
-      0.5 * statOf(defender, 'physical', def.ratings.midfield);
+    const defBuildStat = 0.5 * statOf(defender, 'defending', defR.midfield) +
+      0.5 * statOf(defender, 'physical', defR.midfield) + defenderEdge;
     const buildP = clamp(
       ratio(
         blend(att.ratings.midfield, attBuildStat) + midfieldEdge,
-        blend(0.82 * def.ratings.midfield + 0.18 * def.ratings.defense, defBuildStat)
+        blend(0.82 * defR.midfield + 0.18 * defR.defense, defBuildStat)
       ),
       0.14,
       0.88
@@ -176,17 +192,23 @@ export function simulateHighlight(ctx) {
     if (phaseHint === 'high_press' || (phase !== 'corner' && phase !== 'free_kick' && !rng.bernoulli(buildP))) {
       terminal = failOutcome(rng, phaseHint);
     } else {
-      const creationBonus = phase === 'counter' ? 8 : phase === 'corner' ? 3 : phase === 'free_kick' ? 1 : 0;
+      // Objetos de jugada: "Contragolpe ensayado" potencia los contraataques y
+      // "Pizarra a balón parado" los córners y tiros libres.
+      const mb = att.matchBonuses || {};
+      const creationBonus = phase === 'counter' ? 8 + (mb.counterBoost || 0)
+        : phase === 'corner' ? 3 + (mb.setPieceBonus || 0)
+        : phase === 'free_kick' ? 1 + (mb.setPieceBonus || 0)
+        : 0;
       // Duelo de creación: pase filtrado del enlace + desmarque del rematador,
       // contra la marca y el repliegue (pace) del defensor.
       const attCreateStat = 0.5 * statOf(passer, 'passing', att.ratings.attack) +
         0.5 * statOf(receiver, 'pace', att.ratings.attack);
-      const defCreateStat = 0.5 * statOf(defender, 'defending', def.ratings.defense) +
-        0.5 * statOf(defender, 'pace', def.ratings.defense);
+      const defCreateStat = 0.5 * statOf(defender, 'defending', defR.defense) +
+        0.5 * statOf(defender, 'pace', defR.defense) + defenderEdge;
       const creationP = clamp(
         ratio(
           blend(0.76 * att.ratings.attack + 0.24 * att.ratings.midfield, attCreateStat) + creationBonus,
-          blend(0.88 * def.ratings.defense + 0.12 * def.ratings.midfield, defCreateStat)
+          blend(0.88 * defR.defense + 0.12 * defR.midfield, defCreateStat)
         ),
         0.18,
         0.9
@@ -196,9 +218,9 @@ export function simulateHighlight(ctx) {
         terminal = defensiveOutcome(rng, phase);
         xg = terminal === 'bloqueo' ? 0.08 : 0;
       } else {
-        const skillDelta = att.ratings.attack - def.ratings.defense;
-        const shooterSkill = shooter.shooting || shooter.rating || att.ratings.attack;
-        const quality = ratio(0.8 * att.ratings.attack + 0.2 * shooterSkill, 0.88 * def.ratings.defense + 0.12 * def.ratings.gk);
+        const skillDelta = att.ratings.attack - defR.defense;
+        const shooterSkill = (shooter.shooting || shooter.rating || att.ratings.attack) + shooterEdge;
+        const quality = ratio(0.8 * att.ratings.attack + 0.2 * shooterSkill, 0.88 * defR.defense + 0.12 * defR.gk);
         xg = clamp(
           0.18 + 0.3 * quality + skillDelta / 270 +
             (phase === 'counter' ? 0.06 : 0) +
@@ -215,7 +237,7 @@ export function simulateHighlight(ctx) {
           0.82
         );
         // Bloqueo: el defensor concreto se cruza (su defensa contra el disparo).
-        const blockDef = blend(def.ratings.defense, statOf(defender, 'defending', def.ratings.defense));
+        const blockDef = blend(defR.defense, statOf(defender, 'defending', defR.defense) + defenderEdge);
         const blockAtt = blend(att.ratings.attack, shooterSkill);
         if (!rng.bernoulli(onTargetP)) {
           terminal = 'tiro_fuera';
@@ -223,7 +245,7 @@ export function simulateHighlight(ctx) {
           terminal = 'bloqueo';
         } else {
           // Mano a mano: rematador contra reflejos/colocación del portero concreto.
-          const finishSkill = ratio(0.85 * shooterSkill + 0.15 * att.ratings.attack, blend(def.ratings.gk, keeperSkill) + 4);
+          const finishSkill = ratio(0.85 * shooterSkill + 0.15 * att.ratings.attack, blend(defR.gk, keeperSkill) + 4);
           const goalP = clamp(xg * (1.0 + finishSkill), 0.05, 0.68);
           terminal = rng.bernoulli(goalP) ? 'gol' : 'parada';
         }

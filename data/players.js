@@ -311,7 +311,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": null,
+    "trait": "Velocista",
     "tacticalType": "posesion"
   },
   {
@@ -411,7 +411,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": "presion"
   },
   {
@@ -791,7 +791,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": null,
+    "trait": "Motor",
     "tacticalType": "posesion"
   },
   {
@@ -1702,7 +1702,7 @@ export const PLAYERS = [
       "handling": 93,
       "positioning": 96
     },
-    "trait": null,
+    "trait": "Mariscal",
     "tacticalType": null
   },
   {
@@ -1742,7 +1742,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": null,
+    "trait": "Garra",
     "tacticalType": null
   },
   {
@@ -1762,7 +1762,7 @@ export const PLAYERS = [
       "physical": 96
     },
     "gk": null,
-    "trait": null,
+    "trait": "Muro",
     "tacticalType": null
   },
   {
@@ -1822,7 +1822,7 @@ export const PLAYERS = [
       "physical": 94
     },
     "gk": null,
-    "trait": null,
+    "trait": "Especialista",
     "tacticalType": null
   },
   {
@@ -1862,7 +1862,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -1882,7 +1882,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Penalero",
     "tacticalType": null
   },
   {
@@ -1902,7 +1902,7 @@ export const PLAYERS = [
       "physical": 82
     },
     "gk": null,
-    "trait": null,
+    "trait": "Penalero",
     "tacticalType": null
   },
   {
@@ -1939,7 +1939,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Líbero",
     "tacticalType": null
   },
   {
@@ -1959,7 +1959,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -1999,7 +1999,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Líbero",
     "tacticalType": null
   },
   {
@@ -2019,7 +2019,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -2079,7 +2079,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Velocista",
     "tacticalType": null
   },
   {
@@ -2119,7 +2119,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -2236,7 +2236,7 @@ export const PLAYERS = [
       "physical": 89
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -2590,7 +2590,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": null,
+    "trait": "Garra",
     "tacticalType": null
   },
   {
@@ -2984,7 +2984,7 @@ export const PLAYERS = [
       "handling": 90,
       "positioning": 93
     },
-    "trait": null,
+    "trait": "Mariscal",
     "tacticalType": null
   },
   {
@@ -3004,7 +3004,7 @@ export const PLAYERS = [
       "physical": 92
     },
     "gk": null,
-    "trait": null,
+    "trait": "Líbero",
     "tacticalType": null
   },
   {
@@ -3024,7 +3024,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Líbero",
     "tacticalType": null
   },
   {
@@ -3044,7 +3044,7 @@ export const PLAYERS = [
       "physical": 94
     },
     "gk": null,
-    "trait": null,
+    "trait": "Líbero",
     "tacticalType": null
   },
   {
@@ -3064,7 +3064,7 @@ export const PLAYERS = [
       "physical": 92
     },
     "gk": null,
-    "trait": null,
+    "trait": "Líbero",
     "tacticalType": null
   },
   {
@@ -3084,7 +3084,7 @@ export const PLAYERS = [
       "physical": 89
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -3104,7 +3104,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -3124,7 +3124,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -3144,7 +3144,7 @@ export const PLAYERS = [
       "physical": 89
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -3164,7 +3164,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -3184,7 +3184,7 @@ export const PLAYERS = [
       "physical": 91
     },
     "gk": null,
-    "trait": null,
+    "trait": "Velocista",
     "tacticalType": null
   },
   {
@@ -3401,7 +3401,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -3441,7 +3441,7 @@ export const PLAYERS = [
       "physical": 97
     },
     "gk": null,
-    "trait": null,
+    "trait": "Velocista",
     "tacticalType": null
   },
   {
@@ -3461,7 +3461,7 @@ export const PLAYERS = [
       "physical": 95
     },
     "gk": null,
-    "trait": null,
+    "trait": "Muro",
     "tacticalType": null
   },
   {
@@ -3675,7 +3675,7 @@ export const PLAYERS = [
       "handling": 89,
       "positioning": 92
     },
-    "trait": null,
+    "trait": "Mariscal",
     "tacticalType": null
   },
   {
@@ -3775,7 +3775,7 @@ export const PLAYERS = [
       "physical": 89
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -3795,7 +3795,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -3815,7 +3815,7 @@ export const PLAYERS = [
       "physical": 91
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -3835,7 +3835,7 @@ export const PLAYERS = [
       "physical": 87
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -3855,7 +3855,7 @@ export const PLAYERS = [
       "physical": 88
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -3875,7 +3875,7 @@ export const PLAYERS = [
       "physical": 89
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -4172,7 +4172,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -4272,7 +4272,7 @@ export const PLAYERS = [
       "physical": 89
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -4292,7 +4292,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -4312,7 +4312,7 @@ export const PLAYERS = [
       "physical": 88
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -4332,7 +4332,7 @@ export const PLAYERS = [
       "physical": 89
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -4806,7 +4806,7 @@ export const PLAYERS = [
       "physical": 98
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -4826,7 +4826,7 @@ export const PLAYERS = [
       "physical": 96
     },
     "gk": null,
-    "trait": null,
+    "trait": "Especialista",
     "tacticalType": null
   },
   {
@@ -4886,7 +4886,7 @@ export const PLAYERS = [
       "physical": 92
     },
     "gk": null,
-    "trait": null,
+    "trait": "Penalero",
     "tacticalType": null
   },
   {
@@ -4906,7 +4906,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Penalero",
     "tacticalType": null
   },
   {
@@ -4926,7 +4926,7 @@ export const PLAYERS = [
       "physical": 94
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -5103,7 +5103,7 @@ export const PLAYERS = [
       "physical": 87
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -5123,7 +5123,7 @@ export const PLAYERS = [
       "physical": 88
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -5220,7 +5220,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -5240,7 +5240,7 @@ export const PLAYERS = [
       "physical": 91
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -5280,7 +5280,7 @@ export const PLAYERS = [
       "physical": 87
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -5300,7 +5300,7 @@ export const PLAYERS = [
       "physical": 88
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -5320,7 +5320,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Líbero",
     "tacticalType": null
   },
   {
@@ -6074,7 +6074,7 @@ export const PLAYERS = [
       "physical": 97
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -6114,7 +6114,7 @@ export const PLAYERS = [
       "physical": 96
     },
     "gk": null,
-    "trait": null,
+    "trait": "Motor",
     "tacticalType": "posesion"
   },
   {
@@ -6134,7 +6134,7 @@ export const PLAYERS = [
       "physical": 96
     },
     "gk": null,
-    "trait": null,
+    "trait": "Motor",
     "tacticalType": null
   },
   {
@@ -6154,7 +6154,7 @@ export const PLAYERS = [
       "physical": 91
     },
     "gk": null,
-    "trait": null,
+    "trait": "Killer",
     "tacticalType": null
   },
   {
@@ -6291,7 +6291,7 @@ export const PLAYERS = [
       "physical": 89
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -6311,7 +6311,7 @@ export const PLAYERS = [
       "physical": 89
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -6371,7 +6371,7 @@ export const PLAYERS = [
       "physical": 88
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -6551,7 +6551,7 @@ export const PLAYERS = [
       "physical": 97
     },
     "gk": null,
-    "trait": null,
+    "trait": "Garra",
     "tacticalType": null
   },
   {
@@ -6591,7 +6591,7 @@ export const PLAYERS = [
       "physical": 88
     },
     "gk": null,
-    "trait": null,
+    "trait": "Velocista",
     "tacticalType": null
   },
   {
@@ -6611,7 +6611,7 @@ export const PLAYERS = [
       "physical": 97
     },
     "gk": null,
-    "trait": null,
+    "trait": "Velocista",
     "tacticalType": null
   },
   {
@@ -6631,7 +6631,7 @@ export const PLAYERS = [
       "physical": 92
     },
     "gk": null,
-    "trait": null,
+    "trait": "Líbero",
     "tacticalType": null
   },
   {
@@ -6711,7 +6711,7 @@ export const PLAYERS = [
       "physical": 92
     },
     "gk": null,
-    "trait": null,
+    "trait": "Especialista",
     "tacticalType": null
   },
   {
@@ -6771,7 +6771,7 @@ export const PLAYERS = [
       "physical": 87
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -7245,7 +7245,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": null,
+    "trait": "Garra",
     "tacticalType": null
   },
   {
@@ -7325,7 +7325,7 @@ export const PLAYERS = [
       "physical": 89
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -7345,7 +7345,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -7365,7 +7365,7 @@ export const PLAYERS = [
       "physical": 91
     },
     "gk": null,
-    "trait": null,
+    "trait": "Killer",
     "tacticalType": null
   },
   {
@@ -7402,7 +7402,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Líbero",
     "tacticalType": null
   },
   {
@@ -7422,7 +7422,7 @@ export const PLAYERS = [
       "physical": 95
     },
     "gk": null,
-    "trait": null,
+    "trait": "Especialista",
     "tacticalType": null
   },
   {
@@ -7442,7 +7442,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Líbero",
     "tacticalType": null
   },
   {
@@ -7482,7 +7482,7 @@ export const PLAYERS = [
       "physical": 89
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -7599,7 +7599,7 @@ export const PLAYERS = [
       "physical": 89
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -7793,7 +7793,7 @@ export const PLAYERS = [
       "handling": 95,
       "positioning": 90
     },
-    "trait": null,
+    "trait": "Muro",
     "tacticalType": null
   },
   {
@@ -7813,7 +7813,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -7833,7 +7833,7 @@ export const PLAYERS = [
       "physical": 91
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -7853,7 +7853,7 @@ export const PLAYERS = [
       "physical": 95
     },
     "gk": null,
-    "trait": null,
+    "trait": "Penalero",
     "tacticalType": null
   },
   {
@@ -7873,7 +7873,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -7930,7 +7930,7 @@ export const PLAYERS = [
       "physical": 89
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -7970,7 +7970,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -7990,7 +7990,7 @@ export const PLAYERS = [
       "physical": 88
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -8107,7 +8107,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -8187,7 +8187,7 @@ export const PLAYERS = [
       "physical": 83
     },
     "gk": null,
-    "trait": null,
+    "trait": "Velocista",
     "tacticalType": null
   },
   {
@@ -8421,7 +8421,7 @@ export const PLAYERS = [
       "handling": 93,
       "positioning": 96
     },
-    "trait": null,
+    "trait": "Mariscal",
     "tacticalType": null
   },
   {
@@ -8441,7 +8441,7 @@ export const PLAYERS = [
       "physical": 98
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -8501,7 +8501,7 @@ export const PLAYERS = [
       "physical": 86
     },
     "gk": null,
-    "trait": null,
+    "trait": "Penalero",
     "tacticalType": null
   },
   {
@@ -8541,7 +8541,7 @@ export const PLAYERS = [
       "physical": 92
     },
     "gk": null,
-    "trait": null,
+    "trait": "Líbero",
     "tacticalType": null
   },
   {
@@ -9215,7 +9215,7 @@ export const PLAYERS = [
       "physical": 81
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -9272,7 +9272,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": null,
+    "trait": "Velocista",
     "tacticalType": null
   },
   {
@@ -9806,7 +9806,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": null,
+    "trait": "Garra",
     "tacticalType": null
   },
   {
@@ -9826,7 +9826,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": null,
+    "trait": "Garra",
     "tacticalType": null
   },
   {
@@ -9846,7 +9846,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Especialista",
     "tacticalType": null
   },
   {
@@ -9926,7 +9926,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -9946,7 +9946,7 @@ export const PLAYERS = [
       "physical": 97
     },
     "gk": null,
-    "trait": null,
+    "trait": "Garra",
     "tacticalType": null
   },
   {
@@ -9966,7 +9966,7 @@ export const PLAYERS = [
       "physical": 95
     },
     "gk": null,
-    "trait": null,
+    "trait": "Especialista",
     "tacticalType": null
   },
   {
@@ -9986,7 +9986,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -10006,7 +10006,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -10260,7 +10260,7 @@ export const PLAYERS = [
       "handling": 90,
       "positioning": 93
     },
-    "trait": null,
+    "trait": "Mariscal",
     "tacticalType": null
   },
   {
@@ -10300,7 +10300,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Líbero",
     "tacticalType": null
   },
   {
@@ -10320,7 +10320,7 @@ export const PLAYERS = [
       "physical": 94
     },
     "gk": null,
-    "trait": null,
+    "trait": "Líbero",
     "tacticalType": null
   },
   {
@@ -10360,7 +10360,7 @@ export const PLAYERS = [
       "physical": 91
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -10380,7 +10380,7 @@ export const PLAYERS = [
       "physical": 92
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -10400,7 +10400,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -10420,7 +10420,7 @@ export const PLAYERS = [
       "physical": 89
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -10440,7 +10440,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -10460,7 +10460,7 @@ export const PLAYERS = [
       "physical": 91
     },
     "gk": null,
-    "trait": null,
+    "trait": "Killer",
     "tacticalType": null
   },
   {
@@ -10497,7 +10497,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Líbero",
     "tacticalType": null
   },
   {
@@ -10537,7 +10537,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -10754,7 +10754,7 @@ export const PLAYERS = [
       "physical": 87
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -11171,7 +11171,7 @@ export const PLAYERS = [
       "physical": 96
     },
     "gk": null,
-    "trait": null,
+    "trait": "Especialista",
     "tacticalType": null
   },
   {
@@ -11191,7 +11191,7 @@ export const PLAYERS = [
       "physical": 98
     },
     "gk": null,
-    "trait": null,
+    "trait": "Velocista",
     "tacticalType": null
   },
   {
@@ -11331,7 +11331,7 @@ export const PLAYERS = [
       "physical": 91
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -11351,7 +11351,7 @@ export const PLAYERS = [
       "physical": 92
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -11842,7 +11842,7 @@ export const PLAYERS = [
       "physical": 97
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -12333,7 +12333,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -12550,7 +12550,7 @@ export const PLAYERS = [
       "physical": 97
     },
     "gk": null,
-    "trait": null,
+    "trait": "Velocista",
     "tacticalType": null
   },
   {
@@ -12707,7 +12707,7 @@ export const PLAYERS = [
       "handling": 91,
       "positioning": 94
     },
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -12767,7 +12767,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -12924,7 +12924,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -13849,7 +13849,7 @@ export const PLAYERS = [
       "physical": 96
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -13869,7 +13869,7 @@ export const PLAYERS = [
       "physical": 98
     },
     "gk": null,
-    "trait": null,
+    "trait": "Velocista",
     "tacticalType": null
   },
   {
@@ -13929,7 +13929,7 @@ export const PLAYERS = [
       "physical": 95
     },
     "gk": null,
-    "trait": null,
+    "trait": "Velocista",
     "tacticalType": null
   },
   {
@@ -13966,7 +13966,7 @@ export const PLAYERS = [
       "handling": 92,
       "positioning": 95
     },
-    "trait": null,
+    "trait": "Mariscal",
     "tacticalType": null
   },
   {
@@ -13986,7 +13986,7 @@ export const PLAYERS = [
       "physical": 95
     },
     "gk": null,
-    "trait": null,
+    "trait": "Especialista",
     "tacticalType": null
   },
   {
@@ -14006,7 +14006,7 @@ export const PLAYERS = [
       "physical": 96
     },
     "gk": null,
-    "trait": null,
+    "trait": "Especialista",
     "tacticalType": null
   },
   {
@@ -14026,7 +14026,7 @@ export const PLAYERS = [
       "physical": 92
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -14046,7 +14046,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -14066,7 +14066,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -14086,7 +14086,7 @@ export const PLAYERS = [
       "physical": 92
     },
     "gk": null,
-    "trait": null,
+    "trait": "Penalero",
     "tacticalType": null
   },
   {
@@ -14143,7 +14143,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Líbero",
     "tacticalType": null
   },
   {
@@ -14163,7 +14163,7 @@ export const PLAYERS = [
       "physical": 94
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -14577,7 +14577,7 @@ export const PLAYERS = [
       "physical": 91
     },
     "gk": null,
-    "trait": null,
+    "trait": "Maestro",
     "tacticalType": null
   },
   {
@@ -14597,7 +14597,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -14617,7 +14617,7 @@ export const PLAYERS = [
       "physical": 88
     },
     "gk": null,
-    "trait": null,
+    "trait": "Cañón",
     "tacticalType": null
   },
   {
@@ -14897,7 +14897,7 @@ export const PLAYERS = [
       "physical": 84
     },
     "gk": null,
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {

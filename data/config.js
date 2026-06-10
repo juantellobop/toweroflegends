@@ -29,6 +29,21 @@ export const CONFIG = {
   DR_BY_STAT: false,
   ITEM_ADD_CAP: 12,
   ITEM_MULT_CAP: 0.15,
+  // Sinergia ítem↔táctica: si el synergyType del ítem coincide con el tipo
+  // del dibujo (posesión/presión/contra), su efecto se aplica multiplicado.
+  ITEM_SYNERGY_MULT: 1.5,
+  // Topes de los efectos de partido (tras nerfeo y decaimiento). Los de
+  // puntos de rating actúan en duelos concretos; los de probabilidad, sobre
+  // las mecánicas del partido.
+  MATCH_BONUS_CAPS: {
+    stealChance: 0.25, // prob. de asfixiar la salida rival (presión alta)
+    counterBoost: 8, // pts de rating en la definición de contraataques
+    setPieceBonus: 8, // pts de rating en córners y tiros libres
+    lateDefense: 8, // pts de defensa del minuto 75 en adelante
+    comebackBoost: 0.05, // empuje extra por gol de desventaja
+    penaltyChance: 1.5, // peso extra de la fase penalti (sobre 1.0 base)
+    penaltyConvert: 0.08, // prob. extra de convertir el penalti
+  },
 
   // --- Cartas ---
   ALLOW_DUPLICATE_PLAYERS: false,
@@ -44,8 +59,10 @@ export const CONFIG = {
   NO_REPEAT_RIVALS: true,
   // Rampa de arranque: descuento a la fuerza objetivo del rival en los
   // primeros niveles (nivel → puntos). La torre empieza contra rivales más
-  // blandos y la dificultad sin capar arranca en el nivel 6.
-  OPP_EARLY_EASE: { 1: 8, 2: 6, 3: 4, 4: 2, 5: 1 },
+  // blandos y la dificultad sin capar arranca en el nivel 6. En estos niveles
+  // el rival elegido se debilita hasta el objetivo si el pool no tiene
+  // equipos tan blandos (ver generateOpponent).
+  OPP_EARLY_EASE: { 1: 10, 2: 8, 3: 6, 4: 4, 5: 2 },
 
   // --- Química ---
   CHEM_NATION: 2, // bonus por par de misma nación en una línea

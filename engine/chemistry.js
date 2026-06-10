@@ -41,13 +41,15 @@ function eraChemistry(players) {
 }
 
 // Devuelve la química por línea: { GK, DEF, MID, FWD } (cada una topada a CHEM_CAP).
+// Un Capitán alineado suma +1 a la química de su línea (un solo bonus por línea).
 export function computeChemistry(starting11) {
   const chem = {};
   for (const line of LINES) {
     const players = starting11[line] || [];
     const nation = pairsSharing(players, 'nation') * CONFIG.CHEM_NATION;
     const era = eraChemistry(players);
-    chem[line] = Math.min(CONFIG.CHEM_CAP, nation + era);
+    const captain = players.some((p) => p && p.trait === 'Capitán') ? 1 : 0;
+    chem[line] = Math.min(CONFIG.CHEM_CAP, nation + era + captain);
   }
   return chem;
 }

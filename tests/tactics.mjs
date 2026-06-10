@@ -6,6 +6,9 @@
 import assert from 'node:assert/strict';
 import { CONFIG, formationType, formationLineSlots, FORMATION_MODIFIERS } from '../data/config.js';
 import { computeChemistry, computeTeamChem } from '../engine/chemistry.js';
+import {
+  duelBonus, gkDefenseLineBonus, penaltyConvertBonus, phaseShooterMultiplier,
+} from '../engine/traits.js';
 import { calcularRatings, buildBattleTeam } from '../engine/teamRatings.js';
 import { simularPartido } from '../engine/simulate.js';
 import { assignLineToSlots } from '../state/run.js';
@@ -103,6 +106,37 @@ const core = (n) => {
 assert.equal(core(4), 0);
 assert.equal(core(5), 1);
 assert.equal(core(11), CONFIG.CHEM_CORE_CAP);
+
+// === 6b. Rasgos condicionales ===
+// Killer: solo define mejor empatado o perdiendo, nunca en ventaja.
+assert.equal(duelBonus({ trait: 'Killer' }, { role: 'shooter', deficit: 0 }), 5);
+assert.equal(duelBonus({ trait: 'Killer' }, { role: 'shooter', deficit: 2 }), 5);
+assert.equal(duelBonus({ trait: 'Killer' }, { role: 'shooter', deficit: -1 }), 0);
+// Velocista en contras; Especialista a balón parado; Garra solo al final.
+assert.equal(duelBonus({ trait: 'Velocista' }, { role: 'shooter', phase: 'counter' }), 5);
+assert.equal(duelBonus({ trait: 'Velocista' }, { role: 'shooter', phase: 'open_play' }), 0);
+assert.equal(duelBonus({ trait: 'Especialista' }, { role: 'shooter', phase: 'corner', deficit: -1 }), 4);
+assert.equal(duelBonus({ trait: 'Garra' }, { role: 'defender', minute: 80 }), 4);
+assert.equal(duelBonus({ trait: 'Garra' }, { role: 'defender', minute: 60 }), 0);
+assert.equal(duelBonus({ trait: 'Garra' }, { role: 'shooter', minute: 80 }), 0, 'Garra es defensivo');
+// Penalero pide el penalti y lo convierte mejor; Especialista pide el balón parado.
+assert.equal(phaseShooterMultiplier({ trait: 'Penalero' }, 'penalty'), 2.5);
+assert.equal(phaseShooterMultiplier({ trait: 'Penalero' }, 'open_play'), 1);
+assert.equal(phaseShooterMultiplier({ trait: 'Especialista' }, 'free_kick'), 1.6);
+assert.equal(penaltyConvertBonus({ trait: 'Penalero' }), 0.05);
+assert.equal(penaltyConvertBonus({ trait: 'Killer' }), 0);
+// Mariscal ordena la zaga; Capitán suma +1 de química a su línea (respeta el cap).
+assert.equal(gkDefenseLineBonus({ trait: 'Mariscal' }), 1.5);
+assert.equal(gkDefenseLineBonus({ trait: 'Paradón' }), 0);
+assert.equal(
+  computeChemistry({ GK: [], DEF: [{ nation: 'A', era: '1900', trait: 'Capitán' }], MID: [], FWD: [] }).DEF,
+  1, 'Capitán aporta +1 a su línea aunque no haya pares'
+);
+const cappedLine = ['1990', '1990', '1990', '1990'].map((era) => ({ nation: 'Italia', era, position: 'DEF', trait: 'Capitán' }));
+assert.equal(
+  computeChemistry({ GK: [], DEF: cappedLine, MID: [], FWD: [] }).DEF,
+  CONFIG.CHEM_CAP, 'el Capitán no rompe el tope de química por línea'
+);
 
 // === 7. Realismo: constantes presentes y peso individual subido ===
 assert.ok(CONFIG.RED_CARD_PENALTY > 0 && CONFIG.RED_CARD_PENALTY < 0.5, 'penalización de roja sana');

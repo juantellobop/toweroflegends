@@ -5,7 +5,9 @@ import { ITEMS } from '../data/items.js';
 import { OPPONENTS, generateOpponent } from '../data/opponents.js';
 import { ovrBand } from '../engine/ovr.js';
 import { RNG } from '../engine/rng.js';
-import { applyItemsToRatings, effectiveItemEffects, matchStealBonus } from '../engine/items.js';
+import {
+  applyItemsToRatings, chemTeamBonus, effectiveItemEffects, matchBonuses, matchStealBonus, metaBonuses,
+} from '../engine/items.js';
 import { buildBattleTeam } from '../engine/teamRatings.js';
 import {
   chooseItemCard, choosePlayerCard, createRun, drawPlayerPack, isLineupComplete,
@@ -15,6 +17,8 @@ import {
 function item(id) {
   return ITEMS.find((x) => x.id === id);
 }
+
+const near = (a, b, eps = 1e-9) => Math.abs(a - b) <= eps;
 
 // Plantilla inicial: 11 cartas únicas de todo el roster, una por hueco de la
 // formación, con bandas de OVR sorteadas ≈ 80% < 70 / 15% 70-90 / 5% > 90.
@@ -61,6 +65,41 @@ const pressure = item('presion_alta');
 assert.equal(matchStealBonus([pressure, pressure, pressure]), 0.105);
 assert.equal(item('suplentes_lujo'), undefined);
 assert.equal(item('ojeador'), undefined);
+
+// Catálogo ampliado: ids únicos y reparto de tipos.
+assert.ok(ITEMS.length >= 28, `catálogo de ítems pequeño: ${ITEMS.length}`);
+assert.equal(new Set(ITEMS.map((x) => x.id)).size, ITEMS.length, 'ids de ítems duplicados');
+
+// Reliquias meta: cartas extra en sobres, con decaimiento por copia.
+assert.deepEqual(metaBonuses([item('ojeador_estrella'), item('director_deportivo')]),
+  { extraPlayerCard: 1, extraItemCard: 1 });
+assert.deepEqual(metaBonuses([item('banquillo_lujo')]), { extraPlayerCard: 1, extraItemCard: 1 });
+// 2ª copia decae (1 + 0.5 = 1.5 → floor 1): los sobres no crecen sin límite.
+assert.deepEqual(metaBonuses([item('ojeador_estrella'), item('ojeador_estrella')]),
+  { extraPlayerCard: 1, extraItemCard: 0 });
+
+// Efectos de partido: nerfeados a la mitad y topados por MATCH_BONUS_CAPS.
+const counterItem = item('contragolpe_ensayado');
+assert.equal(matchBonuses([counterItem]).counterBoost, 3); // 6 × 0.5
+assert.ok(matchBonuses(Array(10).fill(counterItem)).counterBoost <= CONFIG.MATCH_BONUS_CAPS.counterBoost);
+assert.equal(matchBonuses([item('cerrojo_final')]).lateDefense, 3);
+assert.equal(matchBonuses([item('remontada')]).comebackBoost, 0.02);
+const penalty = matchBonuses([item('pena_maxima')]);
+assert.equal(penalty.penaltyChance, 0.4);
+assert.equal(penalty.penaltyConvert, 0.03);
+
+// Sinergia ítem↔táctica: ×1.5 solo si el dibujo comparte el tipo del ítem.
+assert.equal(matchBonuses([counterItem], '4-4-2').counterBoost, 4.5); // 4-4-2 = contra
+assert.equal(matchBonuses([counterItem], '4-3-3').counterBoost, 3); // presión ≠ contra
+const tikitaka = item('tiki_taka');
+const base = { attack: 50, midfield: 50, defense: 50, gk: 50 };
+assert.ok(near(applyItemsToRatings(base, [tikitaka]).midfield, 52), 'sin formación, sin sinergia');
+assert.ok(near(applyItemsToRatings(base, [tikitaka], '4-2-3-1').midfield, 53), 'posesión activa la sinergia');
+assert.ok(near(applyItemsToRatings(base, [tikitaka], '4-4-2').midfield, 52), 'contra no la activa');
+
+// Reliquia de química: +2 de equipo, con decaimiento en copias.
+assert.equal(chemTeamBonus([item('duodecimo_jugador')]), 2);
+assert.equal(chemTeamBonus([item('duodecimo_jugador'), item('duodecimo_jugador')]), 3);
 const hugeAdds = Array.from({ length: 3 }, (_, i) => ({
   id: `huge-add-${i}`, effects: [{ target: 'team', stat: 'attack', op: 'add', value: 100 }],
 }));

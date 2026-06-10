@@ -4,8 +4,8 @@
 // listas de rematadores/asistentes para resolver las jugadas.
 
 import { computeChemistry, computeTeamChem } from './chemistry.js';
-import { applyItemsToRatings } from './items.js';
-import { applyTraitToStats, gkTraitBonus, shooterWeightMultiplier } from './traits.js';
+import { applyItemsToRatings, chemTeamBonus, matchBonuses } from './items.js';
+import { applyTraitToStats, gkDefenseLineBonus, gkTraitBonus, shooterWeightMultiplier } from './traits.js';
 import { CONFIG, LINES, formationLineSlots, FORMATION_MODIFIERS } from '../data/config.js';
 import { t } from '../data/i18n.js';
 
@@ -145,7 +145,9 @@ function baseRatings(starting11, formation) {
   // Defensa = nivel de la línea defensiva con el portero como un integrante
   // más (mezcla ponderada, no un bonus sumado aparte). Así el número refleja a
   // tus defensas en lugar de dispararse siempre al tope de 99.
-  const defenseLine = avg(def.map(({ s, profile }) => defScore(s, profile)));
+  // Un portero Mariscal ordena la zaga: pequeño bonus al rating de la línea.
+  const defenseLine = avg(def.map(({ s, profile }) => defScore(s, profile))) +
+    gkDefenseLineBonus(starting11.GK && starting11.GK[0]);
   const defenseRating = def.length ? 0.8 * defenseLine + 0.2 * gkRating : gkRating;
 
   const midfieldRating = weightedAvg([
@@ -177,17 +179,19 @@ function baseRatings(starting11, formation) {
 
 // Aplica química a los ratings de línea relevantes: la química por línea suma a su
 // rating, y los bonus globales de equipo (núcleo nacional → todas; cohesión
-// táctica → ataque+medio) se reparten encima. CHEM_IMPACT escala cuánto pesa
-// todo ese aporte en el desempeño sin tocar los puntos que ve el jugador.
-function applyChemistry(ratings, starting11, formation) {
+// táctica → ataque+medio; reliquias 'chem' → todas) se reparten encima.
+// CHEM_IMPACT escala cuánto pesa todo ese aporte en el desempeño sin tocar
+// los puntos que ve el jugador.
+function applyChemistry(ratings, starting11, formation, items = []) {
   const chem = computeChemistry(starting11);
   const team = computeTeamChem(starting11, formation);
+  const itemChem = chemTeamBonus(items);
   const impact = CONFIG.CHEM_IMPACT;
   return {
-    attack: ratings.attack + (chem.FWD + team.all + team.attackMid) * impact,
-    midfield: ratings.midfield + (chem.MID + team.all + team.attackMid) * impact,
-    defense: ratings.defense + (chem.DEF + team.all) * impact,
-    gk: ratings.gk + (chem.GK + team.all) * impact,
+    attack: ratings.attack + (chem.FWD + team.all + team.attackMid + itemChem) * impact,
+    midfield: ratings.midfield + (chem.MID + team.all + team.attackMid + itemChem) * impact,
+    defense: ratings.defense + (chem.DEF + team.all + itemChem) * impact,
+    gk: ratings.gk + (chem.GK + team.all + itemChem) * impact,
   };
 }
 
@@ -214,8 +218,8 @@ export function calcularRatings(team) {
     return r;
   }
   let r = baseRatings(team.starting11, team.formation);
-  r = applyChemistry(r, team.starting11, team.formation);
-  r = applyItemsToRatings(r, team.items || []);
+  r = applyChemistry(r, team.starting11, team.formation, team.items || []);
+  r = applyItemsToRatings(r, team.items || [], team.formation);
   r = applyFormationModifiers(r, team.formation);
   for (const k in r) r[k] = Math.max(1, Math.min(99, Math.round(r[k] * 10) / 10));
   return r;
@@ -240,7 +244,7 @@ function buildShooters(team, ratings) {
         ? s.shooting * 0.45 + s.pace * 0.2 + s.dribbling * 0.28 + s.passing * 0.07
         : s.shooting * 0.7 + s.pace * 0.15 + s.dribbling * 0.15;
       const weight = shooterRoleWeight * roleWeight * shooterWeightMultiplier(p);
-      return { name: p.name, shooting: s.shooting, weight };
+      return { name: p.name, shooting: s.shooting, weight, trait: p.trait || null };
     });
   }
   if (team.lineup) {
@@ -277,7 +281,7 @@ function buildAssisters(team) {
     return pool.map(({ player: p, roleWeight }) => {
       const s = applyTraitToStats(p) || {};
       // passing/dribbling se exponen para los duelos de construcción/creación.
-      return { name: p.name, passing: s.passing, dribbling: s.dribbling, weight: (s.passing * 0.7 + s.dribbling * 0.3) * roleWeight };
+      return { name: p.name, passing: s.passing, dribbling: s.dribbling, weight: (s.passing * 0.7 + s.dribbling * 0.3) * roleWeight, trait: p.trait || null };
     });
   }
   if (team.lineup) {
@@ -323,6 +327,7 @@ function normalizeLinePlayer(player, line, ratings, opts = {}) {
   return {
     name: player?.name || `${line} ${Math.round(rating)}`,
     position: opts.role || line,
+    trait: player?.trait || null,
     rating,
     passing: s?.passing ?? rating,
     shooting: s?.shooting ?? rating,
@@ -389,5 +394,8 @@ export function buildBattleTeam(team) {
     attackers,
     gkName: gkName(team),
     items: team.items || [],
+    // Bonos de partido de los objetos (presión, contras, balón parado, etc.),
+    // ya nerfeados, con decaimiento, sinergia táctica y topes aplicados.
+    matchBonuses: matchBonuses(team.items || [], team.formation),
   };
 }

@@ -5,7 +5,6 @@
 
 import { CONFIG } from '../data/config.js';
 import { buildBattleTeam } from './teamRatings.js';
-import { matchStealBonus } from './items.js';
 import { ratio, simulateHighlight } from './highlights.js';
 
 export { ratio };
@@ -29,7 +28,9 @@ function applyRedCard(team) {
 function withComebackPush(att, score, side) {
   const deficit = side === 'A' ? score.B - score.A : score.A - score.B;
   if (deficit <= 0) return att;
-  const push = Math.min(deficit, 2) * CONFIG.COMEBACK_PUSH;
+  // "Remontada": el objeto amplifica el empuje por gol de desventaja.
+  const pushPerGoal = CONFIG.COMEBACK_PUSH + (att.matchBonuses?.comebackBoost || 0);
+  const push = Math.min(deficit, 2) * pushPerGoal;
   return {
     ...att,
     ratings: {
@@ -100,8 +101,9 @@ export function simularPartido(teamA, teamB, rng) {
   const events = [];
   let eventSeq = 0;
 
-  const stealAgainstB = matchStealBonus(A.items); // A presiona → B pierde más
-  const stealAgainstA = matchStealBonus(B.items);
+  // Robo por presión (incluye la sinergia táctica del equipo que presiona).
+  const stealAgainstB = A.matchBonuses.stealChance; // A presiona → B pierde más
+  const stealAgainstA = B.matchBonuses.stealChance;
 
   for (const { minute, side } of queue) {
     const steal = side === 'A' ? stealAgainstA : stealAgainstB;

@@ -1,9 +1,12 @@
 // Torre de Leyendas — Aplicación de efectos de objetos a los ratings (§4.2).
 // Orden (§6.1): primero todos los 'add', luego todos los 'mult'.
 // target: 'team' | 'line' | 'player' afecta ratings; 'match' afecta mecánicas
-// del partido (stealChance); 'meta' afecta el bucle (extra cartas) — no aquí.
+// del partido (ver MATCH_BONUS_CAPS); 'chem' suma química de equipo; 'meta'
+// afecta el bucle (extra cartas).
+// Sinergia: un ítem con synergyType ('posesion'|'presion'|'contra') aplica su
+// efecto multiplicado por ITEM_SYNERGY_MULT si coincide con el tipo del dibujo.
 
-import { CONFIG } from '../data/config.js';
+import { CONFIG, formationType } from '../data/config.js';
 
 const lineToStat = { FWD: 'attack', MID: 'midfield', DEF: 'defense', GK: 'gk' };
 
@@ -19,13 +22,17 @@ function effectKey(item, effect) {
 
 // Devuelve contribuciones ya nerfeadas y con decaimiento por copia.
 // Para `mult`, value es el bonus respecto de 1 (0.04 = +4%).
-export function effectiveItemEffects(items = [], { scalePower = true } = {}) {
+// Con `formation`, los ítems cuya sinergia coincide con el tipo del dibujo
+// aplican su efecto multiplicado por ITEM_SYNERGY_MULT.
+export function effectiveItemEffects(items = [], { scalePower = true, formation = null } = {}) {
+  const tacticType = formation ? formationType(formation) : null;
   const seenItems = new Map();
   const seenStats = new Map();
   const out = [];
   for (const item of items) {
     const itemCopyIndex = seenItems.get(item.id) || 0;
     seenItems.set(item.id, itemCopyIndex + 1);
+    const synergy = tacticType && item.synergyType === tacticType ? CONFIG.ITEM_SYNERGY_MULT : 1;
     for (const effect of item.effects || []) {
       const key = effectKey(item, effect);
       const copyIndex = CONFIG.DR_BY_STAT ? (seenStats.get(key) || 0) : itemCopyIndex;
@@ -33,19 +40,19 @@ export function effectiveItemEffects(items = [], { scalePower = true } = {}) {
       const decay = Math.pow(CONFIG.DR_RATE, copyIndex);
       const scale = scalePower ? CONFIG.ITEM_POWER_SCALE : 1;
       const base = effect.op === 'mult' ? effect.value - 1 : effect.value;
-      out.push({ ...effect, itemId: item.id, value: base * scale * decay });
+      out.push({ ...effect, itemId: item.id, value: base * scale * decay * synergy });
     }
   }
   return out;
 }
 
 // Aplica primero add y después mult, con topes independientes por rating.
-export function applyItemsToRatings(ratings, items = []) {
+export function applyItemsToRatings(ratings, items = [], formation = null) {
   const r = { ...ratings };
   const add = {};
   const mult = {};
 
-  for (const effect of effectiveItemEffects(items)) {
+  for (const effect of effectiveItemEffects(items, { formation })) {
     let stat = null;
     if (effect.target === 'team') stat = effect.stat;
     if (effect.target === 'line') stat = lineToStat[effect.line];
@@ -60,10 +67,31 @@ export function applyItemsToRatings(ratings, items = []) {
   return r;
 }
 
+// Agrega todos los efectos de partido ('match') en un objeto de bonus, cada
+// uno topado según MATCH_BONUS_CAPS. La simulación los lee por equipo.
+export function matchBonuses(items = [], formation = null) {
+  const caps = CONFIG.MATCH_BONUS_CAPS;
+  const out = {};
+  for (const stat in caps) out[stat] = 0;
+  for (const effect of effectiveItemEffects(items, { formation })) {
+    if (effect.target !== 'match' || effect.op !== 'add') continue;
+    if (!(effect.stat in caps)) continue;
+    out[effect.stat] += effect.value;
+  }
+  for (const stat in caps) out[stat] = Math.min(caps[stat], Math.max(0, out[stat]));
+  return out;
+}
+
 // Suma la probabilidad de robo (stealChance) aportada por objetos 'match'.
-export function matchStealBonus(items = []) {
-  return effectiveItemEffects(items)
-    .filter((e) => e.target === 'match' && e.stat === 'stealChance' && e.op === 'add')
+export function matchStealBonus(items = [], formation = null) {
+  return matchBonuses(items, formation).stealChance;
+}
+
+// Química de equipo aportada por reliquias (target 'chem'). Sin nerfeo de
+// potencia (como los meta): son puntos discretos de química, con decaimiento.
+export function chemTeamBonus(items = []) {
+  return effectiveItemEffects(items, { scalePower: false })
+    .filter((e) => e.target === 'chem' && e.stat === 'teamAll' && e.op === 'add')
     .reduce((sum, e) => sum + e.value, 0);
 }
 
