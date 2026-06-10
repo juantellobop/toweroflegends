@@ -468,9 +468,11 @@ select {
 .scene-pop .scene-image.is-active {
   animation: scene-pan 1.8s var(--ease-standard) both;
 }
+/* Solo transform (composited): animar filter sobre la imagen a pantalla
+   completa repintaba cada frame en WebKit antiguo y producía parpadeos. */
 @keyframes scene-pan {
-  from { transform: scale(1.035); filter: saturate(1.08) contrast(1.04); }
-  to { transform: scale(1.01); filter: saturate(1) contrast(1); }
+  from { transform: scale(1.035); }
+  to { transform: scale(1.01); }
 }
 .scene-scrim {
   position: absolute;
@@ -682,7 +684,9 @@ select {
   transition: transform var(--dur-base) var(--ease-emphasis), opacity var(--dur-base), filter var(--dur-base);
 }
 .deal-inner {
+  -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
+  will-change: transform; /* capa estable durante el volteo (evita parpadeo WebKit) */
   animation: deal-flip var(--dur-slow) var(--ease-emphasis) backwards;
   animation-delay: calc(var(--i) * 110ms + 120ms);
 }
@@ -691,8 +695,11 @@ select {
   to   { transform: rotateY(0deg) translateY(0); }
 }
 .deal-front, .deal-back { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+/* Las dos caras separadas medio píxel en Z: si quedan coplanares, Safari
+   hace z-fighting durante el rotateY y la carta parpadea al voltear. */
+.deal-front { transform: translateZ(0.5px); }
 .deal-back {
-  position: absolute; inset: 0; transform: rotateY(180deg);
+  position: absolute; inset: 0; transform: rotateY(180deg) translateZ(0.5px);
   display: flex; align-items: center; justify-content: center;
   border-radius: 14px;
   background:
@@ -787,6 +794,9 @@ select {
   filter: drop-shadow(0 20px 26px rgba(0,0,0,.55));
   transform-origin: 50% 60%;
   transition: transform var(--dur-base) var(--ease-emphasis);
+  /* Capa propia: con animación infinita + drop-shadow, sin compositar el
+     navegador repinta sombra e imagen pixelada en cada frame (shimmer). */
+  will-change: transform;
   animation: pack-float 5s ease-in-out infinite;
 }
 
@@ -798,6 +808,7 @@ select {
   background: radial-gradient(closest-side,
     rgba(255,212,42,.55), rgba(37,230,255,.20) 58%, transparent 74%);
   filter: blur(8px);
+  will-change: transform, opacity; /* el blur se rasteriza una vez, no por frame */
   animation: pack-pulse 2.8s ease-in-out infinite;
 }
 /* Rayos de cromo girando lentamente. */
@@ -809,6 +820,7 @@ select {
   -webkit-mask: radial-gradient(closest-side, #000 30%, transparent 70%);
   mask: radial-gradient(closest-side, #000 30%, transparent 70%);
   opacity: .55;
+  will-change: transform; /* gradiente cónico + máscara: compositar, no repintar */
   animation: pack-spin 18s linear infinite;
 }
 /* Estrellitas que titilan alrededor. */
@@ -882,14 +894,17 @@ select {
   50%      { opacity: 1; transform: scale(1.15); }
 }
 @keyframes pack-tap-blink { 0%, 60% { opacity: 1; } 80%, 100% { opacity: .25; } }
+/* El filter de 0% y 100% repite la misma lista de funciones (drop-shadow +
+   brightness): si las listas no coinciden, el navegador no puede interpolar
+   y el filtro salta de golpe a mitad de animación (flicker). */
 @keyframes pack-open {
-  0%   { transform: translateX(0) rotate(0); }
+  0%   { transform: translateX(0) rotate(0); filter: drop-shadow(0 20px 26px rgba(0,0,0,.55)) brightness(1); }
   12%  { transform: translateX(-7px) rotate(-2.5deg); }
   24%  { transform: translateX(7px) rotate(2.5deg); }
   36%  { transform: translateX(-6px) rotate(-2deg); }
   48%  { transform: translateX(6px) rotate(2deg); }
   60%  { transform: translateX(0) rotate(0) scale(1.06); }
-  100% { transform: scale(1.6) translateY(-7%); opacity: 0; filter: brightness(2.6); }
+  100% { transform: scale(1.6) translateY(-7%); opacity: 0; filter: drop-shadow(0 20px 26px rgba(0,0,0,.55)) brightness(2.6); }
 }
 @keyframes pack-flash {
   0%   { opacity: 0; transform: scale(.2); }
@@ -4101,8 +4116,8 @@ select {
   animation: scene-idle-pan 13s ease-in-out infinite alternate;
 }
 @keyframes scene-idle-pan {
-  from { transform: scale(1.06) translate3d(-1.5%, -1%, 0); filter: saturate(1.02); }
-  to   { transform: scale(1.12) translate3d(1.5%, 1%, 0); filter: saturate(1.08); }
+  from { transform: scale(1.06) translate3d(-1.5%, -1%, 0); }
+  to   { transform: scale(1.12) translate3d(1.5%, 1%, 0); }
 }
 
 /* Overlay retro: rejilla de escaneo sutil sobre la viñeta. */
@@ -4120,8 +4135,8 @@ select {
 /* Paneo direccional según el lado que ataca. */
 .scene-pitch[data-side="away"].scene-pop .scene-image.is-active { animation-name: scene-pan-rev; }
 @keyframes scene-pan-rev {
-  from { transform: scale(1.035) translateX(2%); filter: saturate(1.08) contrast(1.04); }
-  to { transform: scale(1.01) translateX(0); filter: saturate(1) contrast(1); }
+  from { transform: scale(1.035) translateX(2%); }
+  to { transform: scale(1.01) translateX(0); }
 }
 
 /* Distintivo (pill) de tipo de evento. */
@@ -4189,18 +4204,28 @@ select {
   72% { opacity: 1; }
   100% { opacity: 0; transform: rotate(-9deg) scale(1.04); }
 }
-/* Destello de color al marcar. */
-.scene-goal .scene-scrim { animation: scene-goal-flash .8s ease-out both; }
+/* Destello de color al marcar. El halo (box-shadow de 120px de blur) se pinta
+   una sola vez en el ::after y solo se anima su opacidad (composited): animar
+   el box-shadow directamente repintaba el blur entero en cada frame. */
+.scene-scrim::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 120px 8px color-mix(in srgb, var(--tone, #ffcf33) 60%, transparent);
+  opacity: 0;
+}
+.scene-goal .scene-scrim::after { animation: scene-goal-flash .8s ease-out both; }
 @keyframes scene-goal-flash {
-  0% { box-shadow: inset 0 0 0 0 transparent; }
-  20% { box-shadow: inset 0 0 120px 8px color-mix(in srgb, var(--tone, #ffcf33) 60%, transparent); }
-  100% { box-shadow: inset 0 0 0 0 transparent; }
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .scene-idle .scene-image,
   .scene-goal .scene-stamp span,
-  .scene-goal .scene-scrim { animation: none; }
+  .scene-goal .scene-scrim::after { animation: none; }
   .scene-idle .scene-image { transform: scale(1.06); }
 }
 
@@ -4314,9 +4339,12 @@ select {
   animation: panel-rise 500ms var(--ease-emphasis) both;
 }
 
+/* Solo opacidad: animar `filter` aquí afectaba a paneles con backdrop-filter
+   (cristal) y forzaba repintados/churn de capas en WebKit → flickering en
+   cada cambio de pantalla. La opacidad se composita siempre. */
 @keyframes panel-rise {
-  from { opacity: 0; filter: brightness(.9); }
-  to { opacity: 1; filter: none; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .deal-card,
@@ -4391,8 +4419,8 @@ select {
 }
 
 @keyframes panel-refresh {
-  from { filter: brightness(1.08); }
-  to { filter: none; }
+  from { opacity: .88; }
+  to { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4479,6 +4507,10 @@ select {
   background: rgba(3,6,22,.74);
   -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
   animation: fade .18s ease;
+}
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .player-modal-card {
   position: relative;

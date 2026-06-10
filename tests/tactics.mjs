@@ -164,4 +164,77 @@ const d1 = simularPartido(t1, generateOpponent(5, new RNG(7)), new RNG(42));
 const d2 = simularPartido(t1, generateOpponent(5, new RNG(7)), new RNG(42));
 assert.deepEqual(d1, d2, 'misma semilla → mismo partido');
 
-console.log(`Tácticas (formación, extremos, 4-2-3-1, química, duelos, realismo): OK · reflejos=${concededReflex} < colocación=${concededPlaced} en ${N} partidos`);
+// === 10. Perfiles de hueco: el mismo jugador rinde distinto según dónde juegue ===
+// Jugadores sintéticos de control (sin rasgo, naciones distintas para no
+// contaminar con química; la época compartida afecta igual a ambos órdenes).
+const mkP = (id, position, stats) => ({
+  id, name: id, nation: `N_${id}`, era: '2000', position, rarity: 'common', stats, trait: null, tacticalType: null,
+});
+const stopper = (id) => mkP(id, 'DEF', { passing: 45, shooting: 30, defending: 92, dribbling: 40, pace: 55, physical: 90 });
+const carrilero = (id) => mkP(id, 'DEF', { passing: 82, shooting: 45, defending: 62, dribbling: 75, pace: 90, physical: 62 });
+const destructor = (id) => mkP(id, 'MID', { passing: 60, shooting: 35, defending: 90, dribbling: 45, pace: 60, physical: 88 });
+const creador = (id) => mkP(id, 'MID', { passing: 90, shooting: 60, defending: 45, dribbling: 86, pace: 70, physical: 55 });
+const ariete = (id) => mkP(id, 'FWD', { passing: 60, shooting: 92, defending: 25, dribbling: 70, pace: 78, physical: 75 });
+const extremo = (id) => mkP(id, 'FWD', { passing: 72, shooting: 65, defending: 25, dribbling: 92, pace: 92, physical: 55 });
+
+const r433 = (starting11) => calcularRatings({ name: 'X', formation: '4-3-3', items: [], starting11 });
+const onlyLine = (line, players) => ({ GK: [], DEF: [], MID: [], FWD: [], [line]: players });
+
+// Defensa 4-3-3: stoppers de centrales y carrileros de laterales > invertido.
+const backOk = r433(onlyLine('DEF', [carrilero('c1'), stopper('s1'), stopper('s2'), carrilero('c2')]));
+const backSwapped = r433(onlyLine('DEF', [stopper('s1'), carrilero('c1'), carrilero('c2'), stopper('s2')]));
+assert.ok(backOk.defense > backSwapped.defense,
+  `centrales de corte en el eje defienden más: ${backOk.defense} > ${backSwapped.defense}`);
+// La proyección de los laterales alimenta el ataque: con carrileros de lateral
+// el equipo genera más que con stoppers de lateral.
+assert.ok(backOk.attack > backSwapped.attack,
+  `laterales con pase/pace proyectan: ${backOk.attack} > ${backSwapped.attack}`);
+
+// Mediocampo 4-3-3: destructor de pivote (centro) y creadores de interiores.
+const midOk = r433(onlyLine('MID', [creador('i1'), destructor('dm'), creador('i2')]));
+const midSwapped = r433(onlyLine('MID', [destructor('dm'), creador('i1'), creador('i2')]));
+assert.ok(midOk.midfield > midSwapped.midfield,
+  `el pivote del 4-3-3 es el del centro: ${midOk.midfield} > ${midSwapped.midfield}`);
+
+// Tridente 4-3-3: rematador de 9 y regateadores de extremos.
+const triOk = r433(onlyLine('FWD', [extremo('w1'), ariete('cf'), extremo('w2')]));
+const triSwapped = r433(onlyLine('FWD', [ariete('cf'), extremo('w1'), extremo('w2')]));
+assert.ok(triOk.attack > triSwapped.attack,
+  `el 9 remata y los extremos regatean: ${triOk.attack} > ${triSwapped.attack}`);
+
+// 4-2-3-1: pivotes defensivos y, en la línea de creación, mediapunta de
+// pase/remate en el centro con regateadores por fuera > invertido.
+const mediapunta = mkP('mp', 'MID', { passing: 92, shooting: 80, defending: 40, dribbling: 75, pace: 65, physical: 60 });
+const bandaCreador = (id) => mkP(id, 'MID', { passing: 70, shooting: 60, defending: 35, dribbling: 92, pace: 90, physical: 50 });
+const r4231 = (mids) => calcularRatings({
+  name: 'X', formation: '4-2-3-1', items: [],
+  starting11: { GK: [], DEF: [], MID: mids, FWD: [] },
+});
+const engOk = r4231([destructor('p1'), destructor('p2'), bandaCreador('b1'), mediapunta, bandaCreador('b2')]);
+const engSwapped = r4231([destructor('p1'), destructor('p2'), mediapunta, bandaCreador('b1'), bandaCreador('b2')]);
+assert.ok(engOk.midfield > engSwapped.midfield,
+  `mediapunta en el centro de la creación: ${engOk.midfield} > ${engSwapped.midfield}`);
+// Y poner a un creador de pivote en vez del destructor baja el medio.
+const engBadPivot = r4231([bandaCreador('b1'), destructor('p1'), destructor('p2'), mediapunta, bandaCreador('b2')]);
+assert.ok(engOk.midfield > engBadPivot.midfield,
+  `los pivotes del 4-2-3-1 son de corte: ${engOk.midfield} > ${engBadPivot.midfield}`);
+
+// Los laterales entran al pool de asistentes (incidencia ofensiva real); los
+// centrales no.
+const fullTeam = buildBattleTeam({
+  name: 'Perfilado', formation: '4-3-3', items: [],
+  starting11: {
+    GK: [byId('gk_yashin_1966')],
+    DEF: [carrilero('c1'), stopper('s1'), stopper('s2'), carrilero('c2')],
+    MID: [creador('i1'), destructor('dm'), creador('i2')],
+    FWD: [extremo('w1'), ariete('cf'), extremo('w2')],
+  },
+});
+assert.ok(fullTeam.assisters.some((a) => a.name === 'c1') && fullTeam.assisters.some((a) => a.name === 'c2'),
+  'los laterales asisten');
+assert.ok(!fullTeam.assisters.some((a) => a.name === 's1'), 'los centrales no asisten');
+// El 9 pesa más como rematador que el extremo con menos remate.
+const wShooter = (name) => fullTeam.shooters.find((sh) => sh.name === name)?.weight || 0;
+assert.ok(wShooter('cf') > wShooter('w1'), `el 9 remata más: ${wShooter('cf')} > ${wShooter('w1')}`);
+
+console.log(`Tácticas (formación, extremos, 4-2-3-1, perfiles de hueco, química, duelos, realismo): OK · reflejos=${concededReflex} < colocación=${concededPlaced} en ${N} partidos`);

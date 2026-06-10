@@ -139,10 +139,12 @@ function renderRoute(route, draw, hint = 'auto') {
     }
     if (changingRoute && !prefersReducedMotion()) {
       screen.classList.add('screen-enter', `screen-enter-${direction}`);
+      // 540ms > la animación interna más larga (panel-rise 500ms): quitar la
+      // clase antes cortaba esas animaciones a medias (salto de 1 frame).
       setTimeout(() => {
         screen.classList.remove('screen-enter', `screen-enter-${direction}`);
         root.classList.remove('app-route-changing');
-      }, 460);
+      }, 540);
     } else if (from === route && !prefersReducedMotion()) {
       screen.classList.add('screen-refresh');
       setTimeout(() => screen.classList.remove('screen-refresh'), 240);

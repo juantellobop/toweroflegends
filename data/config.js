@@ -123,6 +123,64 @@ export function formationType(formation) {
 export const LINES = ['GK', 'DEF', 'MID', 'FWD'];
 export const RARITIES = ['common', 'rare', 'epic', 'legend'];
 
+// Perfil táctico de cada hueco (por formación → línea → slotIndex). No cambia
+// qué posiciones acepta el hueco (eso es FORMATION_SLOT_RULES), solo cómo
+// puntúa el jugador que lo ocupa:
+//  DEF: 'central' (corte/físico) | 'lateral' (recorrido: pace/pase, proyección)
+//  MID: 'pivote' (corte+físico, salida) | 'mixto' (box-to-box) |
+//       'interior' (pase/regate, llegada) | 'banda' (regate/pace)
+//  ENG: 'mediapunta' (pase/remate) | 'extremo' (regate/pace)
+//  FWD: 'nueve' (remate, referencia del tridente) | 'extremo' (regate/pace) |
+//       'delantero' (punta genérico en duplas o solo)
+// El orden sigue los slots de izquierda a derecha tal como los pinta la UI.
+export const SLOT_PROFILES = {
+  '4-3-3': {
+    DEF: ['lateral', 'central', 'central', 'lateral'],
+    MID: ['interior', 'pivote', 'interior'],
+    FWD: ['extremo', 'nueve', 'extremo'],
+  },
+  '4-4-2': {
+    DEF: ['lateral', 'central', 'central', 'lateral'],
+    MID: ['banda', 'mixto', 'mixto', 'banda'],
+    FWD: ['delantero', 'delantero'],
+  },
+  '4-2-3-1': {
+    DEF: ['lateral', 'central', 'central', 'lateral'],
+    MID: ['pivote', 'pivote', 'extremo', 'mediapunta', 'extremo'],
+    FWD: ['delantero'],
+  },
+  '3-5-2': {
+    DEF: ['central', 'central', 'central'],
+    MID: ['banda', 'interior', 'pivote', 'interior', 'banda'],
+    FWD: ['delantero', 'delantero'],
+  },
+  '5-3-2': {
+    DEF: ['lateral', 'central', 'central', 'central', 'lateral'],
+    MID: ['mixto', 'pivote', 'mixto'],
+    FWD: ['delantero', 'delantero'],
+  },
+  '4-3-1-2': {
+    DEF: ['lateral', 'central', 'central', 'lateral'],
+    MID: ['mixto', 'pivote', 'mixto', 'mediapunta'],
+    FWD: ['delantero', 'delantero'],
+  },
+  '3-4-3': {
+    DEF: ['central', 'central', 'central'],
+    MID: ['banda', 'mixto', 'mixto', 'banda'],
+    FWD: ['extremo', 'nueve', 'extremo'],
+  },
+};
+
+// Perfil por defecto cuando la formación no define uno para el hueco.
+const DEFAULT_PROFILE = { GK: 'gk', DEF: 'central', MID: 'mixto', FWD: 'delantero' };
+
+export function slotProfile(formation, line, slotIndex, role = line) {
+  const fromMap = SLOT_PROFILES[formation]?.[line]?.[slotIndex];
+  if (fromMap) return fromMap;
+  if (role === 'ENG') return 'mediapunta';
+  return DEFAULT_PROFILE[line] || 'mixto';
+}
+
 // Reglas de slot por formación. `accepts` define qué posiciones admite el hueco;
 // `role` cómo puntúa ese hueco (ENG = híbrido medio/ataque).
 // Los EXTREMOS (huecos anchos de la línea de ataque) admiten delanteros o medios.
@@ -160,11 +218,13 @@ export function formationLineSlots(formation, line) {
   const rules = FORMATION_SLOT_RULES[formation]?.[line] || {};
   return Array.from({ length: count }, (_, slotIndex) => {
     const rule = rules[slotIndex] || {};
+    const role = rule.role || line;
     return {
       line,
       slotIndex,
       accepts: rule.accepts || [line],
-      role: rule.role || line,
+      role,
+      profile: slotProfile(formation, line, slotIndex, role),
     };
   });
 }
