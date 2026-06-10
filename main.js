@@ -3,10 +3,11 @@
 
 import {
   createRun, rollPlayerPack, rollItemPack, choosePlayerCard, chooseItemCard,
+  isNationPackLevel, rollNationPack,
   playMatch, applyResult, advanceLevel, prepareOpponent, retryLevel,
   togglePlayerInLineup, placePlayerInLineup, setFormation,
 } from './state/run.js';
-import { renderPlayerPack, renderItemPack } from './ui/packScreen.js';
+import { renderPlayerPack, renderItemPack, renderNationPack } from './ui/packScreen.js';
 import { renderBuild } from './ui/buildScreen.js';
 import { renderScouting } from './ui/scoutingScreen.js';
 import { renderMatch } from './ui/matchScreen.js';
@@ -238,11 +239,19 @@ function render(navHint = 'auto') {
   switch (state.phase) {
     case 'playerPack':
       renderRoute('playerPack', () => {
-        renderPlayerPack(root, state, rollPlayerPack(state), (tpl) => {
+        const onPick = (tpl) => {
           choosePlayerCard(state, tpl);
           state.phase = 'itemPack';
           render('forward');
-        });
+        };
+        // Cada 5 niveles el sobre normal se reemplaza por el de selecciones:
+        // se elige una selección (nación + año) y de ella cualquier jugador.
+        const nationTeams = isNationPackLevel(state.level) ? rollNationPack(state) : null;
+        if (nationTeams && nationTeams.length) {
+          renderNationPack(root, state, nationTeams, onPick);
+        } else {
+          renderPlayerPack(root, state, rollPlayerPack(state), onPick);
+        }
       }, navHint);
       break;
 

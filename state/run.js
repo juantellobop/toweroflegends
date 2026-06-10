@@ -482,6 +482,56 @@ export function rollPlayerPack(state) {
   return state.playerChoices;
 }
 
+// ¿Toca el sobre especial de selecciones en este nivel? (5, 10, 15…)
+export function isNationPackLevel(level) {
+  const every = CONFIG.NATION_PACK_EVERY;
+  return every > 0 && level % every === 0;
+}
+
+// Agrupa el catálogo por selección (nación + año) y marca, contra la plantilla
+// actual, qué cartas son nuevas. Los jugadores van ordenados por OVR.
+function nationTeamsFrom(catalog, squad) {
+  const ownedIds = new Set(squad.map((p) => p.id));
+  const groups = new Map();
+  for (const player of catalog) {
+    const id = `${player.nation}|${player.era}`;
+    if (!groups.has(id)) groups.set(id, { id, nation: player.nation, era: player.era, players: [] });
+    groups.get(id).players.push(player);
+  }
+  return [...groups.values()].map((team) => {
+    const players = team.players
+      .slice()
+      .sort((a, b) => playerOVR(b) - playerOVR(a))
+      .map((p) => ({ ...p, selectable: !ownedIds.has(p.id) }));
+    const fresh = players.filter((p) => p.selectable);
+    return {
+      ...team,
+      players,
+      newCount: fresh.length,
+      topOvr: fresh.length ? playerOVR(fresh[0]) : 0,
+    };
+  });
+}
+
+// Genera el sobre especial: selecciones distintas (nación + año) con cartas
+// nuevas suficientes para que la elección tenga sustancia; si no alcanzan,
+// se admite cualquier selección con al menos una carta nueva.
+export function rollNationPack(state) {
+  const count = CONFIG.NATION_PACK_TEAMS;
+  const teams = nationTeamsFrom(state.roster || getPlayableRoster(), state.squad);
+  let eligible = teams.filter((team) => team.newCount >= CONFIG.NATION_PACK_MIN_PLAYERS);
+  if (eligible.length < count) eligible = teams.filter((team) => team.newCount > 0);
+  const pool = eligible.slice();
+  const chosen = [];
+  while (chosen.length < count && pool.length) {
+    const pick = state.rng.pick(pool);
+    pool.splice(pool.indexOf(pick), 1);
+    chosen.push(pick);
+  }
+  state.nationChoices = chosen;
+  return chosen;
+}
+
 // Genera el sobre de objeto del nivel actual.
 export function rollItemPack(state) {
   const meta = metaBonuses(state.items);
@@ -500,6 +550,7 @@ export function choosePlayerCard(state, template) {
   // Si hay hueco compatible, colócalo automáticamente.
   togglePlayerInLineup(state, card);
   state.playerChoices = null;
+  state.nationChoices = null;
   return card;
 }
 
@@ -656,6 +707,7 @@ export function createRun(opts = {}) {
     pendingItemPack: CONFIG.ITEM_PACK_BASE,
     pendingBias: RARITY_BIAS.inicial,
     playerChoices: null,
+    nationChoices: null,
     itemChoices: null,
     lastMatch: null,
     lastReward: null,

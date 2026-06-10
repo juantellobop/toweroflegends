@@ -59,6 +59,14 @@ export const CONFIG = {
   PACK_EMPATE: 2,
   ITEM_PACK_BASE: 3, // objetos a elegir; +1 en goleada
 
+  // --- Sobre especial de selecciones ---
+  // Cada N niveles (5, 10, 15…) el sobre de jugador se reemplaza por uno
+  // especial: se sortean selecciones (nación + año) presentes en el roster,
+  // se elige una y de ella se lleva cualquier jugador.
+  NATION_PACK_EVERY: 5,
+  NATION_PACK_TEAMS: 3, // selecciones a elegir en el sobre especial
+  NATION_PACK_MIN_PLAYERS: 4, // cartas nuevas mínimas para entrar al sorteo
+
 };
 
 // Fuerza objetivo del rival histórico en un nivel dado.

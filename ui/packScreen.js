@@ -9,7 +9,8 @@ import { playerCardHTML, itemCardHTML } from './cards.js';
 import { esc, prefersReducedMotion } from './dom.js';
 import { haptic } from '../match/feedback.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
-import { t } from '../data/i18n.js';
+import { flagSrcForNation } from '../data/flags.js';
+import { localizeEra, localizeNation, t } from '../data/i18n.js';
 
 const COPY = {
   player: {
@@ -21,6 +22,11 @@ const COPY = {
     title: 'pack.itemTitle',
     hint: 'pack.itemHint',
     open: 'pack.itemOpen',
+  },
+  nation: {
+    title: 'pack.nationTitle',
+    hint: 'pack.nationHint',
+    open: 'pack.nationOpen',
   },
 };
 
@@ -97,6 +103,63 @@ export function renderItemPack(root, state, choices, onPick) {
   wire(root, choices, onPick);
 }
 
+// === Sobre especial de selecciones (cada 5 niveles) ===
+
+function nationLabel(team) {
+  return `${localizeNation(team.nation)} ${localizeEra(team.era)}`;
+}
+
+// Carta de selección: bandera grande + nación + año, con cuántas cartas
+// nuevas aporta y el mejor OVR disponible como pista para decidir.
+function nationTeamCardHTML(team) {
+  return `
+  <div class="card nation-team-card rarity-legend" data-id="${esc(team.id)}">
+    <div class="card-head">
+      <div class="card-pos">${esc(localizeEra(team.era))}</div>
+      <div class="card-rarity">${t('pack.nationBadge')}</div>
+    </div>
+    <div class="nation-flag" aria-hidden="true">
+      <img src="${esc(flagSrcForNation(team.nation))}" alt="" loading="eager" decoding="async" />
+    </div>
+    <div class="card-name">${esc(localizeNation(team.nation))}</div>
+    <div class="card-meta">
+      <span class="chip">${t('pack.nationNew', { n: team.newCount })}</span>
+      <span class="chip">${t('pack.nationTopOvr', { ovr: team.topOvr })}</span>
+    </div>
+  </div>`;
+}
+
+// Sobre de selecciones: primero se elige una selección (cartas con bandera) y
+// después, de su plantel completo, el jugador que se quiera llevar.
+export function renderNationPack(root, state, teams, onPick) {
+  const body = teams.map((team, i) =>
+    dealCard(nationTeamCardHTML(team), team.id, i, 'nation')
+  ).join('');
+  root.innerHTML = shell(state, 'nation', teams.length, body);
+  wire(root, teams, (team) => renderNationRoster(root, state, team, onPick));
+}
+
+// Segunda etapa: plantel completo de la selección elegida. Las cartas brotan
+// con el mismo reparto escalonado del sobre; las ya poseídas van apagadas.
+function renderNationRoster(root, state, team, onPick) {
+  const body = team.players.map((p, i) =>
+    dealCard(playerCardHTML(p, { idValue: p.id, disabled: p.selectable === false }), p.id, i, 'nation', p.selectable !== false)
+  ).join('');
+  root.innerHTML = `
+    <section class="screen pack-screen pixel-screen nation-roster-screen" data-kind="nation">
+      <header class="nav-large pack-head">
+        <div class="level-badge">${t('generic.level', { level: state.level })}</div>
+        <h1 class="large-title">${esc(nationLabel(team))}</h1>
+        <p class="hint">${t('pack.nationPickHint')}</p>
+      </header>
+      <div class="pack-stage nation-roster-stage">
+        <div class="pack-deal nation-roster ${prefersReducedMotion() ? '' : 'dealing'} no-flip" id="deal">${body}</div>
+      </div>
+    </section>`;
+  window.scrollTo(0, 0);
+  wireChoice(root, team.players, onPick);
+}
+
 function wire(root, choices, onPick) {
   const opener = root.querySelector('#opener');
   const openBar = root.querySelector('#openBar');
@@ -104,7 +167,6 @@ function wire(root, choices, onPick) {
   const cards = Array.from(root.querySelectorAll('.deal-card'));
   const reduce = prefersReducedMotion();
   let opened = false;
-  let chosen = false;
 
   // --- Apertura del sobre: sacudida + fogonazo, y las cartas brotan ---
   function openPack() {
@@ -143,11 +205,19 @@ function wire(root, choices, onPick) {
   });
   root.querySelector('#openBtn').addEventListener('click', openPack);
 
-  // --- Elección de carta (solo tras abrir el sobre) ---
-  // Al tocar una carta se confirma directamente: se eleva, las demás retroceden
-  // y la elegida "vuela" antes de avanzar. Sin botón de confirmación.
+  wireChoice(root, choices, onPick, () => opened);
+}
+
+// --- Elección de carta (solo tras abrir el sobre) ---
+// Al tocar una carta se confirma directamente: se eleva, las demás retroceden
+// y la elegida "vuela" antes de avanzar. Sin botón de confirmación.
+function wireChoice(root, choices, onPick, isOpen = () => true) {
+  const cards = Array.from(root.querySelectorAll('.deal-card'));
+  const reduce = prefersReducedMotion();
+  let chosen = false;
+
   function choose(card) {
-    if (!opened || chosen) return;
+    if (!isOpen() || chosen) return;
     if (card.classList.contains('disabled-deal')) return;
     const choice = choices.find((x) => x.id === card.dataset.id);
     if (!choice || choice.selectable === false) return;

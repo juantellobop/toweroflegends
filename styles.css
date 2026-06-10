@@ -731,6 +731,33 @@ select {
 .deal-card.disabled-deal { cursor: not-allowed; }
 .deal-card.disabled-deal:hover { transform: none; filter: none; }
 
+/* === Sobre especial de selecciones (cada 5 niveles) === */
+/* Carta de selección: bandera protagonista + nación + año + pistas. */
+.nation-team-card .nation-flag {
+  position: relative;
+  height: 96px;
+  margin: 10px 0 6px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--separator);
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, rgba(0,0,0,.32), rgba(255,255,255,.06));
+}
+.nation-team-card .nation-flag img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+.nation-team-card .card-name { font-size: var(--t-title-3); }
+
+/* Plantel de la selección elegida: rejilla amplia para hasta 12 cartas. */
+.nation-roster { max-width: 1040px; }
+.nation-roster-stage {
+  min-height: 0;
+  padding-top: var(--space-2);
+  justify-content: center;
+}
+
 .pack-confirm {
   /* En flujo, justo debajo de las cartas (no fijada abajo del todo). */
   display: flex; align-items: center; gap: var(--space-4);
