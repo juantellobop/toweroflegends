@@ -68,7 +68,7 @@ function choosePhase(att, def, rng, phaseHint) {
     { value: 'corner', weight: 8 + Math.max(0, att.ratings.attack - def.ratings.defense) * 0.08 },
     { value: 'free_kick', weight: 9 },
     { value: 'throw_in', weight: 7 },
-    { value: 'penalty', weight: 1.2 },
+    { value: 'penalty', weight: 1.0 },
   ], rng);
 }
 
@@ -158,7 +158,8 @@ export function simulateHighlight(ctx) {
     const midfieldEdge = phase === 'counter' ? 7 : phaseHint === 'high_press' ? -9 : 0;
 
     // Duelo de construcción: regate del que conduce + pase del enlace, contra el
-    // corte y el físico del defensor que sale a presionar.
+    // corte y el físico del defensor que sale a presionar. Ambos lados son medias
+    // ponderadas (misma escala): equipos iguales → 50%.
     const attBuildStat = 0.5 * statOf(carrier, 'dribbling', att.ratings.midfield) +
       0.5 * statOf(passer, 'passing', att.ratings.midfield);
     const defBuildStat = 0.5 * statOf(defender, 'defending', def.ratings.midfield) +
@@ -166,7 +167,7 @@ export function simulateHighlight(ctx) {
     const buildP = clamp(
       ratio(
         blend(att.ratings.midfield, attBuildStat) + midfieldEdge,
-        blend(def.ratings.midfield + def.ratings.defense * 0.18, defBuildStat)
+        blend(0.82 * def.ratings.midfield + 0.18 * def.ratings.defense, defBuildStat)
       ),
       0.14,
       0.88
@@ -184,8 +185,8 @@ export function simulateHighlight(ctx) {
         0.5 * statOf(defender, 'pace', def.ratings.defense);
       const creationP = clamp(
         ratio(
-          blend(att.ratings.attack + att.ratings.midfield * 0.24, attCreateStat) + creationBonus,
-          blend(def.ratings.defense + def.ratings.midfield * 0.12, defCreateStat)
+          blend(0.76 * att.ratings.attack + 0.24 * att.ratings.midfield, attCreateStat) + creationBonus,
+          blend(0.88 * def.ratings.defense + 0.12 * def.ratings.midfield, defCreateStat)
         ),
         0.18,
         0.9
@@ -197,21 +198,21 @@ export function simulateHighlight(ctx) {
       } else {
         const skillDelta = att.ratings.attack - def.ratings.defense;
         const shooterSkill = shooter.shooting || shooter.rating || att.ratings.attack;
-        const quality = ratio(att.ratings.attack + shooterSkill * 0.25, def.ratings.defense + def.ratings.gk * 0.12);
+        const quality = ratio(0.8 * att.ratings.attack + 0.2 * shooterSkill, 0.88 * def.ratings.defense + 0.12 * def.ratings.gk);
         xg = clamp(
-          0.11 + 0.27 * quality + skillDelta / 270 +
+          0.18 + 0.3 * quality + skillDelta / 270 +
             (phase === 'counter' ? 0.06 : 0) +
             (phase === 'free_kick' ? -0.04 : 0) +
             (phase === 'corner' ? -0.02 : 0) +
             (rng.next() * 0.08 - 0.03),
-          0.04,
-          0.58
+          0.05,
+          0.62
         );
 
         const onTargetP = clamp(
-          0.48 + skillDelta / 185 + (phase === 'corner' ? -0.06 : 0) + (phase === 'free_kick' ? -0.04 : 0),
-          0.24,
-          0.78
+          0.57 + skillDelta / 185 + (phase === 'corner' ? -0.06 : 0) + (phase === 'free_kick' ? -0.04 : 0),
+          0.3,
+          0.82
         );
         // Bloqueo: el defensor concreto se cruza (su defensa contra el disparo).
         const blockDef = blend(def.ratings.defense, statOf(defender, 'defending', def.ratings.defense));
@@ -222,8 +223,8 @@ export function simulateHighlight(ctx) {
           terminal = 'bloqueo';
         } else {
           // Mano a mano: rematador contra reflejos/colocación del portero concreto.
-          const finishSkill = ratio(shooterSkill + att.ratings.attack * 0.15, blend(def.ratings.gk, keeperSkill) + 4);
-          const goalP = clamp(xg * (1.0 + finishSkill), 0.05, 0.64);
+          const finishSkill = ratio(0.85 * shooterSkill + 0.15 * att.ratings.attack, blend(def.ratings.gk, keeperSkill) + 4);
+          const goalP = clamp(xg * (1.0 + finishSkill), 0.05, 0.68);
           terminal = rng.bernoulli(goalP) ? 'gol' : 'parada';
         }
       }

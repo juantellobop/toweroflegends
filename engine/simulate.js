@@ -3,7 +3,7 @@
 // un evento compacto. La presentación se apoya en escenas pixelart estáticas,
 // no en una simulación continua de jugadores.
 
-import { CONFIG, formationType, TYPE_COUNTER } from '../data/config.js';
+import { CONFIG } from '../data/config.js';
 import { buildBattleTeam } from './teamRatings.js';
 import { matchStealBonus } from './items.js';
 import { ratio, simulateHighlight } from './highlights.js';
@@ -12,23 +12,32 @@ export { ratio };
 
 const clampRating = (v) => Math.max(1, Math.min(99, Math.round(v * 10) / 10));
 
-// Ventaja de tipo táctico (counter piedra-papel-tijera): si el dibujo de un equipo
-// cuenta el del rival, sube su ataque y su medio en TYPE_BONUS. Se aplica antes de
-// repartir la posesión para que también pese ahí. Sin tipo conocido → sin efecto.
-function applyTypeEdge(team, bonus) {
+// Tarjeta roja: el equipo que comete la falta roja juega en inferioridad el resto
+// del partido (las jugadas se procesan en orden cronológico, así que mutar sus
+// ratings afecta solo a las jugadas posteriores). Resta a defensa y medio.
+function applyRedCard(team) {
   team.ratings = {
     ...team.ratings,
-    attack: clampRating(team.ratings.attack * (1 + bonus)),
-    midfield: clampRating(team.ratings.midfield * (1 + bonus)),
+    defense: clampRating(team.ratings.defense * (1 - CONFIG.RED_CARD_PENALTY)),
+    midfield: clampRating(team.ratings.midfield * (1 - CONFIG.RED_CARD_PENALTY)),
   };
 }
 
-function applyTypeCounter(A, B) {
-  const typeA = formationType(A.formation);
-  const typeB = formationType(B.formation);
-  if (!typeA || !typeB || typeA === typeB) return;
-  if (TYPE_COUNTER[typeA] === typeB) applyTypeEdge(A, CONFIG.TYPE_BONUS);
-  else if (TYPE_COUNTER[typeB] === typeA) applyTypeEdge(B, CONFIG.TYPE_BONUS);
+// Empuje del que va por detrás: el equipo atacante que pierde se vuelca (sube su
+// ataque y medio según los goles de desventaja, hasta 2). Modela "ir a por el
+// partido"; se calcula por jugada con el marcador cronológico del momento.
+function withComebackPush(att, score, side) {
+  const deficit = side === 'A' ? score.B - score.A : score.A - score.B;
+  if (deficit <= 0) return att;
+  const push = Math.min(deficit, 2) * CONFIG.COMEBACK_PUSH;
+  return {
+    ...att,
+    ratings: {
+      ...att.ratings,
+      attack: clampRating(att.ratings.attack * (1 + push)),
+      midfield: clampRating(att.ratings.midfield * (1 + push)),
+    },
+  };
 }
 
 // Reparte seqA jugadas de "A" y seqB de "B" a lo largo de 90 minutos.
@@ -41,8 +50,9 @@ function interleaveOverTime(seqA, seqB, rng) {
     [slots[i], slots[j]] = [slots[j], slots[i]];
   }
   const total = slots.length || 1;
+  // La última jugada cae en el 90': los partidos pueden decidirse sobre la bocina.
   return slots.map((side, i) => ({
-    minute: Math.max(1, Math.min(90, Math.round(((i + 1) / (total + 1)) * 90))),
+    minute: Math.max(1, Math.min(90, Math.round(((i + 1) / total) * 90))),
     side,
   }));
 }
@@ -57,9 +67,17 @@ function applyScore(event, score) {
 }
 
 function makeHighlight({ id, minute, side, A, B, score, rng, phaseHint }) {
-  const att = side === 'A' ? A : B;
+  const att = withComebackPush(side === 'A' ? A : B, score, side);
   const def = side === 'A' ? B : A;
   return simulateHighlight({ id, minute, side, att, def, score, rng, phaseHint });
+}
+
+// Contabiliza un evento: actualiza marcador, aplica tarjeta roja si la hubo
+// (al equipo que defiende, que es quien comete la falta) y lo guarda.
+function recordEvent(event, A, B, score, events) {
+  applyScore(event, score);
+  if (event.pattern === 'red_foul') applyRedCard(event.side === 'A' ? B : A);
+  events.push(event);
 }
 
 // Simula el partido completo. teamA = jugador, teamB = rival.
@@ -68,7 +86,10 @@ export function simularPartido(teamA, teamB, rng) {
   const A = buildBattleTeam(teamA);
   const B = buildBattleTeam(teamB);
 
-  applyTypeCounter(A, B);
+  // Ratings de salida: lo que se devuelve al final. Una tarjeta roja muta
+  // team.ratings durante el partido, pero el informe refleja el once inicial.
+  const startRatingsA = A.ratings;
+  const startRatingsB = B.ratings;
 
   const possessionA = ratio(A.ratings.midfield, B.ratings.midfield);
   const seqA = Math.round(CONFIG.BASE_SEQUENCES * possessionA);
@@ -95,20 +116,22 @@ export function simularPartido(teamA, teamB, rng) {
       rng,
       phaseHint,
     });
-    applyScore(event, score);
-    events.push(event);
+    recordEvent(event, A, B, score, events);
 
     if (event.type === 'perdida') {
       maybeCounter(minute, side === 'A' ? 'B' : 'A', A, B, score, events, rng, () => `hl_${++eventSeq}`);
     }
   }
 
+  // Desempate por número de secuencia: comparar ids como texto ordenaría
+  // "hl_10" antes que "hl_9" y desordenaría los marcadores acumulados.
+  const seqOf = (id) => parseInt(String(id).replace(/\D+/g, ''), 10) || 0;
   return {
     golesA: score.A,
     golesB: score.B,
-    eventos: events.sort((a, b) => a.minute - b.minute || String(a.id).localeCompare(String(b.id))),
-    ratingsA: A.ratings,
-    ratingsB: B.ratings,
+    eventos: events.sort((a, b) => a.minute - b.minute || seqOf(a.id) - seqOf(b.id)),
+    ratingsA: startRatingsA,
+    ratingsB: startRatingsB,
   };
 }
 
@@ -124,6 +147,5 @@ function maybeCounter(minute, side, A, B, score, events, rng, nextId) {
     rng,
     phaseHint: 'counter',
   });
-  applyScore(event, score);
-  events.push(event);
+  recordEvent(event, A, B, score, events);
 }

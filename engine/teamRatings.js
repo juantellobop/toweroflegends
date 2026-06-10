@@ -37,18 +37,15 @@ function assignPlayersToSlots(formation, line, players) {
   const slots = formationLineSlots(formation, line).map((slot) => ({ ...slot, player: null }));
   const remaining = (players || []).filter(Boolean).slice();
 
-  function fill(slot, predicate) {
-    const idx = remaining.findIndex((player) => predicate(player, slot));
+  function fill(slot) {
+    const idx = remaining.findIndex((player) => slot.accepts.includes(player.position));
     if (idx < 0) return;
     slot.player = remaining.splice(idx, 1)[0];
   }
 
-  slots
-    .filter((slot) => slot.accepts.length === 1)
-    .forEach((slot) => fill(slot, (player) => slot.accepts.includes(player.position)));
-  slots
-    .filter((slot) => !slot.player && slot.accepts.length > 1)
-    .forEach((slot) => fill(slot, (player) => slot.accepts.includes(player.position)));
+  // En orden de hueco: cada slot toma el primer compatible que quede (preserva el
+  // orden del array; debe coincidir con assignLineToSlots de state/run.js).
+  slots.forEach(fill);
 
   return slots.filter((slot) => slot.player);
 }

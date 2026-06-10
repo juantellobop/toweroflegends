@@ -988,12 +988,37 @@ select {
 .chem-pill b { font-family: var(--font-rounded); font-size: var(--t-title-3); color: var(--success); }
 
 .header-pills { display: flex; align-items: stretch; gap: var(--space-3); }
+
+/* Aporte de objetos junto al rating del equipo */
+.rt-valwrap { display: inline-flex; align-items: baseline; gap: 4px; }
+.rt-delta { font-size: var(--t-caption-2); font-weight: 800; font-family: var(--font-rounded); line-height: 1; }
+.rt-delta.up { color: var(--success); }
+.rt-delta.down { color: var(--danger); }
+
+/* Leyenda de química bajo el campo */
+.chem-legend {
+  display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-2); font-size: var(--t-caption-2); color: var(--label-secondary);
+}
+.chem-legend .cl-key { display: inline-flex; align-items: center; gap: 5px; }
+.chem-legend .cl-swatch { width: 16px; height: 0; border-top-width: 2px; border-top-style: solid; }
+.chem-legend .cl-swatch.nation { border-top-color: var(--arcade-yellow); }
+.chem-legend .cl-swatch.era { border-top-color: var(--arcade-cyan); border-top-style: dashed; }
+.chem-legend .cl-sep { flex: 1; }
+.chem-legend .cl-line { font-weight: 600; opacity: 0.6; }
+.chem-legend .cl-line.has { opacity: 1; color: var(--label-primary); }
+.chem-legend .cl-line b { font-family: var(--font-rounded); color: var(--success); margin-left: 2px; }
+
+/* Badge ×N de copias de objeto acumuladas */
+.item-card { position: relative; }
+.item-stack {
+  position: absolute; top: 6px; right: 6px; z-index: 2;
+  font-family: var(--font-rounded); font-weight: 800; font-size: var(--t-caption-1);
+  color: #fff; background: var(--brand); border-radius: var(--radius-s);
+  padding: 1px 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+}
+.item-stack-note { margin-top: 4px; font-size: var(--t-caption-2); color: var(--label-secondary); font-style: italic; }
 .tactic-pill b { color: var(--label-primary); font-size: var(--t-callout); }
-.tactic-pill .tactic-edge { font-size: var(--t-caption-2); font-weight: 700; letter-spacing: 0.3px; }
-.tactic-pill.matchup-edge b, .tactic-pill.matchup-edge .tactic-edge { color: var(--success); }
-.tactic-pill.matchup-weak b, .tactic-pill.matchup-weak .tactic-edge { color: var(--danger); }
-.tactic-pill.matchup-even .tactic-edge { color: var(--label-secondary); }
-.scout-counter-hint { margin: var(--space-1) 0 0; font-size: var(--t-caption-1); color: var(--success); font-weight: 600; }
 
 .formation-seg { margin-bottom: var(--space-4); }
 
@@ -2586,7 +2611,10 @@ select {
   margin: 0 auto;
 }
 
-.team-select-screen .field[data-formation="4-3-1-2"] {
+/* Dibujos de 5 líneas (enganche/creación entre medio y ataque): campo más alto
+   y carta algo menor para que las líneas extra no se pisen. */
+.team-select-screen .field[data-formation="4-3-1-2"],
+.team-select-screen .field[data-formation="4-2-3-1"] {
   --lineup-card: clamp(74px, 7.6vw, 94px);
   height: min(82vh, 820px, calc(100vh - 180px));
   min-height: 580px;
@@ -2633,7 +2661,8 @@ select {
     width: min(100%, 56vh, 620px);
   }
 
-  .team-select-screen .field[data-formation="4-3-1-2"] {
+  .team-select-screen .field[data-formation="4-3-1-2"],
+  .team-select-screen .field[data-formation="4-2-3-1"] {
     height: calc(100vh - 210px);
     min-height: 0;
     width: min(100%, 58vh, 640px);
@@ -3863,7 +3892,8 @@ select {
     aspect-ratio: 3 / 4;
   }
 
-  .team-select-screen .field[data-formation="4-3-1-2"] {
+  .team-select-screen .field[data-formation="4-3-1-2"],
+  .team-select-screen .field[data-formation="4-2-3-1"] {
     --lineup-card: 54px;
     height: min(62vh, calc(100vh - 300px));
     min-height: 430px;
@@ -4871,28 +4901,28 @@ button.primary:active:not(:disabled),
     font-size: 9px;
   }
 
-  /* Más alto = más cancha aprovechada y caras/nombres más grandes. */
+  /* Campo compacto: deja ver suplentes/ratings sin scroll en pantallas cortas. */
   .team-select-screen .field,
   .team-select-screen .field[data-formation="4-3-1-2"] {
     width: 100%;
-    height: min(calc((100vw - 24px) * 4 / 3), calc(100svh - 250px));
-    min-height: 440px;
+    height: min(calc((100vw - 24px) * 7 / 6), calc(100svh - 250px), 415px);
+    min-height: 390px;
     aspect-ratio: auto;
   }
 
   .team-select-screen,
   .team-select-screen .field[data-formation="4-3-1-2"] {
-    --lineup-card: 64px;
+    --lineup-card: 60px;
   }
 
   .team-select-screen .field-chip {
-    min-height: 92px;
-    padding: 5px 2px 3px;
+    min-height: 86px;
+    padding: 4px 2px 3px;
   }
 
   .team-select-screen .chip-face {
-    width: 56px;
-    height: 56px;
+    width: 52px;
+    height: 52px;
     min-width: 0;
     min-height: 0;
     margin-bottom: 1px;
@@ -4916,6 +4946,12 @@ button.primary:active:not(:disabled),
     width: 18px;
     height: 18px;
     font-size: 9px;
+  }
+
+  /* Leyenda de química compacta: no debe empujar los suplentes bajo el CTA fijo. */
+  .chem-legend {
+    margin-top: 4px;
+    gap: var(--space-1) var(--space-2);
   }
 
   .team-select-screen .ratings-glass {

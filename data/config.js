@@ -4,9 +4,13 @@
 export const CONFIG = {
   // --- Motor de simulación ---
   THETA: 1.6, // dominio del rating frente a la suerte
-  BASE_SEQUENCES: 22, // jugadas de ataque totales por partido
+  BASE_SEQUENCES: 24, // jugadas de ataque totales por partido
   COUNTER_CHANCE: 0.2, // prob. de contraataque tras una pérdida
-  W_DUEL: 0.3, // peso del duelo individual en cada jugada (0.7 sigue siendo el equipo)
+  W_DUEL: 0.4, // peso del duelo individual en cada jugada (0.6 sigue siendo el equipo)
+
+  // --- Realismo del partido ---
+  RED_CARD_PENALTY: 0.1, // un expulsado resta ~10% a defensa y medio del equipo el resto del partido
+  COMEBACK_PUSH: 0.05, // empuje al equipo que va por detrás (por gol de diferencia, hasta 2 goles)
 
   // --- Vidas / fin de run ---
   LIVES: 1, // 1 = perder termina la run; 3 = sistema de vidas
@@ -48,9 +52,6 @@ export const CONFIG = {
   CHEM_CORE_CAP: 3, // tope del bonus de núcleo nacional
   CHEM_TACTIC: 1, // bonus a ataque+medio si tu plantilla encaja con el tipo del dibujo
 
-  // --- Tipos tácticos (counter piedra-papel-tijera) ---
-  TYPE_BONUS: 0.06, // ventaja a ataque+medio si tu tipo cuenta el del rival
-
   // --- Recompensas (tamaño de sobre por resultado) ---
   PACK_GOLEADA: 5, // dif >= 5
   PACK_AMPLIA: 4, // dif 3-4
@@ -79,9 +80,12 @@ export const RARITY_BIAS = {
 };
 
 // Definición de formaciones disponibles: jugadores por línea.
+// En 4-2-3-1 el "5" de mediocampo son 2 pivotes (MID) + 3 de la línea de creación
+// (extremos + mediapunta, rol ENG) por detrás del único delantero.
 export const FORMATIONS = {
   '4-3-3': { GK: 1, DEF: 4, MID: 3, FWD: 3 },
   '4-4-2': { GK: 1, DEF: 4, MID: 4, FWD: 2 },
+  '4-2-3-1': { GK: 1, DEF: 4, MID: 5, FWD: 1 },
   '3-5-2': { GK: 1, DEF: 3, MID: 5, FWD: 2 },
   '5-3-2': { GK: 1, DEF: 5, MID: 3, FWD: 2 },
   '4-3-1-2': { GK: 1, DEF: 4, MID: 4, FWD: 2 },
@@ -95,49 +99,54 @@ export const FORMATION_MODIFIERS = {
   '4-4-2': { attack: 1.0, midfield: 1.0, defense: 1.0 }, // equilibrio puro
   '4-3-3': { attack: 1.04, midfield: 1.0, defense: 0.98 }, // ofensivo
   '3-4-3': { attack: 1.06, midfield: 1.01, defense: 0.94 }, // todo al ataque
+  '4-2-3-1': { attack: 1.02, midfield: 1.04, defense: 0.99 }, // posesión con pivotes
   '3-5-2': { attack: 0.99, midfield: 1.05, defense: 0.98 }, // control de medio
   '5-3-2': { attack: 0.95, midfield: 0.99, defense: 1.06 }, // defensivo
   '4-3-1-2': { attack: 1.02, midfield: 1.04, defense: 0.97 }, // creativo (enganche)
 };
 
-// Tipo táctico que proyecta cada dibujo. Alimenta el counter (TYPE_COUNTER) y la
-// cohesión de química. Las formaciones de rival con formas raras caen a null.
+// Tipo/identidad de juego que proyecta cada dibujo. Se usa para la cohesión de
+// química (jugadores que encajan con el estilo) y como etiqueta informativa en la
+// UI. NO crea ventajas/desventajas respecto al rival: cada táctica vale por sus
+// propios trade-offs (FORMATION_MODIFIERS).
 export const FORMATION_TYPE = {
-  '3-5-2': 'posesion', '4-3-1-2': 'posesion',
+  '3-5-2': 'posesion', '4-3-1-2': 'posesion', '4-2-3-1': 'posesion',
   '4-3-3': 'presion', '3-4-3': 'presion',
   '5-3-2': 'contra', '4-4-2': 'contra',
 };
-
-// Triángulo piedra-papel-tijera: el valor es el tipo al que VENCES.
-// posesión vence a presión (mantienes el balón lejos del pressing),
-// presión vence a contra (asfixias al repliegue),
-// contra vence a posesión (castigas al rival volcado).
-export const TYPE_COUNTER = { posesion: 'presion', presion: 'contra', contra: 'posesion' };
 
 // Devuelve el tipo táctico de un dibujo, o null si no tiene identidad conocida.
 export function formationType(formation) {
   return FORMATION_TYPE[formation] || null;
 }
 
-// Tipo que VENCE a `type` (el inverso de TYPE_COUNTER). Útil para sugerir en el
-// scouting con qué estilo contrarrestar al rival.
-export function typeThatBeats(type) {
-  return Object.keys(TYPE_COUNTER).find((k) => TYPE_COUNTER[k] === type) || null;
-}
-
-// Resultado del cruce de estilos desde la perspectiva de `myType`:
-// 'edge' (cuentas al rival), 'weak' (te cuenta), 'even' (neutro o sin tipo).
-export function matchupVs(myType, rivalType) {
-  if (!myType || !rivalType || myType === rivalType) return 'even';
-  if (TYPE_COUNTER[myType] === rivalType) return 'edge';
-  if (TYPE_COUNTER[rivalType] === myType) return 'weak';
-  return 'even';
-}
-
 export const LINES = ['GK', 'DEF', 'MID', 'FWD'];
 export const RARITIES = ['common', 'rare', 'epic', 'legend'];
 
+// Reglas de slot por formación. `accepts` define qué posiciones admite el hueco;
+// `role` cómo puntúa ese hueco (ENG = híbrido medio/ataque).
+// Los EXTREMOS (huecos anchos de la línea de ataque) admiten delanteros o medios.
 export const FORMATION_SLOT_RULES = {
+  '4-3-3': {
+    FWD: {
+      0: { accepts: ['FWD', 'MID'], role: 'FWD' }, // extremo izquierdo
+      2: { accepts: ['FWD', 'MID'], role: 'FWD' }, // extremo derecho
+    },
+  },
+  '3-4-3': {
+    FWD: {
+      0: { accepts: ['FWD', 'MID'], role: 'FWD' },
+      2: { accepts: ['FWD', 'MID'], role: 'FWD' },
+    },
+  },
+  '4-2-3-1': {
+    MID: {
+      // 0-1 = pivotes (MID puro); 2-4 = línea de creación (extremos + mediapunta).
+      2: { accepts: ['MID', 'FWD'], role: 'ENG' },
+      3: { accepts: ['MID', 'FWD'], role: 'ENG' },
+      4: { accepts: ['MID', 'FWD'], role: 'ENG' },
+    },
+  },
   '4-3-1-2': {
     MID: {
       3: { accepts: ['MID', 'FWD'], role: 'ENG' },

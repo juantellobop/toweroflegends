@@ -358,12 +358,6 @@ const DICTIONARIES = {
     },
     tactics: {
       style: 'Estilo',
-      yours: 'Tu estilo',
-      rival: 'Estilo rival',
-      edge: 'Ventaja táctica',
-      even: 'Estilo neutral',
-      weak: 'Desventaja táctica',
-      counterWith: ({ type }) => `Contrarréstalo con ${type}`,
     },
     match: {
       plays: ({ count }) => `${count} jugadas`,
@@ -590,6 +584,9 @@ const DICTIONARIES = {
       nextOpponent: 'Next opponent',
       viewLineup: 'View XI',
       chemistry: 'Chemistry',
+      chemNation: 'Nation',
+      chemEra: 'Era',
+      fromItems: 'Items contribution',
       tacticalBoard: 'Tactical board',
       boardHint: 'Drag players to the right slot or tap to edit.',
       formationAria: 'Formation',
@@ -620,12 +617,6 @@ const DICTIONARIES = {
     },
     tactics: {
       style: 'Style',
-      yours: 'Your style',
-      rival: 'Opponent style',
-      edge: 'Tactical edge',
-      even: 'Neutral style',
-      weak: 'Tactical disadvantage',
-      counterWith: ({ type }) => `Counter it with ${type}`,
     },
     match: {
       plays: ({ count }) => `${count} plays`,

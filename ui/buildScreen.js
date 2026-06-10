@@ -11,7 +11,7 @@ import {
   canPlacePlayerInSlot, assignLineToSlots,
 } from '../state/run.js';
 import { playerOVR } from '../engine/ovr.js';
-import { FORMATIONS, LINES, formationLineSlots, formationType, matchupVs } from '../data/config.js';
+import { FORMATIONS, LINES, formationLineSlots, formationType } from '../data/config.js';
 import { countTo } from '../match/feedback.js';
 import { playerInitials, playerSurname, portraitPathForPlayer } from '../data/playerAssets.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
@@ -22,6 +22,8 @@ import { localizeOpponentName, t } from '../data/i18n.js';
 const LINE_TOP = { GK: 86, DEF: 65, MID: 43, ENG: 31, FWD: 20 };
 const FORMATION_LINE_TOP = {
   '4-3-1-2': { GK: 92, DEF: 73, MID: 53, ENG: 31, FWD: 8 },
+  // 4-2-3-1: pivotes (MID) por detrás de la línea de creación (ENG) y el delantero.
+  '4-2-3-1': { GK: 92, DEF: 73, MID: 52, ENG: 30, FWD: 8 },
 };
 
 function esc(s) {
@@ -32,6 +34,8 @@ function spreadLeft(n, line, formation) {
   if (n === 1) return [50];
   if (formation === '4-3-1-2' && line === 'FWD' && n === 2) return [28, 72];
   if (formation === '4-3-1-2' && line === 'MID' && n === 3) return [18, 50, 82];
+  if (formation === '4-2-3-1' && line === 'MID' && n === 2) return [30, 70]; // pivotes
+  if (formation === '4-2-3-1' && line === 'ENG' && n === 3) return [18, 50, 82]; // creación
   if (line === 'FWD') {
     if (n === 2) return [42, 58];
     if (n === 3) return [18, 50, 82];
@@ -143,17 +147,15 @@ function fieldNodes(positions) {
   }).join('');
 }
 
+// Identidad del dibujo (Posesión / Presión / Contra). Es informativa: describe el
+// estilo propio de la formación, sin comparar con el rival.
 function tacticPill(state) {
   const myType = formationType(state.formation);
   if (!myType) return '';
-  const rivalType = state.opponent ? formationType(state.opponent.formation) : null;
-  const matchup = matchupVs(myType, rivalType); // 'edge' | 'weak' | 'even'
-  const typeName = t(`admin.tactical.${myType}`);
   return `
-    <div class="chem-pill tactic-pill matchup-${matchup}">
+    <div class="chem-pill tactic-pill">
       <span>${t('tactics.style')}</span>
-      <b>${esc(typeName)}</b>
-      ${rivalType ? `<small class="tactic-edge">${t(`tactics.${matchup}`)}</small>` : ''}
+      <b>${esc(t(`admin.tactical.${myType}`))}</b>
     </div>`;
 }
 

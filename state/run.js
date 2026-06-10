@@ -189,14 +189,15 @@ function canAssignPlayersToLine(formation, line, players) {
 export function assignLineToSlots(formation, line, players) {
   const slots = formationLineSlots(formation, line).map((slot) => ({ ...slot, player: null }));
   const remaining = (players || []).filter(Boolean);
-  function fill(slot, predicate) {
-    const idx = remaining.findIndex((player) => predicate(player, slot));
+  function fill(slot) {
+    const idx = remaining.findIndex((player) => slot.accepts.includes(player.position));
     if (idx < 0) return;
     slot.player = remaining.splice(idx, 1)[0];
   }
-  slots.filter((s) => s.accepts.length === 1).forEach((s) => fill(s, (p) => s.accepts.includes(p.position)));
-  slots.filter((s) => !s.player && s.accepts.length > 1).forEach((s) => fill(s, (p) => s.accepts.includes(p.position)));
-  slots.filter((s) => !s.player).forEach((s) => fill(s, (p) => s.accepts.includes(p.position)));
+  // En orden de hueco: cada slot toma el primer jugador compatible que quede. Así
+  // se preserva el orden del array (p. ej. el 9 en el centro de un tridente, los
+  // extremos a los lados aunque acepten MID o FWD).
+  slots.forEach(fill);
   return slots;
 }
 
@@ -549,7 +550,9 @@ function forceAtLeastDraw(result) {
     const ev = events[i];
     if (ev.side === 'B' && ev.type === 'gol') {
       ev.type = 'parada';
-      ev.pattern = 'shot';
+      // El patrón debe seguir a la fase: un penalti parado se presenta como
+      // penalti, no como remate de jugada.
+      ev.pattern = ev.phase === 'penalty' ? 'penalty' : ev.phase === 'free_kick' ? 'free_kick' : 'shot';
       deficit -= 1;
     }
   }
