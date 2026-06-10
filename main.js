@@ -24,6 +24,7 @@ import {
   filterTeamNameInput, hasDisallowedTeamNameChars, sanitizeTeamName,
 } from './data/teamName.js';
 import { LANGUAGES, getLanguage, initLanguage, localizeNation, setLanguage, t } from './data/i18n.js';
+import { esc, prefersReducedMotion } from './ui/dom.js';
 
 const root = document.getElementById('app');
 initLanguage();
@@ -55,9 +56,6 @@ let leaderboardCache = { entries: [], loaded: false };
 let leaderboardPromise = null;
 let currentRoute = '';
 let menuDraft = { teamName: '', nation: '' };
-
-const prefersReducedMotion = () =>
-  typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function activeScreen() {
   return root.firstElementChild?.classList?.contains('screen')
@@ -498,10 +496,6 @@ function handleAdminHash() {
 }
 
 window.addEventListener('hashchange', handleAdminHash);
-
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-}
 
 await initAdminPlayerDatabase();
 if (window.location.hash === ADMIN_HASH) {

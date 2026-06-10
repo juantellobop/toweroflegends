@@ -1,3 +1,4 @@
+import { esc } from './dom.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { sanitizeTeamName } from '../data/teamName.js';
 import { t } from '../data/i18n.js';
@@ -6,10 +7,6 @@ export const LEADERBOARD_LIMIT = 20;
 
 const API_URL = '/api/ranking';
 const STATIC_URL = '/data/ranking.json';
-
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-}
 
 function normalizeEntry(entry) {
   const floor = Math.max(0, Math.floor(Number(entry?.floor) || 0));

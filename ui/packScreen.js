@@ -5,13 +5,11 @@
 // una: se eleva, las demás se atenúan y retroceden; "Elegir" confirma y la carta
 // "vuela" a la plantilla. "Lectura total": cada carta muestra todo lo necesario.
 
-import { playerCardHTML, itemCardHTML, esc } from './cards.js';
+import { playerCardHTML, itemCardHTML } from './cards.js';
+import { esc, prefersReducedMotion } from './dom.js';
 import { haptic } from '../match/feedback.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { t } from '../data/i18n.js';
-
-const prefersReduced = () =>
-  typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const COPY = {
   player: {
@@ -104,7 +102,7 @@ function wire(root, choices, onPick) {
   const openBar = root.querySelector('#openBar');
   const deal = root.querySelector('#deal');
   const cards = Array.from(root.querySelectorAll('.deal-card'));
-  const reduce = prefersReduced();
+  const reduce = prefersReducedMotion();
   let opened = false;
   let chosen = false;
 

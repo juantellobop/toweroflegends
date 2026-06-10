@@ -1,6 +1,7 @@
 // Torre de Leyendas — Scouting previo: identidad, ratings y once del rival.
 
-import { esc, POSITION_LABEL } from './cards.js';
+import { POSITION_LABEL } from './cards.js';
+import { esc } from './dom.js';
 import { LINES } from '../data/config.js';
 import { calcularRatings } from '../engine/teamRatings.js';
 import { playerInitials, playerSurname, portraitPathForName } from '../data/playerAssets.js';
@@ -61,10 +62,10 @@ function ratings(opponent) {
   // modificador de la formación del rival), no los base precomputados.
   const r = calcularRatings(opponent);
   const rows = [
-    ['ATA', Math.round(r.attack), UI_ASSETS.icons.attack],
-    ['MED', Math.round(r.midfield), UI_ASSETS.icons.midfield],
-    ['DEF', Math.round(r.defense), UI_ASSETS.icons.defense],
-    ['POR', Math.round(r.gk), UI_ASSETS.icons.gk],
+    [t('ratings.attack'), Math.round(r.attack), UI_ASSETS.icons.attack],
+    [t('ratings.midfield'), Math.round(r.midfield), UI_ASSETS.icons.midfield],
+    [t('ratings.defense'), Math.round(r.defense), UI_ASSETS.icons.defense],
+    [t('ratings.gk'), Math.round(r.gk), UI_ASSETS.icons.gk],
   ];
   return `<div class="scout-ratings arcade-panel">
     ${rows.map(([label, value, icon]) => `

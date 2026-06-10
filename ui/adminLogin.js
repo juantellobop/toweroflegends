@@ -2,7 +2,7 @@
 // Pide usuario y contraseña; al validarlos contra el servidor invoca onSuccess.
 
 import { adminLogin } from '../data/adminAuth.js';
-import { esc } from './cards.js';
+import { esc } from './dom.js';
 import { t } from '../data/i18n.js';
 
 export function renderAdminLogin(root, handlers = {}) {

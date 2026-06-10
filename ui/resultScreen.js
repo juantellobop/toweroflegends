@@ -1,15 +1,12 @@
 // Torre de Leyendas — Pantallas de resultado y fin de run (§4.5/§4.6, §8.6/§8.7).
 
+import { esc } from './dom.js';
 import { summarize } from '../engine/narrator.js';
 import { confetti, haptic } from '../match/feedback.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { renderLeaderboard } from './leaderboard.js';
 import { localizeNation, localizeOpponentName, t } from '../data/i18n.js';
-
-function esc(s) {
-  return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-}
 
 function localizeHistoryOpponent(value) {
   const text = String(value || '');
@@ -120,9 +117,10 @@ export function renderGameOver(root, state, best, handlers) {
       <span class="path-opp">${esc(localizeHistoryOpponent(h.opponent))}</span>
     </li>`).join('');
 
+  const LINE_ORDER = { GK: 0, DEF: 1, MID: 2, FWD: 3 };
   const squad = state.squad
     .slice()
-    .sort((a, b) => ({ GK: 0, DEF: 1, MID: 2, FWD: 3 }[a.position] - { GK: 0, DEF: 1, MID: 2, FWD: 3 }[b.position]))
+    .sort((a, b) => LINE_ORDER[a.position] - LINE_ORDER[b.position])
     .map((p) => `<span class="squad-chip rarity-${esc(p.rarity)}">${esc(p.name)}</span>`).join('');
 
   root.innerHTML = `

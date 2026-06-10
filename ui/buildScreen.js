@@ -6,6 +6,7 @@
 // Suplentes en una tira inferior. Botón "Jugar" flotante (cristal).
 
 import { playerCardHTML, itemCardHTML, POSITION_LABEL, LINE_LABEL } from './cards.js';
+import { esc } from './dom.js';
 import {
   liveRatings, liveChemistry, liveItemDelta, isLineupComplete, isStarter, formationSlots,
   canPlacePlayerInSlot, assignLineToSlots,
@@ -26,9 +27,6 @@ const FORMATION_LINE_TOP = {
   '4-2-3-1': { GK: 92, DEF: 73, MID: 52, ENG: 30, FWD: 8 },
 };
 
-function esc(s) {
-  return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-}
 function spreadLeft(n, line, formation) {
   if (n <= 0) return [];
   if (n === 1) return [50];
@@ -177,7 +175,7 @@ function chemLegend(state) {
       <span class="cl-key"><i class="cl-swatch nation"></i>${t('build.chemNation')}</span>
       <span class="cl-key"><i class="cl-swatch era"></i>${t('build.chemEra')}</span>
       <span class="cl-sep" aria-hidden="true"></span>
-      ${line('DEF', bl.DEF)}${line('MED', bl.MID)}${line('ATA', bl.FWD)}
+      ${line(t('ratings.defense'), bl.DEF)}${line(t('ratings.midfield'), bl.MID)}${line(t('ratings.attack'), bl.FWD)}
     </div>`;
 }
 
@@ -186,10 +184,10 @@ function ratingsHeader(state) {
   const chem = liveChemistry(state);
   const itemD = liveItemDelta(state);
   const rows = [
-    ['ATA', r.attack, UI_ASSETS.icons.attack, itemD.attack],
-    ['MED', r.midfield, UI_ASSETS.icons.midfield, itemD.midfield],
-    ['DEF', r.defense, UI_ASSETS.icons.defense, itemD.defense],
-    ['POR', r.gk, UI_ASSETS.icons.gk, itemD.gk],
+    [t('ratings.attack'), r.attack, UI_ASSETS.icons.attack, itemD.attack],
+    [t('ratings.midfield'), r.midfield, UI_ASSETS.icons.midfield, itemD.midfield],
+    [t('ratings.defense'), r.defense, UI_ASSETS.icons.defense, itemD.defense],
+    [t('ratings.gk'), r.gk, UI_ASSETS.icons.gk, itemD.gk],
   ];
   const rowHTML = rows.map(([label, val, icon, d]) => `
     <div class="rating-row">

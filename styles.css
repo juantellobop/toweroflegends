@@ -725,18 +725,36 @@ select {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Anclado arriba (no centrado al viewport): así el sobre y las cartas no
-     "saltan" cuando en mobile aparece/desaparece la barra del navegador y
-     cambia la altura visible. El diseño queda sólido y sin movimientos. */
+  /* En mobile, anclado ARRIBA (no centrado al viewport): así el sobre y las
+     cartas no "saltan" cuando aparece/desaparece la barra del navegador y
+     cambia la altura visible. El min-height sólo reserva el alto (mantiene el
+     botón fijo abajo) sin mover el contenido superior. */
   justify-content: flex-start;
   gap: 48px;
-  /* Contenido anclado ARRIBA (flex-start), no centrado al viewport: así el
-     sobre y las cartas no "saltan" cuando en mobile aparece/desaparece la
-     barra del navegador. El min-height sólo reserva el alto (mantiene el botón
-     fijo abajo) sin mover el contenido superior. */
   min-height: calc(100vh - 220px);
   padding-top: clamp(20px, 6vh, 64px);
   margin-top: var(--space-4);
+}
+/* En desktop el viewport es estable: el sobre y las cartas se centran
+   verticalmente en la pantalla. La reserva inferior de .pixel-screen (120px)
+   ya descuenta la barra de acción fija, así que el centro óptico queda entre
+   la cabecera y el botón. */
+@media (min-width: 761px) {
+  .pack-screen {
+    display: flex;
+    flex-direction: column;
+  }
+  .pack-screen .nav-large {
+    width: min(100%, 720px);
+    margin-inline: auto;
+  }
+  .pack-stage {
+    flex: 1;
+    justify-content: center;
+    min-height: 0;
+    margin-top: 0;
+    padding-top: 0;
+  }
 }
 /* Sobre y cartas comparten celda de la rejilla → al ocultarse el sobre, las
    cartas quedan en su lugar sin saltos de layout durante la animación. */

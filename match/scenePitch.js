@@ -1,10 +1,7 @@
 import { sceneForEvent } from './scenes.js';
+import { esc } from '../ui/dom.js';
 import { playerInitials, portraitPathForName } from '../data/playerAssets.js';
 import { localizeTeamName, sceneAlt, sceneTitle, t } from '../data/i18n.js';
-
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-}
 
 function roleFor(ev, name) {
   if (!name) return t('scene.role.protagonist');

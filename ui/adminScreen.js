@@ -6,7 +6,8 @@ import {
 } from '../data/adminPlayers.js';
 import { playerInitials, portraitPathForPlayer } from '../data/playerAssets.js';
 import { adminAuthHeaders, clearAdminToken } from '../data/adminAuth.js';
-import { playerCardHTML, POSITION_LABEL, RARITY_LABEL, esc } from './cards.js';
+import { playerCardHTML, POSITION_LABEL, RARITY_LABEL } from './cards.js';
+import { esc } from './dom.js';
 import { localizeEra, localizeNation, t } from '../data/i18n.js';
 
 const positionOptions = () => [

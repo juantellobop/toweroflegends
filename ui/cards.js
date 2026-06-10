@@ -2,6 +2,7 @@
 // Toda la información visible que el jugador necesita para decidir (§2):
 // posición, atributos, rareza, nación, época y rasgo.
 
+import { esc } from './dom.js';
 import { playerOVR } from '../engine/ovr.js';
 import { playerInitials, portraitPathForPlayer } from '../data/playerAssets.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
@@ -17,10 +18,6 @@ const FIELD_STATS = [
   ['dribbling'], ['defending'], ['physical'],
 ];
 const GK_STATS = [['reflexes'], ['handling'], ['positioning']];
-
-function esc(s) {
-  return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-}
 
 function statBars(player) {
   const rows = player.position === 'GK'
@@ -87,5 +84,3 @@ export function itemCardHTML(item, opts = {}) {
     ${opts.stack > 1 ? `<div class="item-stack-note">${esc(t('card.itemStackNote'))}</div>` : ''}
   </div>`;
 }
-
-export { esc };

@@ -3,6 +3,7 @@
 // ticker de comentario + controles. El `MatchDirector` reproduce los eventos
 // del motor; esta pantalla solo monta el render y cablea controles y feedback.
 
+import { esc, prefersReducedMotion } from './dom.js';
 import { Pitch } from '../match/pitch.js';
 import { ScenePitch } from '../match/scenePitch.js';
 import { MatchDirector, MODES } from '../match/director.js';
@@ -14,12 +15,9 @@ import { localizeOpponentName, t } from '../data/i18n.js';
 
 const SPEEDS = [1, 2, 4];
 
-const prefersReduced = () =>
-  typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-
 export function renderMatch(root, state, result, handlers) {
   const opp = state.opponent;
-  const reduce = prefersReduced();
+  const reduce = prefersReducedMotion();
   const homeShape = FORMATIONS[state.formation] || FORMATIONS['4-3-3'];
 
   // Identidad del equipo local (nombre + bandera elegidos en el menú).
@@ -127,7 +125,7 @@ export function renderMatch(root, state, result, handlers) {
 
   function typeLine(line, text, opts = {}) {
     const token = ++typeToken;
-    const reduce = opts.instant || prefersReduced();
+    const reduce = opts.instant || prefersReducedMotion();
     const ms = reduce ? 0 : Math.max(8, Math.min(28, 22 / Math.max(1, opts.speed || 1)));
     line.textContent = '';
     nowComment.textContent = '';
@@ -265,8 +263,4 @@ export function renderMatch(root, state, result, handlers) {
 
   // Arranque: reduce-motion → modo accesible "solo comentario" (§5.3, §5.7).
   buildDirector(reduce ? 'commentary' : 'full');
-}
-
-function esc(s) {
-  return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 }
