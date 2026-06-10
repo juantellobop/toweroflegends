@@ -1126,8 +1126,10 @@ select {
 }
 .field-bg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .field-bg .fl { fill: none; stroke: var(--pitch-line); stroke-width: 0.5; vector-effect: non-scaling-stroke; opacity: 0.7; }
-.chem-link { stroke: var(--pitch-line); stroke-width: 1; vector-effect: non-scaling-stroke; opacity: 0.45; stroke-dasharray: 3 3; }
-.chem-link.strong { stroke: var(--brand); opacity: 0.8; stroke-dasharray: none; }
+.field-bg .fl-spot { fill: var(--pitch-line); stroke: none; }
+/* Enlaces de química: nación sólido y época discontinuo, bien visibles. */
+.chem-link { stroke: var(--pitch-line); stroke-width: 1.5; vector-effect: non-scaling-stroke; opacity: 0.5; stroke-dasharray: 3 3; }
+.chem-link.strong { stroke: var(--brand); stroke-width: 2; opacity: 0.85; stroke-dasharray: none; }
 
 .chip-anchor { position: absolute; transform: translate(-50%, -50%); }
 .field-chip {
@@ -2644,7 +2646,8 @@ select {
 
 .team-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 350px);
+  /* Sidebar algo más esbelta: el tablero táctico se queda con el ancho. */
+  grid-template-columns: minmax(0, 1fr) minmax(272px, 330px);
   gap: 14px;
   align-items: start;
 }
@@ -2690,7 +2693,10 @@ select {
 }
 
 .team-select-screen .field {
-  width: min(100%, 66vh, 760px);
+  /* Los topes (vh + el max-width de la capa pixel) eran el cuello de botella:
+     en desktop el tablero quedaba a ~520px con el panel medio vacío. */
+  width: min(100%, 80vh, 860px);
+  max-width: none;
   height: min(76vh, 800px, calc(100vh - 200px));
   min-height: 520px;
   aspect-ratio: 4 / 5;
@@ -2744,14 +2750,14 @@ select {
   .team-select-screen .field {
     min-height: 0;
     height: calc(100vh - 230px);
-    width: min(100%, 56vh, 620px);
+    width: min(100%, 68vh, 720px);
   }
 
   .team-select-screen .field[data-formation="4-3-1-2"],
   .team-select-screen .field[data-formation="4-2-3-1"] {
     height: calc(100vh - 210px);
     min-height: 0;
-    width: min(100%, 58vh, 640px);
+    width: min(100%, 70vh, 740px);
   }
 
   .team-panel-head p,
@@ -5004,11 +5010,13 @@ button.primary:active:not(:disabled),
     font-size: 9px;
   }
 
-  /* Campo compacto: deja ver suplentes/ratings sin scroll en pantallas cortas. */
+  /* Campo compacto: deja ver suplentes/ratings sin scroll en pantallas cortas.
+     A sangre dentro del panel (margen negativo): cada px de ancho cuenta. */
   .team-select-screen .field,
   .team-select-screen .field[data-formation="4-3-1-2"] {
-    width: 100%;
-    height: min(calc((100vw - 24px) * 7 / 6), calc(100svh - 250px), 415px);
+    width: calc(100% + 16px);
+    margin-inline: -8px;
+    height: min(calc((100vw - 40px) * 7 / 6), calc(100svh - 250px), 430px);
     min-height: 390px;
     aspect-ratio: auto;
   }

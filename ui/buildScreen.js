@@ -18,6 +18,7 @@ import { playerInitials, playerSurname, portraitPathForPlayer } from '../data/pl
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { localizeOpponentName, t } from '../data/i18n.js';
+import { PITCH_MARKINGS } from './pitchArt.js';
 
 // Posición vertical (top %) de cada línea en el campo, de abajo (POR) a arriba (DEL).
 const LINE_TOP = { GK: 86, DEF: 65, MID: 43, ENG: 31, FWD: 20 };
@@ -55,10 +56,12 @@ function spreadLeft(n, line, formation) {
     // La dupla va abierta (4-4-2, 3-5-2, 5-3-2): con [42,58] las dos cartas
     // se tocaban y el enlace de química entre ellas quedaba oculto.
     if (n === 2) return [33, 67];
-    if (n === 3) return [18, 50, 82];
+    if (n === 3) return [16, 50, 84];
   }
-  if (line === 'DEF' && n === 3) return [28, 50, 72];
-  const margin = line === 'GK' ? 42 : 12;
+  if (line === 'DEF' && n === 3) return [26, 50, 74];
+  // Margen 10: las líneas llenas (4-5 jugadores) abren casi todo el ancho del
+  // tablero, que en desktop ahora es más generoso.
+  const margin = line === 'GK' ? 42 : 10;
   return Array.from({ length: n }, (_, i) => margin + ((100 - margin * 2) * i) / (n - 1));
 }
 
@@ -123,11 +126,7 @@ function fieldSVG(positions) {
        class="chem-link ${l.strong ? 'strong' : ''}" />`).join('');
   return `
     <svg class="field-bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-      <rect x="1" y="1" width="98" height="98" rx="3" class="fl" />
-      <line x1="1" y1="50" x2="99" y2="50" class="fl" />
-      <circle cx="50" cy="50" r="9" class="fl" />
-      <rect x="30" y="1" width="40" height="12" class="fl" />
-      <rect x="30" y="87" width="40" height="12" class="fl" />
+      ${PITCH_MARKINGS}
       <g class="chem-links">${links}</g>
     </svg>`;
 }

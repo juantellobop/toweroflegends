@@ -8,6 +8,7 @@ import { playerInitials, playerSurname, portraitPathForName } from '../data/play
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { localizeAchievement, localizeOpponentName, t } from '../data/i18n.js';
+import { PITCH_MARKINGS } from './pitchArt.js';
 
 // Reparto vertical de las líneas: extremos cerca de las áreas para que el once
 // ocupe casi todo el alto del tablero (menos césped vacío arriba y abajo).
@@ -47,11 +48,7 @@ function field(opponent) {
   return `
     <div class="field scout-field">
       <svg class="field-bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <rect x="1" y="1" width="98" height="98" rx="3" class="fl" />
-        <line x1="1" y1="50" x2="99" y2="50" class="fl" />
-        <circle cx="50" cy="50" r="9" class="fl" />
-        <rect x="30" y="1" width="40" height="12" class="fl" />
-        <rect x="30" y="87" width="40" height="12" class="fl" />
+        ${PITCH_MARKINGS}
       </svg>
       ${nodes}
     </div>`;
