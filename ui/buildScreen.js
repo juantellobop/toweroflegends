@@ -27,6 +27,23 @@ const FORMATION_LINE_TOP = {
   '4-2-3-1': { GK: 92, DEF: 73, MID: 52, ENG: 30, FWD: 8 },
 };
 
+// Separación mínima entre centros de fichas (unidades del viewBox 0-100).
+// Una ficha mide ~64px sobre un campo de ≤460px (≈14-18 unidades según la
+// pantalla): por debajo de este hueco las cartas se tocan y tapan el enlace
+// de química que se dibuja entre ellas.
+const MIN_CHIP_GAP = 20;
+
+// Garantiza el hueco mínimo re-extendiendo la línea centrada en 50. Mantiene
+// el orden de los huecos y el centrado; con n≤5 el span nunca pisa las bandas.
+function withMinGap(xs) {
+  if (xs.length < 2) return xs;
+  let gap = Infinity;
+  for (let i = 1; i < xs.length; i++) gap = Math.min(gap, xs[i] - xs[i - 1]);
+  if (gap >= MIN_CHIP_GAP) return xs;
+  const start = 50 - (MIN_CHIP_GAP * (xs.length - 1)) / 2;
+  return xs.map((_, i) => start + MIN_CHIP_GAP * i);
+}
+
 function spreadLeft(n, line, formation) {
   if (n <= 0) return [];
   if (n === 1) return [50];
@@ -35,7 +52,9 @@ function spreadLeft(n, line, formation) {
   if (formation === '4-2-3-1' && line === 'MID' && n === 2) return [30, 70]; // pivotes
   if (formation === '4-2-3-1' && line === 'ENG' && n === 3) return [18, 50, 82]; // creación
   if (line === 'FWD') {
-    if (n === 2) return [42, 58];
+    // La dupla va abierta (4-4-2, 3-5-2, 5-3-2): con [42,58] las dos cartas
+    // se tocaban y el enlace de química entre ellas quedaba oculto.
+    if (n === 2) return [33, 67];
     if (n === 3) return [18, 50, 82];
   }
   if (line === 'DEF' && n === 3) return [28, 50, 72];
@@ -52,7 +71,7 @@ function positionSlots(formation, line, slots) {
   }
 
   for (const [role, roleSlots] of byRole.entries()) {
-    const xs = spreadLeft(roleSlots.length, role, formation);
+    const xs = withMinGap(spreadLeft(roleSlots.length, role, formation));
     const top = FORMATION_LINE_TOP[formation]?.[role] ?? LINE_TOP[role] ?? LINE_TOP[line];
     roleSlots.forEach((slot, i) => {
       slot.x = xs[i];

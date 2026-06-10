@@ -220,14 +220,29 @@ async function assertCenteredForwards(page) {
     assert.deepEqual(overlaps, [], `${label} field chips must not overlap:\n${overlaps.join('\n')}`);
   }
 
-  for (const formation of ['4-4-2', '3-5-2']) {
+  for (const formation of ['4-4-2', '3-5-2', '5-3-2']) {
     await page.click(`.formation-seg .seg[data-formation="${formation}"]`);
     await page.waitForTimeout(120);
     const xs = await page.locator('.chip-anchor[data-line="FWD"]').evaluateAll((nodes) =>
-      nodes.map((node) => parseFloat(node.style.left))
+      nodes.map((node) => parseFloat(node.style.left)).sort((a, b) => a - b)
     );
     assert.equal(xs.length, 2, `${formation} must have two forward slots`);
-    assert.ok(xs.every((x) => x >= 35 && x <= 65), `${formation} forwards must be centered, got ${xs.join(', ')}`);
+    // La dupla va separada (se ve el enlace de química entre las dos cartas)
+    // pero sin abrirse a la banda como un tridente.
+    assert.ok(xs[1] - xs[0] >= 25, `${formation} forwards must be split apart, got ${xs.join(', ')}`);
+    assert.ok(xs.every((x) => x >= 28 && x <= 72), `${formation} forwards must stay inboard, got ${xs.join(', ')}`);
+  }
+
+  // Hueco mínimo entre fichas de una misma línea: el enlace de química nunca
+  // queda tapado por dos cartas vecinas (líneas de 5 incluidas).
+  await page.click('.formation-seg .seg[data-formation="3-5-2"]');
+  await page.waitForTimeout(120);
+  const midXs = await page.locator('.chip-anchor[data-line="MID"]').evaluateAll((nodes) =>
+    nodes.map((node) => parseFloat(node.style.left)).sort((a, b) => a - b)
+  );
+  assert.equal(midXs.length, 5, '3-5-2 must have five midfield slots');
+  for (let i = 1; i < midXs.length; i++) {
+    assert.ok(midXs[i] - midXs[i - 1] >= 19.5, `3-5-2 midfield chips too close: ${midXs.join(', ')}`);
   }
   await page.click('.formation-seg .seg[data-formation="4-3-3"]');
   await page.waitForTimeout(120);
