@@ -276,7 +276,6 @@ export function renderBuild(root, state, handlers) {
           <div class="team-panel-head">
             <div>
               <h2>${t('build.tacticalBoard')}</h2>
-              <p>${t('build.boardHint')}</p>
             </div>
             <div class="seg-control formation-seg" role="tablist" aria-label="${t('build.formationAria')}">${formationSegs}</div>
           </div>

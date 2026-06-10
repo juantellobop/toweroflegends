@@ -684,7 +684,6 @@ select {
   font-size: var(--t-large-title); font-weight: 700; line-height: 1.1;
   letter-spacing: -0.02em; margin: var(--space-2) 0 0; text-align: left;
 }
-.nav-large .level-badge { margin-bottom: var(--space-2); }
 .section-title { font-size: var(--t-title-3); font-weight: 600; margin: var(--space-5) 0 var(--space-2); }
 
 /* --- §4.2 Apertura de sobre: reparto + volteo 3D --- */
