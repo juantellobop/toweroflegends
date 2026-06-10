@@ -2454,6 +2454,43 @@ select {
   top: auto;
 }
 
+/* Ratings en la columna lateral (solo desktop; en móvil la columna se disuelve
+   y los ratings conservan su barra compacta propia): rejilla 2×2 con barras
+   y las píldoras de química/táctica debajo. */
+@media (min-width: 761px) {
+  .team-side .ratings-glass {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 0;
+    padding: 10px 12px;
+  }
+
+  .team-side .rt-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 14px;
+  }
+
+  .team-side .header-pills {
+    justify-content: space-around;
+    border-top: 1px solid var(--separator);
+    padding-top: 8px;
+  }
+
+  .team-side .chem-pill {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .team-side .opponent-brief {
+    width: 100%;
+    margin: 0;
+  }
+}
+
 .ratings-glass .rating-row {
   display: grid;
   grid-template-columns: 24px auto auto;
@@ -2634,14 +2671,14 @@ select {
 
 .team-select-screen .build-nav {
   display: flex;
-  align-items: end;
-  gap: 14px;
-  margin-bottom: 8px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0;
 }
 
 .team-select-screen .build-nav .large-title {
   margin: 0;
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(1.3rem, 1.9vw, 1.8rem);
 }
 
 .team-layout {
@@ -2694,10 +2731,11 @@ select {
 
 .team-select-screen .field {
   /* Los topes (vh + el max-width de la capa pixel) eran el cuello de botella:
-     en desktop el tablero quedaba a ~520px con el panel medio vacío. */
+     en desktop el tablero quedaba a ~520px con el panel medio vacío. Sin la
+     cabecera encima, además, gana el alto completo de la pantalla. */
   width: min(100%, 80vh, 860px);
   max-width: none;
-  height: min(76vh, 800px, calc(100vh - 200px));
+  height: min(84vh, 880px, calc(100vh - 205px));
   min-height: 520px;
   aspect-ratio: 4 / 5;
   margin: 0 auto;
@@ -2708,7 +2746,7 @@ select {
 .team-select-screen .field[data-formation="4-3-1-2"],
 .team-select-screen .field[data-formation="4-2-3-1"] {
   --lineup-card: clamp(74px, 7.6vw, 94px);
-  height: min(82vh, 820px, calc(100vh - 180px));
+  height: min(88vh, 900px, calc(100vh - 190px));
   min-height: 580px;
 }
 
@@ -2749,15 +2787,15 @@ select {
 
   .team-select-screen .field {
     min-height: 0;
-    height: calc(100vh - 230px);
-    width: min(100%, 68vh, 720px);
+    height: calc(100vh - 205px);
+    width: min(100%, 76vh, 780px);
   }
 
   .team-select-screen .field[data-formation="4-3-1-2"],
   .team-select-screen .field[data-formation="4-2-3-1"] {
-    height: calc(100vh - 210px);
+    height: calc(100vh - 190px);
     min-height: 0;
-    width: min(100%, 70vh, 740px);
+    width: min(100%, 78vh, 800px);
   }
 
   .team-panel-head p,
@@ -2828,17 +2866,13 @@ select {
   filter: drop-shadow(0 14px 18px rgba(0,0,0,.45));
 }
 
-.team-roster {
-  position: sticky;
-  top: calc(env(safe-area-inset-top) + 12px);
-}
-
 .team-roster .bench-strip {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
   gap: 10px;
   overflow-y: auto;
-  max-height: min(58vh, 560px);
+  /* La columna ahora también aloja título+ratings+rival: el banquillo cede alto. */
+  max-height: clamp(240px, calc(100vh - 500px), 520px);
   padding: 2px 2px 12px;
 }
 
@@ -4734,10 +4768,16 @@ button.primary:active:not(:disabled),
   flex-direction: column;
 }
 
-.team-select-screen .build-nav { order: 0; }
-.team-select-screen .opponent-brief { order: 1; }
-.team-select-screen .ratings-glass { order: 2; }
-.team-select-screen .team-layout { order: 3; }
+/* Columna lateral del armado: título, ratings, rival y suplentes acompañan
+   al tablero, que arranca pegado al top y se queda con el alto completo. */
+.team-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  position: sticky;
+  top: calc(env(safe-area-inset-top) + 12px);
+}
 
 .field {
   isolation: isolate;
@@ -4986,10 +5026,13 @@ button.primary:active:not(:disabled),
     text-align: left;
   }
 
-  .team-select-screen .team-layout {
+  .team-select-screen .team-layout,
+  .team-select-screen .team-side {
     display: contents;
   }
 
+  /* La sección es flex en columna: el nav compacto va primero (order 0
+     implícito), tablero, suplentes, ratings y rival debajo. */
   .team-select-screen .team-field-panel { order: 1; }
   .team-select-screen .team-roster { order: 2; }
   .team-select-screen .ratings-glass { order: 3; }

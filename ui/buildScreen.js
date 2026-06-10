@@ -271,14 +271,6 @@ export function renderBuild(root, state, handlers) {
 
   root.innerHTML = `
     <section class="screen build-screen pixel-screen team-select-screen">
-      <header class="nav-large build-nav">
-        <div class="level-badge">${t('generic.level', { level: state.level })}</div>
-        <h1 class="large-title">${t('build.title')}</h1>
-      </header>
-
-      ${opponentHTML}
-      ${ratingsHeader(state)}
-
       <div class="team-layout">
         <main class="team-field-panel arcade-panel">
           <div class="team-panel-head">
@@ -298,18 +290,28 @@ export function renderBuild(root, state, handlers) {
           <div class="slot-picker glass-thick" id="slotPicker" hidden></div>
         </main>
 
-        <aside class="team-roster arcade-panel">
-          <div class="team-panel-head roster-head">
-            <div>
-              <h2>${t('build.roster')}</h2>
-            </div>
-          </div>
-          ${bench(state)}
+        <aside class="team-side">
+          <header class="nav-large build-nav">
+            <div class="level-badge">${t('generic.level', { level: state.level })}</div>
+            <h1 class="large-title">${t('build.title')}</h1>
+          </header>
 
-          <details class="items-fold">
-            <summary>${t('build.activeItems', { count: state.items.length })}</summary>
-            ${itemsHTML}
-          </details>
+          ${ratingsHeader(state)}
+          ${opponentHTML}
+
+          <div class="team-roster arcade-panel">
+            <div class="team-panel-head roster-head">
+              <div>
+                <h2>${t('build.roster')}</h2>
+              </div>
+            </div>
+            ${bench(state)}
+
+            <details class="items-fold">
+              <summary>${t('build.activeItems', { count: state.items.length })}</summary>
+              ${itemsHTML}
+            </details>
+          </div>
         </aside>
       </div>
 
