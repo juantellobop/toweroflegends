@@ -12,7 +12,9 @@ function byId(id) {
 }
 
 // Once titular fuerte contra el rival inicial: debe dominar sin convertir
-// cada highlight en goleada automática.
+// cada highlight en goleada automática. Con la rampa de arranque
+// (OPP_EARLY_EASE) el rival de nivel 1 es más blando (~64-66 de fuerza),
+// así que la banda de goles admite algo más que contra el viejo rival de 70.
 const strong = {
   name: 'Leyendas',
   color: '#D4AF37',
@@ -62,6 +64,6 @@ console.log('\nDeterminismo (misma semilla → mismo partido):', same ? 'OK ✅'
 
 const meanA = totalA / N;
 const meanB = totalB / N;
-const ok = meanA >= 1.4 && meanA <= 3.2 && meanB <= 0.9 && upsets / N <= 0.28 && same;
+const ok = meanA >= 1.4 && meanA <= 3.6 && meanB <= 0.9 && upsets / N <= 0.28 && same;
 console.log('\nResultado:', ok ? 'CORDURA OK ✅' : 'REVISAR ⚠️');
 process.exit(ok ? 0 : 1);

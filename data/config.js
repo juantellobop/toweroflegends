@@ -42,6 +42,10 @@ export const CONFIG = {
   OPP_GROWTH: 1.0,
   OPP_MATCH_WINDOW: 4,
   NO_REPEAT_RIVALS: true,
+  // Rampa de arranque: descuento a la fuerza objetivo del rival en los
+  // primeros niveles (nivel → puntos). La torre empieza contra rivales más
+  // blandos y la dificultad sin capar arranca en el nivel 6.
+  OPP_EARLY_EASE: { 1: 8, 2: 6, 3: 4, 4: 2, 5: 1 },
 
   // --- Química ---
   CHEM_NATION: 2, // bonus por par de misma nación en una línea
@@ -51,6 +55,9 @@ export const CONFIG = {
   CHEM_CORE: 1, // bonus global por escalón de núcleo nacional (ver computeTeamChem)
   CHEM_CORE_CAP: 3, // tope del bonus de núcleo nacional
   CHEM_TACTIC: 1, // bonus a ataque+medio si tu plantilla encaja con el tipo del dibujo
+  // Cuánto pesa la química en los ratings que usa la simulación. Los puntos de
+  // química que ve el jugador no cambian; solo su efecto sobre el desempeño.
+  CHEM_IMPACT: 1.25,
 
   // --- Recompensas (tamaño de sobre por resultado) ---
   PACK_GOLEADA: 5, // dif >= 5
@@ -69,9 +76,11 @@ export const CONFIG = {
 
 };
 
-// Fuerza objetivo del rival histórico en un nivel dado.
+// Fuerza objetivo del rival histórico en un nivel dado. Los primeros niveles
+// llevan un descuento (OPP_EARLY_EASE) para que el arranque sea amable.
 export function targetStrength(level) {
-  return CONFIG.OPP_BASE_STRENGTH + (level - 1) * CONFIG.OPP_GROWTH;
+  const ease = CONFIG.OPP_EARLY_EASE[level] || 0;
+  return CONFIG.OPP_BASE_STRENGTH + (level - 1) * CONFIG.OPP_GROWTH - ease;
 }
 
 // Alias conservado para consumidores anteriores del motor.

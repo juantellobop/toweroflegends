@@ -6,7 +6,7 @@
 import { computeChemistry, computeTeamChem } from './chemistry.js';
 import { applyItemsToRatings } from './items.js';
 import { applyTraitToStats, gkTraitBonus, shooterWeightMultiplier } from './traits.js';
-import { LINES, formationLineSlots, FORMATION_MODIFIERS } from '../data/config.js';
+import { CONFIG, LINES, formationLineSlots, FORMATION_MODIFIERS } from '../data/config.js';
 import { t } from '../data/i18n.js';
 
 function avg(arr) {
@@ -177,15 +177,17 @@ function baseRatings(starting11, formation) {
 
 // Aplica química a los ratings de línea relevantes: la química por línea suma a su
 // rating, y los bonus globales de equipo (núcleo nacional → todas; cohesión
-// táctica → ataque+medio) se reparten encima.
+// táctica → ataque+medio) se reparten encima. CHEM_IMPACT escala cuánto pesa
+// todo ese aporte en el desempeño sin tocar los puntos que ve el jugador.
 function applyChemistry(ratings, starting11, formation) {
   const chem = computeChemistry(starting11);
   const team = computeTeamChem(starting11, formation);
+  const impact = CONFIG.CHEM_IMPACT;
   return {
-    attack: ratings.attack + chem.FWD + team.all + team.attackMid,
-    midfield: ratings.midfield + chem.MID + team.all + team.attackMid,
-    defense: ratings.defense + chem.DEF + team.all,
-    gk: ratings.gk + chem.GK + team.all,
+    attack: ratings.attack + (chem.FWD + team.all + team.attackMid) * impact,
+    midfield: ratings.midfield + (chem.MID + team.all + team.attackMid) * impact,
+    defense: ratings.defense + (chem.DEF + team.all) * impact,
+    gk: ratings.gk + (chem.GK + team.all) * impact,
   };
 }
 
