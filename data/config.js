@@ -74,7 +74,7 @@ export const CONFIG = {
   CHEM_TACTIC: 1, // bonus a ataque+medio si tu plantilla encaja con el tipo del dibujo
   // Cuánto pesa la química en los ratings que usa la simulación. Los puntos de
   // química que ve el jugador no cambian; solo su efecto sobre el desempeño.
-  CHEM_IMPACT: 1.25,
+  CHEM_IMPACT: 1.4,
 
   // --- Recompensas (tamaño de sobre por resultado) ---
   PACK_GOLEADA: 5, // dif >= 5
