@@ -82,9 +82,46 @@ try {
   assert.match(injected.entries[0].teamName, /^[\p{L} ]+$/u);
   assert.doesNotMatch(injected.entries[0].teamName, /[<>"'=()/]/);
 
+  // Once del último partido: se guarda saneado (formación conocida, máx. 11,
+  // posiciones válidas, OVR acotado, sin caracteres de marcado en nombres).
+  const withLineup = await request('/api/ranking', {
+    method: 'POST',
+    body: JSON.stringify({
+      teamName: 'Equipo Once',
+      nation: 'River Plate',
+      floor: 120,
+      formation: '4-3-3',
+      lineup: [
+        { name: 'Portero Uno', position: 'GK', line: 'GK', ovr: 88, rarity: 'legend' },
+        { name: '<img src=x onerror=alert(1)>Hack', position: 'DEF', ovr: 9000, rarity: 'inventada' },
+        { name: 'Posición Mala', position: 'XX', ovr: 70 },
+        ...Array.from({ length: 12 }, (_, i) => ({ name: `Relleno ${TEAM_SUFFIXES[i]}`, position: 'MID', ovr: 60 + i })),
+      ],
+    }),
+  });
+  const savedLineup = withLineup.entries[0];
+  assert.equal(savedLineup.formation, '4-3-3');
+  assert.ok(Array.isArray(savedLineup.lineup) && savedLineup.lineup.length <= 11);
+  assert.equal(savedLineup.lineup[0].name, 'Portero Uno');
+  assert.equal(savedLineup.lineup[0].rarity, 'legend');
+  assert.doesNotMatch(savedLineup.lineup[1].name, /[<>"'=()/]/);
+  assert.ok(savedLineup.lineup[1].ovr <= 199);
+  assert.equal(savedLineup.lineup[1].rarity, '');
+  assert.ok(savedLineup.lineup.every((p) => ['GK', 'DEF', 'MID', 'FWD'].includes(p.position)));
+
+  // Formación desconocida o once vacío: la entrada se guarda sin esos campos.
+  const bare = await request('/api/ranking', {
+    method: 'POST',
+    body: JSON.stringify({ teamName: 'Equipo Pelado', nation: 'Boca', floor: 110, formation: '9-9-9', lineup: [] }),
+  });
+  assert.equal(bare.entries[1].teamName, 'Equipo Pelado');
+  assert.equal(bare.entries[1].formation, undefined);
+  assert.equal(bare.entries[1].lineup, undefined);
+
   const persisted = JSON.parse(await fs.readFile(rankingFile, 'utf8'));
   assert.equal(persisted.entries.length, 20);
-  assert.equal(persisted.entries[0].floor, 99);
+  assert.equal(persisted.entries[0].floor, 120);
+  assert.equal(persisted.entries[0].lineup.length, savedLineup.lineup.length);
 
   console.log('Ranking persistente: OK');
 } finally {

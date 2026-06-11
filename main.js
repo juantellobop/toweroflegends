@@ -5,7 +5,7 @@ import {
   createRun, rollPlayerPack, rollItemPack, choosePlayerCard, chooseItemCard,
   isNationPackLevel, rollNationPack,
   playMatch, applyResult, advanceLevel, prepareOpponent, retryLevel,
-  togglePlayerInLineup, placePlayerInLineup, setFormation,
+  togglePlayerInLineup, placePlayerInLineup, setFormation, assignLineToSlots,
 } from './state/run.js';
 import { renderPlayerPack, renderItemPack, renderNationPack } from './ui/packScreen.js';
 import { renderBuild } from './ui/buildScreen.js';
@@ -15,8 +15,9 @@ import { renderResult, renderGameOver } from './ui/resultScreen.js';
 import { renderAdmin } from './ui/adminScreen.js';
 import { renderAdminLogin } from './ui/adminLogin.js';
 import { getAdminToken, clearAdminToken } from './data/adminAuth.js';
-import { fetchLeaderboard, renderLeaderboard, submitLeaderboardEntry } from './ui/leaderboard.js';
-import { CONFIG } from './data/config.js';
+import { fetchLeaderboard, openLeaderboardLineup, renderLeaderboard, submitLeaderboardEntry } from './ui/leaderboard.js';
+import { CONFIG, LINES } from './data/config.js';
+import { playerOVR } from './engine/ovr.js';
 import { preloadUiAssets, UI_ASSETS } from './data/uiAssets.js';
 import { flagSrcForNation, FLAG_NATIONS } from './data/flags.js';
 import { initAdminPlayerDatabase } from './data/adminPlayers.js';
@@ -159,9 +160,24 @@ function renderRoute(route, draw, hint = 'auto') {
 }
 
 root.addEventListener('pointerdown', (event) => {
-  const target = event.target.closest('button, .deal-card, .card.clickable, .admin-player-row');
+  const target = event.target.closest('button, .deal-card, .card.clickable, .admin-player-row, .leaderboard-row.has-lineup');
   if (!target || target.disabled || target.getAttribute('aria-disabled') === 'true') return;
   target.classList.add('is-pressing');
+});
+
+// Las filas del top 20 con once guardado abren el modal del último partido.
+root.addEventListener('click', (event) => {
+  const row = event.target.closest('.leaderboard-row.has-lineup');
+  if (row?.dataset.entryId) openLeaderboardLineup(row.dataset.entryId);
+});
+
+root.addEventListener('keydown', (event) => {
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  const row = event.target.closest?.('.leaderboard-row.has-lineup');
+  if (row?.dataset.entryId) {
+    event.preventDefault();
+    openLeaderboardLineup(row.dataset.entryId);
+  }
 });
 
 root.addEventListener('pointerup', (event) => {
@@ -209,6 +225,22 @@ function updateMenuLeaderboard() {
   });
 }
 
+// Once del último partido tal como se vio en el campo: por línea y en el orden
+// visible de los huecos (assignLineToSlots), con OVR y rareza para el modal.
+function lineupSnapshot(run) {
+  return LINES.flatMap((line) =>
+    assignLineToSlots(run.formation, line, run.starting11[line] || [])
+      .filter((slot) => slot.player)
+      .map((slot) => ({
+        name: slot.player.name,
+        position: slot.player.position,
+        line,
+        ovr: playerOVR(slot.player),
+        rarity: slot.player.rarity || '',
+      }))
+  );
+}
+
 function submitGameOverRanking() {
   if (!state.leaderboardPromise && !state.leaderboardResult) {
     const run = state;
@@ -216,6 +248,8 @@ function submitGameOverRanking() {
       teamName: run.team?.name || 'Leyendas',
       nation: run.team?.nation || '',
       floor: run.level,
+      formation: run.formation,
+      lineup: lineupSnapshot(run),
     }).then((data) => {
       run.leaderboardResult = { ...data, submitted: true };
       leaderboardCache = { ...data, loaded: true };

@@ -1648,6 +1648,82 @@ select {
   line-height: 1.4;
 }
 
+/* Filas con once guardado: abren el modal del último partido de la run. */
+.leaderboard-row.has-lineup {
+  cursor: pointer;
+}
+
+.leaderboard-row.has-lineup:hover,
+.leaderboard-row.has-lineup:focus-visible {
+  border-color: var(--arcade-yellow);
+  background: #0a1c6e;
+}
+
+.leaderboard-more {
+  font-style: normal;
+  color: var(--arcade-cyan);
+  margin-left: 6px;
+}
+
+/* Modal del último once (reutiliza la estructura de .player-modal). */
+.lineup-modal-card {
+  width: min(430px, 94vw);
+}
+
+.lineup-modal-panel {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  color: #fff;
+  text-align: left;
+  border-color: var(--arcade-yellow);
+}
+
+.lineup-modal-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-pixel);
+}
+
+.lineup-modal-head div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.lineup-modal-head b {
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lineup-modal-head span {
+  color: rgba(255,255,255,.72);
+  font-size: 11px;
+}
+
+/* El tablero 3/4 no debe desbordar el alto del viewport: su ancho se limita
+   también en función del alto disponible (ancho = alto * 0.75). */
+.lineup-modal-field {
+  max-width: min(400px, 100%, calc((100vh - 230px) * 0.75));
+}
+
+.lineup-modal .field-chip {
+  width: 56px;
+  padding: 4px 2px;
+}
+
+.lineup-modal .chip-face {
+  width: 42px;
+  height: 50px;
+}
+
+.lineup-modal .chip-name {
+  max-width: 52px;
+}
+
 .menu-admin-button {
   border-radius: 0;
   border: 3px solid var(--arcade-cyan);

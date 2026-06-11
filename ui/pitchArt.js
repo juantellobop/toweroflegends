@@ -1,7 +1,20 @@
-// Torre de Leyendas — Marcas del campo compartidas (tablero táctico y scouting).
-// Se dibujan en un viewBox 0-100 con preserveAspectRatio="none": las medidas
-// son relativas al tablero (se estiran con él), no a un campo real a escala.
-// Solo trazos estáticos (.fl): nada animado.
+// Torre de Leyendas — Marcas del campo compartidas (tablero táctico, scouting
+// y once del ranking). Se dibujan en un viewBox 0-100 con
+// preserveAspectRatio="none": las medidas son relativas al tablero (se estiran
+// con él), no a un campo real a escala. Solo trazos estáticos (.fl): nada animado.
+
+// Reparto vertical de las líneas: extremos cerca de las áreas para que el once
+// ocupe casi todo el alto del tablero (menos césped vacío arriba y abajo).
+export const LINE_TOP = { GK: 89, DEF: 67, MID: 43, FWD: 16 };
+
+// Coordenadas horizontales (en %) de los n jugadores de una línea. Cuantos
+// menos jugadores, más centrados (una pareja no va pegada a la banda); las
+// líneas llenas (4-5) abren casi todo el ancho del tablero.
+export function lineSpreadX(n) {
+  if (n <= 1) return [50];
+  const margin = n <= 2 ? 27 : n === 3 ? 15 : 9;
+  return Array.from({ length: n }, (_, i) => margin + ((100 - margin * 2) * i) / (n - 1));
+}
 
 export const PITCH_MARKINGS = `
   <rect x="1" y="1" width="98" height="98" rx="3" class="fl" />

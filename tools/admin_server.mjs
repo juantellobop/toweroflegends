@@ -7,7 +7,7 @@ import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { LINES, RARITIES } from '../data/config.js';
+import { FORMATIONS, LINES, RARITIES } from '../data/config.js';
 import { playerOVR } from '../engine/ovr.js';
 import { sanitizeTeamName } from '../data/teamName.js';
 
@@ -248,13 +248,33 @@ function clampText(value, max) {
   return String(value || '').trim().replace(/\s+/g, ' ').slice(0, max);
 }
 
+// Once del último partido de la run: solo nombres del roster, posiciones/líneas
+// conocidas y números acotados. Devuelve null si no hay nada utilizable.
+function sanitizeRankingLineup(raw) {
+  if (!Array.isArray(raw)) return null;
+  const players = raw.slice(0, 11).map((player) => {
+    const name = clampText(player?.name, 60).replace(/[<>"'`=\\/()[\]{}]/g, '').trim();
+    if (!name || !POSITIONS.has(player?.position)) return null;
+    const line = POSITIONS.has(player?.line) ? player.line : player.position;
+    const ovr = Math.max(0, Math.min(199, Math.round(Number(player?.ovr) || 0)));
+    const rarity = RARITY_SET.has(player?.rarity) ? player.rarity : '';
+    return { name, position: player.position, line, ovr, rarity };
+  }).filter(Boolean);
+  return players.length ? players : null;
+}
+
 function sanitizeRankingEntry(raw) {
   const floor = Math.max(0, Math.floor(Number(raw?.floor) || 0));
   const teamName = sanitizeTeamName(raw?.teamName);
   const nation = clampText(raw?.nation, 48);
   const createdAt = Number.isFinite(Date.parse(raw?.createdAt)) ? new Date(raw.createdAt).toISOString() : new Date().toISOString();
   const id = clampText(raw?.id, 80) || crypto.randomUUID();
-  return { id, teamName, nation, floor, createdAt };
+  const entry = { id, teamName, nation, floor, createdAt };
+  // Equipo del último partido (opcional): formación conocida + once saneado.
+  if (FORMATIONS[raw?.formation]) entry.formation = raw.formation;
+  const lineup = sanitizeRankingLineup(raw?.lineup);
+  if (lineup) entry.lineup = lineup;
+  return entry;
 }
 
 function sortRanking(entries) {
