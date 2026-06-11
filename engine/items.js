@@ -4,7 +4,8 @@
 // del partido (ver MATCH_BONUS_CAPS); 'chem' suma química de equipo; 'meta'
 // afecta el bucle (extra cartas).
 // Sinergia: un ítem con synergyType ('posesion'|'presion'|'contra') aplica su
-// efecto multiplicado por ITEM_SYNERGY_MULT si coincide con el tipo del dibujo.
+// efecto positivo multiplicado por ITEM_SYNERGY_MULT si coincide con el tipo
+// del dibujo, y sus efectos negativos (el coste del ítem) se anulan.
 
 import { CONFIG, formationType } from '../data/config.js';
 
@@ -23,7 +24,8 @@ function effectKey(item, effect) {
 // Devuelve contribuciones ya nerfeadas y con decaimiento por copia.
 // Para `mult`, value es el bonus respecto de 1 (0.04 = +4%).
 // Con `formation`, los ítems cuya sinergia coincide con el tipo del dibujo
-// aplican su efecto multiplicado por ITEM_SYNERGY_MULT.
+// aplican su efecto positivo multiplicado por ITEM_SYNERGY_MULT y anulan sus
+// efectos negativos: la táctica absorbe el trade-off del ítem.
 export function effectiveItemEffects(items = [], { scalePower = true, formation = null } = {}) {
   const tacticType = formation ? formationType(formation) : null;
   const seenItems = new Map();
@@ -32,7 +34,7 @@ export function effectiveItemEffects(items = [], { scalePower = true, formation 
   for (const item of items) {
     const itemCopyIndex = seenItems.get(item.id) || 0;
     seenItems.set(item.id, itemCopyIndex + 1);
-    const synergy = tacticType && item.synergyType === tacticType ? CONFIG.ITEM_SYNERGY_MULT : 1;
+    const synergyActive = Boolean(tacticType && item.synergyType === tacticType);
     for (const effect of item.effects || []) {
       const key = effectKey(item, effect);
       const copyIndex = CONFIG.DR_BY_STAT ? (seenStats.get(key) || 0) : itemCopyIndex;
@@ -40,6 +42,8 @@ export function effectiveItemEffects(items = [], { scalePower = true, formation 
       const decay = Math.pow(CONFIG.DR_RATE, copyIndex);
       const scale = scalePower ? CONFIG.ITEM_POWER_SCALE : 1;
       const base = effect.op === 'mult' ? effect.value - 1 : effect.value;
+      if (synergyActive && base < 0) continue;
+      const synergy = synergyActive ? CONFIG.ITEM_SYNERGY_MULT : 1;
       out.push({ ...effect, itemId: item.id, value: base * scale * decay * synergy });
     }
   }

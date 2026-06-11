@@ -261,6 +261,36 @@ export const FORMATION_SLOT_RULES = {
   },
 };
 
+// Enlaces de química extra por formación: pares de huecos (línea, slotIndex)
+// que juegan química entre sí además de la de su propia línea. Reflejan
+// sociedades tácticas reales: extremo↔interior de su lado (4-3-3),
+// lateral↔volante de banda (4-4-2), carrilero↔delanteros (3-5-2) y volante de
+// banda↔extremo (3-4-3). Cada par reparte su química mitad a cada línea.
+export const CHEM_FORMATION_LINKS = {
+  '4-3-3': [
+    { a: ['MID', 0], b: ['FWD', 0] },
+    { a: ['MID', 2], b: ['FWD', 2] },
+  ],
+  '4-4-2': [
+    { a: ['DEF', 0], b: ['MID', 0] },
+    { a: ['DEF', 3], b: ['MID', 3] },
+  ],
+  '3-5-2': [
+    { a: ['MID', 0], b: ['FWD', 0] },
+    { a: ['MID', 0], b: ['FWD', 1] },
+    { a: ['MID', 4], b: ['FWD', 0] },
+    { a: ['MID', 4], b: ['FWD', 1] },
+  ],
+  '3-4-3': [
+    { a: ['MID', 0], b: ['FWD', 0] },
+    { a: ['MID', 3], b: ['FWD', 2] },
+  ],
+};
+
+export function chemFormationLinks(formation) {
+  return CHEM_FORMATION_LINKS[formation] || [];
+}
+
 export function formationLineSlots(formation, line) {
   const shape = FORMATIONS[formation] || FORMATIONS['4-3-3'];
   const count = shape[line] || 0;

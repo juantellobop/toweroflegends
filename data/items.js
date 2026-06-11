@@ -6,7 +6,8 @@
 // lateDefense, comebackBoost, penaltyChance, penaltyConvert). 'chem' suma
 // química de equipo y 'meta' da cartas extra en los sobres.
 // synergyType ('posesion'|'presion'|'contra'): si coincide con el tipo del
-// dibujo en uso, el efecto del ítem se aplica ×ITEM_SYNERGY_MULT.
+// dibujo en uso, el efecto positivo del ítem se aplica ×ITEM_SYNERGY_MULT y
+// sus efectos negativos se anulan (la táctica absorbe el coste).
 // Las descripciones muestran el valor YA nerfeado (value × ITEM_POWER_SCALE).
 
 export const ITEMS = [

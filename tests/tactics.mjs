@@ -10,6 +10,8 @@ import {
   duelBonus, gkDefenseLineBonus, penaltyConvertBonus, phaseShooterMultiplier,
 } from '../engine/traits.js';
 import { calcularRatings, buildBattleTeam } from '../engine/teamRatings.js';
+import { effectiveItemEffects } from '../engine/items.js';
+import { ITEMS } from '../data/items.js';
 import { simularPartido } from '../engine/simulate.js';
 import { assignLineToSlots } from '../state/run.js';
 import { generateOpponent } from '../data/opponents.js';
@@ -107,7 +109,63 @@ assert.equal(core(4), 0);
 assert.equal(core(5), 1);
 assert.equal(core(11), CONFIG.CHEM_CORE_CAP);
 
-// === 6b. Rasgos condicionales ===
+// === 6b. Química entre líneas por formación (CHEM_FORMATION_LINKS) ===
+// Once de control: nadie comparte nación y las épocas van espaciadas ≥20 años
+// (sin pares de línea), salvo los jugadores enlazados que se marcan a mano.
+const mkChemP = (id, position, nation, era) => ({ id, name: id, position, nation, era, trait: null });
+const xi433 = {
+  GK: [mkChemP('g', 'GK', 'NG', '1900')],
+  DEF: ['1920', '1940', '1960', '1980'].map((era, i) => mkChemP(`d${i}`, 'DEF', `ND${i}`, era)),
+  MID: [mkChemP('m0', 'MID', 'Brasil', '1970'), mkChemP('m1', 'MID', 'NM1', '1900'), mkChemP('m2', 'MID', 'NM2', '1930')],
+  FWD: [mkChemP('f0', 'FWD', 'Brasil', '1970'), mkChemP('f1', 'FWD', 'NF1', '2000'), mkChemP('f2', 'FWD', 'NF2', '2030')],
+};
+// Sin formación no hay enlaces extra; en 4-3-3 el extremo izquierdo (f0) juega
+// química con el interior de su lado (m0): nación+época = 3, mitad a cada línea.
+assert.equal(computeChemistry(xi433).MID, 0, 'sin formación no hay pares cruzados');
+assert.equal(computeChemistry(xi433).FWD, 0, 'sin formación no hay pares cruzados');
+assert.equal(computeChemistry(xi433, '4-3-3').MID, 1.5, 'extremo↔interior suma al medio');
+assert.equal(computeChemistry(xi433, '4-3-3').FWD, 1.5, 'extremo↔interior suma al ataque');
+// El lado contrario no enlaza: extremo derecho (slot 2) con interior izquierdo no puntúa.
+const xiCruzado = { ...xi433, FWD: [xi433.FWD[1], xi433.FWD[2], xi433.FWD[0]] };
+assert.equal(computeChemistry(xiCruzado, '4-3-3').FWD, 0, 'cada extremo solo con el interior de su lado');
+
+// 4-4-2: el lateral izquierdo (d0) enlaza con el volante de banda izquierdo (m0).
+const xi442 = {
+  GK: [mkChemP('g', 'GK', 'NG', '1900')],
+  DEF: [mkChemP('d0', 'DEF', 'Italia', '1990'), mkChemP('d1', 'DEF', 'ND1', '1920'), mkChemP('d2', 'DEF', 'ND2', '1940'), mkChemP('d3', 'DEF', 'ND3', '1960')],
+  MID: [mkChemP('m0', 'MID', 'Italia', '1990'), mkChemP('m1', 'MID', 'NM1', '1900'), mkChemP('m2', 'MID', 'NM2', '1930'), mkChemP('m3', 'MID', 'NM3', '2030')],
+  FWD: [mkChemP('f0', 'FWD', 'NF0', '1900'), mkChemP('f1', 'FWD', 'NF1', '1930')],
+};
+assert.equal(computeChemistry(xi442, '4-4-2').DEF, 1.5, 'lateral↔volante de banda suma a la defensa');
+assert.equal(computeChemistry(xi442, '4-4-2').MID, 1.5, 'lateral↔volante de banda suma al medio');
+
+// 3-5-2: los carrileros (slots 0 y 4 del medio) enlazan con ambos delanteros.
+const xi352 = {
+  GK: [mkChemP('g', 'GK', 'NG', '1900')],
+  DEF: [mkChemP('d0', 'DEF', 'ND0', '1920'), mkChemP('d1', 'DEF', 'ND1', '1940'), mkChemP('d2', 'DEF', 'ND2', '1960')],
+  MID: [mkChemP('m0', 'MID', 'Brasil', '1970'), mkChemP('m1', 'MID', 'NM1', '1900'), mkChemP('m2', 'MID', 'NM2', '1930'), mkChemP('m3', 'MID', 'NM3', '2000'), mkChemP('m4', 'MID', 'NM4', '2030')],
+  FWD: [mkChemP('f0', 'FWD', 'Brasil', '1970'), mkChemP('f1', 'FWD', 'Brasil', '1940')],
+};
+// Enlaces: m0-f0 (nación+época = 3) y m0-f1 (nación = 2) → MID +2.5, FWD +2.5;
+// dentro de la delantera f0-f1 comparten nación (+2).
+assert.equal(computeChemistry(xi352, '3-5-2').MID, 2.5, 'carrilero↔delanteros suma al medio');
+assert.equal(computeChemistry(xi352, '3-5-2').FWD, 4.5, 'carrilero↔delanteros suma al ataque');
+
+// === 6c. Sinergia de ítems: si la táctica coincide, el coste se anula ===
+// Tiki-taka (posesión): +8% medio, −5% defensa. Con dibujo de posesión el
+// negativo desaparece y el positivo se amplifica; con otro dibujo aplica normal.
+const tikiTaka = ITEMS.find((item) => item.id === 'tiki_taka');
+const effSinergia = effectiveItemEffects([tikiTaka], { formation: '4-2-3-1' }); // posesión
+assert.ok(!effSinergia.some((e) => e.value < 0), 'la sinergia anula el efecto negativo');
+assert.ok(near(effSinergia.find((e) => e.stat === 'midfield').value, 0.08 * CONFIG.ITEM_POWER_SCALE * CONFIG.ITEM_SYNERGY_MULT),
+  'el efecto positivo sigue amplificado');
+const effNeutra = effectiveItemEffects([tikiTaka], { formation: '4-3-3' }); // presión ≠ posesión
+const negNeutra = effNeutra.find((e) => e.stat === 'defense');
+assert.ok(negNeutra && negNeutra.value < 0, 'sin sinergia el negativo sí aplica');
+assert.ok(near(effNeutra.find((e) => e.stat === 'midfield').value, 0.08 * CONFIG.ITEM_POWER_SCALE),
+  'sin sinergia el positivo no se amplifica');
+
+// === 6d. Rasgos condicionales ===
 // Killer: solo define mejor empatado o perdiendo, nunca en ventaja.
 assert.equal(duelBonus({ trait: 'Killer' }, { role: 'shooter', deficit: 0 }), 5);
 assert.equal(duelBonus({ trait: 'Killer' }, { role: 'shooter', deficit: 2 }), 5);

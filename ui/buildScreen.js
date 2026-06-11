@@ -14,7 +14,7 @@ import {
 import { playerOVR } from '../engine/ovr.js';
 import { chemNation } from '../engine/chemistry.js';
 import { chemTeamBonus } from '../engine/items.js';
-import { FORMATIONS, LINES, formationLineSlots, formationType } from '../data/config.js';
+import { FORMATIONS, LINES, chemFormationLinks, formationLineSlots, formationType } from '../data/config.js';
 import { countTo } from '../match/feedback.js';
 import { playerInitials, playerSurname, portraitPathForPlayer } from '../data/playerAssets.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
@@ -28,6 +28,19 @@ const FORMATION_LINE_TOP = {
   '4-3-1-2': { GK: 92, DEF: 73, MID: 53, ENG: 31, FWD: 8 },
   // 4-2-3-1: pivotes (MID) por detrás de la línea de creación (ENG) y el delantero.
   '4-2-3-1': { GK: 92, DEF: 73, MID: 52, ENG: 30, FWD: 8 },
+};
+
+// Ajuste fino (dx/dy en % del campo) por hueco concreto, sobre la posición de su
+// línea. Dibuja el rol dentro del dibujo: el MC más defensivo se retrasa
+// (4-3-3, 3-5-2, 5-3-2, 4-3-1-2, doble pivote del 3-4-3), los extremos parten
+// algo más abajo (4-3-3, 4-2-4) y los laterales del 5-3-2 se proyectan.
+const SLOT_NUDGES = {
+  '4-3-3': { 'MID:1': { dy: 5 }, 'FWD:0': { dy: 4 }, 'FWD:2': { dy: 4 } },
+  '3-5-2': { 'MID:2': { dy: 5 } },
+  '5-3-2': { 'MID:1': { dy: 5 }, 'DEF:0': { dy: -4 }, 'DEF:4': { dy: -4 } },
+  '4-3-1-2': { 'MID:1': { dy: 5 } },
+  '3-4-3': { 'MID:1': { dy: 4 }, 'MID:2': { dy: 4 } },
+  '4-2-4': { 'FWD:0': { dy: 4 }, 'FWD:3': { dy: 4 } },
 };
 
 // Separación mínima entre centros de fichas (unidades del viewBox 0-100).
@@ -51,7 +64,9 @@ function spreadLeft(n, line, formation) {
   if (n <= 0) return [];
   if (n === 1) return [50];
   if (formation === '4-3-1-2' && line === 'FWD' && n === 2) return [28, 72];
-  if (formation === '4-3-1-2' && line === 'MID' && n === 3) return [18, 50, 82];
+  // Trío de mediocampo compacto (interiores cerca del pivote): mismo esquema
+  // en 4-3-3, 5-3-2 y 4-3-1-2.
+  if (['4-3-3', '5-3-2', '4-3-1-2'].includes(formation) && line === 'MID' && n === 3) return [22, 50, 78];
   if ((formation === '4-2-3-1' || formation === '4-2-4') && line === 'MID' && n === 2) return [30, 70]; // pivotes
   if (formation === '4-2-3-1' && line === 'ENG' && n === 3) return [18, 50, 82]; // creación
   if (line === 'FWD') {
@@ -79,8 +94,9 @@ function positionSlots(formation, line, slots) {
     const xs = withMinGap(spreadLeft(roleSlots.length, role, formation));
     const top = FORMATION_LINE_TOP[formation]?.[role] ?? LINE_TOP[role] ?? LINE_TOP[line];
     roleSlots.forEach((slot, i) => {
-      slot.x = xs[i];
-      slot.y = top;
+      const nudge = SLOT_NUDGES[formation]?.[`${slot.line}:${slot.slotIndex}`];
+      slot.x = xs[i] + (nudge?.dx || 0);
+      slot.y = top + (nudge?.dy || 0);
     });
   }
 
@@ -104,10 +120,11 @@ function lineupPositions(state) {
 }
 
 // Enlaces de química del campo, espejando los grupos del motor: el portero
-// enlaza con la defensa, el mediocampo incluye a los enganches y los enganches
-// enlazan también con la delantera (cada par se dibuja una sola vez). Con el
-// Duodécimo jugador (boost) todo par del grupo se enlaza en violeta.
-function chemLinks(positions, boost = false) {
+// enlaza con la defensa, el mediocampo incluye a los enganches, los enganches
+// enlazan también con la delantera y la formación añade sus pares entre líneas
+// (CHEM_FORMATION_LINKS; cada par se dibuja una sola vez). Con el Duodécimo
+// jugador (boost) todo par del grupo se enlaza en violeta.
+function chemLinks(positions, formation, boost = false) {
   const filled = positions.filter((p) => p.player);
   const groups = [
     filled.filter((p) => p.line === 'GK' || p.line === 'DEF'),
@@ -116,26 +133,32 @@ function chemLinks(positions, boost = false) {
   ];
   const links = [];
   const seen = new Set();
+  const addPair = (a, b) => {
+    const key = [a.player.uid, b.player.uid].sort().join('|');
+    if (seen.has(key)) return;
+    seen.add(key);
+    const nation = chemNation(a.player.nation) === chemNation(b.player.nation);
+    const era = a.player.era === b.player.era;
+    if (boost || nation || era) {
+      links.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, nation, era, boost });
+    }
+  };
   for (const arr of groups) {
     for (let i = 0; i < arr.length; i++) {
-      for (let j = i + 1; j < arr.length; j++) {
-        const a = arr[i], b = arr[j];
-        const key = [a.player.uid, b.player.uid].sort().join('|');
-        if (seen.has(key)) continue;
-        seen.add(key);
-        const nation = chemNation(a.player.nation) === chemNation(b.player.nation);
-        const era = a.player.era === b.player.era;
-        if (boost || nation || era) {
-          links.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, nation, era, boost });
-        }
-      }
+      for (let j = i + 1; j < arr.length; j++) addPair(arr[i], arr[j]);
     }
+  }
+  for (const link of chemFormationLinks(formation)) {
+    const at = (ref) => filled.find((p) => p.line === ref[0] && p.slotIndex === ref[1]);
+    const a = at(link.a);
+    const b = at(link.b);
+    if (a && b) addPair(a, b);
   }
   return links;
 }
 
-function fieldSVG(positions, boost = false) {
-  const links = chemLinks(positions, boost);
+function fieldSVG(positions, formation, boost = false) {
+  const links = chemLinks(positions, formation, boost);
   const lineEl = (l, cls) => `<line x1="${l.x1}" y1="${l.y1}" x2="${l.x2}" y2="${l.y2}" class="chem-link ${cls}" />`;
   // Dos capas: la base (violeta con boost; época discontinua sin él) y, encima,
   // el dorado de nación, que se superpone gráficamente a la línea violeta.
@@ -209,7 +232,7 @@ function itemDeltaHTML(d) {
 function chemLegend(state) {
   const bl = liveChemistry(state).byLine;
   const boost = chemTeamBonus(state.items) > 0;
-  const line = (label, v) => `<span class="cl-line ${v > 0 ? 'has' : ''}">${label} <b>${v}</b></span>`;
+  const line = (label, v) => `<span class="cl-line ${v > 0 ? 'has' : ''}">${label} <b>${Math.round(v * 10) / 10}</b></span>`;
   return `
     <div class="chem-legend">
       <span class="cl-key"><i class="cl-swatch nation"></i>${t('build.chemNation')}</span>
@@ -305,7 +328,7 @@ export function renderBuild(root, state, handlers) {
           </div>
 
           <div class="field" id="field" data-formation="${esc(state.formation)}">
-            ${fieldSVG(positions, chemTeamBonus(state.items) > 0)}
+            ${fieldSVG(positions, state.formation, chemTeamBonus(state.items) > 0)}
             ${fieldNodes(positions)}
           </div>
           ${chemLegend(state)}
