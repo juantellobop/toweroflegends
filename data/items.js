@@ -165,6 +165,65 @@ export const ITEMS = [
     ],
   },
 
+  // Cartas de trade-off (+stat / −stat) hasta completar 4 por sinergia: con el
+  // dibujo a juego el negativo se anula y el positivo se amplifica.
+  {
+    id: 'falso_nueve', name: 'Falso nueve', type: 'tactica', rarity: 'rare', synergyType: 'posesion',
+    desc: '+3% mediocampo, −1,5% ataque.',
+    effects: [
+      { target: 'team', stat: 'midfield', op: 'mult', value: 1.06 },
+      { target: 'team', stat: 'attack', op: 'mult', value: 0.97 },
+    ],
+  },
+  {
+    id: 'salida_lavolpiana', name: 'Salida lavolpiana', type: 'tactica', rarity: 'epic', synergyType: 'posesion',
+    desc: '+4% ataque, −2,5% defensa.',
+    effects: [
+      { target: 'team', stat: 'attack', op: 'mult', value: 1.08 },
+      { target: 'team', stat: 'defense', op: 'mult', value: 0.95 },
+    ],
+  },
+  {
+    id: 'dormir_partido', name: 'Dormir el partido', type: 'tactica', rarity: 'common', synergyType: 'posesion',
+    desc: '+3% defensa, −1,5% ataque.',
+    effects: [
+      { target: 'team', stat: 'defense', op: 'mult', value: 1.06 },
+      { target: 'team', stat: 'attack', op: 'mult', value: 0.97 },
+    ],
+  },
+  {
+    id: 'marcaje_al_hombre', name: 'Marcaje al hombre', type: 'tactica', rarity: 'epic', synergyType: 'presion',
+    desc: '+4% defensa, −2,5% mediocampo.',
+    effects: [
+      { target: 'team', stat: 'defense', op: 'mult', value: 1.08 },
+      { target: 'team', stat: 'midfield', op: 'mult', value: 0.95 },
+    ],
+  },
+  {
+    id: 'linea_adelantada', name: 'Línea adelantada', type: 'tactica', rarity: 'rare', synergyType: 'presion',
+    desc: '+3% mediocampo, −1,5% defensa.',
+    effects: [
+      { target: 'team', stat: 'midfield', op: 'mult', value: 1.06 },
+      { target: 'team', stat: 'defense', op: 'mult', value: 0.97 },
+    ],
+  },
+  {
+    id: 'jauria', name: 'Jauría', type: 'tactica', rarity: 'common', synergyType: 'presion',
+    desc: '+3% ataque, −1,5% mediocampo.',
+    effects: [
+      { target: 'team', stat: 'attack', op: 'mult', value: 1.06 },
+      { target: 'team', stat: 'midfield', op: 'mult', value: 0.97 },
+    ],
+  },
+  {
+    id: 'doble_pivote', name: 'Doble pivote', type: 'tactica', rarity: 'rare', synergyType: 'contra',
+    desc: '+4% mediocampo, −2% ataque.',
+    effects: [
+      { target: 'team', stat: 'midfield', op: 'mult', value: 1.08 },
+      { target: 'team', stat: 'attack', op: 'mult', value: 0.96 },
+    ],
+  },
+
   // ===== Reliquias (pasivas de la run) =====
   {
     id: 'localia', name: 'Localía', type: 'reliquia', rarity: 'legend',

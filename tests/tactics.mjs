@@ -164,6 +164,13 @@ const negNeutra = effNeutra.find((e) => e.stat === 'defense');
 assert.ok(negNeutra && negNeutra.value < 0, 'sin sinergia el negativo sí aplica');
 assert.ok(near(effNeutra.find((e) => e.stat === 'midfield').value, 0.08 * CONFIG.ITEM_POWER_SCALE),
   'sin sinergia el positivo no se amplifica');
+// El catálogo mantiene 4 cartas de trade-off (+stat/−stat) por cada sinergia.
+for (const type of ['posesion', 'presion', 'contra']) {
+  const tradeoffs = ITEMS.filter((item) => item.synergyType === type &&
+    item.effects.some((e) => e.op === 'mult' && e.value > 1) &&
+    item.effects.some((e) => e.op === 'mult' && e.value < 1));
+  assert.equal(tradeoffs.length, 4, `4 cartas +/− de ${type}: ${tradeoffs.map((i) => i.id).join(', ')}`);
+}
 
 // === 6d. Rasgos condicionales ===
 // Killer: solo define mejor empatado o perdiendo, nunca en ventaja.
