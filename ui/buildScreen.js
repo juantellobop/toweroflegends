@@ -103,21 +103,30 @@ function lineupPositions(state) {
   return pos;
 }
 
-// Enlaces de química: pares de la misma línea que comparten nación o época.
-// Con el Duodécimo jugador (boost) todo el plantel tiene química: cada par de
-// la línea se enlaza en violeta, y el dorado de nación pisa al violeta.
+// Enlaces de química del campo, espejando los grupos del motor: el portero
+// enlaza con la defensa, el mediocampo incluye a los enganches y los enganches
+// enlazan también con la delantera (cada par se dibuja una sola vez). Con el
+// Duodécimo jugador (boost) todo par del grupo se enlaza en violeta.
 function chemLinks(positions, boost = false) {
+  const filled = positions.filter((p) => p.player);
+  const groups = [
+    filled.filter((p) => p.line === 'GK' || p.line === 'DEF'),
+    filled.filter((p) => p.line === 'MID'),
+    filled.filter((p) => p.line === 'FWD' || p.role === 'ENG'),
+  ];
   const links = [];
-  const byLine = {};
-  positions.forEach((p) => { if (p.player) (byLine[p.line] ||= []).push(p); });
-  for (const line in byLine) {
-    const arr = byLine[line];
+  const seen = new Set();
+  for (const arr of groups) {
     for (let i = 0; i < arr.length; i++) {
       for (let j = i + 1; j < arr.length; j++) {
-        const a = arr[i].player, b = arr[j].player;
-        const nation = chemNation(a.nation) === chemNation(b.nation);
-        if (boost || nation || a.era === b.era) {
-          links.push({ x1: arr[i].x, y1: arr[i].y, x2: arr[j].x, y2: arr[j].y, strong: nation, boost });
+        const a = arr[i], b = arr[j];
+        const key = [a.player.uid, b.player.uid].sort().join('|');
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const nation = chemNation(a.player.nation) === chemNation(b.player.nation);
+        const era = a.player.era === b.player.era;
+        if (boost || nation || era) {
+          links.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, nation, era, boost });
         }
       }
     }
@@ -126,13 +135,19 @@ function chemLinks(positions, boost = false) {
 }
 
 function fieldSVG(positions, boost = false) {
-  const links = chemLinks(positions, boost).map((l) =>
-    `<line x1="${l.x1}" y1="${l.y1}" x2="${l.x2}" y2="${l.y2}"
-       class="chem-link ${l.strong ? 'strong' : l.boost ? 'boost' : ''}" />`).join('');
+  const links = chemLinks(positions, boost);
+  const lineEl = (l, cls) => `<line x1="${l.x1}" y1="${l.y1}" x2="${l.x2}" y2="${l.y2}" class="chem-link ${cls}" />`;
+  // Dos capas: la base (violeta con boost; época discontinua sin él) y, encima,
+  // el dorado de nación, que se superpone gráficamente a la línea violeta.
+  const under = links
+    .filter((l) => boost || (l.era && !l.nation))
+    .map((l) => lineEl(l, boost ? 'boost' : ''))
+    .join('');
+  const over = links.filter((l) => l.nation).map((l) => lineEl(l, 'strong')).join('');
   return `
     <svg class="field-bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
       ${PITCH_MARKINGS}
-      <g class="chem-links">${links}</g>
+      <g class="chem-links">${under}${over}</g>
     </svg>`;
 }
 

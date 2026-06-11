@@ -457,7 +457,7 @@ export function liveChemistry(state) {
   // El total incluye la química de equipo aportada por reliquias (p. ej. el
   // Duodécimo jugador), redondeada por el decaimiento de copias repetidas.
   const total = totalChemistry(state.starting11, state.formation) + chemTeamBonus(state.items || []);
-  return { byLine: computeChemistry(state.starting11), total: Math.round(total) };
+  return { byLine: computeChemistry(state.starting11, state.formation), total: Math.round(total) };
 }
 
 // Aporte neto de los objetos a cada rating de equipo (con objetos − sin objetos),

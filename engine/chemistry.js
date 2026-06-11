@@ -6,7 +6,7 @@
 // (premia construir el XI en torno a 1-2 naciones) y una "cohesión táctica" (premia
 // que tus jugadores encajen con el tipo del dibujo). Ambos modestos.
 
-import { CONFIG, LINES, formationType } from '../data/config.js';
+import { CONFIG, LINES, formationLineSlots, formationType } from '../data/config.js';
 
 // Naciones históricas que cuentan como la misma selección a efectos de química
 // (y de enlaces en el campo): Alemania Occidental ≡ Alemania.
@@ -15,50 +15,75 @@ export function chemNation(nation) {
   return NATION_ALIASES[nation] || nation;
 }
 
-// Cuenta pares que comparten una clave dentro de un grupo de jugadores.
-function pairsSharing(players, getKey) {
-  const counts = {};
-  for (const p of players) {
-    const v = getKey(p);
-    counts[v] = (counts[v] || 0) + 1;
+// Química de un par de jugadores: nación compartida (+CHEM_NATION) y época
+// (década exacta vale CHEM_ERA; contiguas, 1960↔1970, la mitad).
+function pairChem(a, b) {
+  let total = 0;
+  if (a.nation && chemNation(a.nation) === chemNation(b.nation)) total += CONFIG.CHEM_NATION;
+  const ea = parseInt(a.era, 10);
+  const eb = parseInt(b.era, 10);
+  if (Number.isFinite(ea) && Number.isFinite(eb)) {
+    const diff = Math.abs(ea - eb);
+    if (diff === 0) total += CONFIG.CHEM_ERA;
+    else if (diff === 10) total += CONFIG.CHEM_ERA_ADJACENT;
   }
-  let pairs = 0;
-  for (const v in counts) {
-    const n = counts[v];
-    pairs += (n * (n - 1)) / 2; // combinaciones C(n,2)
-  }
-  return pairs;
+  return total;
 }
 
-// Química de época: década exacta vale CHEM_ERA; décadas contiguas (1960↔1970),
-// la mitad. Así las generaciones coherentes puntúan sin ser binarias.
-function eraChemistry(players) {
+// Suma la química de todos los pares del grupo. `skip` excluye los pares cuyos
+// dos miembros pertenezcan a ese conjunto (p. ej. enganche-enganche, que ya
+// puntuó en el mediocampo y no debe repetir en la delantera).
+function groupChem(players, skip = null) {
   let total = 0;
   for (let i = 0; i < players.length; i++) {
     for (let j = i + 1; j < players.length; j++) {
-      const a = parseInt(players[i].era, 10);
-      const b = parseInt(players[j].era, 10);
-      if (!Number.isFinite(a) || !Number.isFinite(b)) continue;
-      const diff = Math.abs(a - b);
-      if (diff === 0) total += CONFIG.CHEM_ERA;
-      else if (diff === 10) total += CONFIG.CHEM_ERA_ADJACENT;
+      if (skip && skip.has(players[i]) && skip.has(players[j])) continue;
+      total += pairChem(players[i], players[j]);
     }
   }
   return total;
 }
 
-// Devuelve la química por línea: { GK, DEF, MID, FWD } (cada una topada a CHEM_CAP).
-// Un Capitán alineado suma +1 a la química de su línea (un solo bonus por línea).
-export function computeChemistry(starting11) {
-  const chem = {};
+// Jugadores del once que ocupan huecos de enganche (rol ENG) según el dibujo.
+// Replica la asignación hueco→jugador de teamRatings/run.js: cada hueco toma
+// el primer jugador compatible que quede.
+function engancheSet(starting11, formation) {
+  const set = new Set();
+  if (!formation) return set;
   for (const line of LINES) {
-    const players = starting11[line] || [];
-    const nation = pairsSharing(players, (p) => chemNation(p.nation)) * CONFIG.CHEM_NATION;
-    const era = eraChemistry(players);
-    const captain = players.some((p) => p && p.trait === 'Capitán') ? 1 : 0;
-    chem[line] = Math.min(CONFIG.CHEM_CAP, nation + era + captain);
+    const slots = formationLineSlots(formation, line);
+    if (!slots.some((slot) => slot.role === 'ENG')) continue;
+    const remaining = (starting11[line] || []).filter(Boolean).slice();
+    for (const slot of slots) {
+      const idx = remaining.findIndex((p) => slot.accepts.includes(p.position));
+      if (idx < 0) continue;
+      const player = remaining.splice(idx, 1)[0];
+      if (slot.role === 'ENG') set.add(player);
+    }
   }
-  return chem;
+  return set;
+}
+
+// Devuelve la química por línea: { GK, DEF, MID, FWD } (cada una topada a CHEM_CAP).
+// El portero hace química con la defensa (suma en DEF) y los enganches juegan
+// química con el mediocampo Y con la delantera (sus pares entre sí puntúan una
+// sola vez, en MID). Un Capitán alineado suma +1 a la química de su línea.
+export function computeChemistry(starting11, formation = null) {
+  const linePlayers = (line) => (starting11[line] || []).filter(Boolean);
+  const captain = (players) => (players.some((p) => p.trait === 'Capitán') ? 1 : 0);
+  const cap = (value) => Math.min(CONFIG.CHEM_CAP, value);
+  const gk = linePlayers('GK');
+  const def = linePlayers('DEF');
+  const mid = linePlayers('MID');
+  const fwd = linePlayers('FWD');
+  const enganches = engancheSet(starting11, formation);
+  const eng = mid.filter((p) => enganches.has(p));
+  return {
+    GK: cap(captain(gk)),
+    DEF: cap(groupChem([...gk, ...def]) + captain(def)),
+    MID: cap(groupChem(mid) + captain(mid)),
+    FWD: cap(groupChem([...fwd, ...eng], enganches) + captain(fwd)),
+  };
 }
 
 // Bonus globales de equipo (no por línea):
@@ -97,7 +122,7 @@ export function computeTeamChem(starting11, formation) {
 
 // Química total (suma de líneas + bonus globales), útil para un indicador global.
 export function totalChemistry(starting11, formation) {
-  const chem = computeChemistry(starting11);
+  const chem = computeChemistry(starting11, formation);
   const team = computeTeamChem(starting11, formation);
   return LINES.reduce((s, l) => s + chem[l], 0) + team.all + team.attackMid;
 }

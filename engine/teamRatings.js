@@ -183,7 +183,7 @@ function baseRatings(starting11, formation) {
 // CHEM_IMPACT escala cuánto pesa todo ese aporte en el desempeño sin tocar
 // los puntos que ve el jugador.
 function applyChemistry(ratings, starting11, formation, items = []) {
-  const chem = computeChemistry(starting11);
+  const chem = computeChemistry(starting11, formation);
   const team = computeTeamChem(starting11, formation);
   const itemChem = chemTeamBonus(items);
   const impact = CONFIG.CHEM_IMPACT;
