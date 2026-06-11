@@ -8,11 +8,18 @@
 
 import { CONFIG, LINES, formationType } from '../data/config.js';
 
+// Naciones históricas que cuentan como la misma selección a efectos de química
+// (y de enlaces en el campo): Alemania Occidental ≡ Alemania.
+const NATION_ALIASES = { 'Alemania Occidental': 'Alemania' };
+export function chemNation(nation) {
+  return NATION_ALIASES[nation] || nation;
+}
+
 // Cuenta pares que comparten una clave dentro de un grupo de jugadores.
-function pairsSharing(players, key) {
+function pairsSharing(players, getKey) {
   const counts = {};
   for (const p of players) {
-    const v = p[key];
+    const v = getKey(p);
     counts[v] = (counts[v] || 0) + 1;
   }
   let pairs = 0;
@@ -46,7 +53,7 @@ export function computeChemistry(starting11) {
   const chem = {};
   for (const line of LINES) {
     const players = starting11[line] || [];
-    const nation = pairsSharing(players, 'nation') * CONFIG.CHEM_NATION;
+    const nation = pairsSharing(players, (p) => chemNation(p.nation)) * CONFIG.CHEM_NATION;
     const era = eraChemistry(players);
     const captain = players.some((p) => p && p.trait === 'Capitán') ? 1 : 0;
     chem[line] = Math.min(CONFIG.CHEM_CAP, nation + era + captain);
@@ -65,7 +72,11 @@ export function computeTeamChem(starting11, formation) {
 
   // Núcleo nacional: tamaño del grupo de nación más numeroso del XI.
   const byNation = {};
-  for (const p of all) if (p && p.nation) byNation[p.nation] = (byNation[p.nation] || 0) + 1;
+  for (const p of all) {
+    if (!p || !p.nation) continue;
+    const nation = chemNation(p.nation);
+    byNation[nation] = (byNation[nation] || 0) + 1;
+  }
   const coreSize = Math.max(0, ...Object.values(byNation));
   const core = Math.min(CONFIG.CHEM_CORE_CAP, Math.max(0, Math.floor((coreSize - 3) / 2)) * CONFIG.CHEM_CORE);
 

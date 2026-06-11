@@ -1089,6 +1089,7 @@ select {
 .chem-legend .cl-swatch { width: 16px; height: 0; border-top-width: 2px; border-top-style: solid; }
 .chem-legend .cl-swatch.nation { border-top-color: var(--arcade-yellow); }
 .chem-legend .cl-swatch.era { border-top-color: var(--arcade-cyan); border-top-style: dashed; }
+.chem-legend .cl-swatch.boost { border-top-color: #a06bff; }
 .chem-legend .cl-sep { flex: 1; }
 .chem-legend .cl-line { font-weight: 600; opacity: 0.6; }
 .chem-legend .cl-line.has { opacity: 1; color: var(--label-primary); }
@@ -1126,8 +1127,11 @@ select {
 .field-bg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .field-bg .fl { fill: none; stroke: var(--pitch-line); stroke-width: 0.5; vector-effect: non-scaling-stroke; opacity: 0.7; }
 .field-bg .fl-spot { fill: var(--pitch-line); stroke: none; }
-/* Enlaces de química: nación sólido y época discontinuo, bien visibles. */
+/* Enlaces de química: nación sólido y época discontinuo, bien visibles.
+   Con el Duodécimo jugador todo par se enlaza en violeta (boost); el dorado
+   de nación tiene su propia clase y pisa al violeta. */
 .chem-link { stroke: var(--pitch-line); stroke-width: 1.5; vector-effect: non-scaling-stroke; opacity: 0.5; stroke-dasharray: 3 3; }
+.chem-link.boost { stroke: #a06bff; stroke-width: 1.8; opacity: 0.8; stroke-dasharray: none; }
 .chem-link.strong { stroke: var(--brand); stroke-width: 2; opacity: 0.85; stroke-dasharray: none; }
 
 .chip-anchor { position: absolute; transform: translate(-50%, -50%); }
@@ -1666,14 +1670,21 @@ select {
 }
 
 /* Modal del último once (reutiliza la estructura de .player-modal). */
-.lineup-modal-card {
-  width: min(430px, 94vw);
+.lineup-modal {
+  /* Menos aire que el .player-modal genérico: en móvil el tablero aprovecha
+     el ancho de pantalla sin pasar de ~96vw. */
+  padding: 8px;
+}
+
+/* Doble clase: gana a la regla genérica .player-modal-card (definida después). */
+.player-modal-card.lineup-modal-card {
+  width: min(560px, 96vw);
 }
 
 .lineup-modal-panel {
   display: grid;
-  gap: 12px;
-  padding: 14px;
+  gap: 14px;
+  padding: 16px;
   color: #fff;
   text-align: left;
   border-color: var(--arcade-yellow);
@@ -1682,18 +1693,18 @@ select {
 .lineup-modal-head {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   font-family: var(--font-pixel);
 }
 
 .lineup-modal-head div {
   display: grid;
-  gap: 4px;
+  gap: 5px;
   min-width: 0;
 }
 
 .lineup-modal-head b {
-  font-size: 15px;
+  font-size: 16px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1701,27 +1712,55 @@ select {
 
 .lineup-modal-head span {
   color: rgba(255,255,255,.72);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 /* El tablero 3/4 no debe desbordar el alto del viewport: su ancho se limita
    también en función del alto disponible (ancho = alto * 0.75). */
 .lineup-modal-field {
-  max-width: min(400px, 100%, calc((100vh - 230px) * 0.75));
+  margin: 0 auto;
+  width: 100%;
+  max-width: min(520px, 100%, calc((100vh - 250px) * 0.75));
 }
 
-.lineup-modal .field-chip {
-  width: 56px;
-  padding: 4px 2px;
+/* Cruz de cierre: botón cuadrado con borde blanco y aro azul marino, a juego
+   con el panel arcade (la cruz es SVG para que quede nítida y centrada).
+   44px = mínimo táctil de la app (coincide con el min-height global de button). */
+.lineup-modal .player-modal-close {
+  top: -14px;
+  right: -14px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 0;
+  background: var(--arcade-red, #ff3154);
+  color: #fff;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 3px #071459, 0 4px 0 rgba(0,0,0,.35);
 }
 
-.lineup-modal .chip-face {
-  width: 42px;
-  height: 50px;
+.lineup-modal .player-modal-close svg {
+  display: block;
+  width: 16px;
+  height: 16px;
 }
 
-.lineup-modal .chip-name {
-  max-width: 52px;
+@media (max-width: 480px) {
+  .lineup-modal .field-chip {
+    width: 56px;
+    padding: 4px 2px;
+  }
+
+  .lineup-modal .chip-face {
+    width: 42px;
+    height: 50px;
+  }
+
+  .lineup-modal .chip-name {
+    max-width: 52px;
+  }
 }
 
 .menu-admin-button {
@@ -2676,6 +2715,12 @@ select {
   stroke: var(--arcade-cyan);
   stroke-width: 1.2;
   opacity: .65;
+}
+
+.chem-link.boost {
+  stroke: #a06bff;
+  stroke-width: 1.4;
+  opacity: .8;
 }
 
 .chem-link.strong {

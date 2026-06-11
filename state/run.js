@@ -14,7 +14,7 @@ import { simularPartido } from '../engine/simulate.js';
 import { calcularRatings } from '../engine/teamRatings.js';
 import { computeChemistry, totalChemistry } from '../engine/chemistry.js';
 import { rewardFor, classifyResult, rollRarity } from '../engine/rewards.js';
-import { metaBonuses } from '../engine/items.js';
+import { chemTeamBonus, metaBonuses } from '../engine/items.js';
 import { playerOVR, ovrBand, OVR_BANDS } from '../engine/ovr.js';
 import { flagAccentForNation } from '../data/flags.js';
 import { sanitizeTeamName } from '../data/teamName.js';
@@ -454,7 +454,10 @@ export function liveRatings(state) {
   return calcularRatings({ formation: state.formation, starting11: state.starting11, items: state.items });
 }
 export function liveChemistry(state) {
-  return { byLine: computeChemistry(state.starting11), total: totalChemistry(state.starting11, state.formation) };
+  // El total incluye la química de equipo aportada por reliquias (p. ej. el
+  // Duodécimo jugador), redondeada por el decaimiento de copias repetidas.
+  const total = totalChemistry(state.starting11, state.formation) + chemTeamBonus(state.items || []);
+  return { byLine: computeChemistry(state.starting11), total: Math.round(total) };
 }
 
 // Aporte neto de los objetos a cada rating de equipo (con objetos − sin objetos),

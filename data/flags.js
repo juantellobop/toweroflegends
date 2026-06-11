@@ -24,6 +24,8 @@ const FLAG_DIR = 'assets/flags';
 const FLAG_FILE_ALIAS = {
   'river-plate': 'riverplate.png',
   'san-lorenzo': 'sanlorenzo.png',
+  // Alemania Occidental es la misma selección que Alemania: misma bandera.
+  'alemania-occidental': 'alemania.png',
 };
 
 // Naciones/equipos con imagen real descargada. La mayoría son PNG (flagcdn);
@@ -31,7 +33,7 @@ const FLAG_FILE_ALIAS = {
 const FLAG_PNG = new Set([
   'riverplate', 'boca', 'independiente', 'racing', 'sanlorenzo', 'velez',
   'huracan', 'estudiantes', 'gimnasia', 'central', 'newells', 'lanus',
-  'alemania', 'alemania-occidental', 'argentina', 'brasil', 'bulgaria', 'belgica',
+  'alemania', 'argentina', 'brasil', 'bulgaria', 'belgica',
   'camerun', 'checoslovaquia', 'colombia', 'corea-del-sur', 'costa-rica', 'croacia',
   'dinamarca', 'espana', 'estados-unidos', 'francia', 'ghana', 'inglaterra', 'irlanda',
   'italia', 'liberia', 'marruecos', 'mexico', 'paraguay', 'paises-bajos', 'portugal',
@@ -56,7 +58,6 @@ export const FLAG_NATIONS = [
   'Países Bajos', 'Portugal', 'Bélgica', 'Croacia', 'Dinamarca', 'Suecia', 'Irlanda',
   'Rusia', 'Ucrania', 'Rumanía', 'Bulgaria', 'Turquía', 'Corea del Sur', 'Marruecos',
   'Senegal', 'Camerún', 'Ghana', 'Liberia', 'URSS', 'Yugoslavia', 'Checoslovaquia',
-  'Alemania Occidental',
 ];
 
 // Color de acento del equipo según su bandera (confeti, realces). Oro por defecto.

@@ -202,7 +202,9 @@ export function openLeaderboardLineup(entryId) {
   overlay.innerHTML = `
     <div class="player-modal-backdrop" data-close></div>
     <div class="player-modal-card lineup-modal-card" role="dialog" aria-modal="true" aria-label="${esc(t('leaderboard.lineup'))}">
-      <button class="player-modal-close" data-close aria-label="${esc(t('generic.close'))}">✕</button>
+      <button class="player-modal-close" data-close aria-label="${esc(t('generic.close'))}">
+        <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.4 2.4 L9.6 9.6 M9.6 2.4 L2.4 9.6" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" fill="none" /></svg>
+      </button>
       <section class="arcade-panel lineup-modal-panel">
         <header class="lineup-modal-head">
           <img class="leaderboard-flag" src="${esc(flagSrcForNation(entry.nation || entry.teamName))}" alt="" decoding="async" />

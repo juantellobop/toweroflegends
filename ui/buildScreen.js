@@ -12,6 +12,8 @@ import {
   canPlacePlayerInSlot, assignLineToSlots,
 } from '../state/run.js';
 import { playerOVR } from '../engine/ovr.js';
+import { chemNation } from '../engine/chemistry.js';
+import { chemTeamBonus } from '../engine/items.js';
 import { FORMATIONS, LINES, formationLineSlots, formationType } from '../data/config.js';
 import { countTo } from '../match/feedback.js';
 import { playerInitials, playerSurname, portraitPathForPlayer } from '../data/playerAssets.js';
@@ -102,7 +104,9 @@ function lineupPositions(state) {
 }
 
 // Enlaces de química: pares de la misma línea que comparten nación o época.
-function chemLinks(positions) {
+// Con el Duodécimo jugador (boost) todo el plantel tiene química: cada par de
+// la línea se enlaza en violeta, y el dorado de nación pisa al violeta.
+function chemLinks(positions, boost = false) {
   const links = [];
   const byLine = {};
   positions.forEach((p) => { if (p.player) (byLine[p.line] ||= []).push(p); });
@@ -111,8 +115,9 @@ function chemLinks(positions) {
     for (let i = 0; i < arr.length; i++) {
       for (let j = i + 1; j < arr.length; j++) {
         const a = arr[i].player, b = arr[j].player;
-        if (a.nation === b.nation || a.era === b.era) {
-          links.push({ x1: arr[i].x, y1: arr[i].y, x2: arr[j].x, y2: arr[j].y, strong: a.nation === b.nation });
+        const nation = chemNation(a.nation) === chemNation(b.nation);
+        if (boost || nation || a.era === b.era) {
+          links.push({ x1: arr[i].x, y1: arr[i].y, x2: arr[j].x, y2: arr[j].y, strong: nation, boost });
         }
       }
     }
@@ -120,10 +125,10 @@ function chemLinks(positions) {
   return links;
 }
 
-function fieldSVG(positions) {
-  const links = chemLinks(positions).map((l) =>
+function fieldSVG(positions, boost = false) {
+  const links = chemLinks(positions, boost).map((l) =>
     `<line x1="${l.x1}" y1="${l.y1}" x2="${l.x2}" y2="${l.y2}"
-       class="chem-link ${l.strong ? 'strong' : ''}" />`).join('');
+       class="chem-link ${l.strong ? 'strong' : l.boost ? 'boost' : ''}" />`).join('');
   return `
     <svg class="field-bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
       ${PITCH_MARKINGS}
@@ -184,14 +189,18 @@ function itemDeltaHTML(d) {
 }
 
 // Leyenda + desglose por línea: explica qué significan las líneas del campo
-// (nación / época) y dónde tienes química, para que no se perciba como "0".
+// (nación / época / equipo unido) y dónde tienes química, para que no se
+// perciba como "0". Con el boost activo, la época queda pintada en violeta.
 function chemLegend(state) {
   const bl = liveChemistry(state).byLine;
+  const boost = chemTeamBonus(state.items) > 0;
   const line = (label, v) => `<span class="cl-line ${v > 0 ? 'has' : ''}">${label} <b>${v}</b></span>`;
   return `
     <div class="chem-legend">
       <span class="cl-key"><i class="cl-swatch nation"></i>${t('build.chemNation')}</span>
-      <span class="cl-key"><i class="cl-swatch era"></i>${t('build.chemEra')}</span>
+      ${boost
+        ? `<span class="cl-key"><i class="cl-swatch boost"></i>${t('build.chemBoost')}</span>`
+        : `<span class="cl-key"><i class="cl-swatch era"></i>${t('build.chemEra')}</span>`}
       <span class="cl-sep" aria-hidden="true"></span>
       ${line(t('ratings.defense'), bl.DEF)}${line(t('ratings.midfield'), bl.MID)}${line(t('ratings.attack'), bl.FWD)}
     </div>`;
@@ -281,7 +290,7 @@ export function renderBuild(root, state, handlers) {
           </div>
 
           <div class="field" id="field" data-formation="${esc(state.formation)}">
-            ${fieldSVG(positions)}
+            ${fieldSVG(positions, chemTeamBonus(state.items) > 0)}
             ${fieldNodes(positions)}
           </div>
           ${chemLegend(state)}
