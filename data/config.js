@@ -17,7 +17,9 @@ export const CONFIG = {
 
   // --- Plantilla de arranque ---
   STARTING_FORMATION: '4-3-3',
-  STARTER_SQUAD_SIZE: 11,
+  STARTER_SQUAD_SIZE: 16, // 11 titulares + 5 suplentes (STARTER_BENCH)
+  // Suplentes iniciales por posición, además del once de la formación.
+  STARTER_BENCH: { GK: 1, DEF: 1, MID: 2, FWD: 1 },
   // Sorteo por banda de OVR (cualquier jugador del roster completo).
   // Pesos relativos por banda: < 70 / 70-90 / > 90.
   STARTER_BAND_WEIGHTS: { low: 80, mid: 15, high: 5 },

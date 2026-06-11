@@ -121,18 +121,20 @@ export function drawPlayerPack(catalog, squad, size, weights, rng) {
   return cards.map((card) => ({ ...card, selectable: !ownedIds.has(card.id) }));
 }
 
-// Sortea 11 cartas que cubren la formación tomando de TODO el roster. La banda
-// de cada hueco se decide por pesos (≈80% < 70, 15% 70-90, 5% > 90), cayendo a
-// bandas contiguas si la pedida se agota en esa posición.
+// Sortea las cartas que cubren la formación más los suplentes de arranque
+// (STARTER_BENCH), tomando de TODO el roster. La banda de cada hueco se decide
+// por pesos (≈80% < 70, 15% 70-90, 5% > 90), cayendo a bandas contiguas si la
+// pedida se agota en esa posición.
 export function generateStarterSquad(catalog, formation, config, rng) {
   const slots = formationSlots(formation);
+  const bench = config.STARTER_BENCH || {};
   const weights = config.STARTER_BAND_WEIGHTS;
   const occupied = new Set();
   const squad = [];
 
   for (const line of LINES) {
     const byBand = groupByBand(catalog.filter((p) => p.position === line));
-    for (let i = 0; i < slots[line]; i++) {
+    for (let i = 0; i < slots[line] + (bench[line] || 0); i++) {
       const picked = pickFromBand(byBand, weights, occupied, rng);
       if (!picked) throw new Error(`No hay jugadores suficientes para cubrir ${line}`);
       occupied.add(picked.id);
