@@ -52,7 +52,7 @@ function spreadLeft(n, line, formation) {
   if (n === 1) return [50];
   if (formation === '4-3-1-2' && line === 'FWD' && n === 2) return [28, 72];
   if (formation === '4-3-1-2' && line === 'MID' && n === 3) return [18, 50, 82];
-  if (formation === '4-2-3-1' && line === 'MID' && n === 2) return [30, 70]; // pivotes
+  if ((formation === '4-2-3-1' || formation === '4-2-4') && line === 'MID' && n === 2) return [30, 70]; // pivotes
   if (formation === '4-2-3-1' && line === 'ENG' && n === 3) return [18, 50, 82]; // creación
   if (line === 'FWD') {
     // La dupla va abierta (4-4-2, 3-5-2, 5-3-2): con [42,58] las dos cartas

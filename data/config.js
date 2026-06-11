@@ -126,6 +126,7 @@ export const FORMATIONS = {
   '5-3-2': { GK: 1, DEF: 5, MID: 3, FWD: 2 },
   '4-3-1-2': { GK: 1, DEF: 4, MID: 4, FWD: 2 },
   '3-4-3': { GK: 1, DEF: 3, MID: 4, FWD: 3 },
+  '4-2-4': { GK: 1, DEF: 4, MID: 2, FWD: 4 },
 };
 
 // Identidad de cada formación: multiplicadores modestos (±2-6%) a los ratings de
@@ -139,6 +140,7 @@ export const FORMATION_MODIFIERS = {
   '3-5-2': { attack: 0.99, midfield: 1.05, defense: 0.98 }, // control de medio
   '5-3-2': { attack: 0.95, midfield: 0.99, defense: 1.06 }, // defensivo
   '4-3-1-2': { attack: 1.02, midfield: 1.04, defense: 0.97 }, // creativo (enganche)
+  '4-2-4': { attack: 1.08, midfield: 0.93, defense: 0.98 }, // ataque total, medio puenteado
 };
 
 // Tipo/identidad de juego que proyecta cada dibujo. Se usa para la cohesión de
@@ -148,7 +150,7 @@ export const FORMATION_MODIFIERS = {
 export const FORMATION_TYPE = {
   '3-5-2': 'posesion', '4-3-1-2': 'posesion', '4-2-3-1': 'posesion',
   '4-3-3': 'presion', '3-4-3': 'presion',
-  '5-3-2': 'contra', '4-4-2': 'contra',
+  '5-3-2': 'contra', '4-4-2': 'contra', '4-2-4': 'contra',
 };
 
 // Devuelve el tipo táctico de un dibujo, o null si no tiene identidad conocida.
@@ -205,6 +207,11 @@ export const SLOT_PROFILES = {
     MID: ['banda', 'mixto', 'mixto', 'banda'],
     FWD: ['extremo', 'nueve', 'extremo'],
   },
+  '4-2-4': {
+    DEF: ['lateral', 'central', 'central', 'lateral'],
+    MID: ['pivote', 'pivote'],
+    FWD: ['extremo', 'delantero', 'delantero', 'extremo'],
+  },
 };
 
 // Perfil por defecto cuando la formación no define uno para el hueco.
@@ -244,6 +251,12 @@ export const FORMATION_SLOT_RULES = {
   '4-3-1-2': {
     MID: {
       3: { accepts: ['MID', 'FWD'], role: 'ENG' },
+    },
+  },
+  '4-2-4': {
+    FWD: {
+      0: { accepts: ['FWD', 'MID'], role: 'FWD' }, // punta izquierda
+      3: { accepts: ['FWD', 'MID'], role: 'FWD' }, // punta derecha
     },
   },
 };

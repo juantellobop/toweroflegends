@@ -360,19 +360,27 @@ function statFor(player, key) {
 }
 
 function orderLineForFormation(line, players, slots) {
-  if (line !== 'FWD' || slots.FWD !== 3 || players.length !== 3) return players;
-  const picked = players.slice();
-  let centerIndex = 0;
-  for (let i = 1; i < picked.length; i++) {
-    const a = statFor(picked[i], 'shooting') * 0.8 + statFor(picked[i], 'physical') * 0.2;
-    const b = statFor(picked[centerIndex], 'shooting') * 0.8 + statFor(picked[centerIndex], 'physical') * 0.2;
-    if (a > b) centerIndex = i;
+  if (line !== 'FWD' || players.length !== slots.FWD) return players;
+  const nineScore = (p) => statFor(p, 'shooting') * 0.8 + statFor(p, 'physical') * 0.2;
+  const wingScore = (p) => statFor(p, 'dribbling') + statFor(p, 'pace');
+  if (slots.FWD === 3) {
+    const picked = players.slice();
+    let centerIndex = 0;
+    for (let i = 1; i < picked.length; i++) {
+      if (nineScore(picked[i]) > nineScore(picked[centerIndex])) centerIndex = i;
+    }
+    const [center] = picked.splice(centerIndex, 1);
+    picked.sort((a, b) => wingScore(b) - wingScore(a));
+    return [picked[0], center, picked[1]];
   }
-  const [center] = picked.splice(centerIndex, 1);
-  picked.sort((a, b) =>
-    (statFor(b, 'dribbling') + statFor(b, 'pace')) - (statFor(a, 'dribbling') + statFor(a, 'pace'))
-  );
-  return [picked[0], center, picked[1]];
+  if (slots.FWD === 4) {
+    // 4-2-4: la dupla de mejores rematadores al centro, regateadores a las puntas.
+    const picked = players.slice().sort((a, b) => nineScore(b) - nineScore(a));
+    const centers = picked.slice(0, 2);
+    const wings = picked.slice(2).sort((a, b) => wingScore(b) - wingScore(a));
+    return [wings[0], centers[0], centers[1], wings[1]];
+  }
+  return players;
 }
 
 // Rellena automáticamente el once con los mejores de la plantilla por línea.
