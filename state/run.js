@@ -383,20 +383,33 @@ function orderLineForFormation(line, players, slots) {
   return players;
 }
 
-// Rellena automáticamente el once con los mejores de la plantilla por línea.
+// Rellena automáticamente el once con los mejores de la plantilla, hueco a
+// hueco. Los huecos de una sola posición eligen primero (para no quedarse sin
+// especialistas) y los híbridos (extremos, enganches) toman después al mejor
+// disponible entre las posiciones que aceptan; a igual OVR gana la natural.
 export function autoFillStarting11(state) {
-  const slots = formationSlots(state.formation);
   const used = new Set();
   const eleven = emptyStarting11();
+  const allSlots = LINES.flatMap((line) => formationLineSlots(state.formation, line));
+  const bySlot = new Map();
+  for (const slot of allSlots.slice().sort((a, b) => a.accepts.length - b.accepts.length)) {
+    const player = state.squad
+      .filter((p) => slot.accepts.includes(p.position) && !used.has(p.id))
+      .sort((a, b) =>
+        (playerOVR(b) - playerOVR(a)) ||
+        ((b.position === slot.line ? 1 : 0) - (a.position === slot.line ? 1 : 0))
+      )[0];
+    if (!player) continue;
+    used.add(player.id);
+    bySlot.set(slot, player);
+  }
+  const shape = formationSlots(state.formation);
   for (const line of LINES) {
-    const candidates = state.squad
-      .filter((p) => p.position === line && !used.has(p.id))
-      .sort((a, b) => playerOVR(b) - playerOVR(a));
-    const selected = candidates.slice(0, slots[line]);
-    for (const player of orderLineForFormation(line, selected, slots)) {
-      eleven[line].push(player);
-      used.add(player.id);
-    }
+    const picked = allSlots
+      .filter((slot) => slot.line === line)
+      .map((slot) => bySlot.get(slot))
+      .filter(Boolean);
+    eleven[line] = orderLineForFormation(line, picked, shape);
   }
   state.starting11 = eleven;
 }
