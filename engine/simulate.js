@@ -9,7 +9,9 @@ import { ratio, simulateHighlight } from './highlights.js';
 
 export { ratio };
 
-const clampRating = (v) => Math.max(1, Math.min(99, Math.round(v * 10) / 10));
+// Redondeo a décimas con piso de 1; sin techo: los ajustes en vivo (roja,
+// remontada) no recortan a los equipos que superan 99.
+const roundRating = (v) => Math.max(1, Math.round(v * 10) / 10);
 
 // Tarjeta roja: el equipo que comete la falta roja juega en inferioridad el resto
 // del partido (las jugadas se procesan en orden cronológico, así que mutar sus
@@ -17,8 +19,8 @@ const clampRating = (v) => Math.max(1, Math.min(99, Math.round(v * 10) / 10));
 function applyRedCard(team) {
   team.ratings = {
     ...team.ratings,
-    defense: clampRating(team.ratings.defense * (1 - CONFIG.RED_CARD_PENALTY)),
-    midfield: clampRating(team.ratings.midfield * (1 - CONFIG.RED_CARD_PENALTY)),
+    defense: roundRating(team.ratings.defense * (1 - CONFIG.RED_CARD_PENALTY)),
+    midfield: roundRating(team.ratings.midfield * (1 - CONFIG.RED_CARD_PENALTY)),
   };
 }
 
@@ -35,8 +37,8 @@ function withComebackPush(att, score, side) {
     ...att,
     ratings: {
       ...att.ratings,
-      attack: clampRating(att.ratings.attack * (1 + push)),
-      midfield: clampRating(att.ratings.midfield * (1 + push)),
+      attack: roundRating(att.ratings.attack * (1 + push)),
+      midfield: roundRating(att.ratings.midfield * (1 + push)),
     },
   };
 }

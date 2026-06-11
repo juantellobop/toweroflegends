@@ -100,14 +100,16 @@ assert.ok(near(applyItemsToRatings(base, [tikitaka], '4-4-2').midfield, 52), 'co
 // Reliquia de química: +2 de equipo, con decaimiento en copias.
 assert.equal(chemTeamBonus([item('duodecimo_jugador')]), 2);
 assert.equal(chemTeamBonus([item('duodecimo_jugador'), item('duodecimo_jugador')]), 3);
+// Sin topes de acumulación: cada objeto distinto suma entero (tras el nerfeo
+// ×0.5); el decaimiento solo aplica a copias del mismo objeto.
 const hugeAdds = Array.from({ length: 3 }, (_, i) => ({
   id: `huge-add-${i}`, effects: [{ target: 'team', stat: 'attack', op: 'add', value: 100 }],
 }));
 const hugeMults = Array.from({ length: 3 }, (_, i) => ({
   id: `huge-mult-${i}`, effects: [{ target: 'team', stat: 'midfield', op: 'mult', value: 2 }],
 }));
-assert.equal(applyItemsToRatings({ attack: 50, midfield: 50, defense: 50, gk: 50 }, hugeAdds).attack, 62);
-assert.ok(Math.abs(applyItemsToRatings({ attack: 50, midfield: 50, defense: 50, gk: 50 }, hugeMults).midfield - 57.5) < 1e-9);
+assert.equal(applyItemsToRatings({ attack: 50, midfield: 50, defense: 50, gk: 50 }, hugeAdds).attack, 200);
+assert.ok(Math.abs(applyItemsToRatings({ attack: 50, midfield: 50, defense: 50, gk: 50 }, hugeMults).midfield - 125) < 1e-9);
 
 // Jugadores únicos: sobre jugable, repetidas deshabilitadas y alta rechazada.
 const tinyCatalog = ROSTER.slice(0, 4);

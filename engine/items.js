@@ -11,10 +11,6 @@ import { CONFIG, formationType } from '../data/config.js';
 
 const lineToStat = { FWD: 'attack', MID: 'midfield', DEF: 'defense', GK: 'gk' };
 
-function clamp(value, cap) {
-  return Math.max(-cap, Math.min(cap, value));
-}
-
 function effectKey(item, effect) {
   if (!CONFIG.DR_BY_STAT) return item.id;
   const target = effect.target === 'line' ? `${effect.target}:${effect.line}` : effect.target;
@@ -50,7 +46,8 @@ export function effectiveItemEffects(items = [], { scalePower = true, formation 
   return out;
 }
 
-// Aplica primero add y después mult, con topes independientes por rating.
+// Aplica primero add y después mult, sin topes: cada objeto suma entero (el
+// decaimiento por copia y el nerfeo de potencia ya moderan el apilamiento).
 export function applyItemsToRatings(ratings, items = [], formation = null) {
   const r = { ...ratings };
   const add = {};
@@ -65,9 +62,9 @@ export function applyItemsToRatings(ratings, items = [], formation = null) {
     if (bucket) bucket[stat] = (bucket[stat] || 0) + effect.value;
   }
 
-  for (const stat in r) r[stat] += clamp(add[stat] || 0, CONFIG.ITEM_ADD_CAP);
-  for (const stat in r) r[stat] *= 1 + clamp(mult[stat] || 0, CONFIG.ITEM_MULT_CAP);
-  for (const stat in r) r[stat] = Math.max(1, Math.min(99, r[stat]));
+  for (const stat in r) r[stat] += add[stat] || 0;
+  for (const stat in r) r[stat] *= 1 + (mult[stat] || 0);
+  for (const stat in r) r[stat] = Math.max(1, r[stat]);
   return r;
 }
 

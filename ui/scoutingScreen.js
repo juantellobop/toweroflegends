@@ -56,7 +56,7 @@ function ratings(opponent) {
         <img src="${icon}" alt="" aria-hidden="true" loading="lazy" decoding="async" />
         <span>${label}</span>
         <b>${value}</b>
-        <i><span style="width:${value}%"></span></i>
+        <i><span style="width:${Math.min(100, value)}%"></span></i>
       </div>`).join('')}
   </div>`;
 }

@@ -12,14 +12,15 @@ const STAT_BONUS = {
   Líbero: { passing: 4, defending: 2 },
 };
 
-// Devuelve una copia de stats con el bonus del rasgo aplicado (recortado a 99).
+// Devuelve una copia de stats con el bonus del rasgo aplicado, sin recorte:
+// el rasgo suma entero aunque la stat supere 99.
 export function applyTraitToStats(player) {
   if (!player.stats) return player.stats;
   const bonus = STAT_BONUS[player.trait];
   if (!bonus) return player.stats;
   const out = { ...player.stats };
   for (const k in bonus) {
-    out[k] = Math.min(99, (out[k] || 0) + bonus[k]);
+    out[k] = (out[k] || 0) + bonus[k];
   }
   return out;
 }

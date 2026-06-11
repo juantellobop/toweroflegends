@@ -107,7 +107,7 @@ const core = (n) => {
 };
 assert.equal(core(4), 0);
 assert.equal(core(5), 1);
-assert.equal(core(11), CONFIG.CHEM_CORE_CAP);
+assert.equal(core(11), 4, 'núcleo nacional sin tope: 11 connacionales → +4');
 
 // === 6b. Química entre líneas por formación (CHEM_FORMATION_LINKS) ===
 // Once de control: nadie comparte nación y las épocas van espaciadas ≥20 años
@@ -197,10 +197,11 @@ assert.equal(
   computeChemistry({ GK: [], DEF: [{ nation: 'A', era: '1900', trait: 'Capitán' }], MID: [], FWD: [] }).DEF,
   1, 'Capitán aporta +1 a su línea aunque no haya pares'
 );
-const cappedLine = ['1990', '1990', '1990', '1990'].map((era) => ({ nation: 'Italia', era, position: 'DEF', trait: 'Capitán' }));
+// Sin tope por línea: 4 italianos de 1990 = 6 pares × 3 + 1 de Capitán = 19.
+const stackedLine = ['1990', '1990', '1990', '1990'].map((era) => ({ nation: 'Italia', era, position: 'DEF', trait: 'Capitán' }));
 assert.equal(
-  computeChemistry({ GK: [], DEF: cappedLine, MID: [], FWD: [] }).DEF,
-  CONFIG.CHEM_CAP, 'el Capitán no rompe el tope de química por línea'
+  computeChemistry({ GK: [], DEF: stackedLine, MID: [], FWD: [] }).DEF,
+  19, 'la química de línea suma entera, sin recorte'
 );
 
 // === 7. Realismo: constantes presentes y peso individual subido ===

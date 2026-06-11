@@ -214,14 +214,16 @@ function applyFormationModifiers(ratings, formation) {
 export function calcularRatings(team) {
   if (team.ratings && !team.starting11) {
     const r = applyFormationModifiers({ ...team.ratings }, team.formation);
-    for (const k in r) r[k] = Math.max(1, Math.min(99, Math.round(r[k] * 10) / 10));
+    for (const k in r) r[k] = Math.max(1, Math.round(r[k] * 10) / 10);
     return r;
   }
   let r = baseRatings(team.starting11, team.formation);
   r = applyChemistry(r, team.starting11, team.formation, team.items || []);
   r = applyItemsToRatings(r, team.items || [], team.formation);
   r = applyFormationModifiers(r, team.formation);
-  for (const k in r) r[k] = Math.max(1, Math.min(99, Math.round(r[k] * 10) / 10));
+  // Sin techo de 99: todo lo que suman jugadores, química, objetos y táctica
+  // llega entero a la simulación (solo piso de 1 y redondeo a décimas).
+  for (const k in r) r[k] = Math.max(1, Math.round(r[k] * 10) / 10);
   return r;
 }
 
@@ -254,7 +256,7 @@ function buildShooters(team, ratings) {
   // Compatibilidad con un rival sin once definido.
   return [0, 1, 2].map((i) => ({
     name: `${team.name} #${9 + i}`,
-    shooting: Math.max(1, Math.min(99, ratings.attack + (i - 1) * 3)),
+    shooting: Math.max(1, ratings.attack + (i - 1) * 3),
     weight: 1,
   }));
 }
@@ -361,7 +363,7 @@ function linePlayers(team, ratings, line) {
   return Array.from({ length: count }, (_, i) => normalizeLinePlayer({
     name: `${team.name} #${line === 'GK' ? 1 : i + 2}`,
     position: line,
-    ovr: Math.max(1, Math.min(99, ratings[stat] + ((i % 3) - 1) * 2)),
+    ovr: Math.max(1, ratings[stat] + ((i % 3) - 1) * 2),
   }, line, ratings));
 }
 

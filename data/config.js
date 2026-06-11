@@ -26,11 +26,12 @@ export const CONFIG = {
   PACK_BAND_WEIGHTS: { low: 60, mid: 30, high: 10 },
 
   // --- Objetos ---
+  // Sin topes de acumulación: cada objeto suma entero. El apilamiento lo
+  // modera el nerfeo de potencia (ITEM_POWER_SCALE) y el decaimiento por
+  // copia repetida (DR_RATE).
   ITEM_POWER_SCALE: 0.5,
   DR_RATE: 0.5,
   DR_BY_STAT: false,
-  ITEM_ADD_CAP: 12,
-  ITEM_MULT_CAP: 0.15,
   // Sinergia ítem↔táctica: si el synergyType del ítem coincide con el tipo
   // del dibujo (posesión/presión/contra), su efecto se aplica multiplicado.
   ITEM_SYNERGY_MULT: 1.5,
@@ -67,12 +68,12 @@ export const CONFIG = {
   OPP_EARLY_EASE: { 1: 10, 2: 8, 3: 6, 4: 4, 5: 2 },
 
   // --- Química ---
+  // Sin topes: toda la química construida (pares de línea, enlaces de
+  // formación, núcleo nacional) suma entera a los ratings.
   CHEM_NATION: 2, // bonus por par de misma nación en una línea
   CHEM_ERA: 1, // bonus por par de misma época (década exacta) en una línea
   CHEM_ERA_ADJACENT: 0.5, // bonus por par de décadas contiguas (1960↔1970)
-  CHEM_CAP: 10, // tope de química por línea
   CHEM_CORE: 1, // bonus global por escalón de núcleo nacional (ver computeTeamChem)
-  CHEM_CORE_CAP: 3, // tope del bonus de núcleo nacional
   CHEM_TACTIC: 1, // bonus a ataque+medio si tu plantilla encaja con el tipo del dibujo
   // Cuánto pesa la química en los ratings que usa la simulación. Los puntos de
   // química que ve el jugador no cambian; solo su efecto sobre el desempeño.

@@ -4,7 +4,9 @@
 
 import { CONFIG, targetStrength } from './config.js';
 
-const clamp = (n) => Math.max(1, Math.min(99, Math.round(n)));
+// Piso de 1 y redondeo; sin techo de 99: los rivales de niveles altos siguen
+// creciendo igual que el equipo del jugador (simetría de la dificultad).
+const clamp = (n) => Math.max(1, Math.round(n));
 
 function names(text, position, ovr) {
   return text.split('|').map((name, i) => ({

@@ -258,7 +258,7 @@ function ratingsHeader(state) {
     <div class="rating-row">
       <img src="${icon}" alt="" aria-hidden="true" loading="lazy" decoding="async" />
       <span class="rt-label">${label}</span>
-      <span class="rt-bar"><span class="rt-fill" style="width:${Math.round(val)}%"></span></span>
+      <span class="rt-bar"><span class="rt-fill" style="width:${Math.min(100, Math.round(val))}%"></span></span>
       <span class="rt-valwrap"><b class="rt-val tabular" data-val="${Math.round(val)}">0</b>${itemDeltaHTML(d)}</span>
     </div>`).join('');
   return `

@@ -1,7 +1,7 @@
 // Torre de Leyendas — Cálculo de química / sinergias (§4.7).
 // Por cada par de titulares en la misma línea que comparten nación → +CHEM_NATION.
 // Por cada par que comparte época (década exacta) → +CHEM_ERA; décadas contiguas
-// → +CHEM_ERA_ADJACENT. Tope CHEM_CAP por línea.
+// → +CHEM_ERA_ADJACENT. Sin tope por línea: toda la química construida suma.
 // Algunas formaciones añaden pares entre líneas (CHEM_FORMATION_LINKS): p. ej.
 // en 4-3-3 cada extremo juega química con el interior de su lado. Cada par
 // extra reparte su valor mitad a cada una de las dos líneas implicadas.
@@ -97,7 +97,7 @@ function formationLinkChem(starting11, formation) {
   return extra;
 }
 
-// Devuelve la química por línea: { GK, DEF, MID, FWD } (cada una topada a CHEM_CAP).
+// Devuelve la química por línea: { GK, DEF, MID, FWD }, sin tope: todo par suma.
 // El portero hace química con la defensa (suma en DEF) y los enganches juegan
 // química con el mediocampo Y con la delantera (sus pares entre sí puntúan una
 // sola vez, en MID). Los pares entre líneas de la formación (CHEM_FORMATION_LINKS)
@@ -105,7 +105,6 @@ function formationLinkChem(starting11, formation) {
 export function computeChemistry(starting11, formation = null) {
   const linePlayers = (line) => (starting11[line] || []).filter(Boolean);
   const captain = (players) => (players.some((p) => p.trait === 'Capitán') ? 1 : 0);
-  const cap = (value) => Math.min(CONFIG.CHEM_CAP, value);
   const gk = linePlayers('GK');
   const def = linePlayers('DEF');
   const mid = linePlayers('MID');
@@ -114,16 +113,16 @@ export function computeChemistry(starting11, formation = null) {
   const eng = mid.filter((p) => enganches.has(p));
   const links = formationLinkChem(starting11, formation);
   return {
-    GK: cap(captain(gk) + links.GK),
-    DEF: cap(groupChem([...gk, ...def]) + captain(def) + links.DEF),
-    MID: cap(groupChem(mid) + captain(mid) + links.MID),
-    FWD: cap(groupChem([...fwd, ...eng], enganches) + captain(fwd) + links.FWD),
+    GK: captain(gk) + links.GK,
+    DEF: groupChem([...gk, ...def]) + captain(def) + links.DEF,
+    MID: groupChem(mid) + captain(mid) + links.MID,
+    FWD: groupChem([...fwd, ...eng], enganches) + captain(fwd) + links.FWD,
   };
 }
 
 // Bonus globales de equipo (no por línea):
 //  - all: "núcleo nacional" — si el XI se construye en torno a una nación, sube
-//    todos los ratings (escalones: 5 connacionales → +1, 7 → +2, 9+ → +3).
+//    todos los ratings (escalones: 5 connacionales → +1, 7 → +2, 9 → +3, 11 → +4).
 //  - attackMid: "cohesión táctica" — si la mayoría de tus jugadores de campo con
 //    tacticalType definido coincide con el tipo del dibujo, sube ataque y medio.
 export function computeTeamChem(starting11, formation) {
@@ -138,7 +137,7 @@ export function computeTeamChem(starting11, formation) {
     byNation[nation] = (byNation[nation] || 0) + 1;
   }
   const coreSize = Math.max(0, ...Object.values(byNation));
-  const core = Math.min(CONFIG.CHEM_CORE_CAP, Math.max(0, Math.floor((coreSize - 3) / 2)) * CONFIG.CHEM_CORE);
+  const core = Math.max(0, Math.floor((coreSize - 3) / 2)) * CONFIG.CHEM_CORE;
 
   // Cohesión táctica: requiere que el dibujo tenga tipo y que la mayoría de los
   // jugadores de campo tipados lo compartan.
