@@ -30,12 +30,12 @@ import { LANGUAGES, getLanguage, initLanguage, localizeNation, setLanguage, t } 
 import { GAME_VERSION } from './data/version.js';
 import { esc, prefersReducedMotion } from './ui/dom.js';
 
-// Estadísticas en vivo (contadores del menú + presencia): módulo 100% opcional
-// cargado en diferido. Si la petición del archivo falla (p. ej. el challenge
-// anti-bots del hosting responde HTML en vez del módulo), el juego arranca
-// igual, solo que sin contadores. Un import estático aquí tumbaría toda la UI.
+// Comunidad en vivo (contadores del menú + presencia): módulo 100% opcional
+// cargado en diferido. Si la petición del archivo falla (challenge anti-bots
+// del hosting, bloqueadores de contenido...), el juego arranca igual, solo
+// que sin contadores. Un import estático aquí tumbaría toda la UI.
 let liveStats = null;
-const liveStatsReady = import('./data/liveStats.js')
+const liveStatsReady = import('./data/comunidad.js')
   .then((mod) => {
     liveStats = mod;
     mod.startPresence();

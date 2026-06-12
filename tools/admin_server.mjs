@@ -528,18 +528,22 @@ function onlineCount() {
   return presence.size;
 }
 
+// Rutas en castellano a propósito: "/api/stats" y "heartbeat" coinciden con
+// patrones de telemetría de EasyPrivacy y los bloqueadores cortan la petición
+// en el navegador. Las rutas viejas se mantienen como alias para clientes con
+// el módulo anterior aún cacheado.
 async function handleStats(req, res) {
   try {
     const pathname = (req.url || '').split('?')[0];
 
-    if (req.method === 'GET' && pathname === '/api/stats') {
+    if (req.method === 'GET' && (pathname === '/api/comunidad' || pathname === '/api/stats')) {
       const stats = await readStatsFile();
       json(res, 200, { totalGames: stats.totalGames, online: onlineCount() });
       return;
     }
 
     // Latido de presencia: registra/refresca al cliente y devuelve el recuento.
-    if (req.method === 'POST' && pathname === '/api/stats/heartbeat') {
+    if (req.method === 'POST' && (pathname === '/api/comunidad/latido' || pathname === '/api/stats/heartbeat')) {
       const payload = JSON.parse(await readBody(req) || '{}');
       const id = clampText(payload?.id, 64);
       if (id && (presence.size < PRESENCE_MAX || presence.has(id))) {
@@ -550,7 +554,7 @@ async function handleStats(req, res) {
     }
 
     // Una run nueva arrancó: suma al contador global persistido.
-    if (req.method === 'POST' && pathname === '/api/stats/game') {
+    if (req.method === 'POST' && (pathname === '/api/comunidad/partida' || pathname === '/api/stats/game')) {
       const stats = await readStatsFile();
       stats.totalGames += 1;
       await writeStatsFile();
@@ -737,7 +741,7 @@ export function handleRequest(req, res) {
     handleRanking(req, res);
     return;
   }
-  if (req.url?.startsWith('/api/stats')) {
+  if (req.url?.startsWith('/api/comunidad') || req.url?.startsWith('/api/stats')) {
     handleStats(req, res);
     return;
   }

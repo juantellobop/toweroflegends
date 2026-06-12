@@ -1,7 +1,13 @@
-// Torre de Leyendas — Estadísticas en vivo (/api/stats): partidas jugadas en
+// Torre de Leyendas — Comunidad en vivo (/api/comunidad): partidas jugadas en
 // total y jugadores conectados ahora mismo. Todo es "mejor si está": sin
 // servidor (hosting estático) las llamadas devuelven null y los contadores
 // simplemente no se muestran.
+//
+// OJO con los nombres: este archivo se llamaba liveStats.js y EasyPrivacy (la
+// lista de uBlock/AdGuard/Firefox estricto) bloquea el patrón "/livestats.js",
+// igual que rutas tipo "/api/stats" o "heartbeat". Ni el archivo ni los
+// endpoints deben volver a usar palabras de telemetría (stats, analytics,
+// track, beacon, heartbeat...): por eso todo va en castellano.
 
 import { requestJson } from './api.js';
 
@@ -18,12 +24,12 @@ const clientId = globalThis.crypto?.randomUUID
 
 // { totalGames, online } o null si la API no está disponible.
 export function fetchLiveStats() {
-  return requestJson('/api/stats');
+  return requestJson('/api/comunidad');
 }
 
 // Suma una partida al contador global. Se llama al arrancar una run nueva.
 export function reportRunStarted() {
-  requestJson('/api/stats/game', { method: 'POST', body: '{}' });
+  requestJson('/api/comunidad/partida', { method: 'POST', body: '{}' });
 }
 
 function tabHidden() {
@@ -38,7 +44,7 @@ export function startPresence() {
   if (heartbeatTimer) return;
   const beat = () => {
     if (tabHidden()) return;
-    requestJson('/api/stats/heartbeat', {
+    requestJson('/api/comunidad/latido', {
       method: 'POST',
       body: JSON.stringify({ id: clientId }),
     });

@@ -126,32 +126,38 @@ try {
 
   console.log('Ranking persistente: OK');
 
-  // === Estadísticas en vivo (/api/stats): partidas totales y presencia ===
-  const statsEmpty = await request('/api/stats');
+  // === Comunidad en vivo (/api/comunidad): partidas totales y presencia ===
+  const statsEmpty = await request('/api/comunidad');
   assert.equal(statsEmpty.totalGames, 0);
   assert.equal(statsEmpty.online, 0);
 
   // Dos runs nuevas suman al contador persistido.
-  await request('/api/stats/game', { method: 'POST', body: '{}' });
-  const afterGames = await request('/api/stats/game', { method: 'POST', body: '{}' });
+  await request('/api/comunidad/partida', { method: 'POST', body: '{}' });
+  const afterGames = await request('/api/comunidad/partida', { method: 'POST', body: '{}' });
   assert.equal(afterGames.totalGames, 2);
   const persistedStats = JSON.parse(await fs.readFile(statsFile, 'utf8'));
   assert.equal(persistedStats.totalGames, 2);
 
   // Dos clientes laten → 2 en vivo; el mismo id repetido no duplica.
-  await request('/api/stats/heartbeat', { method: 'POST', body: JSON.stringify({ id: 'cliente-a' }) });
-  await request('/api/stats/heartbeat', { method: 'POST', body: JSON.stringify({ id: 'cliente-a' }) });
-  const twoOnline = await request('/api/stats/heartbeat', { method: 'POST', body: JSON.stringify({ id: 'cliente-b' }) });
+  await request('/api/comunidad/latido', { method: 'POST', body: JSON.stringify({ id: 'cliente-a' }) });
+  await request('/api/comunidad/latido', { method: 'POST', body: JSON.stringify({ id: 'cliente-a' }) });
+  const twoOnline = await request('/api/comunidad/latido', { method: 'POST', body: JSON.stringify({ id: 'cliente-b' }) });
   assert.equal(twoOnline.online, 2);
-  const statsLive = await request('/api/stats');
+  const statsLive = await request('/api/comunidad');
   assert.equal(statsLive.totalGames, 2);
   assert.equal(statsLive.online, 2);
 
   // Un latido sin id no cuenta como jugador.
-  const noId = await request('/api/stats/heartbeat', { method: 'POST', body: '{}' });
+  const noId = await request('/api/comunidad/latido', { method: 'POST', body: '{}' });
   assert.equal(noId.online, 2);
 
-  console.log('Estadísticas en vivo: OK');
+  // Alias legados (/api/stats*): clientes con el módulo viejo cacheado.
+  const legacy = await request('/api/stats');
+  assert.equal(legacy.totalGames, 2);
+  const legacyBeat = await request('/api/stats/heartbeat', { method: 'POST', body: JSON.stringify({ id: 'cliente-viejo' }) });
+  assert.equal(legacyBeat.online, 3);
+
+  console.log('Comunidad en vivo: OK');
 } finally {
   server.kill();
   await fs.rm(tempDir, { recursive: true, force: true });
