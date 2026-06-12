@@ -32,6 +32,11 @@ try {
   assert.match(index.body, new RegExp(`design/tokens\\.css\\?v=${BUILD_VERSION}`));
   assert.match(index.body, new RegExp(`styles\\.css\\?v=${BUILD_VERSION}`));
   assert.match(index.body, new RegExp(`main\\.js\\?v=${BUILD_VERSION}`));
+  assert.match(index.body, new RegExp(`assets/favicon\\.png\\?v=${BUILD_VERSION}`));
+
+  const versionedFavicon = await request(port, `/assets/favicon.png?v=${BUILD_VERSION}`);
+  assert.equal(versionedFavicon.status, 200);
+  assert.equal(versionedFavicon.headers['cache-control'], 'public, max-age=31536000, immutable');
 
   const versionedCss = await request(port, `/styles.css?v=${BUILD_VERSION}`);
   assert.equal(versionedCss.status, 200);

@@ -984,7 +984,7 @@ select {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 50px;
+  bottom: 10px;
   z-index: 40;
   display: flex;
   justify-content: center;
@@ -1069,7 +1069,7 @@ select {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   padding-left: var(--space-4); border-left: 1px solid var(--separator);
 }
-.chem-pill span { font-size: var(--t-caption-2); color: var(--label-secondary); }
+.chem-pill span { font-size: var(--t-caption-2); color: var(--arcade-yellow); }
 .chem-pill b { font-family: var(--font-rounded); font-size: var(--t-title-3); color: var(--success); }
 
 .header-pills { display: flex; align-items: stretch; gap: var(--space-3); }
@@ -2631,13 +2631,14 @@ select {
 
   .team-side .header-pills {
     justify-content: space-around;
+    align-items: center;
     border-top: 1px solid var(--separator);
     padding-top: 8px;
   }
 
   .team-side .chem-pill {
     flex-direction: row;
-    align-items: baseline;
+    align-items: center;
     gap: 6px;
     border-left: 0;
     padding-left: 0;

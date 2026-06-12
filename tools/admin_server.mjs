@@ -44,6 +44,7 @@ const SOURCE_VERSION_PATHS = [
   'index.html',
   'main.js',
   'styles.css',
+  'assets/favicon.png',
   'assets/flags',
   'assets/ui',
   'design',
@@ -135,8 +136,10 @@ function resolveBuildVersion() {
 export const BUILD_VERSION = resolveBuildVersion();
 
 function versionedIndexHtml(source) {
+  // El favicon también va versionado: los navegadores cachean los iconos con
+  // especial insistencia y sin ?v= seguirían mostrando el viejo tras cambiarlo.
   return source.replace(
-    /\b(href|src)="(design\/tokens\.css|styles\.css|main\.js)(?:\?[^"]*)?"/g,
+    /\b(href|src)="(design\/tokens\.css|styles\.css|main\.js|assets\/favicon\.png)(?:\?[^"]*)?"/g,
     (_, attribute, asset) => `${attribute}="${asset}?v=${BUILD_VERSION}"`
   );
 }
