@@ -1750,6 +1750,11 @@ select {
 }
 
 @media (max-width: 480px) {
+
+  .pack-tap{
+    display: none;
+  }
+  
   .lineup-modal .field-chip {
     width: 56px;
     padding: 4px 2px;
