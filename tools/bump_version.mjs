@@ -33,14 +33,22 @@ function git(...args) {
   return execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' }).trim();
 }
 
-// En modo hook, un bump manual previo (data/version.js ya staged) manda:
-// no lo pisamos con otro bump automático encima.
+function parseVersion(source) {
+  const found = VERSION_RE.exec(String(source || ''));
+  return found ? `${found[2]}.${found[3]}.${found[4]}` : null;
+}
+
+// En modo hook, un bump manual previo manda: no lo pisamos con otro bump
+// automático encima. "Manual" significa que el NÚMERO staged difiere del de
+// HEAD; que el archivo esté staged por otra razón (p. ej. un comentario
+// editado) no cuenta y el bump del commit sigue ocurriendo.
 if (auto) {
   try {
-    const staged = git('diff', '--cached', '--name-only').split('\n');
-    if (staged.includes('data/version.js')) process.exit(0);
+    const stagedVersion = parseVersion(git('show', ':data/version.js'));
+    const headVersion = parseVersion(git('show', 'HEAD:data/version.js'));
+    if (stagedVersion && headVersion && stagedVersion !== headVersion) process.exit(0);
   } catch (_) {
-    // Sin git no hay hook posible; el bump manual sigue funcionando.
+    // Primer commit (sin HEAD) o sin git: seguimos con el bump normal.
   }
 }
 
