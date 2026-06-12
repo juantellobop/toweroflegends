@@ -1190,6 +1190,19 @@ select {
   object-position: center top;
   image-rendering: pixelated;
 }
+/* Bandera sutil del país del jugador, en la esquina inferior del retrato
+   (titulares y suplentes). Pisa el inset/tamaño del retrato de arriba. */
+.chip-face .chip-flag,
+.bench-face .chip-flag {
+  position: absolute;
+  inset: auto 1px 1px auto;
+  width: 16px;
+  height: 11px;
+  border: 1px solid rgba(255,255,255,.65);
+  box-shadow: 0 1px 2px rgba(0,0,0,.45);
+  object-fit: cover;
+  image-rendering: pixelated;
+}
 .field-chip.empty { background: rgba(0,0,0,0.18); border-style: dashed; border-color: rgba(255,255,255,0.55); }
 .chip-plus { font-size: 22px; font-weight: 300; line-height: 1; }
 
@@ -3077,24 +3090,62 @@ select {
   padding: 2px 2px 12px;
 }
 
+/* Filtro del banco por línea: select con la piel arcade (flecha propia). */
+.bench-filter {
+  appearance: none;
+  -webkit-appearance: none;
+  align-self: center;
+  min-height: 34px;
+  padding: 6px 26px 6px 10px;
+  color: #fff;
+  background:
+    linear-gradient(45deg, transparent 49%, var(--arcade-cyan) 50%) calc(100% - 16px) 55% / 6px 6px no-repeat,
+    linear-gradient(135deg, transparent 49%, var(--arcade-cyan) 50%) calc(100% - 10px) 55% / 6px 6px no-repeat,
+    #071459;
+  border: 2px solid var(--arcade-cyan);
+  border-radius: 0;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.bench-filter:focus-visible {
+  outline: 3px solid var(--arcade-yellow);
+  outline-offset: 2px;
+}
+
+/* Carta de suplente: retrato arriba a la izquierda con OVR + posición a su
+   lado, y el nombre debajo a todo el ancho (dos líneas máximo). El "i" y el
+   "+" siguen anclados al borde derecho; la línea superior les deja hueco. */
 .team-roster .bench-item {
   min-width: 0;
-  min-height: 142px;
+  min-height: 0;
   display: grid;
-  grid-template-columns: 64px minmax(0, 1fr);
-  grid-template-rows: auto auto auto;
+  grid-template-columns: 48px minmax(0, 1fr);
+  grid-template-rows: auto auto;
   align-items: center;
   justify-items: start;
-  gap: 2px 8px;
+  gap: 6px 8px;
   padding: 8px;
   text-align: left;
 }
 
+.team-roster .bench-item[hidden] { display: none; }
+
 .team-roster .bench-face {
-  grid-row: 1 / 4;
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   border: 2px solid rgba(255,255,255,.78);
+}
+
+.team-roster .bench-topline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 7px;
+  min-width: 0;
+  padding-right: 16px;
 }
 
 .team-roster .bench-ovr {
@@ -3103,9 +3154,17 @@ select {
 }
 
 .team-roster .bench-name {
+  grid-column: 1 / -1;
   max-width: 100%;
   white-space: normal;
-  line-height: 1.1;
+  line-height: 1.2;
+  padding-right: 22px;
+  /* Dos líneas máximo, con recorte limpio. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
 }
 
 .team-roster .bench-pos {
@@ -5511,36 +5570,47 @@ button.primary:active:not(:disabled),
   .team-roster .bench-item {
     width: 100%;
     min-width: 0;
-    min-height: 92px;
-    grid-template-columns: 42px minmax(0, 1fr);
-    grid-template-rows: auto auto auto;
-    gap: 2px 5px;
+    min-height: 0;
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 4px 6px;
     padding: 6px 5px;
     overflow: hidden;
     scroll-snap-align: none;
   }
 
   .team-roster .bench-face {
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
   }
 
-  .team-roster .bench-ovr { font-size: 16px; }
+  .team-roster .bench-face .chip-flag {
+    width: 13px;
+    height: 9px;
+  }
+
+  .team-roster .bench-topline {
+    gap: 1px 5px;
+    padding-right: 14px;
+  }
+
+  .team-roster .bench-ovr { font-size: 15px; }
   .team-roster .bench-name {
-    max-height: 2.2em;
-    overflow: hidden;
-    font-size: 8px;
+    font-size: 9px;
+    padding-right: 18px;
   }
   .team-roster .bench-pos { font-size: 8px; }
   .team-roster .bench-info {
     top: 4px;
     right: 4px;
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
   }
   .team-roster .bench-add {
     right: 4px;
     bottom: 4px;
-    width: 21px;
-    height: 21px;
+    width: 20px;
+    height: 20px;
   }
 
   .scout-hero {

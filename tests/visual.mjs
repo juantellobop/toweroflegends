@@ -322,7 +322,8 @@ async function assertDragAndDrop(page) {
 
 async function assertImmediateTouchDrag(page) {
   const bench = page.locator('.team-roster .bench-item').first();
-  const portrait = bench.locator('.bench-face img');
+  // El retrato concreto: la cara también aloja la bandera (.chip-flag).
+  const portrait = bench.locator('.bench-face img:not(.chip-flag)');
   const box = await portrait.boundingBox();
   assert.ok(box, 'Expected a visible substitute portrait for touch drag test');
   const uid = await bench.getAttribute('data-uid');

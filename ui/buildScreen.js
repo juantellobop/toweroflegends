@@ -47,6 +47,22 @@ const SLOT_NUDGES = {
   '4-2-4': { 'FWD:0': { dy: 4 }, 'FWD:3': { dy: 4 } },
 };
 
+// Filtro del banco de suplentes por línea ('ALL' | GK | DEF | MID | FWD).
+// Vive a nivel de módulo: el tablero se re-renderiza con cada cambio de
+// alineación y el filtro elegido debe sobrevivir a esos re-renders.
+let benchFilter = 'ALL';
+
+function applyBenchFilter(root) {
+  let visible = 0;
+  root.querySelectorAll('.bench-item').forEach((item) => {
+    const show = benchFilter === 'ALL' || item.dataset.line === benchFilter;
+    item.hidden = !show;
+    if (show) visible += 1;
+  });
+  const note = root.querySelector('.bench-filter-empty');
+  if (note) note.hidden = visible > 0;
+}
+
 // Separación mínima entre centros de fichas (unidades del viewBox 0-100).
 // Una ficha mide ~64px sobre un campo de ≤460px (≈14-18 unidades según la
 // pantalla): por debajo de este hueco las cartas se tocan y tapan el enlace
@@ -187,6 +203,7 @@ function chipHTML(p, line, slotIndex) {
       <span class="chip-face" aria-hidden="true">
         <img src="${esc(portraitPathForPlayer(p))}" alt="" draggable="false" loading="lazy" decoding="async" data-hide-on-error="true" />
         <span>${esc(playerInitials(p.name))}</span>
+        <img class="chip-flag" src="${esc(flagSrcForNation(p.nation))}" alt="" draggable="false" loading="lazy" decoding="async" />
       </span>
       <span class="chip-ovr">${ovr}</span>
       <span class="chip-name" title="${esc(p.name)}">${esc(playerSurname(p.name))}</span>
@@ -288,14 +305,18 @@ function bench(state) {
         <span class="bench-face" aria-hidden="true">
           <img src="${esc(portraitPathForPlayer(p))}" alt="" draggable="false" loading="lazy" decoding="async" data-hide-on-error="true" />
           <span>${esc(playerInitials(p.name))}</span>
+          <img class="chip-flag" src="${esc(flagSrcForNation(p.nation))}" alt="" draggable="false" loading="lazy" decoding="async" />
         </span>
-        <span class="bench-ovr">${playerOVR(p)}</span>
+        <span class="bench-topline" aria-hidden="true">
+          <span class="bench-ovr">${playerOVR(p)}</span>
+          <span class="bench-pos">${POSITION_LABEL[p.position]}</span>
+        </span>
         <span class="bench-name">${esc(p.name)}</span>
-        <span class="bench-pos">${POSITION_LABEL[p.position]}</span>
         <span class="bench-add" aria-hidden="true">+</span>
         <span class="chip-info bench-info" role="button" tabindex="0" data-info-uid="${p.uid}" aria-label="${esc(t('build.viewStatsAria', { name: p.name }))}">i</span>
       </button>`).join('')}
-  </div>`;
+  </div>
+  <p class="empty-note bench-filter-empty" hidden>${t('build.noSubs')}</p>`;
 }
 
 export function renderBuild(root, state, handlers) {
@@ -354,6 +375,10 @@ export function renderBuild(root, state, handlers) {
               <div>
                 <h2>${t('build.roster')}</h2>
               </div>
+              <select id="benchFilter" class="bench-filter" aria-label="${esc(t('build.benchFilterAria'))}">
+                ${[['ALL', t('build.benchAll')], ...LINES.map((line) => [line, LINE_LABEL[line]])]
+                  .map(([value, label]) => `<option value="${value}" ${value === benchFilter ? 'selected' : ''}>${esc(label)}</option>`).join('')}
+              </select>
             </div>
             ${bench(state)}
 
@@ -420,6 +445,16 @@ export function renderBuild(root, state, handlers) {
     });
   });
 
+  // === Filtro del banco por línea ===
+  const benchFilterSelect = root.querySelector('#benchFilter');
+  if (benchFilterSelect) {
+    applyBenchFilter(root);
+    benchFilterSelect.addEventListener('change', () => {
+      benchFilter = benchFilterSelect.value;
+      applyBenchFilter(root);
+    });
+  }
+
   // === Jugar ===
   const playBtn = root.querySelector('#play');
   if (complete) playBtn.addEventListener('click', () => handlers.onPlay());
@@ -470,12 +505,26 @@ function wirePlayerStats(root, state) {
   });
 }
 
+// Sesión de arrastre vigente: cada render del tablero registra listeners de
+// window (pointermove/up/cancel y redes de seguridad) y retira los anteriores.
+// Limpieza explícita (sin AbortController): el signal de Node no es válido
+// para el addEventListener de jsdom en los tests de humo.
+let dndCleanup = null;
+
 function wireBuildDragDrop(root, state, handlers, markDragged) {
+  dndCleanup?.();
+  const globalListeners = [];
+  const onGlobal = (target, type, fn) => {
+    target.addEventListener(type, fn);
+    globalListeners.push([target, type, fn]);
+  };
+  dndCleanup = () => globalListeners.forEach(([target, type, fn]) => target.removeEventListener(type, fn));
   const sources = Array.from(root.querySelectorAll('.lineup-draggable'));
   const targets = Array.from(root.querySelectorAll('.chip-anchor[data-line][data-slot]'));
   const field = root.querySelector('#field');
-  // Limpia cualquier ghost huérfano de un arrastre anterior que no se cerrara.
+  // Limpia cualquier ghost/estado huérfano de un arrastre anterior que no se cerrara.
   document.querySelectorAll('.drag-ghost').forEach((node) => node.remove());
+  document.body.classList.remove('lineup-dragging');
   let htmlDragUid = null;
   let pointerDrag = null;
   let activeTarget = null;
@@ -579,6 +628,9 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
     source.classList.remove('drag-source');
     ghost?.remove();
     ghost = null;
+    // Barrido extra: ningún ghost puede quedar "flotando" pase lo que pase
+    // (p. ej. si un re-render a mitad de gesto dejó la referencia atrás).
+    document.querySelectorAll('.drag-ghost').forEach((node) => node.remove());
     pointerDrag = null;
     clearActiveTarget();
     // El brillo NO se limpia aquí: durante el arrastre nativo, pointercancel
@@ -615,7 +667,10 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
     }
 
     source.addEventListener('pointerdown', (event) => {
-      if (event.button !== 0 || event.pointerType === 'mouse' && event.detail > 1) return;
+      if (!event.isPrimary || event.button !== 0 || (event.pointerType === 'mouse' && event.detail > 1)) return;
+      // Un solo gesto a la vez: si otro dedo dejó un arrastre abierto, se
+      // cierra aquí (su ghost se retira) antes de empezar el nuevo.
+      if (pointerDrag) endPointerDrag();
       const player = playerForUid(source.dataset.uid);
       if (!player) return;
       if (isBench) highlightEligible(player); // click o hold: pinta posiciones válidas
@@ -628,6 +683,8 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
       pointerDrag = {
         source,
         player,
+        isBench,
+        pointerId: event.pointerId,
         startX: event.clientX,
         startY: event.clientY,
         dragging: event.pointerType !== 'mouse',
@@ -648,71 +705,103 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
         ghost = makeGhost(source, event.clientX, event.clientY);
       }
     });
-    source.addEventListener('pointermove', (event) => {
+    // Red de seguridad: si el sistema corta la captura del puntero (gesto del
+    // navegador, nodo reemplazado a mitad de arrastre), el gesto se cierra
+    // limpio en lugar de dejar el ghost flotando.
+    source.addEventListener('lostpointercapture', () => {
       if (!pointerDrag || pointerDrag.source !== source) return;
-      const dx = event.clientX - pointerDrag.startX;
-      const dy = event.clientY - pointerDrag.startY;
-      const distance = Math.hypot(dx, dy);
-
-      if (!pointerDrag.mode) {
-        event.preventDefault();
-        moveGhost(event.clientX, event.clientY);
-        if (distance < 5) return;
-        if (Math.abs(dx) > Math.abs(dy) * 1.15) switchToBenchScroll();
-        else pointerDrag.mode = 'drag';
-      }
-
-      if (pointerDrag.mode === 'scroll') {
-        event.preventDefault();
-        pointerDrag.moved = true;
-        if (pointerDrag.scrollContainer) {
-          pointerDrag.scrollContainer.scrollLeft = pointerDrag.startScrollLeft - dx;
-        }
-        return;
-      }
-
-      if (!pointerDrag.dragging && Math.hypot(dx, dy) < 8) return;
-      event.preventDefault();
-      if (!pointerDrag.dragging) {
-        pointerDrag.dragging = true;
-        document.body.classList.add('lineup-dragging');
-        source.classList.add('drag-source');
-        ghost = makeGhost(source, event.clientX, event.clientY);
-      }
-      if (distance >= (event.pointerType === 'mouse' ? 8 : 3)) {
-        pointerDrag.moved = true;
-      }
-      moveGhost(event.clientX, event.clientY);
-      ghost.hidden = true;
-      const target = resolveTarget(event.clientX, event.clientY, pointerDrag.player);
-      ghost.hidden = false;
-      setActiveTarget(target, pointerDrag.player);
-    });
-    source.addEventListener('pointerup', (event) => {
-      if (!pointerDrag || pointerDrag.source !== source) return;
-      if (pointerDrag.mode === 'scroll') {
-        event.preventDefault();
-        if (pointerDrag.moved) markDragged();
-        endPointerDrag();
-        return;
-      }
-      const didDrag = pointerDrag.dragging && pointerDrag.moved;
-      if (didDrag) {
-        event.preventDefault();
-        endPointerDrag({ place: true });
-        if (isBench) clearEligible(); // fin del arrastre por puntero (táctil)
-      } else {
-        endPointerDrag();
-        if (isBench) clearEligible();
-      }
-    });
-    source.addEventListener('pointercancel', () => {
       const wasNative = nativeDragging;
       endPointerDrag();
-      // Si el navegador pasó a arrastre nativo, mantenemos el brillo: lo
-      // limpiará dragend al soltar. Si no, limpiamos aquí.
       if (!wasNative && isBench) clearEligible();
     });
+  });
+
+  // Movimiento/fin del gesto a nivel de window (no del propio nodo): aunque la
+  // captura del puntero falle o el evento acabe en otro elemento, el arrastre
+  // siempre recibe su pointerup/pointercancel y el ghost nunca queda pegado.
+  onGlobal(window, 'pointermove', (event) => {
+    if (!pointerDrag || event.pointerId !== pointerDrag.pointerId) return;
+    const { source } = pointerDrag;
+    const dx = event.clientX - pointerDrag.startX;
+    const dy = event.clientY - pointerDrag.startY;
+    const distance = Math.hypot(dx, dy);
+
+    if (!pointerDrag.mode) {
+      event.preventDefault();
+      moveGhost(event.clientX, event.clientY);
+      if (distance < 5) return;
+      if (Math.abs(dx) > Math.abs(dy) * 1.15) switchToBenchScroll();
+      else pointerDrag.mode = 'drag';
+    }
+
+    if (pointerDrag.mode === 'scroll') {
+      event.preventDefault();
+      pointerDrag.moved = true;
+      if (pointerDrag.scrollContainer) {
+        pointerDrag.scrollContainer.scrollLeft = pointerDrag.startScrollLeft - dx;
+      }
+      return;
+    }
+
+    if (!pointerDrag.dragging && Math.hypot(dx, dy) < 8) return;
+    event.preventDefault();
+    if (!pointerDrag.dragging) {
+      pointerDrag.dragging = true;
+      document.body.classList.add('lineup-dragging');
+      source.classList.add('drag-source');
+      ghost = makeGhost(source, event.clientX, event.clientY);
+    }
+    if (distance >= (event.pointerType === 'mouse' ? 8 : 3)) {
+      pointerDrag.moved = true;
+    }
+    moveGhost(event.clientX, event.clientY);
+    ghost.hidden = true;
+    const target = resolveTarget(event.clientX, event.clientY, pointerDrag.player);
+    ghost.hidden = false;
+    setActiveTarget(target, pointerDrag.player);
+  });
+
+  onGlobal(window, 'pointerup', (event) => {
+    if (!pointerDrag || event.pointerId !== pointerDrag.pointerId) return;
+    const wasBench = pointerDrag.isBench;
+    if (pointerDrag.mode === 'scroll') {
+      event.preventDefault();
+      if (pointerDrag.moved) markDragged();
+      endPointerDrag();
+      return;
+    }
+    const didDrag = pointerDrag.dragging && pointerDrag.moved;
+    if (didDrag) event.preventDefault();
+    endPointerDrag({ place: didDrag });
+    if (wasBench) clearEligible(); // fin del gesto por puntero (táctil)
+  });
+
+  onGlobal(window, 'pointercancel', (event) => {
+    if (!pointerDrag || event.pointerId !== pointerDrag.pointerId) return;
+    const wasNative = nativeDragging;
+    const wasBench = pointerDrag.isBench;
+    endPointerDrag();
+    // Si el navegador pasó a arrastre nativo, mantenemos el brillo: lo
+    // limpiará dragend al soltar. Si no, limpiamos aquí.
+    if (!wasNative && wasBench) clearEligible();
+  });
+
+  // Más redes de seguridad: cambio de pestaña, pérdida de foco de la ventana o
+  // Escape cancelan el gesto en curso al instante.
+  onGlobal(window, 'blur', () => {
+    if (!pointerDrag) return;
+    endPointerDrag();
+    clearEligible();
+  });
+  onGlobal(document, 'visibilitychange', () => {
+    if (!document.hidden || !pointerDrag) return;
+    endPointerDrag();
+    clearEligible();
+  });
+  onGlobal(window, 'keydown', (event) => {
+    if (event.key !== 'Escape' || !pointerDrag) return;
+    endPointerDrag();
+    clearEligible();
   });
 
   targets.forEach((target) => {
