@@ -4218,6 +4218,12 @@ select {
     grid-row: 3;
   }
 
+  /* La crónica de prensa abarca las dos columnas del grid móvil del
+     resultado; sin esto queda encajada en una sola (al 50% del ancho). */
+  .result-screen .press-article {
+    grid-column: 1 / -1;
+  }
+
   .ratings-glass,
   .scout-hero,
   .result-hero,
@@ -5695,7 +5701,6 @@ button.primary:active:not(:disabled),
   border-radius: var(--pixel-radius, 6px);
   box-shadow: 0 6px 0 rgba(0, 0, 0, .42), 0 12px 18px rgba(0, 0, 0, .3);
   padding: 14px 18px 16px;
-  margin: 16px 0 4px;
   font-family: Georgia, 'Times New Roman', Times, serif;
   text-align: left;
 }
