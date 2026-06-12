@@ -3129,18 +3129,20 @@ select {
 .team-roster .bench-item[hidden] { display: none; }
 
 .team-roster .bench-face {
-  width: 60px;
-  height: 60px;
+  width: 75px;
+  height: 75px;
   border: 2px solid rgba(255,255,255,.78);
 }
 
 .team-roster .bench-topline {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  flex-flow: column;
+  align-items: center;
   gap: 2px 7px;
   min-width: 0;
-  padding-right: 16px;
+  padding-right: 0px;
+  width: 100%
 }
 
 .team-roster .bench-ovr {
