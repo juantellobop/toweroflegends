@@ -417,6 +417,10 @@ function render(navHint = 'auto') {
               render('forward');
             } else {
               advanceLevel(state);
+              // La partida cuenta para el contador global al ALCANZAR el
+              // nivel 2: abrir una run y abandonarla en el primer piso no
+              // infla la cifra. advanceLevel pasa de 1 a 2 una sola vez.
+              if (state.level === 2) liveStats?.reportRunPlayed();
               render('forward');
             }
           },
@@ -570,7 +574,6 @@ function renderMenu(navHint = 'auto') {
         teamName,
         teamNation: selectedNation,
       });
-      liveStats?.reportRunStarted();
       render('forward');
     });
   }, navHint);

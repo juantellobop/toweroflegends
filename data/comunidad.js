@@ -27,8 +27,10 @@ export function fetchLiveStats() {
   return requestJson('/api/comunidad');
 }
 
-// Suma una partida al contador global. Se llama al arrancar una run nueva.
-export function reportRunStarted() {
+// Suma una partida al contador global. Se llama al alcanzar el nivel 2: ahí
+// la run cuenta como jugada de verdad (no al abrirla, que generaba cuentas
+// falsas de runs abandonadas en el primer piso).
+export function reportRunPlayed() {
   requestJson('/api/comunidad/partida', { method: 'POST', body: '{}' });
 }
 

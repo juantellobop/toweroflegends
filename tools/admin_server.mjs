@@ -16,7 +16,11 @@ const PORT = Number(process.argv[2] || process.env.PORT || 8080);
 const MAX_BODY = 18 * 1024 * 1024;
 const RANKING_FILE = path.resolve(process.env.RANKING_FILE || path.join(ROOT, 'data', 'ranking.json'));
 const RANKING_LIMIT = 20;
-const STATS_FILE = path.resolve(process.env.STATS_FILE || path.join(ROOT, 'data', 'stats.json'));
+// El contador global de partidas vive por defecto JUNTO al ranking: si
+// RANKING_FILE apunta a una carpeta persistente (fuera del directorio que los
+// deploys reescriben), stats.json la comparte sin configuración extra.
+// STATS_FILE permite separarlo si hiciera falta.
+const STATS_FILE = path.resolve(process.env.STATS_FILE || path.join(path.dirname(RANKING_FILE), 'stats.json'));
 // Presencia en memoria: clientId → último latido. Un cliente cuenta como "en
 // vivo" si latió dentro del TTL (el front late cada 45s; el TTL tolera perder
 // un latido). El tope de entradas evita que ids basura inflen el mapa.
@@ -787,6 +791,7 @@ if (runningDirectly) {
     console.log(`Torre de Leyendas admin server: http://127.0.0.1:${PORT}/`);
     console.log(`Versión de assets: ${BUILD_VERSION}`);
     console.log(`Ranking persistente: ${RANKING_FILE}`);
+    console.log(`Contador de partidas: ${STATS_FILE}`);
     console.log(`Base directa de jugadores: ${PLAYER_DB_FILE}`);
     console.log('POST /api/admin/portrait usa tools/convert_admin_portrait.py');
     console.log(`Panel admin protegido en #playeredit · usuario: ${ADMIN_USER}`);
