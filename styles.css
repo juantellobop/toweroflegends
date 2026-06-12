@@ -1153,14 +1153,15 @@ select {
 .field-chip.filled.rarity-legend { border-color: var(--rarity-legend); box-shadow: 0 0 14px rgba(255,214,10,0.4); }
 .chip-ovr { font-family: var(--font-rounded); font-weight: 800; font-size: var(--t-footnote); line-height: 1; }
 .chip-init { font-family: var(--font-rounded); font-weight: 700; font-size: var(--t-caption-2); opacity: 0.85; }
-.chip-name { font-size: 9px; max-width: 60px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip-name { font-size: 7px; max-width: 60px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chip-face,
 .bench-face {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  /* Sin overflow:hidden: el retrato no desborda (inset 0 + object-fit cover)
+     y la bandera-insignia debe poder sobresalir del recuadro. */
   background: rgba(0,0,0,.24);
   border: 1px solid rgba(255,255,255,.45);
   color: #fff;
@@ -1190,16 +1191,18 @@ select {
   object-position: center top;
   image-rendering: pixelated;
 }
-/* Bandera sutil del país del jugador, en la esquina inferior del retrato
-   (titulares y suplentes). Pisa el inset/tamaño del retrato de arriba. */
+/* Bandera-insignia del país del jugador en la esquina inferior derecha del
+   retrato (titulares y suplentes), sobresaliendo 4px del recuadro, al estilo
+   de la placa OVR. Pisa el inset/tamaño del retrato de arriba. */
 .chip-face .chip-flag,
 .bench-face .chip-flag {
   position: absolute;
-  inset: auto 1px 1px auto;
-  width: 16px;
-  height: 11px;
-  border: 1px solid rgba(255,255,255,.65);
-  box-shadow: 0 1px 2px rgba(0,0,0,.45);
+  inset: auto -4px -4px auto;
+  z-index: 3;
+  width: 22px;
+  height: 14px;
+  border: 2px solid #071459;
+  box-shadow: 0 1px 0 rgba(0,0,0,.35);
   object-fit: cover;
   image-rendering: pixelated;
 }
@@ -1741,31 +1744,8 @@ select {
   max-width: min(520px, 100%, calc((100vh - 250px) * 0.75));
 }
 
-/* Cruz de cierre: botón cuadrado con borde blanco y aro azul marino, a juego
-   con el panel arcade (la cruz es SVG para que quede nítida y centrada).
-   44px = mínimo táctil de la app (coincide con el min-height global de button). */
-.lineup-modal .player-modal-close,
-.squad-review-modal .player-modal-close {
-  top: -14px;
-  right: -14px;
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border-radius: 0;
-  background: var(--arcade-red, #ff3154);
-  color: #fff;
-  border: 3px solid #fff;
-  box-shadow: 0 0 0 3px #071459, 0 4px 0 rgba(0,0,0,.35);
-}
-
-.lineup-modal .player-modal-close svg,
-.squad-review-modal .player-modal-close svg {
-  display: block;
-  width: 16px;
-  height: 16px;
-}
+/* La cruz de cierre de estos modales es la misma .player-modal-close global
+   (un solo estilo para todos los botones de cerrar modal). */
 
 @media (max-width: 480px) {
 
@@ -2975,8 +2955,8 @@ select {
 }
 
 .team-select-screen .chip-face {
-  width: calc(var(--lineup-card) - 22px);
-  height: calc(var(--lineup-card) - 22px);
+  width: calc(var(--lineup-card) - 16px);
+  height: calc(var(--lineup-card) - 16px);
   min-width: 52px;
   min-height: 52px;
   margin-bottom: 3px;
@@ -2990,7 +2970,7 @@ select {
 
 .team-select-screen .chip-name {
   max-width: var(--lineup-card);
-  font-size: clamp(11px, 1.2vw, 15px);
+  font-size: clamp(9px, 1.2vw, 13px);
   line-height: 1.05;
 }
 
@@ -3090,17 +3070,16 @@ select {
   padding: 2px 2px 12px;
 }
 
-/* Filtro del banco por línea: select con la piel arcade (flecha propia). */
+/* Filtro del banco por línea: select con la piel arcade (flecha SVG propia). */
 .bench-filter {
   appearance: none;
   -webkit-appearance: none;
   align-self: center;
   min-height: 34px;
-  padding: 6px 26px 6px 10px;
+  padding: 6px 28px 6px 10px;
   color: #fff;
   background:
-    linear-gradient(45deg, transparent 49%, var(--arcade-cyan) 50%) calc(100% - 16px) 55% / 6px 6px no-repeat,
-    linear-gradient(135deg, transparent 49%, var(--arcade-cyan) 50%) calc(100% - 10px) 55% / 6px 6px no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0h10L5 6z' fill='%2325e6ff'/%3E%3C/svg%3E") no-repeat right 9px center,
     #071459;
   border: 2px solid var(--arcade-cyan);
   border-radius: 0;
@@ -3122,7 +3101,7 @@ select {
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
+  grid-template-columns: 54px minmax(0, 1fr);
   grid-template-rows: auto auto;
   align-items: center;
   justify-items: start;
@@ -3134,8 +3113,8 @@ select {
 .team-roster .bench-item[hidden] { display: none; }
 
 .team-roster .bench-face {
-  width: 48px;
-  height: 48px;
+  width: 54px;
+  height: 54px;
   border: 2px solid rgba(255,255,255,.78);
 }
 
@@ -4935,21 +4914,30 @@ select {
   margin: 0;
   cursor: default;
 }
+/* Cruz de cierre ÚNICA para todos los modales (ficha de jugador, revisar
+   equipo, once del ranking): botón cuadrado rojo con borde blanco y aro azul
+   marino, cruz en SVG nítida y centrada. 44px = mínimo táctil de la app. */
 .player-modal-close {
   position: absolute;
   top: -14px;
-  right: -10px;
+  right: -14px;
   z-index: 2;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 0;
   background: var(--arcade-red, #ff3154);
   color: #fff;
-  border: 3px solid #071459;
-  font-size: 15px;
-  font-weight: 900;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 3px #071459, 0 4px 0 rgba(0,0,0,.35);
   cursor: pointer;
-  box-shadow: 0 3px 0 #071459;
+}
+.player-modal-close svg {
+  display: block;
+  width: 16px;
+  height: 16px;
 }
 .player-modal-close:hover { transform: scale(1.08); }
 
@@ -5176,7 +5164,8 @@ button.primary:active:not(:disabled),
 
 .field-chip {
   position: relative;
-  overflow: hidden;
+  /* Sin overflow:hidden: la bandera-insignia sobresale del recuadro del
+     retrato y puede asomar 1px fuera de la carta. Nada más desborda. */
   background:
     linear-gradient(180deg, rgba(24,55,132,.94), rgba(7,20,89,.94));
   border-color: rgba(255,255,255,.92);
@@ -5251,11 +5240,11 @@ button.primary:active:not(:disabled),
   padding: 7px 4px 6px;
   gap: 2px;
 }
+/* Sin redondeado: mismas tarjetas cuadradas que el tablero táctico propio. */
 .scout-field .scout-chip .chip-face {
-  width: calc(var(--scout-card) - 16px);
-  height: calc(var(--scout-card) - 4px);
+  width: calc(var(--scout-card) - 10px);
+  height: calc(var(--scout-card) - 2px);
   margin-bottom: 3px;
-  border-radius: 11px;
   border: 2px solid rgba(255,255,255,.88);
   font-size: clamp(11px, 1.3vw, 14px);
 }
@@ -5271,7 +5260,7 @@ button.primary:active:not(:disabled),
 }
 .scout-field .scout-chip .chip-name {
   padding: 4px 3px 5px;
-  font-size: clamp(10px, 1.15vw, 13px);
+  font-size: clamp(8px, 1.15vw, 11px);
 }
 
 .bench-add {
@@ -5459,8 +5448,8 @@ button.primary:active:not(:disabled),
   }
 
   .team-select-screen .chip-face {
-    width: calc(var(--lineup-card) - 8px);
-    height: calc(var(--lineup-card) - 8px);
+    width: calc(var(--lineup-card) - 6px);
+    height: calc(var(--lineup-card) - 6px);
     min-width: 0;
     min-height: 0;
     margin-bottom: 1px;
@@ -5474,11 +5463,11 @@ button.primary:active:not(:disabled),
     font-size: 11px;
   }
 
-  /* Con la carta más ancha y el cuerpo a 12px caben ~7 letras del apellido
+  /* Con la carta más ancha y el cuerpo a 10px caben ~9 letras del apellido
      antes del recorte con puntos suspensivos. El padding corto mantiene la
      carta por debajo del hueco entre líneas (nada se pisa en vertical). */
   .team-select-screen .field-chip .chip-name {
-    font-size: 12px;
+    font-size: 10px;
     padding: 2px 3px 3px;
   }
 
@@ -5571,7 +5560,7 @@ button.primary:active:not(:disabled),
     width: 100%;
     min-width: 0;
     min-height: 0;
-    grid-template-columns: 40px minmax(0, 1fr);
+    grid-template-columns: 44px minmax(0, 1fr);
     gap: 4px 6px;
     padding: 6px 5px;
     overflow: hidden;
@@ -5579,13 +5568,14 @@ button.primary:active:not(:disabled),
   }
 
   .team-roster .bench-face {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
   }
 
   .team-roster .bench-face .chip-flag {
-    width: 13px;
-    height: 9px;
+    width: 16px;
+    height: 11px;
+    inset: auto -3px -3px auto;
   }
 
   .team-roster .bench-topline {
@@ -5692,11 +5682,11 @@ button.primary:active:not(:disabled),
   }
 
   .scouting-screen .scout-field .scout-chip .chip-face {
-    width: calc(var(--scout-card) - 12px);
-    height: calc(var(--scout-card) - 8px);
+    width: calc(var(--scout-card) - 8px);
+    height: calc(var(--scout-card) - 6px);
   }
 
   .scouting-screen .scout-field .scout-chip .chip-name {
-    font-size: 11px;
+    font-size: 9px;
   }
 }

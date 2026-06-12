@@ -134,7 +134,9 @@ export function renderSquadIntro(root, state, handlers) {
       <div class="player-modal" id="playerModal" hidden>
         <div class="player-modal-backdrop" data-close></div>
         <div class="player-modal-card" role="dialog" aria-modal="true" aria-label="${t('build.statsDialog')}">
-          <button class="player-modal-close" data-close aria-label="${t('generic.close')}">✕</button>
+          <button class="player-modal-close" data-close aria-label="${t('generic.close')}">
+            <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.4 2.4 L9.6 9.6 M9.6 2.4 L2.4 9.6" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" fill="none" /></svg>
+          </button>
           <div id="playerModalBody"></div>
         </div>
       </div>
