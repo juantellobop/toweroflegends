@@ -5541,6 +5541,15 @@ button.primary:active:not(:disabled),
     margin-top: 14px;
   }
 
+  /* Cabecera del banco en una sola fila: título "Suplentes" a la izquierda y
+     el filtro por línea a la derecha (la cabecera genérica mobile se apila en
+     columna, pero aquí desperdiciaba una fila entera). */
+  .team-select-screen .roster-head {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
   .build-screen .items-fold summary {
     color: rgba(255,255,255,.84);
   }
