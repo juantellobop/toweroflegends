@@ -158,7 +158,7 @@ async function assertBuildLayout(page, label) {
     const ratingsBox = await page.locator('.build-screen .ratings-glass').boundingBox();
     const rosterBox = await page.locator('.build-screen .team-roster').boundingBox();
     assert.ok(ratingsBox && rosterBox && fieldBox.y < rosterBox.y && rosterBox.y < ratingsBox.y, 'Mobile order must be tactical board, substitutes, then team strength');
-    assert.ok(fieldBox.height <= 430, `Mobile tactical field must be about 50px shorter, got ${fieldBox.height}px`);
+    assert.ok(fieldBox.height >= 420 && fieldBox.height <= 470, `Mobile tactical field must be slightly taller (420-470px), got ${fieldBox.height}px`);
     assert.equal(await page.locator('.build-screen .roster-head h2').textContent(), 'Substitutes');
     assert.equal(await page.locator('.build-screen .roster-head p').count(), 0, 'Substitutes summary must be removed');
 

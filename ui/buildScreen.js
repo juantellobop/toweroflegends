@@ -22,24 +22,28 @@ import { flagSrcForNation } from '../data/flags.js';
 import { localizeOpponentName, t } from '../data/i18n.js';
 import { PITCH_MARKINGS } from './pitchArt.js';
 
-// Posición vertical (top %) de cada línea en el campo, de abajo (POR) a arriba (DEL).
-const LINE_TOP = { GK: 86, DEF: 65, MID: 43, ENG: 31, FWD: 20 };
+// Posición vertical (top %) de cada línea en el campo, de abajo (POR) a arriba
+// (DEL). Reparto amplio: delantera y portero cerca de las áreas para que el
+// once aproveche casi todo el alto del tablero.
+const LINE_TOP = { GK: 88, DEF: 66, MID: 42, ENG: 30, FWD: 14 };
 const FORMATION_LINE_TOP = {
-  '4-3-1-2': { GK: 92, DEF: 73, MID: 53, ENG: 31, FWD: 8 },
+  '4-3-1-2': { GK: 91, DEF: 72, MID: 51, ENG: 31, FWD: 9 },
   // 4-2-3-1: pivotes (MID) por detrás de la línea de creación (ENG) y el delantero.
-  '4-2-3-1': { GK: 92, DEF: 73, MID: 52, ENG: 30, FWD: 8 },
+  '4-2-3-1': { GK: 91, DEF: 72, MID: 52, ENG: 30, FWD: 9 },
 };
 
 // Ajuste fino (dx/dy en % del campo) por hueco concreto, sobre la posición de su
 // línea. Dibuja el rol dentro del dibujo: el MC más defensivo se retrasa
 // (4-3-3, 3-5-2, 5-3-2, 4-3-1-2, doble pivote del 3-4-3), los extremos parten
-// algo más abajo (4-3-3, 4-2-4) y los laterales del 5-3-2 se proyectan.
+// algo más abajo (4-3-3, 4-2-4), los laterales del 5-3-2 se proyectan y los
+// carrileros del 3-5-2 adelantan. El escalonado de las líneas de 5 también
+// deja a la vista el enlace de química entre cartas vecinas en mobile.
 const SLOT_NUDGES = {
-  '4-3-3': { 'MID:1': { dy: 5 }, 'FWD:0': { dy: 4 }, 'FWD:2': { dy: 4 } },
-  '3-5-2': { 'MID:2': { dy: 5 } },
-  '5-3-2': { 'MID:1': { dy: 5 }, 'DEF:0': { dy: -4 }, 'DEF:4': { dy: -4 } },
-  '4-3-1-2': { 'MID:1': { dy: 5 } },
-  '3-4-3': { 'MID:1': { dy: 4 }, 'MID:2': { dy: 4 } },
+  '4-3-3': { 'MID:1': { dy: 2 }, 'FWD:0': { dy: 4 }, 'FWD:2': { dy: 4 } },
+  '3-5-2': { 'MID:0': { dy: -5 }, 'MID:2': { dy: 2 }, 'MID:4': { dy: -5 } },
+  '5-3-2': { 'MID:1': { dy: 2 }, 'DEF:0': { dy: -2 }, 'DEF:4': { dy: -2 } },
+  '4-3-1-2': { 'MID:1': { dy: 2 } },
+  '3-4-3': { 'MID:1': { dy: 2 }, 'MID:2': { dy: 2 } },
   '4-2-4': { 'FWD:0': { dy: 4 }, 'FWD:3': { dy: 4 } },
 };
 

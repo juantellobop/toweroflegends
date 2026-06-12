@@ -110,6 +110,28 @@ export function renderGameOver(root, state, best, handlers) {
   const isRecord = reached >= best;
   const leaderboard = handlers.leaderboard || { entries: [], loading: true };
 
+  // Resumen del partido que cerró la run: al caer se llega aquí sin pasar por
+  // la pantalla de resultado, así que el marcador va arriba, a la vista.
+  const m = state.lastMatch;
+  let lastMatchHTML = '';
+  if (m) {
+    const { scorers } = summarize(m.eventos);
+    const oppName = state.opponent ? localizeOpponentName(state.opponent) : '';
+    lastMatchHTML = `
+      <div class="gameover-match arcade-panel">
+        <span class="gameover-match-label">${t('result.lastMatch')}</span>
+        <div class="gameover-match-score">
+          <span>${esc(state.team?.name || 'Leyendas')}</span>
+          <b class="final-score">${m.golesA} <span class="sep">:</span> ${m.golesB}</b>
+          <span>${esc(oppName)}</span>
+        </div>
+        <div class="result-scorers">
+          <span>${t('result.scorers')}</span>
+          <b>${scorers.length ? esc(scorers.join(', ')) : '—'}</b>
+        </div>
+      </div>`;
+  }
+
   const path = state.history.map((h) => `
     <li class="path-item result-${h.result}">
       <span class="path-lvl">${t('result.pathLevel', { level: h.level })}</span>
@@ -135,6 +157,7 @@ export function renderGameOver(root, state, best, handlers) {
         ${isRecord ? `<div class="record">${t('result.newRecord')}</div>` : `<div class="record muted">${t('result.best', { best })}</div>`}
         <p class="go-stat">${t('result.winsRoster', { wins, count: state.squad.length })}</p>
       </div>
+      ${lastMatchHTML}
       ${renderLeaderboard(leaderboard.entries || [], {
         currentId: leaderboard.entryId,
         rank: leaderboard.rank,
