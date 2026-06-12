@@ -1726,7 +1726,8 @@ select {
 /* Cruz de cierre: botón cuadrado con borde blanco y aro azul marino, a juego
    con el panel arcade (la cruz es SVG para que quede nítida y centrada).
    44px = mínimo táctil de la app (coincide con el min-height global de button). */
-.lineup-modal .player-modal-close {
+.lineup-modal .player-modal-close,
+.squad-review-modal .player-modal-close {
   top: -14px;
   right: -14px;
   width: 44px;
@@ -1741,7 +1742,8 @@ select {
   box-shadow: 0 0 0 3px #071459, 0 4px 0 rgba(0,0,0,.35);
 }
 
-.lineup-modal .player-modal-close svg {
+.lineup-modal .player-modal-close svg,
+.squad-review-modal .player-modal-close svg {
   display: block;
   width: 16px;
   height: 16px;

@@ -96,7 +96,9 @@ function squadReviewModal(state) {
     <div class="player-modal squad-review-modal" id="squadReview" hidden>
       <div class="player-modal-backdrop" data-close></div>
       <div class="squad-review-shell" role="dialog" aria-modal="true" aria-label="${esc(t('pack.reviewTitle', { count: state.squad.length }))}">
-        <button class="player-modal-close" data-close aria-label="${t('generic.close')}">✕</button>
+        <button class="player-modal-close" data-close aria-label="${esc(t('generic.close'))}">
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.4 2.4 L9.6 9.6 M9.6 2.4 L2.4 9.6" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" fill="none" /></svg>
+        </button>
         <div class="squad-review-panel arcade-panel">
           <h2 class="squad-review-title">${t('pack.reviewTitle', { count: state.squad.length })}</h2>
           ${starters.length ? `<h3 class="squad-review-sub">${t('squadIntro.eleven')}</h3>${grid(starters)}` : ''}
