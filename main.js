@@ -27,10 +27,14 @@ import {
   filterTeamNameInput, hasDisallowedTeamNameChars, sanitizeTeamName,
 } from './data/teamName.js';
 import { LANGUAGES, getLanguage, initLanguage, localizeNation, setLanguage, t } from './data/i18n.js';
+import { fetchLiveStats, reportRunStarted, startPresence } from './data/liveStats.js';
+import { GAME_VERSION } from './data/version.js';
 import { esc, prefersReducedMotion } from './ui/dom.js';
 
 const root = document.getElementById('app');
 initLanguage();
+// Cuenta a este cliente entre los "jugando ahora" mientras la pestaña viva.
+startPresence();
 // Conservamos las referencias para que todas las descargas de UI iniciadas al
 // entrar terminen y queden disponibles en la caché HTTP del navegador.
 const preloadedUiImages = preloadUiAssets();
@@ -210,6 +214,38 @@ function loadLeaderboard() {
       .finally(() => { leaderboardPromise = null; });
   }
   return leaderboardPromise;
+}
+
+// Contadores en vivo del pie del menú: jugadores conectados y partidas
+// totales. Sin servidor (stats === null) el bloque queda oculto. Un único
+// temporizador refresca mientras el menú siga montado y muere al salir de él.
+let menuStatsTimer = null;
+
+function updateMenuStats() {
+  const draw = (stats) => {
+    const mount = root.querySelector('#menu-stats');
+    if (!mount || !stats) return;
+    // Tu propio latido puede no haber llegado aún: tú siempre cuentas.
+    const online = Math.max(1, Math.round(Number(stats.online) || 0));
+    const totalGames = Math.max(0, Math.round(Number(stats.totalGames) || 0));
+    mount.hidden = false;
+    mount.innerHTML = `
+      <span class="live-dot" aria-hidden="true"></span>
+      <span>${t('menu.liveNow', { n: online.toLocaleString(getLanguage()) })}</span>
+      <span class="menu-live-sep" aria-hidden="true">·</span>
+      <span>${t('menu.totalRuns', { n: totalGames.toLocaleString(getLanguage()) })}</span>`;
+  };
+
+  fetchLiveStats().then(draw);
+  if (menuStatsTimer) clearInterval(menuStatsTimer);
+  menuStatsTimer = setInterval(() => {
+    if (!root.querySelector('#menu-stats')) {
+      clearInterval(menuStatsTimer);
+      menuStatsTimer = null;
+      return;
+    }
+    fetchLiveStats().then(draw);
+  }, 30_000);
 }
 
 function updateMenuLeaderboard() {
@@ -438,11 +474,14 @@ function renderMenu(navHint = 'auto') {
           <button id="start" class="primary big start-prompt" ${hasDraftNation ? '' : 'disabled'}>${hasDraftNation ? t('menu.newRun') : t('menu.chooseFlag')}</button>
         </div>
         <div id="menu-ranking" class="menu-ranking"></div>
+        <div id="menu-stats" class="menu-live" aria-live="polite" hidden></div>
         <p class="disclaimer menu-legal">${t('menu.disclaimer')}</p>
+        <p class="menu-version">v${GAME_VERSION}</p>
       </div>
     </section>`;
 
     updateMenuLeaderboard();
+    updateMenuStats();
 
     // --- Identidad del equipo: nombre + selector de bandera ---
     const nameInput = root.querySelector('#m-teamname');
@@ -517,6 +556,7 @@ function renderMenu(navHint = 'auto') {
         teamName,
         teamNation: selectedNation,
       });
+      reportRunStarted();
       render('forward');
     });
   }, navHint);

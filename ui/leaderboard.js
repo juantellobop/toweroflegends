@@ -1,4 +1,5 @@
 import { esc } from './dom.js';
+import { requestJson } from '../data/api.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { sanitizeTeamName } from '../data/teamName.js';
 import { t } from '../data/i18n.js';
@@ -52,36 +53,6 @@ function normalizePayload(payload) {
     rank: Number.isInteger(payload?.rank) ? payload.rank : null,
     limit: Number(payload?.limit) || LEADERBOARD_LIMIT,
   };
-}
-
-function absoluteUrl(path) {
-  if (typeof window !== 'undefined' && window.location?.href) {
-    return new URL(path, window.location.href).href;
-  }
-  return path;
-}
-
-async function requestJson(path, options = {}) {
-  const fetcher = typeof window !== 'undefined' && typeof window.fetch === 'function'
-    ? window.fetch.bind(window)
-    : typeof fetch === 'function'
-      ? fetch
-      : null;
-  if (!fetcher) return null;
-
-  try {
-    const response = await fetcher(absoluteUrl(path), {
-      ...options,
-      headers: {
-        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-        ...(options.headers || {}),
-      },
-    });
-    if (!response.ok) return null;
-    return response.json();
-  } catch (_) {
-    return null;
-  }
 }
 
 export async function fetchLeaderboard() {

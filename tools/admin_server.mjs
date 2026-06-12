@@ -16,6 +16,13 @@ const PORT = Number(process.argv[2] || process.env.PORT || 8080);
 const MAX_BODY = 18 * 1024 * 1024;
 const RANKING_FILE = path.resolve(process.env.RANKING_FILE || path.join(ROOT, 'data', 'ranking.json'));
 const RANKING_LIMIT = 20;
+const STATS_FILE = path.resolve(process.env.STATS_FILE || path.join(ROOT, 'data', 'stats.json'));
+// Presencia en memoria: clientId → último latido. Un cliente cuenta como "en
+// vivo" si latió dentro del TTL (el front late cada 25s). El tope de entradas
+// evita que ids basura inflen el mapa sin límite.
+const PRESENCE_TTL_MS = 60_000;
+const PRESENCE_MAX = 5000;
+const presence = new Map();
 const PLAYER_DB_FILE = path.resolve(process.env.PLAYER_DB_FILE || path.join(ROOT, 'data', 'players.js'));
 const PLAYER_PORTRAITS_DIR = path.join(ROOT, 'assets', 'player-portraits');
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
@@ -492,6 +499,71 @@ async function handleRanking(req, res) {
   }
 }
 
+// === Estadísticas en vivo (contadores del pie del menú) ===
+
+let statsCache = null; // { totalGames } leído una vez; las escrituras lo mantienen.
+
+async function readStatsFile() {
+  if (statsCache) return statsCache;
+  try {
+    const parsed = JSON.parse(await fs.readFile(STATS_FILE, 'utf8'));
+    statsCache = { totalGames: Math.max(0, Math.floor(Number(parsed?.totalGames) || 0)) };
+  } catch (_) {
+    // Sin archivo (o corrupto): se arranca de cero y la primera partida lo crea.
+    statsCache = { totalGames: 0 };
+  }
+  return statsCache;
+}
+
+async function writeStatsFile() {
+  await fs.mkdir(path.dirname(STATS_FILE), { recursive: true });
+  await fs.writeFile(STATS_FILE, `${JSON.stringify(statsCache, null, 2)}\n`, 'utf8');
+}
+
+function onlineCount() {
+  const cutoff = Date.now() - PRESENCE_TTL_MS;
+  for (const [id, lastSeen] of presence) {
+    if (lastSeen < cutoff) presence.delete(id);
+  }
+  return presence.size;
+}
+
+async function handleStats(req, res) {
+  try {
+    const pathname = (req.url || '').split('?')[0];
+
+    if (req.method === 'GET' && pathname === '/api/stats') {
+      const stats = await readStatsFile();
+      json(res, 200, { totalGames: stats.totalGames, online: onlineCount() });
+      return;
+    }
+
+    // Latido de presencia: registra/refresca al cliente y devuelve el recuento.
+    if (req.method === 'POST' && pathname === '/api/stats/heartbeat') {
+      const payload = JSON.parse(await readBody(req) || '{}');
+      const id = clampText(payload?.id, 64);
+      if (id && (presence.size < PRESENCE_MAX || presence.has(id))) {
+        presence.set(id, Date.now());
+      }
+      json(res, 200, { online: onlineCount() });
+      return;
+    }
+
+    // Una run nueva arrancó: suma al contador global persistido.
+    if (req.method === 'POST' && pathname === '/api/stats/game') {
+      const stats = await readStatsFile();
+      stats.totalGames += 1;
+      await writeStatsFile();
+      json(res, 200, { totalGames: stats.totalGames });
+      return;
+    }
+
+    methodNotAllowed(res);
+  } catch (error) {
+    json(res, 500, { error: error.message || String(error) });
+  }
+}
+
 async function handleAdminPlayer(req, res) {
   try {
     if (!requireAdmin(req, res)) return;
@@ -663,6 +735,10 @@ async function serveStatic(req, res) {
 export function handleRequest(req, res) {
   if (req.url?.startsWith('/api/ranking')) {
     handleRanking(req, res);
+    return;
+  }
+  if (req.url?.startsWith('/api/stats')) {
+    handleStats(req, res);
     return;
   }
   if (req.url?.startsWith('/api/admin/login')) {

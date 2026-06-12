@@ -10,6 +10,7 @@ const PORT = 8092;
 const BASE = `http://127.0.0.1:${PORT}`;
 const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'tdl-ranking-'));
 const rankingFile = path.join(tempDir, 'ranking.json');
+const statsFile = path.join(tempDir, 'stats.json');
 const TEAM_SUFFIXES = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 function waitForServer(url, timeout = 8000) {
@@ -44,7 +45,7 @@ async function request(pathname, options = {}) {
 
 const server = spawn('node', ['tools/admin_server.mjs', String(PORT)], {
   cwd: ROOT,
-  env: { ...process.env, RANKING_FILE: rankingFile },
+  env: { ...process.env, RANKING_FILE: rankingFile, STATS_FILE: statsFile },
   stdio: 'ignore',
 });
 
@@ -124,6 +125,33 @@ try {
   assert.equal(persisted.entries[0].lineup.length, savedLineup.lineup.length);
 
   console.log('Ranking persistente: OK');
+
+  // === Estadísticas en vivo (/api/stats): partidas totales y presencia ===
+  const statsEmpty = await request('/api/stats');
+  assert.equal(statsEmpty.totalGames, 0);
+  assert.equal(statsEmpty.online, 0);
+
+  // Dos runs nuevas suman al contador persistido.
+  await request('/api/stats/game', { method: 'POST', body: '{}' });
+  const afterGames = await request('/api/stats/game', { method: 'POST', body: '{}' });
+  assert.equal(afterGames.totalGames, 2);
+  const persistedStats = JSON.parse(await fs.readFile(statsFile, 'utf8'));
+  assert.equal(persistedStats.totalGames, 2);
+
+  // Dos clientes laten → 2 en vivo; el mismo id repetido no duplica.
+  await request('/api/stats/heartbeat', { method: 'POST', body: JSON.stringify({ id: 'cliente-a' }) });
+  await request('/api/stats/heartbeat', { method: 'POST', body: JSON.stringify({ id: 'cliente-a' }) });
+  const twoOnline = await request('/api/stats/heartbeat', { method: 'POST', body: JSON.stringify({ id: 'cliente-b' }) });
+  assert.equal(twoOnline.online, 2);
+  const statsLive = await request('/api/stats');
+  assert.equal(statsLive.totalGames, 2);
+  assert.equal(statsLive.online, 2);
+
+  // Un latido sin id no cuenta como jugador.
+  const noId = await request('/api/stats/heartbeat', { method: 'POST', body: '{}' });
+  assert.equal(noId.online, 2);
+
+  console.log('Estadísticas en vivo: OK');
 } finally {
   server.kill();
   await fs.rm(tempDir, { recursive: true, force: true });

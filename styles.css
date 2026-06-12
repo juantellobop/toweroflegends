@@ -1784,6 +1784,48 @@ select {
   text-wrap: balance
 }
 
+/* Contadores en vivo del pie del menú (jugando ahora · partidas totales). */
+.menu-live {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: rgba(255,255,255,.82);
+  text-transform: uppercase;
+}
+
+.menu-live .live-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--arcade-green);
+  box-shadow: 0 0 6px rgba(64,200,100,.8);
+  /* Latido solo con opacity (compositable): nada de animar box-shadow. */
+  animation: live-dot-pulse 1.6s ease-in-out infinite;
+}
+
+.menu-live-sep {
+  color: rgba(255,255,255,.45);
+}
+
+@keyframes live-dot-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-live .live-dot { animation: none; }
+}
+
+.menu-version {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: rgba(255,255,255,.45);
+  text-transform: uppercase;
+}
+
 /* Admin */
 .admin-screen {
   background:
