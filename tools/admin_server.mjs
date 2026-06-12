@@ -18,9 +18,9 @@ const RANKING_FILE = path.resolve(process.env.RANKING_FILE || path.join(ROOT, 'd
 const RANKING_LIMIT = 20;
 const STATS_FILE = path.resolve(process.env.STATS_FILE || path.join(ROOT, 'data', 'stats.json'));
 // Presencia en memoria: clientId → último latido. Un cliente cuenta como "en
-// vivo" si latió dentro del TTL (el front late cada 25s). El tope de entradas
-// evita que ids basura inflen el mapa sin límite.
-const PRESENCE_TTL_MS = 60_000;
+// vivo" si latió dentro del TTL (el front late cada 45s; el TTL tolera perder
+// un latido). El tope de entradas evita que ids basura inflen el mapa.
+const PRESENCE_TTL_MS = 120_000;
 const PRESENCE_MAX = 5000;
 const presence = new Map();
 const PLAYER_DB_FILE = path.resolve(process.env.PLAYER_DB_FILE || path.join(ROOT, 'data', 'players.js'));

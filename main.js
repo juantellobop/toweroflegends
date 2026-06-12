@@ -27,14 +27,24 @@ import {
   filterTeamNameInput, hasDisallowedTeamNameChars, sanitizeTeamName,
 } from './data/teamName.js';
 import { LANGUAGES, getLanguage, initLanguage, localizeNation, setLanguage, t } from './data/i18n.js';
-import { fetchLiveStats, reportRunStarted, startPresence } from './data/liveStats.js';
 import { GAME_VERSION } from './data/version.js';
 import { esc, prefersReducedMotion } from './ui/dom.js';
 
+// Estadísticas en vivo (contadores del menú + presencia): módulo 100% opcional
+// cargado en diferido. Si la petición del archivo falla (p. ej. el challenge
+// anti-bots del hosting responde HTML en vez del módulo), el juego arranca
+// igual, solo que sin contadores. Un import estático aquí tumbaría toda la UI.
+let liveStats = null;
+const liveStatsReady = import('./data/liveStats.js')
+  .then((mod) => {
+    liveStats = mod;
+    mod.startPresence();
+    return mod;
+  })
+  .catch(() => null);
+
 const root = document.getElementById('app');
 initLanguage();
-// Cuenta a este cliente entre los "jugando ahora" mientras la pestaña viva.
-startPresence();
 // Conservamos las referencias para que todas las descargas de UI iniciadas al
 // entrar terminen y queden disponibles en la caché HTTP del navegador.
 const preloadedUiImages = preloadUiAssets();
@@ -236,7 +246,11 @@ function updateMenuStats() {
       <span>${t('menu.totalRuns', { n: totalGames.toLocaleString(getLanguage()) })}</span>`;
   };
 
-  fetchLiveStats().then(draw);
+  const refresh = () => {
+    if (liveStats) liveStats.fetchLiveStats().then(draw);
+  };
+
+  liveStatsReady.then(refresh);
   if (menuStatsTimer) clearInterval(menuStatsTimer);
   menuStatsTimer = setInterval(() => {
     if (!root.querySelector('#menu-stats')) {
@@ -244,7 +258,7 @@ function updateMenuStats() {
       menuStatsTimer = null;
       return;
     }
-    fetchLiveStats().then(draw);
+    refresh();
   }, 30_000);
 }
 
@@ -556,7 +570,7 @@ function renderMenu(navHint = 'auto') {
         teamName,
         teamNation: selectedNation,
       });
-      reportRunStarted();
+      liveStats?.reportRunStarted();
       render('forward');
     });
   }, navHint);

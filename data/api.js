@@ -27,7 +27,9 @@ export async function requestJson(path, options = {}) {
       },
     });
     if (!response.ok) return null;
-    return response.json();
+    // Con await el catch también cubre cuerpos que no son JSON (p. ej. un
+    // WAF/proxy que intercepta la petición y responde HTML).
+    return await response.json();
   } catch (_) {
     return null;
   }
