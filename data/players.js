@@ -1040,15 +1040,15 @@ export const PLAYERS = [
     "nation": "Alemania",
     "era": "1974",
     "position": "FWD",
-    "rarity": "epic",
-    "ovr": 83,
+    "rarity": "legend",
+    "ovr": 91,
     "stats": {
-      "pace": 78,
-      "shooting": 94,
+      "pace": 96,
+      "shooting": 99,
       "passing": 70,
-      "dribbling": 80,
+      "dribbling": 85,
       "defending": 30,
-      "physical": 80
+      "physical": 99
     },
     "gk": null,
     "trait": "Francotirador",
