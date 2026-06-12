@@ -21,31 +21,7 @@ import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { localizeOpponentName, t } from '../data/i18n.js';
 import { PITCH_MARKINGS } from './pitchArt.js';
-
-// Posición vertical (top %) de cada línea en el campo, de abajo (POR) a arriba
-// (DEL). Reparto amplio: delantera y portero cerca de las áreas para que el
-// once aproveche casi todo el alto del tablero.
-const LINE_TOP = { GK: 88, DEF: 66, MID: 42, ENG: 30, FWD: 14 };
-const FORMATION_LINE_TOP = {
-  '4-3-1-2': { GK: 91, DEF: 72, MID: 51, ENG: 31, FWD: 9 },
-  // 4-2-3-1: pivotes (MID) por detrás de la línea de creación (ENG) y el delantero.
-  '4-2-3-1': { GK: 91, DEF: 72, MID: 52, ENG: 30, FWD: 9 },
-};
-
-// Ajuste fino (dx/dy en % del campo) por hueco concreto, sobre la posición de su
-// línea. Dibuja el rol dentro del dibujo: el MC más defensivo se retrasa
-// (4-3-3, 3-5-2, 5-3-2, 4-3-1-2, doble pivote del 3-4-3), los extremos parten
-// algo más abajo (4-3-3, 4-2-4), los laterales del 5-3-2 se proyectan y los
-// carrileros del 3-5-2 adelantan. El escalonado de las líneas de 5 también
-// deja a la vista el enlace de química entre cartas vecinas en mobile.
-const SLOT_NUDGES = {
-  '4-3-3': { 'MID:1': { dy: 2 }, 'FWD:0': { dy: 4 }, 'FWD:2': { dy: 4 } },
-  '3-5-2': { 'MID:0': { dy: -5 }, 'MID:2': { dy: 2 }, 'MID:4': { dy: -5 } },
-  '5-3-2': { 'MID:1': { dy: 2 }, 'DEF:0': { dy: -2 }, 'DEF:4': { dy: -2 } },
-  '4-3-1-2': { 'MID:1': { dy: 2 } },
-  '3-4-3': { 'MID:1': { dy: 2 }, 'MID:2': { dy: 2 } },
-  '4-2-4': { 'FWD:0': { dy: 4 }, 'FWD:3': { dy: 4 } },
-};
+import { positionSlots } from './lineupBoard.js';
 
 // Filtro del banco de suplentes por línea ('ALL' | GK | DEF | MID | FWD).
 // Vive a nivel de módulo: el tablero se re-renderiza con cada cambio de
@@ -61,66 +37,6 @@ function applyBenchFilter(root) {
   });
   const note = root.querySelector('.bench-filter-empty');
   if (note) note.hidden = visible > 0;
-}
-
-// Separación mínima entre centros de fichas (unidades del viewBox 0-100).
-// Una ficha mide ~64px sobre un campo de ≤460px (≈14-18 unidades según la
-// pantalla): por debajo de este hueco las cartas se tocan y tapan el enlace
-// de química que se dibuja entre ellas.
-const MIN_CHIP_GAP = 20;
-
-// Garantiza el hueco mínimo re-extendiendo la línea centrada en 50. Mantiene
-// el orden de los huecos y el centrado; con n≤5 el span nunca pisa las bandas.
-function withMinGap(xs) {
-  if (xs.length < 2) return xs;
-  let gap = Infinity;
-  for (let i = 1; i < xs.length; i++) gap = Math.min(gap, xs[i] - xs[i - 1]);
-  if (gap >= MIN_CHIP_GAP) return xs;
-  const start = 50 - (MIN_CHIP_GAP * (xs.length - 1)) / 2;
-  return xs.map((_, i) => start + MIN_CHIP_GAP * i);
-}
-
-function spreadLeft(n, line, formation) {
-  if (n <= 0) return [];
-  if (n === 1) return [50];
-  if (formation === '4-3-1-2' && line === 'FWD' && n === 2) return [28, 72];
-  // Trío de mediocampo compacto (interiores cerca del pivote): mismo esquema
-  // en 4-3-3, 5-3-2 y 4-3-1-2.
-  if (['4-3-3', '5-3-2', '4-3-1-2'].includes(formation) && line === 'MID' && n === 3) return [22, 50, 78];
-  if ((formation === '4-2-3-1' || formation === '4-2-4') && line === 'MID' && n === 2) return [30, 70]; // pivotes
-  if (formation === '4-2-3-1' && line === 'ENG' && n === 3) return [18, 50, 82]; // creación
-  if (line === 'FWD') {
-    // La dupla va abierta (4-4-2, 3-5-2, 5-3-2): con [42,58] las dos cartas
-    // se tocaban y el enlace de química entre ellas quedaba oculto.
-    if (n === 2) return [33, 67];
-    if (n === 3) return [16, 50, 84];
-  }
-  if (line === 'DEF' && n === 3) return [26, 50, 74];
-  // Margen 10: las líneas llenas (4-5 jugadores) abren casi todo el ancho del
-  // tablero, que en desktop ahora es más generoso.
-  const margin = line === 'GK' ? 42 : 10;
-  return Array.from({ length: n }, (_, i) => margin + ((100 - margin * 2) * i) / (n - 1));
-}
-
-function positionSlots(formation, line, slots) {
-  const byRole = new Map();
-  for (const slot of slots) {
-    const role = slot.role || line;
-    if (!byRole.has(role)) byRole.set(role, []);
-    byRole.get(role).push(slot);
-  }
-
-  for (const [role, roleSlots] of byRole.entries()) {
-    const xs = withMinGap(spreadLeft(roleSlots.length, role, formation));
-    const top = FORMATION_LINE_TOP[formation]?.[role] ?? LINE_TOP[role] ?? LINE_TOP[line];
-    roleSlots.forEach((slot, i) => {
-      const nudge = SLOT_NUDGES[formation]?.[`${slot.line}:${slot.slotIndex}`];
-      slot.x = xs[i] + (nudge?.dx || 0);
-      slot.y = top + (nudge?.dy || 0);
-    });
-  }
-
-  return slots;
 }
 
 function slotLabel(line, role) {
@@ -352,7 +268,7 @@ export function renderBuild(root, state, handlers) {
             <div class="seg-control formation-seg" role="tablist" aria-label="${t('build.formationAria')}">${formationSegs}</div>
           </div>
 
-          <div class="field" id="field" data-formation="${esc(state.formation)}">
+          <div class="field lineup-board" id="field" data-formation="${esc(state.formation)}">
             ${fieldSVG(positions, state.formation, chemTeamBonus(state.items) > 0)}
             ${fieldNodes(positions)}
           </div>

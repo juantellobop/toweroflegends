@@ -9,58 +9,35 @@ import { esc } from './dom.js';
 import { LINES } from '../data/config.js';
 import { liveRatings, assignLineToSlots, isStarter } from '../state/run.js';
 import { playerOVR } from '../engine/ovr.js';
-import { playerInitials, playerSurname, portraitPathForPlayer } from '../data/playerAssets.js';
+import { playerInitials, portraitPathForPlayer } from '../data/playerAssets.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { t } from '../data/i18n.js';
-import { LINE_TOP, lineSpreadX, PITCH_MARKINGS } from './pitchArt.js';
+import { lineupFieldHTML, positionSlots, staticChipHTML } from './lineupBoard.js';
 
-// Altura del rol ENG (enganche/creación), entre el mediocampo y el ataque.
-const ENG_TOP = 30;
-
-// Coordenadas del once: huecos visibles por línea (assignLineToSlots, igual que
-// el tablero táctico) agrupados por rol y repartidos como en el scouting.
+// Coordenadas del once: huecos visibles por línea (assignLineToSlots) colocados
+// con la MISMA lógica del tablero táctico (lineupBoard): idéntico esquema.
 function lineupPositions(state) {
-  const out = [];
-  for (const line of LINES) {
+  return LINES.flatMap((line) => {
     const slots = assignLineToSlots(state.formation, line, state.starting11[line] || [])
       .filter((slot) => slot.player);
-    const byRole = new Map();
-    for (const slot of slots) {
-      const role = slot.role || line;
-      if (!byRole.has(role)) byRole.set(role, []);
-      byRole.get(role).push(slot);
-    }
-    for (const [role, roleSlots] of byRole) {
-      const xs = lineSpreadX(roleSlots.length);
-      const y = role === 'ENG' ? ENG_TOP : LINE_TOP[line];
-      roleSlots.forEach((slot, i) => out.push({ player: slot.player, x: xs[i], y }));
-    }
-  }
-  return out;
+    return positionSlots(state.formation, line, slots);
+  });
 }
 
 function field(state) {
-  const nodes = lineupPositions(state).map(({ player, x, y }, i) => `
-    <div class="chip-anchor" style="left:${x}%;top:${y}%;--i:${i}">
-      <button class="field-chip filled squad-chip rarity-${player.rarity}" data-uid="${player.uid}"
-              aria-label="${esc(t('build.viewStatsAria', { name: player.name }))}">
-        <span class="chip-face" aria-hidden="true">
-          <img src="${esc(portraitPathForPlayer(player))}" alt="" loading="lazy" decoding="async" data-hide-on-error="true" />
-          <span>${esc(playerInitials(player.name))}</span>
-        </span>
-        <span class="chip-ovr">${playerOVR(player)}</span>
-        <span class="chip-init">${POSITION_LABEL[player.position]}</span>
-        <span class="chip-name" title="${esc(player.name)}">${esc(playerSurname(player.name))}</span>
-      </button>
-    </div>`).join('');
-  return `
-    <div class="field scout-field squad-field">
-      <svg class="field-bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        ${PITCH_MARKINGS}
-      </svg>
-      ${nodes}
-    </div>`;
+  return lineupFieldHTML({
+    formation: state.formation,
+    slots: lineupPositions(state),
+    fieldClass: 'scout-field squad-field',
+    chip: (slot) => staticChipHTML(slot.player, {
+      portraitSrc: portraitPathForPlayer(slot.player),
+      flagSrc: flagSrcForNation(slot.player.nation),
+      chipClass: 'squad-chip',
+      interactive: true,
+      ariaLabel: t('build.viewStatsAria', { name: slot.player.name }),
+    }),
+  });
 }
 
 function ratings(state) {
@@ -82,6 +59,9 @@ function ratings(state) {
   </div>`;
 }
 
+// Banco con la misma carta de suplente del tablero táctico (retrato con
+// bandera, OVR + posición y nombre), envuelto en .team-roster para reutilizar
+// exactamente sus estilos. Sin "+" ni "i": aquí la carta solo abre su ficha.
 function benchStrip(subs) {
   if (!subs.length) return `<p class="empty-note">${t('build.noSubs')}</p>`;
   return `<div class="bench-strip squad-bench">
@@ -91,10 +71,13 @@ function benchStrip(subs) {
         <span class="bench-face" aria-hidden="true">
           <img src="${esc(portraitPathForPlayer(p))}" alt="" loading="lazy" decoding="async" data-hide-on-error="true" />
           <span>${esc(playerInitials(p.name))}</span>
+          <img class="chip-flag" src="${esc(flagSrcForNation(p.nation))}" alt="" loading="lazy" decoding="async" />
         </span>
-        <span class="bench-ovr">${playerOVR(p)}</span>
+        <span class="bench-topline" aria-hidden="true">
+          <span class="bench-ovr">${playerOVR(p)}</span>
+          <span class="bench-pos">${POSITION_LABEL[p.position]}</span>
+        </span>
         <span class="bench-name">${esc(p.name)}</span>
-        <span class="bench-pos">${POSITION_LABEL[p.position]}</span>
       </button>`).join('')}
   </div>`;
 }
@@ -124,8 +107,14 @@ export function renderSquadIntro(root, state, handlers) {
       ${ratings(state)}
       <h2 class="section-title">${t('squadIntro.eleven')}</h2>
       ${field(state)}
-      <h2 class="section-title">${t('squadIntro.bench')}</h2>
-      ${benchStrip(subs)}
+      <div class="team-roster arcade-panel">
+        <div class="team-panel-head roster-head">
+          <div>
+            <h2>${t('squadIntro.bench')}</h2>
+          </div>
+        </div>
+        ${benchStrip(subs)}
+      </div>
       <p class="scout-note">${t('squadIntro.note')}</p>
       <div class="play-bar action-bar">
         <button id="squad-continue" class="primary big glass-cta">${t('squadIntro.continue')}</button>

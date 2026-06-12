@@ -1,43 +1,36 @@
 // Torre de Leyendas — Scouting previo: identidad, ratings y once del rival.
 
-import { POSITION_LABEL } from './cards.js';
 import { esc } from './dom.js';
 import { LINES } from '../data/config.js';
 import { calcularRatings } from '../engine/teamRatings.js';
-import { playerInitials, playerSurname, portraitPathForName } from '../data/playerAssets.js';
+import { portraitPathForName } from '../data/playerAssets.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { localizeAchievement, localizeOpponentName, t } from '../data/i18n.js';
-import { LINE_TOP, lineSpreadX, PITCH_MARKINGS } from './pitchArt.js';
+import { lineupFieldHTML, positionSlots, staticChipHTML } from './lineupBoard.js';
 
+// Mismo esquema que el tablero táctico propio: huecos por línea posicionados
+// con la misma lógica (alturas, reparto y matices del dibujo rival).
 function positions(opponent) {
   return LINES.flatMap((line) => {
     const players = opponent.lineup.filter((p) => p.position === line);
-    const xs = lineSpreadX(players.length);
-    return players.map((player, i) => ({ player, x: xs[i], y: LINE_TOP[line] }));
+    const slots = players.map((player, slotIndex) => ({ player, line, slotIndex, role: line }));
+    return positionSlots(opponent.formation, line, slots);
   });
 }
 
 function field(opponent) {
-  const nodes = positions(opponent).map(({ player, x, y }) => `
-    <div class="chip-anchor" style="left:${x}%;top:${y}%">
-      <div class="field-chip scout-chip">
-        <span class="chip-face" aria-hidden="true">
-          <img src="${esc(portraitPathForName(player.name))}" alt="" loading="lazy" decoding="async" data-hide-on-error="true" />
-          <span>${esc(playerInitials(player.name))}</span>
-        </span>
-        <span class="chip-ovr">${player.ovr ?? '—'}</span>
-        <span class="chip-init">${POSITION_LABEL[player.position]}</span>
-        <span class="chip-name" title="${esc(player.name)}">${esc(playerSurname(player.name))}</span>
-      </div>
-    </div>`).join('');
-  return `
-    <div class="field scout-field">
-      <svg class="field-bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        ${PITCH_MARKINGS}
-      </svg>
-      ${nodes}
-    </div>`;
+  const flagSrc = flagSrcForNation(opponent.name, [opponent.colors.primary, opponent.colors.secondary]);
+  return lineupFieldHTML({
+    formation: opponent.formation,
+    slots: positions(opponent),
+    fieldClass: 'scout-field',
+    chip: (slot) => staticChipHTML(slot.player, {
+      portraitSrc: portraitPathForName(slot.player.name),
+      flagSrc,
+      chipClass: 'scout-chip',
+    }),
+  });
 }
 
 function ratings(opponent) {

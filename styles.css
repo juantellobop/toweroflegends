@@ -165,6 +165,7 @@ button.ready { animation: pulse 1.2s infinite; }
   border-radius: 999px;
   font-size: 13px;
   letter-spacing: 0.5px;
+  text-align: center;
 }
 .hint { color: var(--muted); font-size: 13px; margin: 4px 0 0; }
 .empty-note { color: var(--muted); font-size: 13px; }
@@ -1193,14 +1194,16 @@ select {
 }
 /* Bandera-insignia del país del jugador en la esquina inferior derecha del
    retrato (titulares y suplentes), sobresaliendo 4px del recuadro, al estilo
-   de la placa OVR. Pisa el inset/tamaño del retrato de arriba. */
+   de la placa OVR. Mismo aspect-ratio que las banderas de la home (4/2.8).
+   Pisa el inset/tamaño del retrato de arriba. */
 .chip-face .chip-flag,
 .bench-face .chip-flag {
   position: absolute;
   inset: auto -4px -4px auto;
   z-index: 3;
   width: 22px;
-  height: 14px;
+  height: auto;
+  aspect-ratio: 4 / 2.8;
   border: 2px solid #071459;
   box-shadow: 0 1px 0 rgba(0,0,0,.35);
   object-fit: cover;
@@ -2935,16 +2938,28 @@ select {
   margin: 0 auto;
 }
 
-/* Dibujos de 5 líneas (enganche/creación entre medio y ataque): campo más alto
-   y carta algo menor para que las líneas extra no se pisen. */
+/* === Tablero compartido (.lineup-board): armado, plantilla inicial y once
+   rival pintan las mismas cartas con los mismos tamaños. La carta se define
+   sobre el propio tablero para que cualquier pantalla la herede. === */
+.lineup-board {
+  --lineup-card: clamp(82px, 8.4vw, 104px);
+}
+
+/* Dibujos de 5 líneas (enganche/creación entre medio y ataque): carta algo
+   menor en cualquier tablero para que las líneas extra no se pisen... */
+.field.lineup-board[data-formation="4-3-1-2"],
+.field.lineup-board[data-formation="4-2-3-1"] {
+  --lineup-card: clamp(74px, 7.6vw, 94px);
+}
+
+/* ...y en el armado, además, campo más alto. */
 .team-select-screen .field[data-formation="4-3-1-2"],
 .team-select-screen .field[data-formation="4-2-3-1"] {
-  --lineup-card: clamp(74px, 7.6vw, 94px);
   height: min(88vh, 900px, calc(100vh - 190px));
   min-height: 580px;
 }
 
-.team-select-screen .field-chip {
+.lineup-board .field-chip {
   width: var(--lineup-card);
   min-height: calc(var(--lineup-card) + 34px);
   padding: 7px 4px 6px;
@@ -2954,7 +2969,7 @@ select {
   user-select: none;
 }
 
-.team-select-screen .chip-face {
+.lineup-board .chip-face {
   width: calc(var(--lineup-card) - 16px);
   height: calc(var(--lineup-card) - 16px);
   min-width: 52px;
@@ -2963,19 +2978,20 @@ select {
   border: 2px solid rgba(255,255,255,.82);
 }
 
-.team-select-screen .chip-ovr {
+.lineup-board .chip-ovr {
   font-size: clamp(12px, 1.5vw, 17px);
   color: var(--arcade-yellow);
 }
 
-.team-select-screen .chip-name {
+.lineup-board .chip-name {
   max-width: var(--lineup-card);
   font-size: clamp(9px, 1.2vw, 13px);
   line-height: 1.05;
 }
 
 @media (max-height: 780px) and (min-width: 761px) {
-  .team-select-screen {
+  .team-select-screen,
+  .field.lineup-board {
     --lineup-card: clamp(62px, 7vh, 80px);
   }
 
@@ -3101,7 +3117,7 @@ select {
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr);
+  grid-template-columns: 60px minmax(0, 1fr);
   grid-template-rows: auto auto;
   align-items: center;
   justify-items: start;
@@ -3113,8 +3129,8 @@ select {
 .team-roster .bench-item[hidden] { display: none; }
 
 .team-roster .bench-face {
-  width: 54px;
-  height: 54px;
+  width: 60px;
+  height: 60px;
   border: 2px solid rgba(255,255,255,.78);
 }
 
@@ -5219,48 +5235,14 @@ button.primary:active:not(:disabled),
   line-height: 1.05;
 }
 
-.field-chip.scout-chip .chip-init {
-  color: var(--arcade-cyan);
-  font-size: 8px;
-}
-
-/* === Once rival (scouting): chips grandes y vistosos =====================
-   El tablero rival usaba los chips base (pequeños), dejando mucho césped
-   vacío. Aquí, scopeado a .scout-field para no tocar el armado propio, se
-   agrandan retrato y nombre y se ensancha el campo para llenar el tablero. */
+/* === Once rival (scouting) y plantilla inicial: el campo se dimensiona aquí,
+   pero las cartas son las del tablero compartido (.lineup-board): idéntico
+   esquema al armado de equipo, sin estilos propios. */
 .scout-field {
-  --scout-card: clamp(76px, 7.4vw, 94px);
   width: min(100%, 560px);
   max-width: 560px;
   aspect-ratio: 3 / 4;
   margin: 0 auto;
-}
-.scout-field .field-chip.scout-chip {
-  width: var(--scout-card);
-  padding: 7px 4px 6px;
-  gap: 2px;
-}
-/* Sin redondeado: mismas tarjetas cuadradas que el tablero táctico propio. */
-.scout-field .scout-chip .chip-face {
-  width: calc(var(--scout-card) - 10px);
-  height: calc(var(--scout-card) - 2px);
-  margin-bottom: 3px;
-  border: 2px solid rgba(255,255,255,.88);
-  font-size: clamp(11px, 1.3vw, 14px);
-}
-.scout-field .scout-chip .chip-ovr {
-  top: 5px;
-  left: 5px;
-  min-width: 26px;
-  padding: 3px 5px;
-  font-size: clamp(12px, 1.5vw, 16px);
-}
-.scout-field .scout-chip .chip-init {
-  font-size: clamp(8px, 0.95vw, 11px);
-}
-.scout-field .scout-chip .chip-name {
-  padding: 4px 3px 5px;
-  font-size: clamp(8px, 1.15vw, 11px);
 }
 
 .bench-add {
@@ -5411,10 +5393,12 @@ button.primary:active:not(:disabled),
   }
 
   /* Campo a sangre dentro del panel (margen negativo) y apenas más alto que
-     antes: las cartas crecen y las líneas (LINE_TOP en buildScreen.js) se
-     reparten por todo el alto sin tapar a los suplentes/ratings de debajo. */
+     antes: las cartas crecen y las líneas (LINE_TOP en lineupBoard.js) se
+     reparten por todo el alto sin tapar a los suplentes/ratings de debajo.
+     El tamaño de carta vive en .lineup-board: lo comparten armado, plantilla
+     inicial y once rival. */
   .team-select-screen,
-  .team-select-screen .field[data-formation] {
+  .field.lineup-board[data-formation] {
     --lineup-card: 70px;
   }
 
@@ -5428,26 +5412,30 @@ button.primary:active:not(:disabled),
 
   /* Líneas de 5 en ancho: carta una pizca menor para que el enlace de química
      entre cartas vecinas conserve su hueco. */
-  .team-select-screen .field[data-formation="3-5-2"],
-  .team-select-screen .field[data-formation="5-3-2"] {
+  .field.lineup-board[data-formation="3-5-2"],
+  .field.lineup-board[data-formation="5-3-2"] {
     --lineup-card: 64px;
   }
 
-  /* Dibujos de 5 líneas (enganche/creación): campo aún más alto y carta menor
-     para que las líneas extra no se pisen. */
+  /* Dibujos de 5 líneas (enganche/creación): carta menor en cualquier tablero
+     y, en el armado, campo aún más alto para que las líneas no se pisen. */
+  .field.lineup-board[data-formation="4-3-1-2"],
+  .field.lineup-board[data-formation="4-2-3-1"] {
+    --lineup-card: 62px;
+  }
+
   .team-select-screen .field[data-formation="4-3-1-2"],
   .team-select-screen .field[data-formation="4-2-3-1"] {
-    --lineup-card: 62px;
     height: min(calc((100vw - 20px) * 1.32), calc(100svh - 225px), 505px);
     min-height: 450px;
   }
 
-  .team-select-screen .field-chip {
+  .lineup-board .field-chip {
     min-height: calc(var(--lineup-card) + 16px);
     padding: 4px 2px 3px;
   }
 
-  .team-select-screen .chip-face {
+  .lineup-board .chip-face {
     width: calc(var(--lineup-card) - 6px);
     height: calc(var(--lineup-card) - 6px);
     min-width: 0;
@@ -5544,7 +5532,7 @@ button.primary:active:not(:disabled),
   /* Cabecera del banco en una sola fila: título "Suplentes" a la izquierda y
      el filtro por línea a la derecha (la cabecera genérica mobile se apila en
      columna, pero aquí desperdiciaba una fila entera). */
-  .team-select-screen .roster-head {
+  .roster-head {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -5569,7 +5557,7 @@ button.primary:active:not(:disabled),
     width: 100%;
     min-width: 0;
     min-height: 0;
-    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-columns: 48px minmax(0, 1fr);
     gap: 4px 6px;
     padding: 6px 5px;
     overflow: hidden;
@@ -5577,13 +5565,12 @@ button.primary:active:not(:disabled),
   }
 
   .team-roster .bench-face {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
   }
 
   .team-roster .bench-face .chip-flag {
     width: 16px;
-    height: 11px;
     inset: auto -3px -3px auto;
   }
 
@@ -5680,22 +5667,150 @@ button.primary:active:not(:disabled),
     text-align: center;
   }
 
-  /* Once rival a sangre y con cartas grandes: retrato y apellido legibles,
-     mismas mejoras que el tablero propio. */
+  /* Once rival (y plantilla inicial) a sangre: el campo ocupa todo el ancho;
+     las cartas ya son las del tablero compartido (.lineup-board). */
   .scouting-screen .scout-field {
-    --scout-card: clamp(64px, 18.5vw, 84px);
     width: calc(100% + 16px);
     margin-inline: -8px;
     max-width: none;
     aspect-ratio: 3 / 4;
   }
+}
 
-  .scouting-screen .scout-field .scout-chip .chip-face {
-    width: calc(var(--scout-card) - 8px);
-    height: calc(var(--scout-card) - 6px);
-  }
+/* =============================================================
+ * Crónica de prensa (§4.5/§8.6): periódico de los 90 sobre el
+ * tablero arcade. Papel envejecido con trama de medios tonos,
+ * cabecera con filetes, titular en serifa y foto pixelart flotada
+ * con el texto justificado envolviéndola. Todo estático (sin
+ * animaciones de filter/box-shadow).
+ * ============================================================= */
 
-  .scouting-screen .scout-field .scout-chip .chip-name {
-    font-size: 9px;
-  }
+.press-article {
+  background:
+    radial-gradient(rgba(31, 22, 8, .05) 1px, transparent 1.4px),
+    #F6EDD5;
+  background-size: 7px 7px;
+  color: #1C1408;
+  border: var(--pixel-border, 4px) solid #1C1408;
+  border-radius: var(--pixel-radius, 6px);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, .42), 0 12px 18px rgba(0, 0, 0, .3);
+  padding: 14px 18px 16px;
+  margin: 16px 0 4px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  text-align: left;
+}
+
+.press-masthead {
+  border-bottom: 1px solid #1C1408;
+  padding-bottom: 6px;
+}
+
+.press-name {
+  margin: 0 0 6px;
+  text-align: center;
+  font-size: clamp(1.3rem, 5vw, 1.9rem);
+  font-weight: 900;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  line-height: 1.05;
+  border-bottom: 3px double #1C1408;
+  padding-bottom: 6px;
+}
+
+.press-dateline {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  font-size: .7rem;
+  font-variant: small-caps;
+  letter-spacing: .08em;
+}
+
+/* Cabecera y titular fuerzan la tinta serifa: pisan los estilos arcade de
+   h2/h3 que aplican algunas pantallas (p. ej. .gameover-screen h3). */
+.press-article .press-name,
+.press-article .press-headline {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  color: #1C1408;
+  text-transform: none;
+  text-shadow: none;
+}
+
+.press-article .press-name { text-transform: uppercase; }
+
+.press-article .press-headline {
+  margin: 12px 0 10px;
+  font-size: clamp(1.25rem, 4.6vw, 1.7rem);
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: -.01em;
+  text-align: left;
+}
+
+/* flow-root encierra el float de la foto sin hacks de clearfix. */
+.press-body { display: flow-root; }
+
+.press-body p {
+  margin: 0 0 12px;
+  font-size: .92rem;
+  line-height: 1.55;
+  text-align: justify;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+
+.press-body p:last-child { margin-bottom: 0; }
+
+.press-photo {
+  float: left;
+  width: min(168px, 36%);
+  margin: 4px 16px 6px 0;
+}
+
+.press-photo-frame {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  border: 3px solid #1C1408;
+  background: #2E86E8; /* fondo azul plano, como una foto de archivo 16 bits */
+  overflow: hidden;
+}
+
+.press-photo-frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  display: block;
+}
+
+/* Sin retrato en disco, la "foto" queda en iniciales sobre el azul. */
+.press-photo-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-pixel, monospace);
+  font-weight: 900;
+  font-size: 1.6rem;
+  color: #F6EDD5;
+  text-shadow: 2px 2px 0 #1C1408;
+}
+
+.press-photo figcaption {
+  margin-top: 6px;
+  font-size: .76rem;
+  font-style: italic;
+  line-height: 1.3;
+  color: #3A3022;
+}
+
+@media (max-width: 620px) {
+  .press-article { padding: 12px 14px 14px; }
+  .press-body p { font-size: .88rem; }
+  .press-photo { width: min(132px, 42%); margin-right: 12px; }
+  .press-photo-fallback { font-size: 1.3rem; }
 }

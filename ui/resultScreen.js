@@ -6,6 +6,7 @@ import { confetti, haptic } from '../match/feedback.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { renderLeaderboard } from './leaderboard.js';
+import { pressArticleHTML } from './prensa.js';
 import { localizeNation, localizeOpponentName, t } from '../data/i18n.js';
 
 function localizeHistoryOpponent(value) {
@@ -88,6 +89,7 @@ export function renderResult(root, state, reward, handlers) {
         </div>
         ${rewardHTML}
       </div>
+      ${pressArticleHTML(state)}
       <div class="result-cta action-bar">
         <button id="next" class="primary big glass-cta">▶ ${nextLabel}</button>
       </div>
@@ -129,7 +131,8 @@ export function renderGameOver(root, state, best, handlers) {
           <span>${t('result.scorers')}</span>
           <b>${scorers.length ? esc(scorers.join(', ')) : '—'}</b>
         </div>
-      </div>`;
+      </div>
+      ${pressArticleHTML(state)}`;
   }
 
   const path = state.history.map((h) => `
