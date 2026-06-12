@@ -740,7 +740,7 @@ export const PLAYERS = [
     "nation": "Irlanda",
     "era": "2002",
     "position": "MID",
-    "rarity": "rare",
+    "rarity": "epic",
     "ovr": 80,
     "stats": {
       "pace": 74,
