@@ -46,6 +46,7 @@ const SOURCE_VERSION_PATHS = [
   'styles.css',
   'assets/favicon.png',
   'assets/flags',
+  'assets/player-portraits',
   'assets/ui',
   'design',
   'data',

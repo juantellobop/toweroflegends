@@ -3,6 +3,13 @@ import { ROSTER } from './roster.js';
 
 export const PORTRAIT_DIR = 'assets/player-portraits';
 
+// El servidor reescribe los imports de módulos con ?v=<build>; reutilizar ese
+// mismo tag en los retratos hace que cada deploy invalide la caché de caras
+// y que entre deploys el navegador las conserve como immutable. Sin tag
+// (tests en Node, apertura directa) las rutas quedan como siempre.
+const BUILD_TAG = new URL(import.meta.url).searchParams.get('v');
+const PORTRAIT_SUFFIX = BUILD_TAG ? `?v=${BUILD_TAG}` : '';
+
 export function normalizeName(name) {
   return String(name || '')
     .normalize('NFD')
@@ -65,12 +72,12 @@ export function playerByDisplayName(name) {
 export function portraitPathForPlayer(player) {
   if (!player) return null;
   if (player.portraitDataUrl) return player.portraitDataUrl;
-  if (player.id) return `${PORTRAIT_DIR}/${player.id}.png`;
+  if (player.id) return `${PORTRAIT_DIR}/${player.id}.png${PORTRAIT_SUFFIX}`;
   return portraitPathForName(player.name);
 }
 
 export function portraitPathForName(name) {
   const known = playerByDisplayName(name);
   if (known) return portraitPathForPlayer(known);
-  return `${PORTRAIT_DIR}/by-name/${slugifyName(name)}.png`;
+  return `${PORTRAIT_DIR}/by-name/${slugifyName(name)}.png${PORTRAIT_SUFFIX}`;
 }

@@ -70,6 +70,10 @@ try {
   assert.equal(portrait.headers['cache-control'], 'public, max-age=604800, stale-while-revalidate=2592000');
   assert.ok(portrait.headers.etag);
 
+  const versionedPortrait = await request(port, `/assets/player-portraits/base_def_vidal.png?v=${BUILD_VERSION}`);
+  assert.equal(versionedPortrait.status, 200);
+  assert.equal(versionedPortrait.headers['cache-control'], 'public, max-age=31536000, immutable');
+
   const versionedImage = await request(port, `/assets/ui/background.jpg?v=${BUILD_VERSION}`);
   assert.equal(versionedImage.status, 200);
   assert.equal(versionedImage.headers['cache-control'], 'public, max-age=31536000, immutable');
