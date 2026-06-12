@@ -3107,6 +3107,32 @@ select {
   background: linear-gradient(90deg, var(--arcade-red), var(--arcade-yellow), var(--arcade-green));
 }
 
+/* --- Presentación de la plantilla inicial (squadIntro) --- */
+.squad-intro-screen .scout-hero {
+  align-items: center;
+}
+
+.squad-chip {
+  cursor: pointer;
+}
+
+/* Las fichas del once brotan escalonadas al entrar. Solo opacity/transform
+   (compositables); el fill `backwards` libera la animación al terminar para
+   no pisar el transform del hover de .field-chip. */
+.squad-field .chip-anchor {
+  animation: squad-chip-in 420ms var(--ease-emphasis) backwards;
+  animation-delay: calc(var(--i, 0) * 50ms + 160ms);
+}
+
+@keyframes squad-chip-in {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 14px)) scale(.82); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .squad-field .chip-anchor { animation: none; }
+}
+
 /* Match broadcast */
 .match-screen {
   position: relative;
@@ -4757,6 +4783,58 @@ select {
   .player-modal-backdrop, .player-modal-card { animation: none; }
 }
 
+/* --- Popup "Revisar mi equipo" (apertura de sobres) --- */
+.review-squad-btn {
+  margin-top: 10px;
+}
+
+.squad-review-shell {
+  position: relative;
+  z-index: 1;
+  width: min(880px, 94vw);
+  animation: pop-in .22s var(--ease-standard, ease) both;
+}
+
+/* El panel hace scroll por dentro; el botón de cerrar vive en el shell para
+   quedarse fijo en la esquina mientras las cartas se desplazan. */
+.squad-review-panel {
+  max-height: min(82vh, 760px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px;
+}
+
+.squad-review-title {
+  margin: 0 0 6px;
+  font-family: var(--font-pixel);
+  color: #fff;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 0 #071459;
+  font-size: var(--t-headline);
+}
+
+.squad-review-sub {
+  margin: 14px 0 8px;
+  font-family: var(--font-pixel);
+  color: var(--arcade-yellow);
+  text-transform: uppercase;
+  font-size: var(--t-footnote);
+}
+
+.squad-review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(172px, 1fr));
+  gap: 10px;
+}
+
+.squad-review-grid .card {
+  width: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .squad-review-shell { animation: none; }
+}
+
 /* ============================================================
    Fondo persistente por ruta.
    La escenografía vive en #app para que no se destruya al cambiar pantalla.
@@ -4804,6 +4882,7 @@ select {
   opacity: .42;
 }
 
+#app[data-route="squadIntro"]::before,
 #app[data-route="playerPack"]::before,
 #app[data-route="itemPack"]::before,
 #app[data-route="scouting"]::before,

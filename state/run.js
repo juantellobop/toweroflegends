@@ -727,7 +727,8 @@ export function createRun(opts = {}) {
     items: [],
     history: [],
     usedOpponentIds: [],
-    phase: 'playerPack',
+    // La run arranca presentando la plantilla generada; de ahí, a los sobres.
+    phase: 'squadIntro',
     // Sobres del primer nivel: neutros.
     pendingPlayerPack: CONFIG.PACK_AJUSTADA,
     pendingItemPack: CONFIG.ITEM_PACK_BASE,

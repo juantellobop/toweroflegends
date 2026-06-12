@@ -31,29 +31,40 @@ try {
   if (!root.querySelector('#start')?.disabled) errors.push('start habilitado sin bandera');
   click(root.querySelector('.flag-opt'));
   click(root.querySelector('#start'));
-  console.log('2. Sobre jugador:', show(), '| cartas:', root.querySelectorAll('.player-card').length);
+  console.log('2. Equipo inicial:', show(), '| once:', root.querySelectorAll('.squad-chip').length, '| suplentes:', root.querySelectorAll('.bench-item').length);
+  if (root.querySelectorAll('.squad-chip').length !== 11) errors.push('presentación del equipo sin 11 titulares');
+  if (!root.querySelectorAll('.bench-item').length) errors.push('presentación del equipo sin suplentes');
+  click(root.querySelector('#squad-continue'));
+  console.log('3. Sobre jugador:', show(), '| cartas:', root.querySelectorAll('.player-card').length);
   if (!root.querySelector('.card-portrait')) errors.push('cartas sin bloque de retrato');
+
+  // Popup "Revisar mi equipo" antes de abrir el sobre
+  click(root.querySelector('#reviewSquad'));
+  if (root.querySelector('#squadReview')?.hidden !== false) errors.push('Revisar mi equipo no abre el popup');
+  if (root.querySelectorAll('#squadReview .player-card').length !== 16) errors.push('el popup de plantilla no muestra las 16 cartas');
+  click(root.querySelector('#squadReview [data-close]'));
+  if (root.querySelector('#squadReview')?.hidden !== true) errors.push('el popup de plantilla no cierra');
 
   click(root.querySelector('#openBtn')); // abrir el sobre sellado de jugadores
   click(root.querySelector('.deal-card:not(.disabled-deal)')); await wait(420); // selección directa
-  console.log('3. Sobre objeto:', show(), '| objetos:', root.querySelectorAll('.item-card').length);
+  console.log('4. Sobre objeto:', show(), '| objetos:', root.querySelectorAll('.item-card').length);
 
   click(root.querySelector('#openBtn')); // abrir el sobre sellado de objetos
   click(root.querySelector('.deal-card')); await wait(420); // selección directa
-  console.log('4. Scouting:', show(), '| once rival:', root.querySelectorAll('.scout-chip').length, '| ratings:', root.querySelectorAll('.scout-rating').length);
+  console.log('5. Scouting:', show(), '| once rival:', root.querySelectorAll('.scout-chip').length, '| ratings:', root.querySelectorAll('.scout-rating').length);
   click(root.querySelector('#scout-continue'));
-  console.log('5. Armar equipo:', show(), '| play activo:', !root.querySelector('#play')?.disabled, '| ratings:', root.querySelectorAll('.rating-row').length);
+  console.log('6. Armar equipo:', show(), '| play activo:', !root.querySelector('#play')?.disabled, '| ratings:', root.querySelectorAll('.rating-row').length);
 
   // toggle un suplente dentro/fuera para probar el handler
   const sub = root.querySelector('.bench-item');
   if (sub) { click(sub); console.log('   (toggle suplente ok, pantalla:', show()+')'); }
 
   click(root.querySelector('#play'));
-  console.log('6. Partido:', show(), '| marcador:', root.querySelector('#scoreA')?.textContent+'-'+root.querySelector('#scoreB')?.textContent);
+  console.log('7. Partido:', show(), '| marcador:', root.querySelector('#scoreA')?.textContent+'-'+root.querySelector('#scoreB')?.textContent);
   if (!root.querySelector('.scene-pitch')) errors.push('partido sin visor de escenas');
   if (!root.querySelector('#viewResult')) errors.push('partido sin botón flotante Ver resultado');
   click(root.querySelector('#viewResult'));
-  console.log('7. Resultado:', show(), '| final:', root.querySelector('.final-score')?.textContent?.replace(/\s+/g,' ').trim() || 'fin de run');
+  console.log('8. Resultado:', show(), '| final:', root.querySelector('.final-score')?.textContent?.replace(/\s+/g,' ').trim() || 'fin de run');
   if (!root.querySelector('.result-screen, .gameover-screen')) errors.push('Ver resultado no navega directamente al resumen');
   if (root.querySelector('.result-screen .result-scorers')?.closest('.result-score-card') == null) errors.push('goleadores fuera de la caja del resultado');
   if (root.querySelector('.result-screen .result-stats')) errors.push('el resumen todavía incluye estadísticas separadas');
@@ -61,9 +72,9 @@ try {
   const next = root.querySelector('#next');
   if (next) {
     click(next);
-    console.log('8. Siguiente:', show());
+    console.log('9. Siguiente:', show());
   } else {
-    console.log('8. Fin de run válido:', show());
+    console.log('9. Fin de run válido:', show());
   }
 } catch(e) { errors.push('runtime: ' + e.message + '\n' + e.stack); }
 

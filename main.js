@@ -8,6 +8,7 @@ import {
   togglePlayerInLineup, placePlayerInLineup, setFormation, assignLineToSlots,
 } from './state/run.js';
 import { renderPlayerPack, renderItemPack, renderNationPack } from './ui/packScreen.js';
+import { renderSquadIntro } from './ui/squadIntroScreen.js';
 import { renderBuild } from './ui/buildScreen.js';
 import { renderScouting } from './ui/scoutingScreen.js';
 import { renderMatch } from './ui/matchScreen.js';
@@ -37,13 +38,14 @@ const BEST_KEY = 'tdl_best';
 const ROUTE_ORDER = {
   menu: 0,
   admin: 1,
-  playerPack: 2,
-  itemPack: 3,
-  scouting: 4,
-  build: 5,
-  match: 6,
-  result: 7,
-  gameover: 8,
+  squadIntro: 2,
+  playerPack: 3,
+  itemPack: 4,
+  scouting: 5,
+  build: 6,
+  match: 7,
+  result: 8,
+  gameover: 9,
 };
 
 function getBest() {
@@ -271,6 +273,18 @@ function submitGameOverRanking() {
 // === Despacho por fase ===
 function render(navHint = 'auto') {
   switch (state.phase) {
+    case 'squadIntro':
+      // Arranque de la run: el equipo completo se presenta antes del primer sobre.
+      renderRoute('squadIntro', () => {
+        renderSquadIntro(root, state, {
+          onContinue: () => {
+            state.phase = 'playerPack';
+            render('forward');
+          },
+        });
+      }, navHint);
+      break;
+
     case 'playerPack':
       renderRoute('playerPack', () => {
         const onPick = (tpl) => {

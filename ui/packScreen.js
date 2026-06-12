@@ -10,6 +10,8 @@ import { esc, prefersReducedMotion } from './dom.js';
 import { haptic } from '../match/feedback.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
+import { LINES } from '../data/config.js';
+import { playerOVR } from '../engine/ovr.js';
 import { localizeEra, localizeNation, t } from '../data/i18n.js';
 
 const COPY = {
@@ -49,6 +51,7 @@ function shell(state, kind, count, body) {
         <div class="level-badge">${t('generic.level', { level: state.level })}</div>
         <h1 class="large-title">${title}</h1>
         <p class="hint">${t('pack.chooseOne', { count, hint })}</p>
+        ${squadReviewButton(state)}
       </header>
 
       <div class="pack-stage" id="stage">
@@ -68,7 +71,52 @@ function shell(state, kind, count, body) {
       <div class="pack-actions action-bar" id="openBar">
         <button id="openBtn" class="primary big glass-cta">${open}</button>
       </div>
+      ${squadReviewModal(state)}
     </section>`;
+}
+
+// === Popup "Revisar mi equipo" ===
+// La plantilla completa en cartas (titulares y suplentes) para comparar lo que
+// ya tienes antes de decidir qué sacar del sobre. Solo aparece con plantilla.
+
+function squadReviewButton(state) {
+  if (!state.squad?.length) return '';
+  return `<button id="reviewSquad" class="ctl review-squad-btn">${t('pack.review')}</button>`;
+}
+
+function squadReviewModal(state) {
+  if (!state.squad?.length) return '';
+  const starters = LINES.flatMap((line) => state.starting11?.[line] || []);
+  const starterUids = new Set(starters.map((p) => p.uid));
+  const subs = state.squad
+    .filter((p) => !starterUids.has(p.uid))
+    .sort((a, b) => playerOVR(b) - playerOVR(a));
+  const grid = (players) => `<div class="squad-review-grid">${players.map((p) => playerCardHTML(p)).join('')}</div>`;
+  return `
+    <div class="player-modal squad-review-modal" id="squadReview" hidden>
+      <div class="player-modal-backdrop" data-close></div>
+      <div class="squad-review-shell" role="dialog" aria-modal="true" aria-label="${esc(t('pack.reviewTitle', { count: state.squad.length }))}">
+        <button class="player-modal-close" data-close aria-label="${t('generic.close')}">✕</button>
+        <div class="squad-review-panel arcade-panel">
+          <h2 class="squad-review-title">${t('pack.reviewTitle', { count: state.squad.length })}</h2>
+          ${starters.length ? `<h3 class="squad-review-sub">${t('squadIntro.eleven')}</h3>${grid(starters)}` : ''}
+          ${subs.length ? `<h3 class="squad-review-sub">${t('squadIntro.bench')}</h3>${grid(subs)}` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function wireSquadReview(root) {
+  const btn = root.querySelector('#reviewSquad');
+  const modal = root.querySelector('#squadReview');
+  if (!btn || !modal) return;
+  const close = () => { modal.hidden = true; };
+  btn.addEventListener('click', () => { modal.hidden = false; });
+  modal.querySelectorAll('[data-close]').forEach((node) => node.addEventListener('click', close));
+  document.addEventListener('keydown', function onEsc(e) {
+    if (e.key === 'Escape' && !modal.hidden) close();
+    if (modal.hidden) document.removeEventListener('keydown', onEsc);
+  });
 }
 
 // Una carta "repartida": contenedor 3D con dorso (arte por tipo) y cara real.
@@ -151,13 +199,16 @@ function renderNationRoster(root, state, team, onPick) {
         <div class="level-badge">${t('generic.level', { level: state.level })}</div>
         <h1 class="large-title">${esc(nationLabel(team))}</h1>
         <p class="hint">${t('pack.nationPickHint')}</p>
+        ${squadReviewButton(state)}
       </header>
       <div class="pack-stage nation-roster-stage">
         <div class="pack-deal nation-roster ${prefersReducedMotion() ? '' : 'dealing'} no-flip" id="deal">${body}</div>
       </div>
+      ${squadReviewModal(state)}
     </section>`;
   window.scrollTo(0, 0);
   wireChoice(root, team.players, onPick);
+  wireSquadReview(root);
 }
 
 function wire(root, choices, onPick) {
@@ -206,6 +257,7 @@ function wire(root, choices, onPick) {
   root.querySelector('#openBtn').addEventListener('click', openPack);
 
   wireChoice(root, choices, onPick, () => opened);
+  wireSquadReview(root);
 }
 
 // --- Elección de carta (solo tras abrir el sobre) ---

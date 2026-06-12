@@ -42,6 +42,10 @@ async function playToBuild(page) {
   await page.waitForTimeout(350);
   await page.click('.flag-opt');
   await page.click('#start');
+  // Presentación de la plantilla inicial: once en el campo + suplentes.
+  await page.waitForSelector('.squad-intro-screen .squad-chip');
+  await assertSquadIntroLayout(page);
+  await page.click('#squad-continue');
   // El sobre llega sellado: abrirlo revela las cartas.
   await page.waitForSelector('.pack-screen .pack-opener');
   await page.click('#openBtn');
@@ -62,6 +66,19 @@ async function playToBuild(page) {
   await page.click('#scout-continue');
   await page.waitForSelector('.build-screen');
   await page.waitForTimeout(350);
+}
+
+async function assertSquadIntroLayout(page) {
+  await page.waitForTimeout(900); // deja terminar el escalonado de fichas
+  const viewport = page.viewportSize();
+  await page.screenshot({
+    path: path.join(OUT, `${viewport && viewport.width <= 760 ? 'mobile' : 'desktop'}-squad-intro.png`),
+    fullPage: true,
+  });
+  const chips = await page.locator('.squad-intro-screen .squad-chip').count();
+  assert.equal(chips, 11, 'Squad intro must show the 11 starters on the pitch');
+  const subs = await page.locator('.squad-intro-screen .bench-item').count();
+  assert.ok(subs > 0, 'Squad intro must show the substitutes strip');
 }
 
 async function assertScoutingLayout(page) {

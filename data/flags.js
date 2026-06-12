@@ -33,6 +33,7 @@ const FLAG_FILE_ALIAS = {
 const FLAG_PNG = new Set([
   'riverplate', 'boca', 'independiente', 'racing', 'sanlorenzo', 'velez',
   'huracan', 'estudiantes', 'gimnasia', 'central', 'newells', 'lanus',
+  'real-madrid', 'barcelona', 'valencia', 'euskadi', 'celta', 'real-sociedad',
   'alemania', 'argentina', 'brasil', 'bulgaria', 'belgica',
   'camerun', 'checoslovaquia', 'colombia', 'corea-del-sur', 'costa-rica', 'croacia',
   'dinamarca', 'espana', 'estados-unidos', 'francia', 'ghana', 'inglaterra', 'irlanda',
@@ -53,8 +54,9 @@ function flagFileFor(name) {
 export const FLAG_NATIONS = [
   'River Plate', 'Boca', 'Independiente', 'Racing', 'San Lorenzo', 'Vélez',
   'Huracán', 'Estudiantes', 'Gimnasia', 'Central', "Newell's", 'Lanús',
-  'Argentina', 'Brasil', 'Uruguay', 'Colombia', 'México', 'Paraguay', 'Costa Rica',
-  'Estados Unidos', 'España', 'Italia', 'Francia', 'Alemania', 'Inglaterra',
+  'Real Madrid', 'Barcelona', 'Valencia', 'Euskadi', 'Celta', 'Real Sociedad',
+  'Argentina', 'Brasil', 'España', 'Uruguay', 'Colombia', 'México', 'Paraguay', 'Costa Rica',
+  'Estados Unidos', 'Italia', 'Francia', 'Alemania', 'Inglaterra',
   'Países Bajos', 'Portugal', 'Bélgica', 'Croacia', 'Dinamarca', 'Suecia', 'Irlanda',
   'Rusia', 'Ucrania', 'Rumanía', 'Bulgaria', 'Turquía', 'Corea del Sur', 'Marruecos',
   'Senegal', 'Camerún', 'Ghana', 'Liberia', 'URSS', 'Yugoslavia', 'Checoslovaquia',
@@ -65,6 +67,8 @@ const NATION_ACCENT = {
   'river-plate': '#e21d2f', boca: '#f4c400', independiente: '#c8102e', racing: '#67b7dc',
   'san-lorenzo': '#d71920', velez: '#005eb8', huracan: '#d71920', estudiantes: '#ed1c24',
   gimnasia: '#173a7a', central: '#f6c500', newells: '#d71920', lanus: '#6f1731',
+  'real-madrid': '#febe10', barcelona: '#a50044', valencia: '#f18e00',
+  euskadi: '#009b48', celta: '#8ac3ee', 'real-sociedad': '#0067b1',
   argentina: '#75aadb', brasil: '#ffdf00', uruguay: '#6cace4', colombia: '#fcd116',
   mexico: '#006847', paraguay: '#d52b1e', 'costa-rica': '#002b7f', 'estados-unidos': '#3c3b6e',
   espana: '#f1bf00', italia: '#009246', francia: '#1d3e8a', alemania: '#ffce00',
