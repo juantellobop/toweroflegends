@@ -1,0 +1,7 @@
+#!/bin/sh
+# Torre de Leyendas — sube la versión visible del juego en cada commit.
+# Patch por defecto (0.1.0 → 0.1.1); para cambios grandes:
+#   BUMP=minor git commit ...   (0.1.4 → 0.2.0)
+#   BUMP=major git commit ...   (0.2.3 → 1.0.0)
+# Documentación: README.md § Versionado del juego.
+node tools/bump_version.mjs --auto || exit 1

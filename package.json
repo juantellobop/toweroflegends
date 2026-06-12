@@ -18,7 +18,11 @@
     "visual": "node tests/visual.mjs",
     "portraits:dry": "python3 tools/generate_player_portraits.py --dry-run --limit 10",
     "portraits": "python3 tools/generate_player_portraits.py",
-    "serve": "node tools/admin_server.mjs"
+    "serve": "node tools/admin_server.mjs",
+    "version:patch": "node tools/bump_version.mjs patch",
+    "version:minor": "node tools/bump_version.mjs minor",
+    "version:major": "node tools/bump_version.mjs major",
+    "postinstall": "git config core.hooksPath .githooks || exit 0"
   },
   "private": true,
   "engines": {

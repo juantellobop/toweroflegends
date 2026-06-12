@@ -1751,6 +1751,9 @@ select {
 
 @media (max-width: 480px) {
 
+  .chem-legend{
+    display: none;
+  }
   .pack-tap{
     display: none;
   }
