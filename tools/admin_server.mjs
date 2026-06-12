@@ -71,6 +71,10 @@ function normalizedVersion(value) {
 }
 
 function hashSourcePath(hash, absolutePath, relativePath) {
+  // El contador global de partidas muta con cada run registrada: incluirlo en
+  // el hash cambiaría la versión de assets (y rompería la caché) sin que el
+  // código hubiera cambiado.
+  if (absolutePath === STATS_FILE) return;
   const stat = statSync(absolutePath);
   if (stat.isDirectory()) {
     for (const entry of readdirSync(absolutePath).sort()) {
