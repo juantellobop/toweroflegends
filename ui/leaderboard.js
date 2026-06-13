@@ -7,6 +7,8 @@ import { FORMATIONS, LINES } from '../data/config.js';
 import { playerInitials, playerSurname, portraitPathForName } from '../data/playerAssets.js';
 import { POSITION_LABEL } from './cards.js';
 import { LINE_TOP, lineSpreadX, PITCH_MARKINGS } from './pitchArt.js';
+import { assignLineToSlots } from '../state/run.js';
+import { lineupFieldHTML, positionSlots } from './lineupBoard.js';
 
 export const LEADERBOARD_LIMIT = 20;
 
@@ -140,9 +142,29 @@ function lineupChip(player) {
     </div>`;
 }
 
-// Pinta el once sobre el tablero agrupando por línea jugada (no por posición
-// natural: un MID en el hueco de enganche cuenta para su línea real).
-function lineupField(lineup) {
+// Pinta el once con el MISMO esquema del tablero táctico (lineupBoard): cada
+// jugador va a su hueco real del dibujo —pivotes y enganches del 4-2-3-1 en
+// líneas distintas, interiores del 4-3-3 escalonados, etc.— en vez del reparto
+// plano por línea. assignLineToSlots reconstruye el rol de cada hueco (el snap
+// del once guarda los jugadores en orden de slot por línea) y positionSlots les
+// da las coordenadas exactas. Sin dibujo válido (entradas antiguas) cae al
+// reparto plano de respaldo.
+function lineupField(lineup, formation) {
+  if (!formation || !FORMATIONS[formation]) return flatLineupField(lineup);
+  const slots = LINES.flatMap((line) => {
+    const players = lineup.filter((p) => (p.line || p.position) === line);
+    return positionSlots(formation, line, assignLineToSlots(formation, line, players));
+  }).filter((slot) => slot.player);
+  return lineupFieldHTML({
+    formation,
+    slots,
+    fieldClass: 'lineup-modal-field',
+    chip: (slot) => lineupChip(slot.player),
+  });
+}
+
+// Respaldo para entradas sin formación guardada: reparto plano por línea jugada.
+function flatLineupField(lineup) {
   const nodes = LINES.flatMap((line) => {
     const players = lineup.filter((p) => (p.line || p.position) === line);
     const xs = lineSpreadX(players.length);
@@ -150,7 +172,7 @@ function lineupField(lineup) {
       <div class="chip-anchor" style="left:${xs[i]}%;top:${LINE_TOP[line]}%">${lineupChip(player)}</div>`);
   }).join('');
   return `
-    <div class="field lineup-modal-field">
+    <div class="field lineup-board lineup-modal-field">
       <svg class="field-bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         ${PITCH_MARKINGS}
       </svg>
@@ -185,7 +207,7 @@ export function openLeaderboardLineup(entryId) {
             <span>${esc(meta)} · ${esc(t('leaderboard.lineup'))}</span>
           </div>
         </header>
-        ${lineupField(entry.lineup)}
+        ${lineupField(entry.lineup, entry.formation)}
       </section>
     </div>`;
 
