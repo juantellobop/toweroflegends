@@ -701,6 +701,7 @@ const DICTIONARIES = {
         winBig: [
           ({ team, figure }) => `Exhibición de ${team} con un ${figure} de leyenda`,
           ({ team, figure }) => `${team} arrasa con un recital firmado por ${figure}`,
+          ({ team, figure }) => `${team} pasa por encima de su rival con un ${figure} estelar`,
         ],
         win: [
           ({ team, figure }) => `${figure} guía a ${team} a una victoria de carácter`,
@@ -710,118 +711,145 @@ const DICTIONARIES = {
         draw: [
           ({ team, opp }) => `${team} y ${opp} firman un empate con sabor a batalla`,
           ({ team, opp }) => `Reparto de puntos entre ${team} y ${opp} tras un pulso sin tregua`,
+          ({ team, opp }) => `${team} y ${opp} se reparten el botín en un duelo de ida y vuelta`,
         ],
         loss: [
           ({ team, opp }) => `${opp} frena en seco la escalada de ${team}`,
           ({ team, opp }) => `${team} cae ante un ${opp} más práctico y pierde fuelle`,
+          ({ team, opp }) => `${opp} aprovecha sus opciones y deja a ${team} sin premio`,
         ],
       },
       lead: {
         win: [
           ({ team, opp, score, figure, feat }) => `La selección de ${team} se impuso por ${score} a la selección de ${opp} en un intenso encuentro que dejó grandes emociones de principio a fin. El protagonista absoluto de la noche fue ${figure}, quien firmó una actuación memorable al ${feat}, siendo determinante en cada uno de los momentos clave del partido.`,
           ({ team, opp, score, figure, feat }) => `${team} resolvió por ${score} ante ${opp} un partido vibrante que mantuvo en vilo a la grada hasta el pitido final. El nombre propio de la jornada fue ${figure}, capaz de ${feat} y de inclinar la balanza en los instantes decisivos, dejando la imagen de un equipo sólido y con hambre de seguir subiendo.`,
+          ({ team, opp, score, figure, feat }) => `Noche redonda para ${team}, que superó por ${score} a ${opp} con autoridad y dejó claro que va en serio en esta Torre. El faro fue ${figure}, brillante al ${feat} y dueño del partido cada vez que tocó el balón en zona decisiva, para regocijo de una afición entregada.`,
         ],
         draw: [
           ({ team, opp, score, figure, feat }) => `${team} y ${opp} firmaron un ${score} en un encuentro intenso en el que ninguno de los dos bajó los brazos. Si alguien sostuvo el pulso fue ${figure}, que se echó el equipo a la espalda al ${feat} y mantuvo viva la ilusión de los suyos hasta el pitazo final.`,
           ({ team, opp, score, figure, feat }) => `El ${score} final entre ${team} y ${opp} reflejó un duelo de ida y vuelta en el que ambos buscaron la victoria sin llegar a encontrarla. Por encima del resto asomó ${figure}, que tiró del carro al ${feat} y sostuvo la fe de los suyos cuando el partido reclamaba a gritos un líder.`,
+          ({ team, opp, score, figure, feat }) => `Ni ${team} ni ${opp} se sacaron ventaja en un ${score} trabajado, de esos que se deciden por centímetros y acaban sin vencedor. El que más se acercó a romper el muro fue ${figure}, que tiró de galones al ${feat} y dejó destellos de su clase en los tramos más calientes.`,
         ],
         loss: [
           ({ team, opp, score, figure, feat }) => `La selección de ${opp} se impuso por ${score} a la selección de ${team} en un duelo áspero que se decidió por detalles. La gran figura del encuentro fue ${figure}, quien marcó diferencias al ${feat} y dejó sin respuestas al conjunto rival.`,
-          ({ team, opp, score, figure, feat }) => `${opp} se llevó el duelo por ${score} ante un ${team} que lo intentó, pero chocó una y otra vez con la realidad del marcador. Aun en la derrota, la figura fue ${figure}, que marcó diferencias al ${feat} y fue de lo poco rescatable para los suyos en una noche cuesta arriba.`,
+          ({ team, opp, score, figure, feat }) => `${opp} se llevó el duelo por ${score} ante un ${team} que lo intentó, pero chocó una y otra vez con la realidad del marcador. El gran nombre del encuentro fue ${figure}, que marcó diferencias al ${feat} y resultó decisivo para doblegar la resistencia de ${team}.`,
+          ({ team, opp, score, figure, feat }) => `${opp} firmó un triunfo por ${score} sobre ${team} en un choque que controló en los momentos importantes. Su gran referente fue ${figure}, que marcó diferencias al ${feat} y se convirtió en una pesadilla para la zaga de ${team} durante toda la noche.`,
         ],
       },
       body: {
         opener: [
           ({ att, def, minute, scorer, how, score }) => `Desde el inicio, ${att} mostró una actitud ofensiva y una presión alta que complicó la salida de ${def}. La insistencia tuvo premio a los ${minute} minutos, cuando ${scorer} ${how} para poner el ${score} en el marcador. El gol dio confianza a los suyos, que comenzaron a controlar la posesión y a generar peligro constante por las bandas.`,
           ({ att, def, minute, scorer, how, score }) => `${att} salió decidido a marcar territorio y sometió a ${def} con una presión que ahogó su primera salida de balón. El esfuerzo encontró recompensa a los ${minute} minutos: ${scorer} ${how} para firmar el ${score}. Con la ventaja en el luminoso, los suyos se asentaron sobre el campo y empezaron a manejar los tiempos del partido a su antojo.`,
+          ({ att, def, minute, scorer, how, score }) => `El guion lo escribió ${att} desde el primer minuto, volcado sobre el campo de ${def} y asfixiante en la presión arriba. El premio a la audacia llegó a los ${minute} minutos: ${scorer} ${how} para subir el ${score} al marcador. A partir de ahí, los suyos jugaron con la tranquilidad del que pega primero y golpea fuerte.`,
         ],
         scoreless: [
           ({ team, opp, keeper }) => `El primer tiempo fue un pulso táctico en el que ${team} y ${opp} se midieron sin conceder espacios. Las defensas ganaron la partida a los ataques y, cuando hizo falta, apareció ${keeper} para apagar los incendios dentro del área. Se llegó al descanso sin goles y con la sensación de que el partido se decidiría por un detalle.`,
           ({ team, opp, keeper }) => `La primera mitad se jugó como una partida de ajedrez: ${team} y ${opp} se anularon mutuamente y apenas dejaron resquicios entre líneas. Cada vez que el peligro asomó, fue ${keeper} quien puso orden bajo los palos. El descanso llegó con el cero en el marcador y la sospecha de que cualquier chispa rompería la igualdad.`,
+          ({ team, opp, keeper }) => `El primer acto fue de máxima tensión y pocos espacios: ${team} y ${opp} se estudiaron sin querer arriesgar de más y fiaron su suerte a la solidez defensiva. ${keeper} tuvo que emplearse a fondo en los contados avisos que llegaron. El intermedio se alcanzó con el casillero a cero y todo por decidir.`,
         ],
         quiet: [
           ({ team, opp, keeper }) => `En la segunda mitad el marcador ya no se movió: ${team} y ${opp} intercambiaron aproximaciones sin claridad en los metros finales y cada intento murió en las manos de ${keeper} o en las botas de una defensa bien plantada. El duelo se cerró sin más sobresaltos, decidido por lo sembrado antes del descanso.`,
           ({ team, opp, keeper }) => `Tras el descanso el electrónico se quedó congelado: ${team} y ${opp} se asomaron al área contraria sin puntería en el último pase, y cuanto llegó a portería lo neutralizó ${keeper} o una defensa atenta a cada centro. El choque se fue apagando sin más alarmas, sentenciado por lo ocurrido antes del intermedio.`,
+          ({ team, opp, keeper }) => `La reanudación no cambió el guion: ${team} y ${opp} se asomaron al área rival con más voluntad que acierto, y lo poco que inquietó se topó con ${keeper} o con una defensa muy ordenada. El marcador aguantó intacto hasta el final, fiel a lo visto en los primeros cuarenta y cinco minutos.`,
         ],
         red: [
           ({ player, team, minute }) => `El partido se complicó con la expulsión de ${player} a los ${minute} minutos, que dejó a ${team} en inferioridad y condicionó por completo el tramo final.`,
           ({ player, team, minute }) => `Todo se torció con la roja directa a ${player} en el minuto ${minute}: ${team} se quedó con uno menos y tuvo que reescribir su plan para el tramo decisivo.`,
+          ({ player, team, minute }) => `El choque dio un vuelco con la tarjeta roja a ${player} en el minuto ${minute}: ${team} se vio obligado a jugar en inferioridad y a replegarse para proteger el resultado.`,
         ],
         subSwap: [
           ({ inName, outName, cause, minute }) => `Para tapar el hueco que dejó ${cause}, ${inName} entró desde el banquillo al ${minute}' y ${outName} dejó su puesto para rearmar la zaga.`,
           ({ inName, outName, cause, minute }) => `Obligado por la baja de ${cause}, el banquillo movió ficha al ${minute}': entró ${inName} y ${outName} cedió su sitio para recomponer la defensa.`,
+          ({ inName, outName, cause, minute }) => `La baja de ${cause} obligó a recomponer la pizarra: al ${minute}' entró ${inName} y ${outName} dejó el campo para reforzar una zaga que se había quedado coja.`,
         ],
         subIn: [
           ({ inName, cause, minute }) => `Tras la expulsión de ${cause}, ${inName} saltó del banquillo al ${minute}' para reforzar la línea defensiva.`,
           ({ inName, cause, minute }) => `Sin ${cause} sobre el campo, ${inName} recibió la llamada al ${minute}' para apuntalar la retaguardia.`,
+          ({ inName, cause, minute }) => `Tras quedarse sin ${cause}, ${inName} entró al campo al ${minute}' con la misión de tapar el agujero en la línea defensiva.`,
         ],
         forfeit: [
           ({ team }) => `Con cuatro expulsados, ${team} se quedó sin equipo sobre el campo y el colegiado dio el partido por perdido.`,
           ({ team }) => `Con cuatro jugadores camino del vestuario, ${team} se quedó sin gente para continuar y el árbitro decretó el final anticipado.`,
+          ({ team }) => `La cuarta expulsión dejó a ${team} sin efectivos suficientes para seguir en pie, y el árbitro no tuvo más remedio que dar por concluido el encuentro.`,
         ],
         penaltyMiss: [
           ({ shooter, keeper, minute }) => `Hubo drama desde los once metros a los ${minute} minutos: ${shooter} tuvo el gol en sus botas, pero ${keeper} y la fortuna le negaron la celebración.`,
           ({ shooter, keeper, minute }) => `El minuto ${minute} dejó el momento más cruel desde el punto de penalti: ${shooter} apuntó al gol, pero ${keeper} adivinó la intención y le robó la fiesta.`,
+          ({ shooter, keeper, minute }) => `Llegó el momento de la pena máxima en el minuto ${minute} y con él, la decepción: ${shooter} buscó el gol desde los once metros, pero ${keeper} se hizo gigante y desbarató la ocasión.`,
         ],
         nearMissSave: [
           ({ shooter, keeper, minute }) => `No todo fue acierto en los metros finales: la ocasión más clara que se marchó la tuvo ${shooter} a los ${minute} minutos, pero ${keeper} le ganó el mano a mano con una intervención de mucho mérito.`,
           ({ shooter, keeper, minute }) => `La jugada más clara que quedó sin premio llevó la firma de ${shooter} en el minuto ${minute}, pero ${keeper} salió a tiempo y resolvió el mano a mano con una parada de enorme valor.`,
+          ({ shooter, keeper, minute }) => `La ocasión más peligrosa que no acabó en gol la tuvo ${shooter} en el minuto ${minute}, aunque ${keeper} reaccionó con una mano providencial para evitar el tanto.`,
         ],
         nearMissWide: [
           ({ shooter, minute }) => `No todo fue acierto en los metros finales: la ocasión más clara que se marchó la tuvo ${shooter} a los ${minute} minutos, con un remate que se fue rozando el palo entre lamentos de la grada.`,
           ({ shooter, minute }) => `La ocasión más nítida que se perdió en el camino la protagonizó ${shooter} en el minuto ${minute}, con un disparo que lamió el palo y heló por un instante a toda la grada.`,
+          ({ shooter, minute }) => `El aviso más serio que quedó sin recompensa lo firmó ${shooter} en el minuto ${minute}, con un disparo que se marchó rozando el poste ante el suspiro de las gradas.`,
         ],
         bestSave: [
           ({ keeper, shooter, minute }) => `La parada de la noche llegó a los ${minute} minutos, cuando ${keeper} le negó el gol cantado a ${shooter} y mantuvo con vida a los suyos en el momento de máxima presión.`,
           ({ keeper, shooter, minute }) => `La intervención más recordada llegó en el minuto ${minute}: ${keeper} voló para negarle el gol hecho a ${shooter} y sostuvo a su equipo en plena tormenta.`,
+          ({ keeper, shooter, minute }) => `El momento estelar bajo palos llegó en el minuto ${minute}: ${keeper} se estiró para sacar un remate cantado de ${shooter} y mantener a los suyos a flote en plena presión rival.`,
         ],
       },
       goal: {
         extend: [
           ({ scorer, minute, how, score }) => `La ventaja creció a los ${minute} minutos, cuando ${scorer} ${how} y dejó el ${score} en el luminoso.`,
           ({ scorer, minute, how, score }) => `El colchón se amplió en el minuto ${minute}: ${scorer} ${how} y estampó el ${score} en el marcador.`,
+          ({ scorer, minute, how, score }) => `La renta siguió engordando en el minuto ${minute}: ${scorer} ${how} y subió el ${score} al electrónico.`,
         ],
         lead: [
           ({ team, scorer, minute, how, score }) => `A los ${minute} minutos, ${scorer} ${how} y puso a ${team} por delante en el marcador (${score}).`,
           ({ team, scorer, minute, how, score }) => `En el minuto ${minute}, ${scorer} ${how} y adelantó a ${team} en el luminoso (${score}).`,
+          ({ team, scorer, minute, how, score }) => `Apareció ${scorer} en el minuto ${minute}: ${how} y puso a ${team} al frente del marcador (${score}).`,
         ],
         equalizer: [
           ({ team, scorer, minute, how }) => `${team} reaccionó y encontró el empate a los ${minute} minutos: ${scorer} ${how} y devolvió la igualdad al encuentro.`,
           ({ team, scorer, minute, how }) => `${team} no se rindió y niveló la balanza en el minuto ${minute}: ${scorer} ${how} y restableció las tablas.`,
+          ({ team, scorer, minute, how }) => `${team} igualó la contienda en el minuto ${minute} cuando ${scorer} ${how} y volvió a poner las tablas en el marcador.`,
         ],
         comeback: [
           ({ team, scorer, minute, how }) => `${team} logró descontar a los ${minute} minutos gracias a ${scorer}, que ${how} y devolvió la incertidumbre al encuentro.`,
           ({ team, scorer, minute, how }) => `${team} recortó distancias en el minuto ${minute} con la firma de ${scorer}, que ${how} y reabrió el partido.`,
+          ({ team, scorer, minute, how }) => `${team} acortó la distancia en el minuto ${minute} de la mano de ${scorer}, que ${how} y metió de nuevo a su equipo en el partido.`,
         ],
         sealer: [
           ({ scorer, minute, how, score }) => `Y cuando el partido parecía abierto, volvió a aparecer la jerarquía: a los ${minute} minutos ${scorer} ${how} y sentenció el ${score} definitivo.`,
           ({ scorer, minute, how, score }) => `Cuando aún cabían dudas, la calidad marcó la diferencia: en el minuto ${minute} ${scorer} ${how} y cerró el ${score} definitivo.`,
+          ({ scorer, minute, how, score }) => `Con el desenlace en el aire, emergió la pegada decisiva: ${scorer} ${how} en el minuto ${minute} y firmó el ${score} definitivo.`,
         ],
       },
       how: {
         penalty: [
           'no perdonó desde los once metros',
           'transformó la pena máxima con una sangre fría de veterano',
+          'engañó al portero desde los once metros con un lanzamiento ajustado',
         ],
         freeKick: [
           'dibujó un tiro libre imposible para el portero',
           'clavó una falta directa a la escuadra',
+          'sorprendió al guardameta con una falta directa que se coló por la escuadra',
         ],
         header: [
           'ganó por arriba y conectó un cabezazo inapelable',
           'se elevó por encima de todos para cabecear a la red',
+          'apareció en el segundo palo para rematar de cabeza a la red',
         ],
         headerAssist: [
           ({ assister }) => `remató de cabeza un centro medido de ${assister}`,
           ({ assister }) => `cabeceó a placer un centro perfecto de ${assister}`,
+          ({ assister }) => `conectó de cabeza un envío al área servido por ${assister}`,
         ],
         counter: [
           'culminó una contra vertiginosa con una definición de killer',
           'remató al contragolpe con un temple letal',
+          'sentenció una contra de manual con una definición de killer',
         ],
         shotAssist: [
           ({ assister }) => `recibió un pase filtrado de ${assister} y batió al portero con un disparo cruzado`,
           ({ assister }) => `cazó una asistencia al hueco de ${assister} y fusiló al meta por bajo`,
+          ({ assister }) => `culminó una pared con ${assister} y batió al meta con un disparo raso`,
         ],
         shot: [
           'apareció en el área tras una jugada colectiva y definió con precisión',
@@ -833,22 +861,27 @@ const DICTIONARIES = {
         goals: [
           ({ goals }) => `convertir ${goals}`,
           ({ goals }) => `firmar ${goals}`,
+          ({ goals }) => `anotar ${goals}`,
         ],
         goalsAssists: [
           ({ goals, assists }) => `convertir ${goals} y aportar ${assists}`,
           ({ goals, assists }) => `firmar ${goals} y servir ${assists}`,
+          ({ goals, assists }) => `anotar ${goals} y regalar ${assists}`,
         ],
         assists: [
           ({ assists }) => `repartir ${assists}`,
           ({ assists }) => `distribuir ${assists}`,
+          ({ assists }) => `regalar ${assists}`,
         ],
         saves: [
           ({ saves }) => `sostener a los suyos con ${saves}`,
           ({ saves }) => `salvar a los suyos con ${saves}`,
+          ({ saves }) => `mantener a flote a los suyos con ${saves}`,
         ],
         wall: [
           'imponer su ley en cada duelo y no perder un balón dividido',
           'ganar cada duelo y blindar su área con autoridad',
+          'mandar en cada balón dividido y levantar un muro infranqueable',
         ],
       },
       units: {
@@ -862,14 +895,17 @@ const DICTIONARIES = {
         win: [
           ({ team, figure, featSummary }) => `El pitazo final confirmó una sólida victoria de ${team}, que encontró en ${figure} a su líder futbolístico y emocional. Con ${featSummary}, el hombre del partido se ganó el reconocimiento de aficionados y analistas, y su equipo ya prepara el asalto al siguiente piso de la Torre de Leyendas.`,
           ({ team, figure, featSummary }) => `El pitido final selló un triunfo merecido de ${team}, que halló en ${figure} el faro al que aferrarse en los momentos calientes. Con ${featSummary} a sus espaldas, la figura se metió a la afición en el bolsillo mientras el equipo afila ya las herramientas para asaltar el próximo piso de la Torre de Leyendas.`,
+          ({ team, figure, featSummary }) => `El triunfo de ${team} quedó sellado en el pitido final, con ${figure} convertido en el gran estandarte de una noche para enmarcar. Con ${featSummary}, se ganó el aplauso unánime de la grada, mientras el equipo pone ya la mirada en el siguiente piso de la Torre de Leyendas.`,
         ],
         draw: [
           ({ team, opp, figure, featSummary }) => `El empate dejó un sabor agridulce en ambos vestuarios, pero nadie discutió el nombre propio de la noche: con ${featSummary}, ${figure} sostuvo a los suyos en los minutos calientes de un duelo que ${team} y ${opp} pelearon hasta el último suspiro.`,
           ({ team, opp, figure, featSummary }) => `El reparto de puntos dejó sensaciones encontradas en los dos banquillos, aunque hubo consenso sobre la figura de la jornada: con ${featSummary}, ${figure} mantuvo a flote a su equipo en un pulso que ${team} y ${opp} disputaron hasta el último aliento.`,
+          ({ team, opp, figure, featSummary }) => `El reparto de puntos dejó a ${team} y ${opp} con la sensación de no haber rematado la faena, aunque la figura no admitió discusión: con ${featSummary}, ${figure} sacó la cara por los suyos en un duelo igualado hasta el pitido final.`,
         ],
         loss: [
           ({ team, figure, featSummary, level }) => `El pitazo final certificó la caída de ${team}, que no encontró respuestas ante un rival más certero. Con ${featSummary}, ${figure} se erigió en el verdugo de la noche y dejó la escalada de ${team} detenida en el piso ${level} de la Torre de Leyendas.`,
           ({ team, figure, featSummary, level }) => `El pitido final ratificó la derrota de ${team}, incapaz de descifrar a un rival más eficaz de cara a puerta. Con ${featSummary}, ${figure} ejerció de verdugo y dejó la escalada de ${team} frenada en el piso ${level} de la Torre de Leyendas.`,
+          ({ team, figure, featSummary, level }) => `La derrota de ${team} quedó certificada al sonar el silbato, sin antídoto para un rival más resolutivo. Con ${featSummary}, ${figure} ejerció de gran protagonista y dejó la andadura de ${team} frenada en el piso ${level} de la Torre de Leyendas.`,
         ],
       },
     },
