@@ -5,7 +5,7 @@
 // sembrado con el propio resultado).
 
 import { RNG } from './rng.js';
-import { t } from '../data/i18n.js';
+import { t, tVariant } from '../data/i18n.js';
 import { playerSurname } from '../data/playerAssets.js';
 
 // Solo cuentan como asistencia los goles de jugada o cabeza: en penaltis y
@@ -115,16 +115,16 @@ function busiestKeeper(match, analysis, half = null) {
 
 // Frase del "cómo" del gol según el patrón del evento.
 function howPhrase(goal, rng) {
-  if (goal.pattern === 'penalty_goal') return t('press.how.penalty');
-  if (goal.pattern === 'free_kick_goal') return t('press.how.freeKick');
+  if (goal.pattern === 'penalty_goal') return tVariant('press.how.penalty', {}, rng);
+  if (goal.pattern === 'free_kick_goal') return tVariant('press.how.freeKick', {}, rng);
   if (goal.pattern === 'header_goal') {
     return goal.assister
-      ? t('press.how.headerAssist', { assister: goal.assister })
-      : t('press.how.header');
+      ? tVariant('press.how.headerAssist', { assister: goal.assister }, rng)
+      : tVariant('press.how.header', {}, rng);
   }
-  if (goal.counter) return t('press.how.counter');
-  if (goal.assister && rng.bernoulli(0.55)) return t('press.how.shotAssist', { assister: goal.assister });
-  return rng.bernoulli(0.5) ? t('press.how.shotA') : t('press.how.shotB');
+  if (goal.counter) return tVariant('press.how.counter', {}, rng);
+  if (goal.assister && rng.bernoulli(0.55)) return tVariant('press.how.shotAssist', { assister: goal.assister }, rng);
+  return tVariant('press.how.shot', {}, rng);
 }
 
 // Clase narrativa del gol según cómo movió el marcador.
@@ -151,17 +151,17 @@ function featSummary(figure) {
 }
 
 // Logro de la figura en versión verbal ("convertir dos goles…"), para el lead.
-function featPhrase(figure) {
+function featPhrase(figure, rng) {
   if (figure.goals && figure.assists) {
-    return t('press.feat.goalsAssists', {
+    return tVariant('press.feat.goalsAssists', {
       goals: t('press.units.goals', { n: figure.goals }),
       assists: t('press.units.assists', { n: figure.assists }),
-    });
+    }, rng);
   }
-  if (figure.goals) return t('press.feat.goals', { goals: t('press.units.goals', { n: figure.goals }) });
-  if (figure.assists) return t('press.feat.assists', { assists: t('press.units.assists', { n: figure.assists }) });
-  if (figure.saves) return t('press.feat.saves', { saves: t('press.units.saves', { n: figure.saves }) });
-  return t('press.feat.wall');
+  if (figure.goals) return tVariant('press.feat.goals', { goals: t('press.units.goals', { n: figure.goals }) }, rng);
+  if (figure.assists) return tVariant('press.feat.assists', { assists: t('press.units.assists', { n: figure.assists }) }, rng);
+  if (figure.saves) return tVariant('press.feat.saves', { saves: t('press.units.saves', { n: figure.saves }) }, rng);
+  return tVariant('press.feat.wall', {}, rng);
 }
 
 function seedFrom(match, level) {
@@ -187,13 +187,13 @@ export function buildCronica(match, ctx) {
 
   // — Lead: resultado + presentación de la figura (en derrota, el marcador se
   //   lee con el ganador por delante, como lo escribiría un periódico).
-  const lead = t(`press.lead.${result}`, {
+  const lead = tVariant(`press.lead.${result}`, {
     team: ctx.teamName,
     opp: ctx.oppName,
     score: result === 'loss' ? `${golesB}-${golesA}` : `${golesA}-${golesB}`,
     figure: figure.name,
-    feat: featPhrase(figure),
-  });
+    feat: featPhrase(figure, rng),
+  }, rng);
 
   // — Cuerpo: frases narradas colocadas en su mitad según el minuto. La
   //   narración principal (goles, rojas, penaltis) y el relleno de ocasiones
@@ -208,14 +208,14 @@ export function buildCronica(match, ctx) {
   const goals = analysis.goals;
   if (goals.length) {
     const opener = goals[0];
-    push(opener.minute, t('press.body.opener', {
+    push(opener.minute, tVariant('press.body.opener', {
       att: teamOf(opener.side),
       def: teamOf(otherSide(opener.side)),
       minute: opener.minute,
       scorer: opener.scorer,
       how: howPhrase(opener, rng),
       score: opener.score,
-    }));
+    }, rng));
 
     // Del resto, se narran hasta dos goles: los que cambian la historia
     // (empates, descuentos, remontadas) y el último si cerró el partido.
@@ -228,51 +228,51 @@ export function buildCronica(match, ctx) {
       const seals = g === lastGoal && winnerSide && g.side === winnerSide &&
         cls !== 'equalizer' && (g.minute >= 70 || goals.length >= 3);
       if (seals) cls = 'sealer';
-      push(g.minute, t(`press.goal.${cls}`, {
+      push(g.minute, tVariant(`press.goal.${cls}`, {
         team: teamOf(g.side),
         scorer: g.scorer,
         minute: g.minute,
         how: howPhrase(g, rng),
         score: g.score,
-      }));
+      }, rng));
     }
   }
 
   // Todas las expulsiones se narran (hasta dos para no inflar el artículo; tres
   // o más rojas en un partido es rarísimo).
   for (const red of analysis.reds.slice(0, 2)) {
-    push(red.minute, t('press.body.red', {
+    push(red.minute, tVariant('press.body.red', {
       player: red.player,
       team: teamOf(red.side),
       minute: red.minute,
-    }));
+    }, rng));
   }
   // Reorganización forzada por una expulsión de DEF/ARQ: el banquillo cubre el
   // hueco atrás y un atacante deja su puesto. Se narra el primer cambio.
   for (const sub of (match.sustitucionesA || []).slice(0, 1)) {
     const key = sub.outName ? 'subSwap' : 'subIn';
-    push(sub.minute, t(`press.body.${key}`, {
+    push(sub.minute, tVariant(`press.body.${key}`, {
       team: ctx.teamName,
       inName: sub.inName,
       outName: sub.outName,
       cause: sub.cause,
       minute: sub.minute,
-    }));
+    }, rng));
   }
   // Cuatro rojas: el partido se da por perdido (incomparecencia).
   if (match.forfeit) {
     const lastRed = analysis.reds[analysis.reds.length - 1];
-    push(lastRed ? lastRed.minute : 90, t('press.body.forfeit', {
+    push(lastRed ? lastRed.minute : 90, tVariant('press.body.forfeit', {
       team: teamOf(match.forfeit),
-    }));
+    }, rng));
   }
   if (analysis.penaltyMisses.length) {
     const miss = analysis.penaltyMisses[0];
-    push(miss.minute, t('press.body.penaltyMiss', {
+    push(miss.minute, tVariant('press.body.penaltyMiss', {
       shooter: miss.shooter,
       keeper: miss.keeper,
       minute: miss.minute,
-    }));
+    }, rng));
   }
 
   // Si la crónica va escasa, se rellena con la ocasión más clara fallada y,
@@ -284,20 +284,20 @@ export function buildCronica(match, ctx) {
   if (coreCount < 4 && byXg.length) {
     usedChance = byXg[0];
     const key = usedChance.type === 'parada' ? 'nearMissSave' : 'nearMissWide';
-    pushExtra(usedChance.minute, t(`press.body.${key}`, {
+    pushExtra(usedChance.minute, tVariant(`press.body.${key}`, {
       shooter: usedChance.shooter,
       keeper: usedChance.keeper,
       minute: usedChance.minute,
-    }));
+    }, rng));
   }
   if (coreCount < 3) {
     const save = byXg.find((c) => c.type === 'parada' && c !== usedChance && c.xg >= 0.3);
     if (save) {
-      pushExtra(save.minute, t('press.body.bestSave', {
+      pushExtra(save.minute, tVariant('press.body.bestSave', {
         keeper: save.keeper,
         shooter: save.shooter,
         minute: save.minute,
-      }));
+      }, rng));
     }
   }
 
@@ -311,33 +311,31 @@ export function buildCronica(match, ctx) {
     const extra = extras[key].length ? joinHalf(extras[key]) : '';
     return extra ? `${core} ${extra}` : core;
   };
-  const firstHalf = halfText('first', t('press.body.scoreless', {
+  const firstHalf = halfText('first', tVariant('press.body.scoreless', {
     team: ctx.teamName,
     opp: ctx.oppName,
     keeper: busiestKeeper(match, analysis, 1),
-  }));
-  const secondHalf = halfText('second', t('press.body.quiet', {
+  }, rng));
+  const secondHalf = halfText('second', tVariant('press.body.quiet', {
     team: ctx.teamName,
     opp: ctx.oppName,
     keeper: busiestKeeper(match, analysis),
-  }));
+  }, rng));
 
-  const closing = t(`press.closing.${result}`, {
+  const closing = tVariant(`press.closing.${result}`, {
     team: ctx.teamName,
     opp: ctx.oppName,
     figure: figure.name,
     featSummary: featSummary(figure),
     level: ctx.level,
-  });
+  }, rng);
 
-  const headKey = result === 'win'
-    ? (golesA - golesB >= 3 ? 'winBig' : (rng.bernoulli(0.5) ? 'win' : 'win2'))
-    : result;
-  const headline = t(`press.headline.${headKey}`, {
+  const headKey = result === 'win' ? (golesA - golesB >= 3 ? 'winBig' : 'win') : result;
+  const headline = tVariant(`press.headline.${headKey}`, {
     team: ctx.teamName,
     opp: ctx.oppName,
     figure: playerSurname(figure.name) || figure.name,
-  });
+  }, rng);
 
   return {
     headline,

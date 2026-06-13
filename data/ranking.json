@@ -540,6 +540,94 @@
       "nation": "River Plate",
       "floor": 2,
       "createdAt": "2026-06-09T23:25:47.740Z"
+    },
+    {
+      "id": "2ab57246-50c0-4f17-bf98-edcbc42b5543",
+      "teamName": "Leyendas",
+      "nation": "River Plate",
+      "floor": 2,
+      "createdAt": "2026-06-13T18:14:24.967Z",
+      "runId": "f1027b10-0f99-473d-af62-74b15a883026",
+      "formation": "4-3-3",
+      "lineup": [
+        {
+          "name": "Tony Sylva",
+          "position": "GK",
+          "line": "GK",
+          "ovr": 68,
+          "rarity": "common"
+        },
+        {
+          "name": "Ruud Krol",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 94,
+          "rarity": "legend"
+        },
+        {
+          "name": "Luke Shaw",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 85,
+          "rarity": "epic"
+        },
+        {
+          "name": "Trifon Ivanov",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 77,
+          "rarity": "rare"
+        },
+        {
+          "name": "Victor Lindelöf",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 69,
+          "rarity": "common"
+        },
+        {
+          "name": "Viktor Claesson",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 67,
+          "rarity": "common"
+        },
+        {
+          "name": "Jonathan Santana",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 67,
+          "rarity": "common"
+        },
+        {
+          "name": "Roman Zobnin",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 66,
+          "rarity": "common"
+        },
+        {
+          "name": "Artem Dzyuba",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 68,
+          "rarity": "common"
+        },
+        {
+          "name": "Davor Šuker",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 91,
+          "rarity": "legend"
+        },
+        {
+          "name": "Brian McBride",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 68,
+          "rarity": "common"
+        }
+      ]
     }
   ]
 }
