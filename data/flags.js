@@ -26,13 +26,16 @@ const FLAG_FILE_ALIAS = {
   'san-lorenzo': 'sanlorenzo.png',
   // Alemania Occidental es la misma selección que Alemania: misma bandera.
   'alemania-occidental': 'alemania.png',
+  // El archivo lleva sufijo de país para no chocar con un genérico "Nacional".
+  'nacional': 'nacional-uruguay.png',
 };
 
 // Naciones/equipos con imagen real descargada. La mayoría son PNG (flagcdn);
 // las históricas sin código ISO son SVG reales (Wikimedia Commons).
 const FLAG_PNG = new Set([
   'riverplate', 'boca', 'independiente', 'racing', 'sanlorenzo', 'velez',
-  'huracan', 'estudiantes', 'gimnasia', 'central', 'newells', 'lanus',
+  'huracan', 'estudiantes', 'gimnasia', 'central', 'newells', 'lanus', 'platense',
+  'penarol', 'defensor-sporting',
   'real-madrid', 'barcelona', 'valencia', 'euskadi', 'celta',
   'andalucia', 'asturias', 'aragon', 'betis', 'real-sociedad',
   'alemania', 'argentina', 'brasil', 'bulgaria', 'belgica',
@@ -62,6 +65,7 @@ export const FLAG_NATIONS = [
   'Países Bajos', 'Portugal', 'Bélgica', 'Croacia', 'Dinamarca', 'Suecia', 'Irlanda',
   'Rusia', 'Ucrania', 'Rumanía', 'Bulgaria', 'Turquía', 'Corea del Sur', 'Marruecos',
   'Senegal', 'Camerún', 'Ghana', 'Liberia', 'URSS', 'Yugoslavia', 'Checoslovaquia',
+  'Nacional', 'Peñarol', 'Defensor Sporting', 'Platense',
 ];
 
 // Color de acento del equipo según su bandera (confeti, realces). Oro por defecto.
@@ -81,6 +85,7 @@ const NATION_ACCENT = {
   turquia: '#e30a17', 'corea-del-sur': '#cd2e3a', marruecos: '#c1272d', senegal: '#00853f',
   camerun: '#007a5e', ghana: '#fcd116', liberia: '#bf0a30', urss: '#cc0000',
   yugoslavia: '#d22630', checoslovaquia: '#11457e', 'alemania-occidental': '#ffce00',
+  nacional: '#0047ab', penarol: '#f6c500', 'defensor-sporting': '#6f2b8f', platense: '#7a4a2b',
 };
 
 export function flagAccentForNation(name) {
