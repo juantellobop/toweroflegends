@@ -6,6 +6,8 @@
 import { CONFIG } from '../data/config.js';
 import { buildBattleTeam } from './teamRatings.js';
 import { ratio, simulateHighlight } from './highlights.js';
+import { createCardTracker, resolveFoul } from './cards.js';
+import { playerOVR } from './ovr.js';
 
 export { ratio };
 
@@ -13,14 +15,87 @@ export { ratio };
 // remontada) no recortan a los equipos que superan 99.
 const roundRating = (v) => Math.max(1, Math.round(v * 10) / 10);
 
-// Tarjeta roja: el equipo que comete la falta roja juega en inferioridad el resto
-// del partido (las jugadas se procesan en orden cronológico, así que mutar sus
-// ratings afecta solo a las jugadas posteriores). Resta a defensa y medio.
+const LINES = ['GK', 'DEF', 'MID', 'FWD'];
+
+function cloneLineup(s11) {
+  const out = {};
+  for (const line of LINES) out[line] = (s11[line] || []).slice();
+  return out;
+}
+
+// Reorganiza la alineación del equipo del jugador tras una expulsión (el rival
+// sintético no tiene once y no pasa por aquí):
+//  - se quita al expulsado de la táctica (ese lugar queda vacío);
+//  - si era DEF o ARQ, entra desde el banquillo el mejor DEF/ARQ disponible para
+//    ocupar su posición y, para mantener diez jugadores, sale del campo el MID/DEL
+//    más flojo;
+//  - si era MID o DEL, solo se quita (sin cambio desde el banco).
+export function expelFromLineup(team, offender) {
+  if (!team.starting11 || !offender || !offender.uid) return;
+  const s11 = cloneLineup(team.starting11);
+  const expelledLine = LINES.find((line) => s11[line].some((p) => p.uid === offender.uid));
+  if (expelledLine) s11[expelledLine] = s11[expelledLine].filter((p) => p.uid !== offender.uid);
+
+  let bench = (team.bench || []).slice();
+  const need = offender.position; // posición natural del expulsado
+  if ((need === 'GK' || need === 'DEF') && expelledLine) {
+    const repl = bench
+      .filter((p) => p.position === need)
+      .sort((a, b) => playerOVR(b) - playerOVR(a))[0];
+    if (repl) {
+      bench = bench.filter((p) => p.uid !== repl.uid);
+      s11[expelledLine] = [...s11[expelledLine], repl];
+      // Sale el MID/DEL más flojo del campo para no quedar con once jugadores.
+      const field = [
+        ...s11.MID.map((p) => ['MID', p]),
+        ...s11.FWD.map((p) => ['FWD', p]),
+      ].sort((a, b) => playerOVR(a[1]) - playerOVR(b[1]));
+      if (field.length) {
+        const [weakLine, weak] = field[0];
+        s11[weakLine] = s11[weakLine].filter((p) => p.uid !== weak.uid);
+      }
+    }
+  }
+  team.starting11 = s11;
+  team.bench = bench;
+}
+
+const inferiorityFactor = (reds) => Math.pow(1 - CONFIG.RED_CARD_PENALTY, reds);
+
+// Tarjeta roja: el equipo que comete la falta juega en inferioridad el resto del
+// partido (las jugadas se procesan en orden cronológico, así que mutar sus
+// ratings/pools afecta solo a las jugadas posteriores). Para el equipo del
+// jugador se rehacen ratings y pools desde la alineación ya reorganizada
+// (refleja la sustitución y el hueco); para ambos se aplica además una
+// penalización por inferioridad numérica a defensa y medio.
 function applyRedCard(team) {
+  team.redCount = (team.redCount || 0) + 1;
+  if (team.starting11) {
+    const rebuilt = buildBattleTeam({
+      name: team.name,
+      color: team.color,
+      formation: team.formation,
+      starting11: team.starting11,
+      items: team.items,
+      bench: team.bench,
+    });
+    Object.assign(team, {
+      shooters: rebuilt.shooters,
+      assisters: rebuilt.assisters,
+      keepers: rebuilt.keepers,
+      defenders: rebuilt.defenders,
+      midfielders: rebuilt.midfielders,
+      attackers: rebuilt.attackers,
+      gkName: rebuilt.gkName,
+    });
+    team.naturalRatings = rebuilt.ratings;
+  }
+  const natural = team.naturalRatings;
+  const f = inferiorityFactor(team.redCount);
   team.ratings = {
-    ...team.ratings,
-    defense: roundRating(team.ratings.defense * (1 - CONFIG.RED_CARD_PENALTY)),
-    midfield: roundRating(team.ratings.midfield * (1 - CONFIG.RED_CARD_PENALTY)),
+    ...natural,
+    defense: roundRating(natural.defense * f),
+    midfield: roundRating(natural.midfield * f),
   };
 }
 
@@ -75,11 +150,43 @@ function makeHighlight({ id, minute, side, A, B, score, rng, phaseHint }) {
   return simulateHighlight({ id, minute, side, att, def, score, rng, phaseHint });
 }
 
-// Contabiliza un evento: actualiza marcador, aplica tarjeta roja si la hubo
-// (al equipo que defiende, que es quien comete la falta) y lo guarda.
-function recordEvent(event, A, B, score, events) {
+// Contabiliza un evento: actualiza marcador, resuelve la tarjeta de la falta (al
+// equipo que defiende, que es quien comete la falta) y lo guarda. En una roja
+// reorganiza/penaliza al equipo infractor y registra al expulsado del jugador.
+function recordEvent(event, A, B, score, events, tracker, rng) {
   applyScore(event, score);
-  if (event.pattern === 'red_foul') applyRedCard(event.side === 'A' ? B : A);
+  if (event.type === 'falta') {
+    const foulSide = event.side === 'A' ? 'B' : 'A'; // defiende = comete la falta
+    const { card, secondYellow } = resolveFoul({
+      side: foulSide,
+      offender: event.offender,
+      phase: event.phase,
+      rng,
+      tracker,
+    });
+    event.card = card;
+    event.secondYellow = secondYellow;
+    if (card === 'red') {
+      event.pattern = 'red_foul';
+      const team = foulSide === 'A' ? A : B;
+      expelFromLineup(team, event.offender);
+      applyRedCard(team);
+      // Solo el equipo del jugador (lado A) arrastra la sanción al próximo
+      // partido; se registra al expulsado con su identidad real.
+      if (foulSide === 'A' && event.offender && event.offender.uid) {
+        (A.expulsados || (A.expulsados = [])).push({
+          uid: event.offender.uid,
+          name: event.offender.name,
+          position: event.offender.position,
+          minute: event.minute,
+          secondYellow,
+        });
+      }
+    } else {
+      // Amarilla o falta sin tarjeta comparten la escena de falta.
+      event.pattern = 'yellow_foul';
+    }
+  }
   events.push(event);
 }
 
@@ -94,6 +201,11 @@ export function simularPartido(teamA, teamB, rng) {
   const startRatingsA = A.ratings;
   const startRatingsB = B.ratings;
 
+  // Ratings naturales de arranque: base para la penalización por inferioridad
+  // (el rival no rehace su once, así que parte de aquí en cada roja).
+  A.naturalRatings = A.ratings;
+  B.naturalRatings = B.ratings;
+
   const possessionA = ratio(A.ratings.midfield, B.ratings.midfield);
   const seqA = Math.round(CONFIG.BASE_SEQUENCES * possessionA);
   const seqB = CONFIG.BASE_SEQUENCES - seqA;
@@ -101,6 +213,7 @@ export function simularPartido(teamA, teamB, rng) {
   const queue = interleaveOverTime(seqA, seqB, rng);
   const score = { A: 0, B: 0 };
   const events = [];
+  const cardTracker = createCardTracker();
   let eventSeq = 0;
 
   // Robo por presión (incluye la sinergia táctica del equipo que presiona).
@@ -120,26 +233,35 @@ export function simularPartido(teamA, teamB, rng) {
       rng,
       phaseHint,
     });
-    recordEvent(event, A, B, score, events);
+    recordEvent(event, A, B, score, events, cardTracker, rng);
 
     if (event.type === 'perdida') {
-      maybeCounter(minute, side === 'A' ? 'B' : 'A', A, B, score, events, rng, () => `hl_${++eventSeq}`);
+      maybeCounter(minute, side === 'A' ? 'B' : 'A', A, B, score, events, rng, () => `hl_${++eventSeq}`, cardTracker);
     }
   }
 
   // Desempate por número de secuencia: comparar ids como texto ordenaría
   // "hl_10" antes que "hl_9" y desordenaría los marcadores acumulados.
   const seqOf = (id) => parseInt(String(id).replace(/\D+/g, ''), 10) || 0;
+  const redsA = A.redCount || 0;
+  const redsB = B.redCount || 0;
+  // Cuatro rojas en un mismo equipo: pierde el partido por incomparecencia,
+  // pase lo que pase con el marcador (regla del juego). Casi imposible (~0,0009%).
+  const forfeit = redsA >= 4 ? 'A' : redsB >= 4 ? 'B' : null;
   return {
     golesA: score.A,
     golesB: score.B,
     eventos: events.sort((a, b) => a.minute - b.minute || seqOf(a.id) - seqOf(b.id)),
     ratingsA: startRatingsA,
     ratingsB: startRatingsB,
+    redsA,
+    redsB,
+    forfeit,
+    expulsadosA: A.expulsados || [],
   };
 }
 
-function maybeCounter(minute, side, A, B, score, events, rng, nextId) {
+function maybeCounter(minute, side, A, B, score, events, rng, nextId, tracker) {
   if (!rng.bernoulli(CONFIG.COUNTER_CHANCE)) return;
   const event = makeHighlight({
     id: nextId(),
@@ -151,5 +273,5 @@ function maybeCounter(minute, side, A, B, score, events, rng, nextId) {
     rng,
     phaseHint: 'counter',
   });
-  recordEvent(event, A, B, score, events);
+  recordEvent(event, A, B, score, events, tracker, rng);
 }

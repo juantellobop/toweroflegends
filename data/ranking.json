@@ -1,6 +1,93 @@
 {
   "entries": [
     {
+      "id": "5209a527-56ca-4c51-b82d-c8499d98aa1d",
+      "teamName": "Leyendas",
+      "nation": "River Plate",
+      "floor": 6,
+      "createdAt": "2026-06-13T11:11:05.232Z",
+      "formation": "4-3-3",
+      "lineup": [
+        {
+          "name": "Gianluca Pagliuca",
+          "position": "GK",
+          "line": "GK",
+          "ovr": 91,
+          "rarity": "legend"
+        },
+        {
+          "name": "Iván Helguera",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 87,
+          "rarity": "epic"
+        },
+        {
+          "name": "Bobby Moore",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 82,
+          "rarity": "epic"
+        },
+        {
+          "name": "Mikael Lustig",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 68,
+          "rarity": "common"
+        },
+        {
+          "name": "Frankie Hejduk",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 67,
+          "rarity": "common"
+        },
+        {
+          "name": "Paulinho",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 91,
+          "rarity": "legend"
+        },
+        {
+          "name": "Sulley Muntari",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 69,
+          "rarity": "common"
+        },
+        {
+          "name": "Sebastian Larsson",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 68,
+          "rarity": "common"
+        },
+        {
+          "name": "Ronaldinho",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 96,
+          "rarity": "legend"
+        },
+        {
+          "name": "Raphinha",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 93,
+          "rarity": "legend"
+        },
+        {
+          "name": "Gonçalo Ramos",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 90,
+          "rarity": "epic"
+        }
+      ]
+    },
+    {
       "id": "f8ff94b2-7f55-4146-9276-7df3385f7700",
       "teamName": "River Plate",
       "nation": "River Plate",

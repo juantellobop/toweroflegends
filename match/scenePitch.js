@@ -44,6 +44,13 @@ function wait(ms) {
 
 // Etiqueta y tono de color del evento, para el distintivo (pill) de la escena.
 function badgeFor(ev) {
+  // La tarjeta manda sobre la fase: una falta en tiro libre que acaba en roja se
+  // anuncia como ROJA, no como TIRO LIBRE.
+  if (ev.type === 'falta') {
+    if (ev.pattern === 'red_foul') return { label: t('scene.badge.roja'), tone: 'red' };
+    if (ev.card === 'yellow') return { label: t('scene.badge.amarilla'), tone: 'yellow' };
+    return { label: t('scene.badge.falta'), tone: 'yellow' };
+  }
   if (ev.phase === 'penalty') return { label: t('scene.badge.penalty'), tone: ev.type === 'gol' ? 'goal' : 'shot' };
   if (ev.phase === 'free_kick') return { label: t('scene.badge.free_kick'), tone: ev.type === 'gol' ? 'goal' : 'shot' };
   if (ev.phase === 'corner') return { label: t('scene.badge.corner'), tone: ev.type === 'gol' ? 'goal' : 'attack' };
@@ -52,9 +59,6 @@ function badgeFor(ev) {
     case 'parada': return { label: t('scene.badge.parada'), tone: 'save' };
     case 'tiro_fuera': return { label: t('scene.badge.tiro_fuera'), tone: 'shot' };
     case 'bloqueo': return { label: t('scene.badge.bloqueo'), tone: 'defense' };
-    case 'falta': return ev.pattern === 'red_foul'
-      ? { label: t('scene.badge.roja'), tone: 'red' }
-      : { label: t('scene.badge.falta'), tone: 'yellow' };
     case 'fuera_juego': return { label: t('scene.badge.fuera_juego'), tone: 'defense' };
     case 'despeje': return { label: t('scene.badge.despeje'), tone: 'defense' };
     case 'perdida': return { label: t('scene.badge.perdida'), tone: 'defense' };

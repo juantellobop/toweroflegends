@@ -15,6 +15,19 @@ function localizeHistoryOpponent(value) {
   return match ? `${localizeNation(match[1])} ${match[2]}` : localizeNation(text);
 }
 
+// Fila de expulsados del resumen: nombre + minuto con un icono de tarjeta roja.
+function redsRowHTML(reds) {
+  if (!reds || !reds.length) return '';
+  const items = reds
+    .map((r) => `<span class="result-red"><span class="result-red-card" aria-hidden="true"></span>${esc(r.name)} <small>${r.minute}'</small></span>`)
+    .join('');
+  return `
+    <div class="result-scorers result-reds">
+      <span>${t('result.reds')}</span>
+      <b>${items}</b>
+    </div>`;
+}
+
 function packVisual(kind, label, count, muted = false) {
   const art = kind === 'item' ? UI_ASSETS.packs.item : UI_ASSETS.packs.player;
   return `
@@ -28,7 +41,7 @@ function packVisual(kind, label, count, muted = false) {
 // Pantalla tras un partido ganado/empatado (o derrota con vidas restantes).
 export function renderResult(root, state, reward, handlers) {
   const m = state.lastMatch;
-  const { scorers } = summarize(m.eventos);
+  const { scorers, reds } = summarize(m.eventos);
   const survived = reward.survivedLoss;
   const resultAsset = reward.result === 'loss' ? UI_ASSETS.results.loss : UI_ASSETS.results.win;
   const resultTitle = reward.result === 'loss'
@@ -80,6 +93,7 @@ export function renderResult(root, state, reward, handlers) {
             <span>${t('result.scorers')}</span>
             <b>${scorers.length ? esc(scorers.join(', ')) : '—'}</b>
           </div>
+          ${redsRowHTML(reds)}
         </div>
       </div>
       <div class="result-progress-row">
@@ -117,7 +131,7 @@ export function renderGameOver(root, state, best, handlers) {
   const m = state.lastMatch;
   let lastMatchHTML = '';
   if (m) {
-    const { scorers } = summarize(m.eventos);
+    const { scorers, reds } = summarize(m.eventos);
     const oppName = state.opponent ? localizeOpponentName(state.opponent) : '';
     lastMatchHTML = `
       <div class="gameover-match arcade-panel">
@@ -131,6 +145,7 @@ export function renderGameOver(root, state, best, handlers) {
           <span>${t('result.scorers')}</span>
           <b>${scorers.length ? esc(scorers.join(', ')) : '—'}</b>
         </div>
+        ${redsRowHTML(reds)}
       </div>
       ${pressArticleHTML(state)}`;
   }

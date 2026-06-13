@@ -201,14 +201,14 @@ export const PLAYERS = [
     "era": "1994",
     "position": "DEF",
     "rarity": "legend",
-    "ovr": 92,
+    "ovr": 95,
     "stats": {
-      "pace": 82,
+      "pace": 99,
       "shooting": 60,
       "passing": 80,
-      "dribbling": 78,
+      "dribbling": 81,
       "defending": 99,
-      "physical": 98
+      "physical": 99
     },
     "gk": null,
     "trait": "Muro",
@@ -460,15 +460,15 @@ export const PLAYERS = [
     "nation": "Países Bajos",
     "era": "1974",
     "position": "DEF",
-    "rarity": "common",
-    "ovr": 79,
+    "rarity": "legend",
+    "ovr": 94,
     "stats": {
-      "pace": 78,
+      "pace": 99,
       "shooting": 56,
       "passing": 78,
       "dribbling": 72,
-      "defending": 82,
-      "physical": 78
+      "defending": 99,
+      "physical": 98
     },
     "gk": null,
     "trait": null,
@@ -681,12 +681,12 @@ export const PLAYERS = [
     "era": "1982",
     "position": "MID",
     "rarity": "legend",
-    "ovr": 90,
+    "ovr": 92,
     "stats": {
-      "pace": 97,
+      "pace": 99,
       "shooting": 96,
-      "passing": 94,
-      "dribbling": 95,
+      "passing": 99,
+      "dribbling": 99,
       "defending": 66,
       "physical": 90
     },
@@ -936,19 +936,20 @@ export const PLAYERS = [
   },
   {
     "id": "fwd_ronaldo_2002",
-    "name": "Ronaldo Nazário",
+    "name": "Ronaldo",
+    "dupGroup": "ronaldo",
     "nation": "Brasil",
     "era": "2002",
     "position": "FWD",
     "rarity": "legend",
-    "ovr": 93,
+    "ovr": 95,
     "stats": {
       "pace": 90,
       "shooting": 99,
       "passing": 78,
       "dribbling": 99,
       "defending": 50,
-      "physical": 85
+      "physical": 99
     },
     "gk": null,
     "trait": "Francotirador",
@@ -1240,7 +1241,7 @@ export const PLAYERS = [
     "nation": "Bulgaria",
     "era": "1994",
     "position": "FWD",
-    "rarity": "epic",
+    "rarity": "legend",
     "ovr": 88,
     "stats": {
       "pace": 90,
@@ -7839,6 +7840,7 @@ export const PLAYERS = [
   {
     "id": "gen_fwd_ronaldo",
     "name": "Ronaldo",
+    "dupGroup": "ronaldo",
     "nation": "Brasil",
     "era": "1998",
     "position": "FWD",
@@ -7848,8 +7850,8 @@ export const PLAYERS = [
       "pace": 99,
       "shooting": 99,
       "passing": 93,
-      "dribbling": 97,
-      "defending": 81,
+      "dribbling": 99,
+      "defending": 67,
       "physical": 95
     },
     "gk": null,
@@ -12165,15 +12167,15 @@ export const PLAYERS = [
     "nation": "Rumanía",
     "era": "1994",
     "position": "MID",
-    "rarity": "rare",
-    "ovr": 77,
+    "rarity": "epic",
+    "ovr": 80,
     "stats": {
-      "pace": 75,
+      "pace": 92,
       "shooting": 75,
       "passing": 81,
       "dribbling": 77,
       "defending": 74,
-      "physical": 75
+      "physical": 86
     },
     "gk": null,
     "trait": null,
@@ -14076,14 +14078,14 @@ export const PLAYERS = [
     "era": "1986",
     "position": "FWD",
     "rarity": "legend",
-    "ovr": 91,
+    "ovr": 86,
     "stats": {
       "pace": 88,
-      "shooting": 95,
-      "passing": 90,
-      "dribbling": 86,
+      "shooting": 88,
+      "passing": 81,
+      "dribbling": 84,
       "defending": 78,
-      "physical": 99
+      "physical": 90
     },
     "gk": null,
     "trait": "Penalero",
@@ -14096,12 +14098,12 @@ export const PLAYERS = [
     "era": "1986",
     "position": "GK",
     "rarity": "legend",
-    "ovr": 91,
+    "ovr": 88,
     "stats": null,
     "gk": {
-      "reflexes": 92,
+      "reflexes": 88,
       "handling": 89,
-      "positioning": 92
+      "positioning": 88
     },
     "trait": null,
     "tacticalType": null
@@ -14510,10 +14512,10 @@ export const PLAYERS = [
     "era": "1986",
     "position": "GK",
     "rarity": "epic",
-    "ovr": 89,
+    "ovr": 88,
     "stats": null,
     "gk": {
-      "reflexes": 90,
+      "reflexes": 87,
       "handling": 87,
       "positioning": 90
     },
@@ -14587,14 +14589,14 @@ export const PLAYERS = [
     "era": "1986",
     "position": "MID",
     "rarity": "legend",
-    "ovr": 95,
+    "ovr": 93,
     "stats": {
-      "pace": 93,
+      "pace": 99,
       "shooting": 93,
-      "passing": 99,
-      "dribbling": 95,
-      "defending": 92,
-      "physical": 93
+      "passing": 87,
+      "dribbling": 89,
+      "defending": 99,
+      "physical": 99
     },
     "gk": null,
     "trait": "Capitán",

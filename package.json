@@ -1,15 +1,16 @@
 {
   "name": "torre-de-leyendas",
-  "version": "0.2.11",
+  "version": "0.3.0",
   "description": "Roguelike de fútbol: escala una torre infinita armando tu selección con sobres de cartas.",
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "test": "npm run security && npm run cache && npm run sanity && npm run lineup && npm run balance && npm run tactics && npm run simulation && npm run cronica && npm run ui",
+    "test": "npm run security && npm run cache && npm run sanity && npm run lineup && npm run cards && npm run balance && npm run tactics && npm run simulation && npm run cronica && npm run ui",
     "security": "node tests/security.mjs",
     "cache": "node tests/cache.mjs",
     "sanity": "node tests/sanity.mjs",
     "lineup": "node tests/lineup.mjs",
+    "cards": "node tests/cards.mjs",
     "balance": "node tests/balance.mjs",
     "tactics": "node tests/tactics.mjs",
     "balance:report": "node tests/balance-report.mjs",

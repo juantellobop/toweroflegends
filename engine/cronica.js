@@ -238,12 +238,20 @@ export function buildCronica(match, ctx) {
     }
   }
 
-  if (analysis.reds.length) {
-    const red = analysis.reds[0];
+  // Todas las expulsiones se narran (hasta dos para no inflar el artículo; tres
+  // o más rojas en un partido es rarísimo).
+  for (const red of analysis.reds.slice(0, 2)) {
     push(red.minute, t('press.body.red', {
       player: red.player,
       team: teamOf(red.side),
       minute: red.minute,
+    }));
+  }
+  // Cuatro rojas: el partido se da por perdido (incomparecencia).
+  if (match.forfeit) {
+    const lastRed = analysis.reds[analysis.reds.length - 1];
+    push(lastRed ? lastRed.minute : 90, t('press.body.forfeit', {
+      team: teamOf(match.forfeit),
     }));
   }
   if (analysis.penaltyMisses.length) {

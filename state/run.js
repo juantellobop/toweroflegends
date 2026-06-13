@@ -104,21 +104,34 @@ function drawByBand(pool, count, weights, rng) {
   return chosen;
 }
 
+// Algunos jugadores son la misma persona en distintas épocas (Ronaldo 1998 y
+// 2002): comparten `dupGroup`. Tener una carta del grupo bloquea a las demás —
+// no aparecen como seleccionables ni pueden añadirse. Para el resto de cartas la
+// clave de grupo es su propio id, así que el bloqueo equivale a "ya la tienes".
+function dupKey(player) {
+  return player.dupGroup || player.id;
+}
+
+function ownedKeySet(squad) {
+  return new Set(squad.map(dupKey));
+}
+
 // Reparte primero cartas no poseídas y solo rellena con repetidas
 // deshabilitadas cuando el pool nuevo no alcanza el tamaño del sobre.
 export function drawPlayerPack(catalog, squad, size, weights, rng) {
-  const ownedIds = new Set(squad.map((p) => p.id));
+  const ownedKeys = ownedKeySet(squad);
+  const owns = (card) => ownedKeys.has(dupKey(card));
   if (CONFIG.ALLOW_DUPLICATE_PLAYERS || !CONFIG.PACK_GUARANTEE_SELECTABLE) {
     return drawByBand(catalog, size, weights, rng)
-      .map((card) => ({ ...card, selectable: CONFIG.ALLOW_DUPLICATE_PLAYERS || !ownedIds.has(card.id) }));
+      .map((card) => ({ ...card, selectable: CONFIG.ALLOW_DUPLICATE_PLAYERS || !owns(card) }));
   }
-  const unowned = catalog.filter((p) => !ownedIds.has(p.id));
-  const owned = catalog.filter((p) => ownedIds.has(p.id));
+  const unowned = catalog.filter((p) => !owns(p));
+  const owned = catalog.filter((p) => owns(p));
   const cards = drawByBand(unowned, Math.min(size, unowned.length), weights, rng);
   if (cards.length < size) {
     cards.push(...drawByBand(owned, Math.min(size - cards.length, owned.length), weights, rng));
   }
-  return cards.map((card) => ({ ...card, selectable: !ownedIds.has(card.id) }));
+  return cards.map((card) => ({ ...card, selectable: !owns(card) }));
 }
 
 // Sortea las cartas que cubren la formación más los suplentes de arranque
@@ -220,6 +233,12 @@ function starterLineFor(state, player) {
   return LINES.find((line) =>
     (state.starting11[line] || []).some((p) => p.uid === player.uid)
   );
+}
+
+// Un jugador con sanción pendiente (expulsado el partido anterior) no puede
+// seleccionarse: cumple un partido en el banquillo antes de volver.
+export function isSuspended(player) {
+  return (player && player.banMatches > 0) || false;
 }
 
 function hasAlignedDuplicate(state, player) {
@@ -394,7 +413,7 @@ export function autoFillStarting11(state) {
   const bySlot = new Map();
   for (const slot of allSlots.slice().sort((a, b) => a.accepts.length - b.accepts.length)) {
     const player = state.squad
-      .filter((p) => slot.accepts.includes(p.position) && !used.has(p.id))
+      .filter((p) => slot.accepts.includes(p.position) && !used.has(p.id) && !isSuspended(p))
       .sort((a, b) =>
         (playerOVR(b) - playerOVR(a)) ||
         ((b.position === slot.line ? 1 : 0) - (a.position === slot.line ? 1 : 0))
@@ -433,6 +452,7 @@ export function togglePlayerInLineup(state, player) {
     return { placed: false };
   }
 
+  if (isSuspended(player)) return { placed: false, suspended: true };
   if (hasAlignedDuplicate(state, player)) return { placed: false, duplicate: true };
 
   const target = firstOpenSlotForPlayer(state, player);
@@ -443,6 +463,10 @@ export function togglePlayerInLineup(state, player) {
 // Coloca un jugador en un slot concreto de su línea. Sirve para drag & drop:
 // desde banquillo coloca/reemplaza; desde el campo reordena dentro de la línea.
 export function placePlayerInLineup(state, player, line = player.position, slotIndex = 0) {
+  // Un sancionado que viene del banquillo no puede entrar a la táctica.
+  if (isSuspended(player) && !starterLineFor(state, player)) {
+    return { placed: false, suspended: true };
+  }
   const plan = evaluatePlacement(state, player, line, slotIndex);
   if (!plan) {
     if (!player || !LINES.includes(line)) return { placed: false, invalidPosition: true };
@@ -517,7 +541,7 @@ export function isNationPackLevel(level) {
 // Agrupa el catálogo por selección (nación + año) y marca, contra la plantilla
 // actual, qué cartas son nuevas. Los jugadores van ordenados por OVR.
 function nationTeamsFrom(catalog, squad) {
-  const ownedIds = new Set(squad.map((p) => p.id));
+  const ownedKeys = ownedKeySet(squad);
   const groups = new Map();
   for (const player of catalog) {
     const id = `${player.nation}|${player.era}`;
@@ -528,7 +552,7 @@ function nationTeamsFrom(catalog, squad) {
     const players = team.players
       .slice()
       .sort((a, b) => playerOVR(b) - playerOVR(a))
-      .map((p) => ({ ...p, selectable: !ownedIds.has(p.id) }));
+      .map((p) => ({ ...p, selectable: !ownedKeys.has(dupKey(p)) }));
     const fresh = players.filter((p) => p.selectable);
     return {
       ...team,
@@ -570,7 +594,7 @@ export function rollItemPack(state) {
 // El jugador elige una carta de jugador del sobre.
 export function choosePlayerCard(state, template) {
   if (!template || template.selectable === false) return null;
-  if (!CONFIG.ALLOW_DUPLICATE_PLAYERS && state.squad.some((p) => p.id === template.id)) return null;
+  if (!CONFIG.ALLOW_DUPLICATE_PLAYERS && state.squad.some((p) => dupKey(p) === dupKey(template))) return null;
   const card = instantiate(template);
   state.squad.push(card);
   // Si hay hueco compatible, colócalo automáticamente.
@@ -607,6 +631,9 @@ export function playMatch(state) {
     formation: state.formation,
     starting11: state.starting11,
     items: state.items,
+    // Banquillo disponible para sustituir tras una expulsión (suplentes que no
+    // están en el once y no están sancionados).
+    bench: state.squad.filter((p) => !isStarter(state, p) && !isSuspended(p)),
   };
   const result = simularPartido(team, state.opponent, matchRng);
   // Regla oculta: el primer partido de la torre es imposible de perder; como
@@ -645,12 +672,41 @@ function forceAtLeastDraw(result) {
   return result;
 }
 
+// Procesa las sanciones por tarjeta roja: primero descuenta un partido a quien
+// ya estaba sancionado (cumplió la pena en este partido) y luego sanciona a los
+// expulsados de este partido. El orden garantiza que el recién expulsado se
+// pierde exactamente el siguiente partido. A los expulsados que estuvieran en el
+// once se los envía al banquillo.
+function applySuspensions(state) {
+  for (const p of state.squad) {
+    if (p.banMatches > 0) p.banMatches -= 1;
+  }
+  const expulsados = state.lastMatch.expulsadosA || [];
+  for (const { uid } of expulsados) {
+    const player = state.squad.find((p) => p.uid === uid);
+    if (!player) continue;
+    player.banMatches = 1;
+    const line = LINES.find((L) => (state.starting11[L] || []).some((q) => q.uid === uid));
+    if (line) state.starting11[line] = state.starting11[line].filter((q) => q.uid !== uid);
+  }
+}
+
 // Aplica el resultado: calcula recompensa, registra historia y avanza/termina.
 export function applyResult(state) {
-  const { golesA, golesB, eventos } = state.lastMatch;
+  const { golesA, golesB, eventos, forfeit } = state.lastMatch;
+  applySuspensions(state);
   const meta = metaBonuses(state.items);
-  const reward = rewardFor(golesA, golesB, meta.extraPlayerCard, meta.extraItemCard);
-  const cls = classifyResult(golesA, golesB);
+  let reward = rewardFor(golesA, golesB, meta.extraPlayerCard, meta.extraItemCard);
+  let cls = classifyResult(golesA, golesB);
+  // Cuatro rojas: el equipo pierde el partido pase lo que pase con el marcador.
+  // Anula incluso la protección de nivel 1.
+  if (forfeit === 'A') {
+    cls = { result: 'loss', tier: 'derrota', diff: cls.diff };
+    reward = { result: 'loss', tier: 'derrota', diff: cls.diff, playerPack: 0, itemPack: 0, rarityBias: null };
+  } else if (forfeit === 'B' && cls.result !== 'win') {
+    cls = { result: 'win', tier: 'ajustada', diff: 1 };
+    reward = rewardFor(1, 0, meta.extraPlayerCard, meta.extraItemCard);
+  }
 
   state.history.push({
     level: state.level,

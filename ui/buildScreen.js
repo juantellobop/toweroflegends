@@ -8,7 +8,7 @@
 import { playerCardHTML, itemCardHTML, POSITION_LABEL, LINE_LABEL } from './cards.js';
 import { esc } from './dom.js';
 import {
-  liveRatings, liveChemistry, liveItemDelta, isLineupComplete, isStarter, formationSlots,
+  liveRatings, liveChemistry, liveItemDelta, isLineupComplete, isStarter, isSuspended, formationSlots,
   canPlacePlayerInSlot, assignLineToSlots,
 } from '../state/run.js';
 import { playerOVR } from '../engine/ovr.js';
@@ -215,22 +215,26 @@ function bench(state) {
   const subs = state.squad.filter((p) => !isStarter(state, p)).sort((a, b) => playerOVR(b) - playerOVR(a));
   if (!subs.length) return `<p class="empty-note">${t('build.noSubs')}</p>`;
   return `<div class="bench-strip">
-    ${subs.map((p) => `
-      <button class="bench-item lineup-draggable rarity-${p.rarity}" data-uid="${p.uid}" data-line="${p.position}" draggable="true"
-              aria-label="${esc(t('build.benchAria', { name: p.name }))}">
+    ${subs.map((p) => {
+    const suspended = isSuspended(p);
+    return `
+      <button class="bench-item${suspended ? '' : ' lineup-draggable'} rarity-${p.rarity}${suspended ? ' bench-item--suspended' : ''}" data-uid="${p.uid}" data-line="${p.position}"${suspended ? ' data-suspended="1"' : ' draggable="true"'}
+              aria-label="${esc(suspended ? t('build.benchSuspendedAria', { name: p.name }) : t('build.benchAria', { name: p.name }))}">
         <span class="bench-face" aria-hidden="true">
           <img src="${esc(portraitPathForPlayer(p))}" alt="" draggable="false" loading="lazy" decoding="async" data-hide-on-error="true" />
           <span>${esc(playerInitials(p.name))}</span>
           <img class="chip-flag" src="${esc(flagSrcForNation(p.nation))}" alt="" draggable="false" loading="lazy" decoding="async" />
+          ${suspended ? `<span class="bench-red-card" title="${esc(t('build.suspended'))}" aria-hidden="true"></span>` : ''}
         </span>
         <span class="bench-topline" aria-hidden="true">
           <span class="bench-ovr">${playerOVR(p)}</span>
           <span class="bench-pos">${POSITION_LABEL[p.position]}</span>
         </span>
         <span class="bench-name">${esc(p.name)}</span>
-        <span class="bench-add" aria-hidden="true">+</span>
+        ${suspended ? '' : '<span class="bench-add" aria-hidden="true">+</span>'}
         <span class="chip-info bench-info" role="button" tabindex="0" data-info-uid="${p.uid}" aria-label="${esc(t('build.viewStatsAria', { name: p.name }))}">i</span>
-      </button>`).join('')}
+      </button>`;
+  }).join('')}
   </div>
   <p class="empty-note bench-filter-empty" hidden>${t('build.noSubs')}</p>`;
 }
@@ -358,6 +362,7 @@ export function renderBuild(root, state, handlers) {
   root.querySelectorAll('.bench-item').forEach((node) => {
     node.addEventListener('click', () => {
       if (suppressClick) return;
+      if (node.dataset.suspended) return; // expulsado: no seleccionable este partido
       const player = state.squad.find((p) => p.uid === node.dataset.uid);
       if (player) openTargetPicker(root, state, player, handlers);
     });

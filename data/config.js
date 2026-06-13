@@ -12,6 +12,20 @@ export const CONFIG = {
   RED_CARD_PENALTY: 0.1, // un expulsado resta ~10% a defensa y medio del equipo el resto del partido
   COMEBACK_PUSH: 0.05, // empuje al equipo que va por detrás (por gol de diferencia, hasta 2 goles)
 
+  // --- Tarjetas ---
+  // Cada falta de la simulación resuelve una tarjeta: roja directa (rara),
+  // amarilla (frecuente) o ninguna. La segunda amarilla a un mismo jugador se
+  // convierte en roja. Calibrado para ~0,125 rojas/equipo/partido (Poisson):
+  // 1 roja en 11,03% de los partidos, 2 en 0,69%, 3 en 0,029%, 4 en 0,0009%.
+  // Re-medir con .cache/cards-probe.mjs si se tocan estos valores o el motor.
+  // Nota: las faltas de la simulación son escasas (~1/equipo/partido), así que
+  // la roja sale casi siempre de una entrada directa; por eso el valor es alto
+  // pese a que "la roja directa es rara" — es raro que una falta lo sea, pero
+  // hay pocas faltas. Medido: mean ~0,127 rojas/equipo, 1→11,4% · 2→0,60%.
+  DIRECT_RED_PROB: 0.105, // prob. de roja directa por falta
+  YELLOW_PROB: 0.62, // prob. de que una falta se sancione con amarilla (si no es roja directa)
+  DANGEROUS_FOUL_MULT: 1.8, // las faltas peligrosas (tiro libre) multiplican el riesgo de tarjeta
+
   // --- Vidas / fin de run ---
   LIVES: 1, // 1 = perder termina la run; 3 = sistema de vidas
 

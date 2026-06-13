@@ -112,7 +112,9 @@ function patternFor(type, phase, rng) {
   if (type === 'despeje') return rng.bernoulli(0.55) ? 'goal_kick' : 'defensive_recovery';
   if (type === 'perdida') return 'defensive_recovery';
   if (type === 'pase_fuera') return rng.bernoulli(0.45) ? 'defensive_pass' : 'midfield_pass';
-  if (type === 'falta') return rng.bernoulli(0.08) ? 'red_foul' : 'yellow_foul';
+  // La tarjeta (amarilla/roja) la decide la simulación tras la falta (necesita
+  // estado del partido para la doble amarilla); aquí se deja el patrón base.
+  if (type === 'falta') return 'yellow_foul';
   if (type === 'fuera_juego' || type === 'sin_remate') return 'midfield_pass';
   if (type === 'bloqueo' || type === 'parada' || type === 'tiro_fuera') return 'shot';
   return 'midfield_pass';
@@ -272,6 +274,12 @@ export function simulateHighlight(ctx) {
     assister: actors.passer,
     keeper: actors.keeper,
     defenderName: actors.defender,
+    // Infractor de la falta (el defensor que comete la entrada): el lado que
+    // defiende es quien comete la falta. uid/posición permiten la tarjeta, la
+    // sustitución y la sanción del jugador real (null en el rival sintético).
+    offender: terminal === 'falta'
+      ? { name: actors.defender, uid: defender.uid ?? null, position: defender.naturalPosition || 'DEF' }
+      : null,
     counter: phase === 'counter',
   };
 }

@@ -32,15 +32,24 @@ export function narrate(ev, rng) {
       return t('narrator.contraataque', { m, attacker: team(ev.attackerTeam), shooter: ev.shooter });
     case 'pase_fuera':
       return t('narrator.pase_fuera', { m, passer: actor(ev, 'passer', ev.assister) });
-    case 'falta':
-      return ev.pattern === 'red_foul'
-        ? t('narrator.faltaRoja', { m, receiver: actor(ev, 'receiver'), defender: actor(ev, 'defender', ev.defenderName) })
-        : t('narrator.falta', {
-          m,
-          receiver: actor(ev, 'receiver'),
-          defender: actor(ev, 'defender', ev.defenderName),
-          kind: ev.phase === 'free_kick' ? t('narrator.faltaPeligrosa') : t('narrator.faltaPresion'),
-        });
+    case 'falta': {
+      const receiver = actor(ev, 'receiver');
+      const defender = actor(ev, 'defender', ev.defenderName);
+      if (ev.card === 'red') {
+        return ev.secondYellow
+          ? t('narrator.faltaSegundaAmarilla', { m, receiver, defender })
+          : t('narrator.faltaRoja', { m, receiver, defender });
+      }
+      if (ev.card === 'yellow') {
+        return t('narrator.faltaAmarilla', { m, receiver, defender });
+      }
+      return t('narrator.falta', {
+        m,
+        receiver,
+        defender,
+        kind: ev.phase === 'free_kick' ? t('narrator.faltaPeligrosa') : t('narrator.faltaPresion'),
+      });
+    }
     case 'fuera_juego':
       return t('narrator.fuera_juego', { m, passer: actor(ev, 'passer', ev.assister), receiver: actor(ev, 'receiver') });
     case 'despeje':
@@ -71,16 +80,26 @@ export function narrate(ev, rng) {
   }
 }
 
-// Resumen breve para la pantalla de resultado: goleadores y mejores paradas.
+// Resumen breve para la pantalla de resultado: goleadores, paradas y expulsados.
 export function summarize(events) {
   const scorers = {};
   let saves = 0;
+  const reds = [];
   for (const ev of events) {
     if (ev.type === 'gol') scorers[ev.shooter] = (scorers[ev.shooter] || 0) + 1;
     if (ev.type === 'parada') saves += 1;
+    // El lado que comete la falta (y recibe la roja) es el que defiende.
+    if (ev.type === 'falta' && ev.pattern === 'red_foul') {
+      reds.push({
+        name: ev.defenderName,
+        side: ev.side === 'A' ? 'B' : 'A',
+        minute: ev.minute,
+        secondYellow: Boolean(ev.secondYellow),
+      });
+    }
   }
   const scorerList = Object.entries(scorers)
     .sort((a, b) => b[1] - a[1])
     .map(([name, n]) => (n > 1 ? `${name} (${n})` : name));
-  return { scorers: scorerList, saves };
+  return { scorers: scorerList, saves, reds };
 }

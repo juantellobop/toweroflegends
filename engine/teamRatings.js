@@ -328,6 +328,12 @@ function normalizeLinePlayer(player, line, ratings, opts = {}) {
   const gk = player && player.gk ? player.gk : null;
   return {
     name: player?.name || `${line} ${Math.round(rating)}`,
+    // Identidad del jugador real (equipo del jugador): permite mapear al
+    // infractor de una falta con su instancia del once para tarjetas/sanciones.
+    uid: player?.uid ?? null,
+    // Posición natural del jugador (no el rol del hueco): la sustitución tras
+    // una roja necesita saber si el expulsado era DEF/ARQ o MID/DEL.
+    naturalPosition: player?.position ?? (opts.role || line),
     position: opts.role || line,
     trait: player?.trait || null,
     rating,
@@ -396,6 +402,11 @@ export function buildBattleTeam(team) {
     attackers,
     gkName: gkName(team),
     items: team.items || [],
+    // Alineación de origen y banquillo: el equipo del jugador los conserva para
+    // poder rehacer ratings/pools tras una expulsión (quitar al expulsado y, si
+    // era DEF/ARQ, sustituirlo desde el banco). El rival sintético no los trae.
+    starting11: team.starting11 || null,
+    bench: team.bench || [],
     // Bonos de partido de los objetos (presión, contras, balón parado, etc.),
     // ya nerfeados, con decaimiento, sinergia táctica y topes aplicados.
     matchBonuses: matchBonuses(team.items || [], team.formation),
