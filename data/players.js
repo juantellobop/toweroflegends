@@ -11082,15 +11082,15 @@ export const PLAYERS = [
     "nation": "Dinamarca",
     "era": "1998",
     "position": "MID",
-    "rarity": "rare",
-    "ovr": 78,
+    "rarity": "legend",
+    "ovr": 88,
     "stats": {
-      "pace": 76,
-      "shooting": 76,
-      "passing": 82,
-      "dribbling": 78,
+      "pace": 91,
+      "shooting": 88,
+      "passing": 89,
+      "dribbling": 93,
       "defending": 75,
-      "physical": 76
+      "physical": 90
     },
     "gk": null,
     "trait": null,
@@ -11103,11 +11103,11 @@ export const PLAYERS = [
     "era": "1998",
     "position": "FWD",
     "rarity": "epic",
-    "ovr": 87,
+    "ovr": 86,
     "stats": {
       "pace": 95,
       "shooting": 87,
-      "passing": 86,
+      "passing": 74,
       "dribbling": 86,
       "defending": 58,
       "physical": 86
