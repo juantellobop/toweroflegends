@@ -176,6 +176,87 @@
       ]
     },
     {
+      "id": "f0a9c4c2-c8b1-4617-9348-5f910e9e52b0",
+      "teamName": "Leyendas",
+      "nation": "River Plate",
+      "floor": 5,
+      "createdAt": "2026-06-13T17:11:59.545Z",
+      "runId": "6302fa7c-7abc-4ce4-a066-ec788d7b2937",
+      "formation": "4-3-3",
+      "lineup": [
+        {
+          "name": "Tony Sylva",
+          "position": "GK",
+          "line": "GK",
+          "ovr": 68,
+          "rarity": "common"
+        },
+        {
+          "name": "Per Mertesacker",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 88,
+          "rarity": "epic"
+        },
+        {
+          "name": "Denzel Dumfries",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 82,
+          "rarity": "rare"
+        },
+        {
+          "name": "Tony Sanneh",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 67,
+          "rarity": "common"
+        },
+        {
+          "name": "Morten Wieghorst",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 77,
+          "rarity": "rare"
+        },
+        {
+          "name": "Claudio Reyna",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 69,
+          "rarity": "common"
+        },
+        {
+          "name": "Kevin-Prince Boateng",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 68,
+          "rarity": "common"
+        },
+        {
+          "name": "Viktor Claesson",
+          "position": "MID",
+          "line": "FWD",
+          "ovr": 67,
+          "rarity": "common"
+        },
+        {
+          "name": "Marco Ureña",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 68,
+          "rarity": "common"
+        },
+        {
+          "name": "Celso Borges",
+          "position": "MID",
+          "line": "FWD",
+          "ovr": 68,
+          "rarity": "common"
+        }
+      ]
+    },
+    {
       "id": "f8ff94b2-7f55-4146-9276-7df3385f7700",
       "teamName": "River Plate",
       "nation": "River Plate",

@@ -8,6 +8,10 @@ import { flagSrcForNation } from '../data/flags.js';
 import { renderLeaderboard } from './leaderboard.js';
 import { pressArticleHTML } from './prensa.js';
 import { localizeNation, localizeOpponentName, t } from '../data/i18n.js';
+import { FORMATIONS, LINES } from '../data/config.js';
+import { assignLineToSlots } from '../state/run.js';
+import { portraitPathForPlayer } from '../data/playerAssets.js';
+import { lineupFieldHTML, positionSlots, staticChipHTML } from './lineupBoard.js';
 
 function localizeHistoryOpponent(value) {
   const text = String(value || '');
@@ -25,6 +29,35 @@ function redsRowHTML(reds) {
     <div class="result-scorers result-reds">
       <span>${t('result.reds')}</span>
       <b>${items}</b>
+    </div>`;
+}
+
+// Tablero con la táctica del último partido (el que cerró la run): el mismo
+// once y esquema que se guardó en el ranking, pintado con la lógica compartida
+// del tablero táctico (lineupBoard) — huecos por línea, rol de cada hueco y
+// coordenadas exactas del dibujo. Vacío si la run no conserva alineación.
+function lastTacticHTML(state) {
+  if (!state.formation || !FORMATIONS[state.formation]) return '';
+  const slots = LINES.flatMap((line) => {
+    const filled = assignLineToSlots(state.formation, line, state.starting11?.[line] || [])
+      .filter((slot) => slot.player);
+    return positionSlots(state.formation, line, filled);
+  });
+  if (!slots.length) return '';
+  const field = lineupFieldHTML({
+    formation: state.formation,
+    slots,
+    fieldClass: 'gameover-tactic-field',
+    chip: (slot) => staticChipHTML(slot.player, {
+      portraitSrc: portraitPathForPlayer(slot.player),
+      flagSrc: flagSrcForNation(slot.player.nation),
+      chipClass: 'scout-chip',
+    }),
+  });
+  return `
+    <div class="gameover-tactic arcade-panel">
+      <span class="gameover-match-label">${t('result.lastTactic')} · ${t('scouting.formation', { formation: state.formation })}</span>
+      ${field}
     </div>`;
 }
 
@@ -147,6 +180,7 @@ export function renderGameOver(root, state, best, handlers) {
         </div>
         ${redsRowHTML(reds)}
       </div>
+      ${lastTacticHTML(state)}
       ${pressArticleHTML(state)}`;
   }
 

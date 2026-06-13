@@ -3884,6 +3884,23 @@ select {
   text-align: center;
 }
 
+/* Bloque con la táctica del último partido: el tablero compartido (.lineup-board)
+   centrado. La pantalla de fin de run es scrollable (no un modal), así que el
+   campo aprovecha el ancho disponible con el mismo tope que el once del scouting
+   y la plantilla inicial (560px), sin acotar por el alto del viewport. */
+.gameover-tactic {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 14px;
+}
+
+.gameover-tactic-field {
+  width: min(100%, 560px);
+  max-width: 560px;
+  margin: 0 auto;
+}
+
 .result-screen {
   max-width: 960px;
   display: grid;
