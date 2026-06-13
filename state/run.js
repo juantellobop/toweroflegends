@@ -656,6 +656,10 @@ export function playMatch(state) {
   // Regla oculta: el primer partido de la torre es imposible de perder; como
   // mínimo se empata. Del segundo en adelante se puede perder con normalidad.
   if (state.level === 1) forceAtLeastDraw(result);
+  // Once tal como saltó al campo (uids por línea, huecos incluidos), antes de
+  // que applySuspensions vacíe los puestos de los expulsados. El resumen y la
+  // táctica del gameover lo usan para mostrar al expulsado en su sitio.
+  result.kickoff11 = serializeStarting11(state.starting11);
   state.lastMatch = result;
   return result;
 }

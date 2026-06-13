@@ -12,6 +12,7 @@ import { FORMATIONS, LINES } from '../data/config.js';
 import { assignLineToSlots } from '../state/run.js';
 import { portraitPathForPlayer } from '../data/playerAssets.js';
 import { lineupFieldHTML, positionSlots, staticChipHTML } from './lineupBoard.js';
+import { POSITION_LABEL } from './cards.js';
 
 function localizeHistoryOpponent(value) {
   const text = String(value || '');
@@ -32,14 +33,22 @@ function redsRowHTML(reds) {
     </div>`;
 }
 
-// Tablero con la táctica del último partido (el que cerró la run): el mismo
-// once y esquema que se guardó en el ranking, pintado con la lógica compartida
-// del tablero táctico (lineupBoard) — huecos por línea, rol de cada hueco y
-// coordenadas exactas del dibujo. Vacío si la run no conserva alineación.
+// Tablero con la táctica del último partido (el que cerró la run): el once tal
+// como saltó al campo (kickoff11), pintado con la lógica compartida del tablero
+// táctico (lineupBoard) — huecos por línea, rol de cada hueco y coordenadas
+// exactas del dibujo. Los expulsados se muestran en su sitio con tarjeta roja.
+// Sin kickoff11 (saves antiguos) cae al once actual. Vacío sin alineación.
 function lastTacticHTML(state) {
   if (!state.formation || !FORMATIONS[state.formation]) return '';
+  const m = state.lastMatch;
+  const byUid = new Map((state.squad || []).map((p) => [p.uid, p]));
+  const kickoff = m?.kickoff11;
+  const lineFor = (line) => kickoff
+    ? (kickoff[line] || []).map((uid) => (uid != null && byUid.get(uid)) || null)
+    : (state.starting11?.[line] || []);
+  const expelled = new Set((m?.expulsadosA || []).map((e) => e.uid));
   const slots = LINES.flatMap((line) => {
-    const filled = assignLineToSlots(state.formation, line, state.starting11?.[line] || [])
+    const filled = assignLineToSlots(state.formation, line, lineFor(line))
       .filter((slot) => slot.player);
     return positionSlots(state.formation, line, filled);
   });
@@ -51,13 +60,35 @@ function lastTacticHTML(state) {
     chip: (slot) => staticChipHTML(slot.player, {
       portraitSrc: portraitPathForPlayer(slot.player),
       flagSrc: flagSrcForNation(slot.player.nation),
-      chipClass: 'scout-chip',
+      chipClass: expelled.has(slot.player.uid) ? 'scout-chip chip-expelled' : 'scout-chip',
     }),
   });
   return `
     <div class="gameover-tactic arcade-panel">
       <span class="gameover-match-label">${t('result.lastTactic')} · ${t('scouting.formation', { formation: state.formation })}</span>
       ${field}
+    </div>`;
+}
+
+// Fila de cambios del resumen (resultado y gameover): tras expulsar a un DEF/ARQ
+// entra un suplente de esa posición y sale un atacante (cambio de posición). Se
+// nombra a quién entró y a quién dejó su puesto.
+function subsRowHTML(subs) {
+  if (!subs || !subs.length) return '';
+  const items = subs.map((s) => {
+    const inLabel = `${esc(s.inName)}${s.inPos ? ` <small>${esc(POSITION_LABEL[s.inPos] || s.inPos)}</small>` : ''}`;
+    const out = s.outName
+      ? `${esc(s.outName)}${s.outPos ? ` <small>${esc(POSITION_LABEL[s.outPos] || s.outPos)}</small>` : ''}`
+      : '';
+    return `<span class="result-sub">
+        <span class="result-sub-in">▲ ${inLabel}</span>${out ? `<span class="result-sub-out">▼ ${out}</span>` : ''}
+        <small class="result-sub-min">${s.minute}'</small>
+      </span>`;
+  }).join('');
+  return `
+    <div class="result-scorers result-subs">
+      <span>${t('result.subs')}</span>
+      <b>${items}</b>
     </div>`;
 }
 
@@ -127,6 +158,7 @@ export function renderResult(root, state, reward, handlers) {
             <b>${scorers.length ? esc(scorers.join(', ')) : '—'}</b>
           </div>
           ${redsRowHTML(reds)}
+          ${subsRowHTML(m.sustitucionesA)}
         </div>
       </div>
       <div class="result-progress-row">
@@ -179,6 +211,7 @@ export function renderGameOver(root, state, best, handlers) {
           <b>${scorers.length ? esc(scorers.join(', ')) : '—'}</b>
         </div>
         ${redsRowHTML(reds)}
+        ${subsRowHTML(m.sustitucionesA)}
       </div>
       ${lastTacticHTML(state)}
       ${pressArticleHTML(state)}`;

@@ -247,6 +247,18 @@ export function buildCronica(match, ctx) {
       minute: red.minute,
     }));
   }
+  // Reorganización forzada por una expulsión de DEF/ARQ: el banquillo cubre el
+  // hueco atrás y un atacante deja su puesto. Se narra el primer cambio.
+  for (const sub of (match.sustitucionesA || []).slice(0, 1)) {
+    const key = sub.outName ? 'subSwap' : 'subIn';
+    push(sub.minute, t(`press.body.${key}`, {
+      team: ctx.teamName,
+      inName: sub.inName,
+      outName: sub.outName,
+      cause: sub.cause,
+      minute: sub.minute,
+    }));
+  }
   // Cuatro rojas: el partido se da por perdido (incomparecencia).
   if (match.forfeit) {
     const lastRed = analysis.reds[analysis.reds.length - 1];

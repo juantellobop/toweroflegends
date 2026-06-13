@@ -3901,6 +3901,27 @@ select {
   margin: 0 auto;
 }
 
+/* Carta del expulsado en la táctica: atenuada y con una tarjeta roja arriba a la
+   derecha (la franja inferior ::after ya marca la rareza, así que la roja va en
+   ::before). Sin filtros animados — es un estado estático. */
+.field-chip.chip-expelled {
+  opacity: .8;
+}
+
+.field-chip.chip-expelled::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 4;
+  width: 14px;
+  height: 19px;
+  background: #e8362f;
+  border: 2px solid #071459;
+  box-shadow: 0 2px 0 rgba(3,8,38,.5);
+  transform: rotate(7deg);
+}
+
 .result-screen {
   max-width: 960px;
   display: grid;
@@ -4037,6 +4058,14 @@ select {
   width: 11px; height: 15px; border-radius: 2px; flex: 0 0 auto;
   background: #d11a1a; border: 1px solid rgba(0,0,0,.5); box-shadow: 0 1px 2px rgba(0,0,0,.4);
 }
+
+/* Fila de cambios del resumen: quién entró (▲) y quién dejó su puesto (▼). */
+.result-subs b { display: flex; flex-wrap: wrap; gap: 10px 16px; }
+.result-sub { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; }
+.result-sub-in { color: var(--arcade-green, #4cd964); }
+.result-sub-out { color: #ff6b6b; }
+.result-sub small { font-size: .72em; opacity: .85; }
+.result-sub-min { color: rgba(255,255,255,.62); }
 
 .result-teams span {
   display: inline-flex;

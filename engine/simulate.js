@@ -30,14 +30,18 @@ function cloneLineup(s11) {
 //    ocupar su posición y, para mantener diez jugadores, sale del campo el MID/DEL
 //    más flojo;
 //  - si era MID o DEL, solo se quita (sin cambio desde el banco).
+// Devuelve { replacement, sacrificed } cuando hubo cambio de banquillo (entra un
+// DEF/ARQ y sale el MID/DEL más flojo), o null si solo se quitó al expulsado.
 export function expelFromLineup(team, offender) {
-  if (!team.starting11 || !offender || !offender.uid) return;
+  if (!team.starting11 || !offender || !offender.uid) return null;
   const s11 = cloneLineup(team.starting11);
   const expelledLine = LINES.find((line) => s11[line].some((p) => p.uid === offender.uid));
   if (expelledLine) s11[expelledLine] = s11[expelledLine].filter((p) => p.uid !== offender.uid);
 
   let bench = (team.bench || []).slice();
   const need = offender.position; // posición natural del expulsado
+  let replacement = null;
+  let sacrificed = null;
   if ((need === 'GK' || need === 'DEF') && expelledLine) {
     const repl = bench
       .filter((p) => p.position === need)
@@ -45,6 +49,7 @@ export function expelFromLineup(team, offender) {
     if (repl) {
       bench = bench.filter((p) => p.uid !== repl.uid);
       s11[expelledLine] = [...s11[expelledLine], repl];
+      replacement = repl;
       // Sale el MID/DEL más flojo del campo para no quedar con once jugadores.
       const field = [
         ...s11.MID.map((p) => ['MID', p]),
@@ -53,11 +58,13 @@ export function expelFromLineup(team, offender) {
       if (field.length) {
         const [weakLine, weak] = field[0];
         s11[weakLine] = s11[weakLine].filter((p) => p.uid !== weak.uid);
+        sacrificed = weak;
       }
     }
   }
   team.starting11 = s11;
   team.bench = bench;
+  return replacement ? { replacement, sacrificed } : null;
 }
 
 const inferiorityFactor = (reds) => Math.pow(1 - CONFIG.RED_CARD_PENALTY, reds);
@@ -169,7 +176,7 @@ function recordEvent(event, A, B, score, events, tracker, rng) {
     if (card === 'red') {
       event.pattern = 'red_foul';
       const team = foulSide === 'A' ? A : B;
-      expelFromLineup(team, event.offender);
+      const sub = expelFromLineup(team, event.offender);
       applyRedCard(team);
       // Solo el equipo del jugador (lado A) arrastra la sanción al próximo
       // partido; se registra al expulsado con su identidad real.
@@ -181,6 +188,19 @@ function recordEvent(event, A, B, score, events, tracker, rng) {
           minute: event.minute,
           secondYellow,
         });
+        // Reorganización tras expulsar a un DEF/ARQ: el banquillo cubre la
+        // posición y un atacante deja su puesto (cambio de posición, no solo de
+        // jugador). Se guarda para el resumen y la crónica.
+        if (sub && sub.replacement) {
+          (A.sustituciones || (A.sustituciones = [])).push({
+            minute: event.minute,
+            cause: event.offender.name,
+            inName: sub.replacement.name,
+            inPos: sub.replacement.position,
+            outName: sub.sacrificed ? sub.sacrificed.name : null,
+            outPos: sub.sacrificed ? sub.sacrificed.position : null,
+          });
+        }
       }
     } else {
       // Amarilla o falta sin tarjeta comparten la escena de falta.
@@ -258,6 +278,7 @@ export function simularPartido(teamA, teamB, rng) {
     redsB,
     forfeit,
     expulsadosA: A.expulsados || [],
+    sustitucionesA: A.sustituciones || [],
   };
 }
 
