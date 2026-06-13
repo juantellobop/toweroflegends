@@ -801,11 +801,11 @@ export const PLAYERS = [
     "era": "1988",
     "position": "MID",
     "rarity": "legend",
-    "ovr": 92,
+    "ovr": 93,
     "stats": {
       "pace": 88,
       "shooting": 88,
-      "passing": 90,
+      "passing": 94,
       "dribbling": 89,
       "defending": 99,
       "physical": 99
@@ -2639,14 +2639,14 @@ export const PLAYERS = [
     "nation": "Países Bajos",
     "era": "2022",
     "position": "MID",
-    "rarity": "rare",
-    "ovr": 82,
+    "rarity": "epic",
+    "ovr": 87,
     "stats": {
       "pace": 80,
       "shooting": 80,
-      "passing": 86,
+      "passing": 99,
       "dribbling": 82,
-      "defending": 79,
+      "defending": 84,
       "physical": 80
     },
     "gk": null,
@@ -5270,12 +5270,12 @@ export const PLAYERS = [
     "era": "2010",
     "position": "FWD",
     "rarity": "legend",
-    "ovr": 91,
+    "ovr": 94,
     "stats": {
-      "pace": 91,
+      "pace": 92,
       "shooting": 95,
-      "passing": 85,
-      "dribbling": 89,
+      "passing": 90,
+      "dribbling": 98,
       "defending": 73,
       "physical": 87
     },
@@ -10350,14 +10350,14 @@ export const PLAYERS = [
     "era": "1998",
     "position": "MID",
     "rarity": "legend",
-    "ovr": 93,
+    "ovr": 95,
     "stats": {
-      "pace": 91,
+      "pace": 99,
       "shooting": 91,
       "passing": 97,
       "dribbling": 93,
       "defending": 90,
-      "physical": 91
+      "physical": 99
     },
     "gk": null,
     "trait": "Maestro",
