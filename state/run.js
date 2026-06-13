@@ -25,6 +25,15 @@ function freshId(base) {
   return `${base}__${uid}`;
 }
 
+// Identidad anónima de la run, estable entre guardado y reanudación. Sirve para
+// que el servidor deduplique el ranking: un save clonado comparte runId y no
+// puede generar una segunda entrada. Mismo fallback que data/comunidad.js.
+function freshRunId() {
+  return globalThis.crypto?.randomUUID
+    ? globalThis.crypto.randomUUID()
+    : `tdl-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 // Clona una carta del catálogo con un uid de instancia para la UI.
 function instantiate(template) {
   return { ...template, uid: freshId(template.id) };
@@ -203,17 +212,35 @@ function canAssignPlayersToLine(formation, line, players) {
 // de array no coincide con el índice de hueco). Compartida con buildScreen.
 export function assignLineToSlots(formation, line, players) {
   const slots = formationLineSlots(formation, line).map((slot) => ({ ...slot, player: null }));
-  const remaining = (players || []).filter(Boolean);
-  function fill(slot) {
-    const idx = remaining.findIndex((player) => slot.accepts.includes(player.position));
-    if (idx < 0) return;
-    slot.player = remaining.splice(idx, 1)[0];
+  const arr = players || [];
+  // Posicional: cada jugador vive en SU hueco (índice del array = slotIndex). Así
+  // un hueco vacío (null) se queda exactamente donde estaba —al quitar a uno, el
+  // resto NO se recoloca— y el 9 sigue en el centro, los extremos a los lados.
+  // Los que no encajen en su propio índice (saves antiguos, cambio de dibujo) se
+  // reparten luego al primer hueco compatible que quede libre.
+  const leftover = [];
+  arr.forEach((player, i) => {
+    if (!player) return;
+    const slot = slots[i];
+    if (slot && !slot.player && slot.accepts.includes(player.position)) slot.player = player;
+    else leftover.push(player);
+  });
+  for (const player of leftover) {
+    const slot = slots.find((s) => !s.player && s.accepts.includes(player.position));
+    if (slot) slot.player = player;
   }
-  // En orden de hueco: cada slot toma el primer jugador compatible que quede. Así
-  // se preserva el orden del array (p. ej. el 9 en el centro de un tridente, los
-  // extremos a los lados aunque acepten MID o FWD).
-  slots.forEach(fill);
   return slots;
+}
+
+// Copia posicional de una línea (longitud = nº de huecos del dibujo): índice =
+// slotIndex, null en los huecos libres. Normaliza listas densas o saves para que
+// las operaciones de colocación trabajen por hueco sin desplazar al resto.
+function lineSlotArray(state, line) {
+  const cap = formationSlots(state.formation)[line] || 0;
+  const assigned = assignLineToSlots(state.formation, line, state.starting11[line] || []);
+  const arr = new Array(cap).fill(null);
+  for (const slot of assigned) if (slot.player) arr[slot.slotIndex] = slot.player;
+  return arr;
 }
 
 // Jugador que ocupa el hueco visible (line, slotIndex), o null si está vacío.
@@ -231,7 +258,7 @@ function slotIndexOfPlayer(state, line, player) {
 
 function starterLineFor(state, player) {
   return LINES.find((line) =>
-    (state.starting11[line] || []).some((p) => p.uid === player.uid)
+    (state.starting11[line] || []).some((p) => p && p.uid === player.uid)
   );
 }
 
@@ -243,7 +270,7 @@ export function isSuspended(player) {
 
 function hasAlignedDuplicate(state, player) {
   return LINES.some((line) =>
-    (state.starting11[line] || []).some((p) => p.id === player.id && p.uid !== player.uid)
+    (state.starting11[line] || []).some((p) => p && p.id === player.id && p.uid !== player.uid)
   );
 }
 
@@ -255,15 +282,12 @@ function targetLineAfterPlacement(state, player, line, slotIndex = 0) {
   const targetIndex = Math.max(0, Math.min(cap - 1, Number(slotIndex) || 0));
   if (!slotAcceptsPosition(state.formation, line, targetIndex, player.position)) return null;
 
-  const arr = (state.starting11[line] || []).slice();
-  const sourceIndex = arr.findIndex((p) => p.uid === player.uid);
-  if (sourceIndex >= 0) arr.splice(sourceIndex, 1);
-
-  if (arr.length < cap) {
-    arr.splice(Math.min(targetIndex, arr.length), 0, player);
-  } else {
-    arr[targetIndex] = player;
-  }
+  const arr = lineSlotArray(state, line);
+  const sourceIndex = arr.findIndex((p) => p && p.uid === player.uid);
+  if (sourceIndex >= 0) arr[sourceIndex] = null;
+  // Ocupa exactamente el hueco destino (vacío → colocación; ocupado → el anterior
+  // sale, sin desplazar a nadie más): el array es posicional, índice = slotIndex.
+  arr[targetIndex] = player;
 
   return canAssignPlayersToLine(state.formation, line, arr) ? arr : null;
 }
@@ -275,22 +299,12 @@ function firstOpenSlotForPlayer(state, player) {
   ];
 
   for (const line of preferredLines) {
-    const cap = formationSlots(state.formation)[line] || 0;
-    const arr = state.starting11[line] || [];
-    if (arr.length >= cap) continue;
-
-    const candidates = formationLineSlots(state.formation, line)
-      .filter((slot) => slot.accepts.includes(player.position))
-      .map((slot) => slot.slotIndex);
-
-    const targetIndexes = line === player.position
-      ? [Math.min(arr.length, cap - 1), ...candidates]
-      : candidates;
-
-    for (const slotIndex of [...new Set(targetIndexes)]) {
-      if (targetLineAfterPlacement(state, player, line, slotIndex)) {
-        return { line, slotIndex };
-      }
+    // Primer hueco VACÍO compatible, en orden de slot: así un jugador entra al
+    // hueco que dejó otro sin recolocar al resto de la línea.
+    const open = assignLineToSlots(state.formation, line, state.starting11[line] || [])
+      .find((slot) => !slot.player && slot.accepts.includes(player.position));
+    if (open && targetLineAfterPlacement(state, player, line, open.slotIndex)) {
+      return { line, slotIndex: open.slotIndex };
     }
   }
 
@@ -327,18 +341,18 @@ function evaluatePlacement(state, player, line, slotIndex = 0) {
     if (!slotAcceptsPosition(state.formation, currentLine, sourceIndex, occupant.position)) return null;
 
     if (currentLine === line) {
-      const arr = state.starting11[line].slice();
-      const ia = arr.findIndex((p) => p.uid === player.uid);
-      const ib = arr.findIndex((p) => p.uid === occupant.uid);
+      const arr = lineSlotArray(state, line);
+      const ia = arr.findIndex((p) => p && p.uid === player.uid);
+      const ib = arr.findIndex((p) => p && p.uid === occupant.uid);
       if (ia < 0 || ib < 0) return null;
       [arr[ia], arr[ib]] = [arr[ib], arr[ia]];
       if (!canAssignPlayersToLine(state.formation, line, arr)) return null;
       return { kind: 'swap', changes: { [line]: arr } };
     }
-    const arrSrc = state.starting11[currentLine].slice();
-    const arrDst = state.starting11[line].slice();
-    const ia = arrSrc.findIndex((p) => p.uid === player.uid);
-    const ib = arrDst.findIndex((p) => p.uid === occupant.uid);
+    const arrSrc = lineSlotArray(state, currentLine);
+    const arrDst = lineSlotArray(state, line);
+    const ia = arrSrc.findIndex((p) => p && p.uid === player.uid);
+    const ib = arrDst.findIndex((p) => p && p.uid === occupant.uid);
     if (ia < 0 || ib < 0) return null;
     arrSrc[ia] = occupant;
     arrDst[ib] = player;
@@ -348,14 +362,15 @@ function evaluatePlacement(state, player, line, slotIndex = 0) {
   }
 
   // --- Hueco vacío, reordenar misma línea o sustitución desde el banco ---
-  const wasFull = (state.starting11[line] || []).length >= cap;
+  const wasFull = (state.starting11[line] || []).filter(Boolean).length >= cap;
   const nextLine = targetLineAfterPlacement(state, player, line, targetIndex);
   if (!nextLine) return null;
   const changes = { [line]: nextLine };
   if (currentLine && currentLine !== line) {
-    const srcArr = state.starting11[currentLine].slice();
-    const si = srcArr.findIndex((p) => p.uid === player.uid);
-    if (si >= 0) srcArr.splice(si, 1);
+    // El jugador deja su línea de origen: su hueco queda vacío en su sitio.
+    const srcArr = lineSlotArray(state, currentLine);
+    const si = srcArr.findIndex((p) => p && p.uid === player.uid);
+    if (si >= 0) srcArr[si] = null;
     changes[currentLine] = srcArr;
   }
   let kind = 'place';
@@ -436,8 +451,9 @@ export function autoFillStarting11(state) {
 // ¿Está el once completo para la formación actual?
 export function isLineupComplete(state) {
   const slots = formationSlots(state.formation);
-  const players = LINES.flatMap((line) => state.starting11[line] || []);
-  return LINES.every((line) => (state.starting11[line] || []).length === slots[line]) &&
+  const filled = (line) => (state.starting11[line] || []).filter(Boolean);
+  const players = LINES.flatMap(filled);
+  return LINES.every((line) => filled(line).length === slots[line]) &&
     LINES.every((line) => canAssignPlayersToLine(state.formation, line, state.starting11[line] || [])) &&
     new Set(players.map((p) => p.id)).size === players.length;
 }
@@ -447,8 +463,9 @@ export function togglePlayerInLineup(state, player) {
   const currentLine = starterLineFor(state, player);
   if (currentLine) {
     const arr = state.starting11[currentLine];
-    const idx = arr.findIndex((p) => p.uid === player.uid);
-    arr.splice(idx, 1);
+    const idx = arr.findIndex((p) => p && p.uid === player.uid);
+    // Hueco en su sitio: lo dejamos vacío (null) sin recolocar al resto.
+    if (idx >= 0) arr[idx] = null;
     return { placed: false };
   }
 
@@ -686,8 +703,12 @@ function applySuspensions(state) {
     const player = state.squad.find((p) => p.uid === uid);
     if (!player) continue;
     player.banMatches = 1;
-    const line = LINES.find((L) => (state.starting11[L] || []).some((q) => q.uid === uid));
-    if (line) state.starting11[line] = state.starting11[line].filter((q) => q.uid !== uid);
+    const line = LINES.find((L) => (state.starting11[L] || []).some((q) => q && q.uid === uid));
+    if (line) {
+      const arr = state.starting11[line];
+      const idx = arr.findIndex((q) => q && q.uid === uid);
+      if (idx >= 0) arr[idx] = null; // hueco del sancionado, en su sitio
+    }
   }
 }
 
@@ -770,6 +791,7 @@ export function createRun(opts = {}) {
   };
 
   const state = {
+    runId: opts.runId || freshRunId(),
     seed,
     rng,
     team,
@@ -802,4 +824,104 @@ export function createRun(opts = {}) {
   autoFillStarting11(state);
 
   return state;
+}
+
+// === Guardado y reanudación de la run ===
+//
+// El estado se serializa a un objeto JSON-able para localStorage (state/run.js
+// no toca el almacenamiento; eso vive en main.js). El catálogo (roster) se
+// regenera y los sobres (choices) se vuelven a sortear de forma determinista
+// desde el RNG (Mulberry32, se guarda `seed` + `state`). En cambio el RIVAL y el
+// PARTIDO sí se persisten: el rival consume RNG y muta usedOpponentIds al crearse
+// (regenerarlo lo duplicaría) y las pantallas de resultado/gaceta/partido leen
+// state.lastMatch/opponent directamente, no los recalculan.
+
+export const SAVE_VERSION = 2;
+
+// Once como uids por línea: al rehidratar se reenlazan a las instancias reales
+// de la plantilla, restaurando las referencias compartidas que JSON rompe.
+function serializeStarting11(starting11) {
+  const out = {};
+  for (const line of LINES) out[line] = (starting11[line] || []).map((p) => (p ? p.uid : null));
+  return out;
+}
+
+export function serializeRun(state) {
+  return {
+    version: SAVE_VERSION,
+    runId: state.runId,
+    seed: state.seed,
+    rngState: state.rng.state,
+    team: state.team,
+    level: state.level,
+    lives: state.lives,
+    livesMax: state.livesMax,
+    formation: state.formation,
+    squad: state.squad,
+    items: state.items,
+    history: state.history,
+    usedOpponentIds: state.usedOpponentIds,
+    starting11: serializeStarting11(state.starting11),
+    phase: state.phase,
+    pendingPlayerPack: state.pendingPlayerPack,
+    pendingItemPack: state.pendingItemPack,
+    pendingBias: state.pendingBias,
+    pendingReward: state.pendingReward ?? null,
+    // Rival y partido en curso: necesarios para retomar en scouting, partido,
+    // resultado, gaceta y gameover (esas pantallas los leen, no los recalculan).
+    opponent: state.opponent ?? null,
+    lastMatch: state.lastMatch ?? null,
+    lastReward: state.lastReward ?? null,
+  };
+}
+
+// Reconstruye un `state` jugable desde el objeto serializado, o devuelve null si
+// el save es incompatible o está corrupto (el llamador lo descarta).
+export function rehydrateRun(data) {
+  try {
+    if (!data || data.version !== SAVE_VERSION) return null;
+    if (!Array.isArray(data.squad) || typeof data.seed !== 'number') return null;
+
+    const rng = new RNG(data.seed);
+    rng.state = data.rngState | 0;
+
+    const squad = data.squad;
+    const byUid = new Map(squad.map((p) => [p.uid, p]));
+    const starting11 = emptyStarting11();
+    for (const line of LINES) {
+      // Posicional: conserva los huecos (null) en su slotIndex al rehidratar.
+      starting11[line] = (data.starting11?.[line] || [])
+        .map((cardUid) => (cardUid != null && byUid.get(cardUid)) || null);
+    }
+
+    return {
+      runId: data.runId || freshRunId(),
+      seed: data.seed,
+      rng,
+      team: data.team,
+      level: data.level,
+      lives: data.lives,
+      livesMax: data.livesMax,
+      formation: data.formation,
+      squad,
+      roster: getPlayableRoster(),
+      starting11,
+      items: Array.isArray(data.items) ? data.items : [],
+      history: Array.isArray(data.history) ? data.history : [],
+      usedOpponentIds: Array.isArray(data.usedOpponentIds) ? data.usedOpponentIds : [],
+      phase: data.phase,
+      pendingPlayerPack: data.pendingPlayerPack,
+      pendingItemPack: data.pendingItemPack,
+      pendingBias: data.pendingBias,
+      pendingReward: data.pendingReward ?? null,
+      playerChoices: null,
+      nationChoices: null,
+      itemChoices: null,
+      opponent: data.opponent ?? null,
+      lastMatch: data.lastMatch ?? null,
+      lastReward: data.lastReward ?? null,
+    };
+  } catch (_) {
+    return null;
+  }
 }

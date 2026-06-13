@@ -1,6 +1,94 @@
 {
   "entries": [
     {
+      "id": "a7fd4c92-b510-450c-9336-e85dcbc0ce4a",
+      "teamName": "Test",
+      "nation": "River Plate",
+      "floor": 9,
+      "createdAt": "2026-06-13T15:47:41.008Z",
+      "runId": "68c9d36b-a3a8-4880-a996-79a70b98b2da",
+      "formation": "4-3-3",
+      "lineup": [
+        {
+          "name": "Richard Kingson",
+          "position": "GK",
+          "line": "GK",
+          "ovr": 65,
+          "rarity": "common"
+        },
+        {
+          "name": "Éric Abidal",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 92,
+          "rarity": "legend"
+        },
+        {
+          "name": "Ilya Kutepov",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 67,
+          "rarity": "common"
+        },
+        {
+          "name": "Jonas Keller",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 61,
+          "rarity": "common"
+        },
+        {
+          "name": "Ferdinand Coly",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 68,
+          "rarity": "common"
+        },
+        {
+          "name": "Roman Zobnin",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 66,
+          "rarity": "common"
+        },
+        {
+          "name": "Iván García",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 60,
+          "rarity": "common"
+        },
+        {
+          "name": "Diego Santos",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 58,
+          "rarity": "common"
+        },
+        {
+          "name": "Joel Campbell",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 69,
+          "rarity": "common"
+        },
+        {
+          "name": "Caio Alves",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 61,
+          "rarity": "common"
+        },
+        {
+          "name": "Samuel Inkoom",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 66,
+          "rarity": "common"
+        }
+      ]
+    },
+    {
       "id": "5209a527-56ca-4c51-b82d-c8499d98aa1d",
       "teamName": "Leyendas",
       "nation": "River Plate",

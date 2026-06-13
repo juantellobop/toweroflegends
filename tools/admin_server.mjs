@@ -289,6 +289,10 @@ function sanitizeRankingEntry(raw) {
   const createdAt = Number.isFinite(Date.parse(raw?.createdAt)) ? new Date(raw.createdAt).toISOString() : new Date().toISOString();
   const id = clampText(raw?.id, 80) || crypto.randomUUID();
   const entry = { id, teamName, nation, floor, createdAt };
+  // Identidad anónima de la run (UUID o fallback tdl-...): sirve para deduplicar
+  // el ranking y que un save clonado no genere una segunda entrada.
+  const runId = clampText(raw?.runId, 64).replace(/[^a-zA-Z0-9-]/g, '');
+  if (runId) entry.runId = runId;
   // Equipo del último partido (opcional): formación conocida + once saneado.
   if (FORMATIONS[raw?.formation]) entry.formation = raw.formation;
   const lineup = sanitizeRankingLineup(raw?.lineup);
@@ -493,7 +497,25 @@ async function handleRanking(req, res) {
     if (req.method === 'POST') {
       const payload = JSON.parse(await readBody(req));
       const entry = sanitizeRankingEntry(payload);
-      const entries = sortRanking([entry, ...await readRankingFile()]).slice(0, RANKING_LIMIT);
+      const existing = await readRankingFile();
+      // Anti-clon: una sola entrada por runId, conservando la de mayor floor. Un
+      // save clonado/reenviado comparte runId y no puede duplicar su puesto.
+      let pool = existing;
+      if (entry.runId) {
+        const prior = existing.find((item) => item.runId === entry.runId);
+        if (prior && prior.floor >= entry.floor) {
+          const priorRank = existing.findIndex((item) => item.id === prior.id);
+          json(res, 200, {
+            entries: existing,
+            entryId: prior.id,
+            rank: priorRank >= 0 ? priorRank + 1 : null,
+            limit: RANKING_LIMIT,
+          });
+          return;
+        }
+        pool = existing.filter((item) => item.runId !== entry.runId);
+      }
+      const entries = sortRanking([entry, ...pool]).slice(0, RANKING_LIMIT);
       await writeRankingFile(entries);
       const rank = entries.findIndex((item) => item.id === entry.id);
       json(res, 200, {

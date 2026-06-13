@@ -31,6 +31,7 @@ try {
   if (!root.querySelector('#start')?.disabled) errors.push('start habilitado sin bandera');
   click(root.querySelector('.flag-opt'));
   click(root.querySelector('#start'));
+  await wait(0); // el handler de inicio es async (cerrojo de sesión única)
   console.log('2. Equipo inicial:', show(), '| once:', root.querySelectorAll('.squad-chip').length, '| suplentes:', root.querySelectorAll('.bench-item').length);
   if (root.querySelectorAll('.squad-chip').length !== 11) errors.push('presentación del equipo sin 11 titulares');
   if (!root.querySelectorAll('.bench-item').length) errors.push('presentación del equipo sin suplentes');

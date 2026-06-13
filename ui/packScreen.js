@@ -86,7 +86,7 @@ function squadReviewButton(state) {
 
 function squadReviewModal(state) {
   if (!state.squad?.length) return '';
-  const starters = LINES.flatMap((line) => state.starting11?.[line] || []);
+  const starters = LINES.flatMap((line) => (state.starting11?.[line] || []).filter(Boolean));
   const starterUids = new Set(starters.map((p) => p.uid));
   const subs = state.squad
     .filter((p) => !starterUids.has(p.uid))

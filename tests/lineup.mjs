@@ -5,6 +5,7 @@
 
 import {
   placePlayerInLineup, canPlacePlayerInSlot, isLineupComplete, isStarter,
+  togglePlayerInLineup,
 } from '../state/run.js';
 
 let pass = 0;
@@ -92,6 +93,25 @@ function uids(line) { return line.map((p) => p.uid); }
   check('once completo antes', isLineupComplete(state));
   placePlayerInLineup(state, eleven.FWD[0], 'FWD', 2);
   check('once completo después', isLineupComplete(state));
+}
+
+// === F. Quitar a un jugador deja su hueco EN SU SITIO (no recoloca la línea) ===
+// Bug reportado: al quitar un central se vaciaba el lateral derecho. El array de
+// la línea es posicional (índice = hueco); quitar = null en su hueco.
+{
+  const d = [P('DEF'), P('DEF'), P('DEF'), P('DEF')];
+  const state = { formation: '4-3-3', starting11: { ...emptyEleven(), DEF: d.slice() }, squad: d.slice() };
+  console.log('F) Quitar deja el hueco en su sitio');
+  togglePlayerInLineup(state, d[1]); // quita el central del hueco 1
+  check('el hueco 1 queda vacío (null)', state.starting11.DEF[1] === null);
+  check('la línea conserva sus 4 huecos', state.starting11.DEF.length === 4);
+  check('el lateral derecho (hueco 3) NO se mueve', state.starting11.DEF[3]?.uid === d[3].uid);
+  check('el resto sigue en su sitio', state.starting11.DEF[0]?.uid === d[0].uid && state.starting11.DEF[2]?.uid === d[2].uid);
+  // Volver a meter un suplente DEF entra precisamente en ese hueco libre.
+  const sub = P('DEF');
+  state.squad.push(sub);
+  togglePlayerInLineup(state, sub);
+  check('el suplente entra en el hueco 1 que quedó libre', state.starting11.DEF[1]?.uid === sub.uid);
 }
 
 console.log(`\n=== Selección de jugadores: ${pass} OK / ${fail} fallos ===`);

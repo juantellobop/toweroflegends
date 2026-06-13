@@ -31,21 +31,28 @@ function gkRatingOf(gkPlayers) {
 
 function assignPlayersToSlots(formation, line, players) {
   if (!formation) {
-    return (players || []).map((player, slotIndex) => ({ line, slotIndex, role: line, player }));
+    return (players || [])
+      .filter(Boolean)
+      .map((player, slotIndex) => ({ line, slotIndex, role: line, player }));
   }
 
   const slots = formationLineSlots(formation, line).map((slot) => ({ ...slot, player: null }));
-  const remaining = (players || []).filter(Boolean).slice();
+  const arr = players || [];
 
-  function fill(slot) {
-    const idx = remaining.findIndex((player) => slot.accepts.includes(player.position));
-    if (idx < 0) return;
-    slot.player = remaining.splice(idx, 1)[0];
+  // Posicional: cada jugador en SU hueco (índice = slotIndex), igual que
+  // assignLineToSlots de state/run.js (deben coincidir). Los que no encajen en su
+  // índice se reparten al primer hueco compatible libre.
+  const leftover = [];
+  arr.forEach((player, i) => {
+    if (!player) return;
+    const slot = slots[i];
+    if (slot && !slot.player && slot.accepts.includes(player.position)) slot.player = player;
+    else leftover.push(player);
+  });
+  for (const player of leftover) {
+    const slot = slots.find((s) => !s.player && s.accepts.includes(player.position));
+    if (slot) slot.player = player;
   }
-
-  // En orden de hueco: cada slot toma el primer compatible que quede (preserva el
-  // orden del array; debe coincidir con assignLineToSlots de state/run.js).
-  slots.forEach(fill);
 
   return slots.filter((slot) => slot.player);
 }

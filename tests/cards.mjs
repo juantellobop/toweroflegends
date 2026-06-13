@@ -97,10 +97,11 @@ const baseLineup = () => ({
   const d2 = squad.find((p) => p.uid === 'd2');
   assert.equal(d2.banMatches, 1, 'el expulsado queda sancionado un partido');
   assert.ok(isSuspended(d2), 'isSuspended detecta la sanción');
-  assert.ok(!state.starting11.DEF.some((p) => p.uid === 'd2'), 'el sancionado sale del once (al banquillo)');
+  assert.ok(!state.starting11.DEF.some((p) => p && p.uid === 'd2'), 'el sancionado sale del once (al banquillo)');
+  assert.equal(state.starting11.DEF.length, 4, 'el hueco del sancionado se queda en su sitio (no recoloca la línea)');
   // El autocompletar no lo vuelve a alinear.
   autoFillStarting11(state);
-  const lined = ['GK', 'DEF', 'MID', 'FWD'].some((L) => state.starting11[L].some((p) => p.uid === 'd2'));
+  const lined = ['GK', 'DEF', 'MID', 'FWD'].some((L) => state.starting11[L].some((p) => p && p.uid === 'd2'));
   assert.ok(!lined, 'autoFill no alinea a un sancionado');
 
   // Tras jugar el siguiente partido (sin nuevas rojas), cumple la sanción.

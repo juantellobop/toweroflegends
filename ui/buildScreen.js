@@ -775,7 +775,7 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
 
 function countMissing(state) {
   const slots = formationSlots(state.formation);
-  return LINES.reduce((n, l) => n + Math.max(0, slots[l] - (state.starting11[l] || []).length), 0);
+  return LINES.reduce((n, l) => n + Math.max(0, slots[l] - (state.starting11[l] || []).filter(Boolean).length), 0);
 }
 
 function openTargetPicker(root, state, player, handlers) {

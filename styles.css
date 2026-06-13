@@ -1567,6 +1567,27 @@ select {
   width: min(340px, 100%);
 }
 
+.continue-meta {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--t-caption, 12px);
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.run-busy-panel {
+  width: min(420px, 100%);
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  text-align: center;
+  color: #fff;
+}
+
+.run-busy-panel .menu-actions {
+  margin-top: 4px;
+}
+
 .menu-actions {
   display: grid;
   justify-items: center;

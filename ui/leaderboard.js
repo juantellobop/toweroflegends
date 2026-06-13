@@ -67,6 +67,7 @@ export async function submitLeaderboardEntry(entry) {
   const payload = await requestJson(API_URL, {
     method: 'POST',
     body: JSON.stringify({
+      runId: entry.runId,
       teamName: entry.teamName,
       nation: entry.nation,
       floor: entry.floor,

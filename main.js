@@ -6,7 +6,9 @@ import {
   isNationPackLevel, rollNationPack,
   playMatch, applyResult, advanceLevel, prepareOpponent, retryLevel,
   togglePlayerInLineup, placePlayerInLineup, setFormation, assignLineToSlots,
+  serializeRun, rehydrateRun,
 } from './state/run.js';
+import { acquireRunLock, releaseRunLock } from './state/sesion.js';
 import { renderPlayerPack, renderItemPack, renderNationPack } from './ui/packScreen.js';
 import { renderSquadIntro } from './ui/squadIntroScreen.js';
 import { renderBuild } from './ui/buildScreen.js';
@@ -51,6 +53,7 @@ const preloadedUiImages = preloadUiAssets();
 const BEST_KEY = 'tdl_best';
 const ROUTE_ORDER = {
   menu: 0,
+  busy: 0,
   admin: 1,
   squadIntro: 2,
   playerPack: 3,
@@ -67,6 +70,46 @@ function getBest() {
 }
 function setBest(v) {
   if (v > getBest()) localStorage.setItem(BEST_KEY, String(v));
+}
+
+// === Autoguardado de la run en el navegador ===
+// Un único slot: empezar una run nueva sobrescribe la anterior (no se puede
+// bifurcar/clonar dentro del mismo navegador). El guardado es 100% local y
+// funciona sin servidor; el anti-clon del ranking va aparte (runId).
+const SAVE_KEY = 'tdl_save';
+
+function saveRun(run) {
+  if (!run) return;
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(serializeRun(run)));
+  } catch (_) {
+    // Cuota llena o almacenamiento bloqueado: la run sigue en memoria.
+  }
+}
+
+function readSave() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function hasSavedRun() {
+  return Boolean(readSave());
+}
+
+function clearSavedRun() {
+  try { localStorage.removeItem(SAVE_KEY); } catch (_) { /* idem saveRun */ }
+}
+
+// Rehidrata la run guardada, o limpia el slot si es incompatible/corrupto.
+function loadRun() {
+  const data = readSave();
+  const run = data ? rehydrateRun(data) : null;
+  if (!run) clearSavedRun();
+  return run;
 }
 
 let state = null;
@@ -297,6 +340,7 @@ function submitGameOverRanking() {
   if (!state.leaderboardPromise && !state.leaderboardResult) {
     const run = state;
     run.leaderboardPromise = submitLeaderboardEntry({
+      runId: run.runId,
       teamName: run.team?.name || 'Leyendas',
       nation: run.team?.nation || '',
       floor: run.level,
@@ -322,6 +366,11 @@ function submitGameOverRanking() {
 
 // === Despacho por fase ===
 function render(navHint = 'auto') {
+  // Autoguardado: render() concentra cada cambio de fase, y el RNG aún está en
+  // su punto previo a los sorteos que dispara esta fase, así que al reanudar se
+  // regeneran idénticos. El partido es atómico (se renderiza fuera de render),
+  // por lo que el save autoritativo queda tras aplicar el resultado.
+  saveRun(state);
   switch (state.phase) {
     case 'squadIntro':
       // Arranque de la run: el equipo completo se presenta antes del primer sobre.
@@ -384,25 +433,30 @@ function render(navHint = 'auto') {
           onSetFormation: (f) => { setFormation(state, f); render('refresh'); },
           onScout: () => { state.phase = 'scouting'; render('back'); },
           onPlay: () => {
-            const result = playMatch(state);
+            // El partido se simula aquí (fija state.lastMatch y el rival) y se
+            // entra a la fase 'match' por render(): así se autoguarda y, si se
+            // cierra a media reproducción, se retoma en la pantalla del partido.
+            playMatch(state);
             state.phase = 'match';
-            renderRoute('match', () => {
-              renderMatch(root, state, result, {
-                onFinish: () => {
-                  const reward = applyResult(state);
-                  state.pendingReward = reward;
-                  state.phase = reward.gameOver ? 'gameover' : 'result';
-                  render('forward');
-                },
-              });
-            }, 'forward');
+            render('forward');
           },
         });
       }, navHint);
       break;
 
     case 'match':
-      // El render del partido se dispara desde onPlay; nada que hacer aquí.
+      // Si se retoma sin partido simulado (caso anómalo), volver al tablero.
+      if (!state.lastMatch) { state.phase = 'build'; render('refresh'); break; }
+      renderRoute('match', () => {
+        renderMatch(root, state, state.lastMatch, {
+          onFinish: () => {
+            const reward = applyResult(state);
+            state.pendingReward = reward;
+            state.phase = reward.gameOver ? 'gameover' : 'result';
+            render('forward');
+          },
+        });
+      }, navHint);
       break;
 
     case 'result':
@@ -434,6 +488,8 @@ function render(navHint = 'auto') {
         renderGameOver(root, state, getBest(), {
           leaderboard: submitGameOverRanking(),
           onRestart: () => {
+            clearSavedRun();
+            releaseRunLock();
             state = null;
             renderMenu('back');
           },
@@ -451,6 +507,8 @@ function renderMenu(navHint = 'auto') {
   renderRoute('menu', () => {
     const draftNation = menuDraft.nation || '';
     const hasDraftNation = Boolean(draftNation);
+    // Resumen de la run guardada (sin rehidratar del todo): equipo + nivel.
+    const savedRun = readSave();
     const languageOptions = LANGUAGES.map((language) =>
       `<option value="${language.code}" ${language.code === getLanguage() ? 'selected' : ''}>${language.label}</option>`
     ).join('');
@@ -489,7 +547,8 @@ function renderMenu(navHint = 'auto') {
           <p class="ti-error" id="m-flag-error" hidden>${t('menu.flagError')}</p>
         </div>
         <div class="menu-actions">
-          <button id="start" class="primary big start-prompt" ${hasDraftNation ? '' : 'disabled'}>${hasDraftNation ? t('menu.newRun') : t('menu.chooseFlag')}</button>
+          ${savedRun ? `<button id="continue" class="primary big start-prompt">${t('menu.continueRun')}<small class="continue-meta">${esc(savedRun.team?.name || t('menu.namePlaceholder'))} · ${t('menu.continueFloor', { level: savedRun.level || 1 })}</small></button>` : ''}
+          <button id="start" class="${savedRun ? 'ghost' : 'primary'} big start-prompt" ${hasDraftNation ? '' : 'disabled'}>${hasDraftNation ? t('menu.newRun') : t('menu.chooseFlag')}</button>
         </div>
         <div id="menu-ranking" class="menu-ranking"></div>
         <div id="menu-stats" class="menu-live" aria-live="polite" hidden></div>
@@ -510,8 +569,26 @@ function renderMenu(navHint = 'auto') {
     const picker = root.querySelector('#m-flagpicker');
     const flagError = root.querySelector('#m-flag-error');
     const startBtn = root.querySelector('#start');
+    const continueBtn = root.querySelector('#continue');
     const languageSelect = root.querySelector('#m-language');
     let selectedNation = draftNation;
+
+    if (continueBtn) {
+      continueBtn.addEventListener('click', async () => {
+        // Sesión única: si otra pestaña ya tiene la run activa, avisamos en vez
+        // de cargar una copia divergente.
+        if (!(await acquireRunLock())) { renderRunBusy(); return; }
+        const run = loadRun();
+        if (run) {
+          state = run;
+          render('forward');
+        } else {
+          // Save corrupto/incompatible: ya quedó limpio, refrescamos sin botón.
+          releaseRunLock();
+          renderMenu('refresh');
+        }
+      });
+    }
 
     function showNameError(show) {
       nameError.hidden = !show;
@@ -556,12 +633,16 @@ function renderMenu(navHint = 'auto') {
       startBtn.textContent = t('menu.newRun');
     });
 
-    startBtn.addEventListener('click', () => {
+    startBtn.addEventListener('click', async () => {
       if (!selectedNation) {
         flagError.hidden = false;
         picker.setAttribute('aria-invalid', 'true');
         return;
       }
+      // Slot único: empezar otra borra la guardada. Confirmamos antes.
+      if (hasSavedRun() && !window.confirm(t('menu.newRunConfirm'))) return;
+      // Sesión única: no arrancar una run nueva si otra pestaña ya juega.
+      if (!(await acquireRunLock())) { renderRunBusy(); return; }
       const fallbackName = t('menu.namePlaceholder');
       const teamName = sanitizeTeamName(nameInput.value, fallbackName);
       nameInput.value = teamName === fallbackName && !nameInput.value.trim() ? '' : teamName;
@@ -576,6 +657,43 @@ function renderMenu(navHint = 'auto') {
       });
       render('forward');
     });
+  }, navHint);
+}
+
+// Pantalla de aviso cuando la run ya está abierta en otra pestaña. Reintentar
+// readquiere el cerrojo (libre si la otra pestaña se cerró) y retoma la run.
+function renderRunBusy(navHint = 'forward') {
+  renderRoute('busy', () => {
+    root.innerHTML = `
+    <section class="screen menu-screen pixel-title-screen run-busy-screen"
+      style="--title-bg:url('${UI_ASSETS.backgrounds.title}')">
+      <div class="title-stage" aria-hidden="true">
+        <img src="${UI_ASSETS.backgrounds.title}" alt="" loading="eager" decoding="async" />
+      </div>
+      <div class="menu-shell">
+        <div class="arcade-panel run-busy-panel">
+          <h2>${t('menu.runBusyTitle')}</h2>
+          <p>${t('menu.runBusyBody')}</p>
+          <div class="menu-actions">
+            <button id="busy-retry" class="primary big start-prompt">${t('menu.runBusyRetry')}</button>
+            <button id="busy-menu" class="ghost big start-prompt">${t('menu.backToMenu')}</button>
+          </div>
+        </div>
+      </div>
+    </section>`;
+
+    root.querySelector('#busy-retry').addEventListener('click', async () => {
+      if (!(await acquireRunLock())) { renderRunBusy('refresh'); return; }
+      const run = loadRun();
+      if (run) {
+        state = run;
+        render('forward');
+      } else {
+        releaseRunLock();
+        renderMenu('back');
+      }
+    });
+    root.querySelector('#busy-menu').addEventListener('click', () => renderMenu('back'));
   }, navHint);
 }
 
