@@ -561,14 +561,14 @@ export const PLAYERS = [
     "era": "2010",
     "position": "MID",
     "rarity": "legend",
-    "ovr": 90,
+    "ovr": 93,
     "stats": {
-      "pace": 93,
-      "shooting": 90,
+      "pace": 99,
+      "shooting": 99,
       "passing": 99,
       "dribbling": 99,
-      "defending": 66,
-      "physical": 80
+      "defending": 73,
+      "physical": 87
     },
     "gk": null,
     "trait": "Maestro",
@@ -581,14 +581,14 @@ export const PLAYERS = [
     "era": "2010",
     "position": "MID",
     "rarity": "legend",
-    "ovr": 90,
+    "ovr": 93,
     "stats": {
-      "pace": 90,
+      "pace": 99,
       "shooting": 86,
       "passing": 99,
-      "dribbling": 92,
+      "dribbling": 99,
       "defending": 81,
-      "physical": 79
+      "physical": 86
     },
     "gk": null,
     "trait": "Maestro",
@@ -9976,11 +9976,11 @@ export const PLAYERS = [
     "era": "1994",
     "position": "MID",
     "rarity": "legend",
-    "ovr": 95,
+    "ovr": 94,
     "stats": {
       "pace": 93,
       "shooting": 93,
-      "passing": 99,
+      "passing": 94,
       "dribbling": 95,
       "defending": 92,
       "physical": 93
@@ -10803,13 +10803,13 @@ export const PLAYERS = [
     "nation": "Alemania",
     "era": "1998",
     "position": "GK",
-    "rarity": "rare",
-    "ovr": 83,
+    "rarity": "epic",
+    "ovr": 86,
     "stats": null,
     "gk": {
-      "reflexes": 84,
-      "handling": 81,
-      "positioning": 84
+      "reflexes": 86,
+      "handling": 85,
+      "positioning": 87
     },
     "trait": null,
     "tacticalType": null
@@ -10921,14 +10921,14 @@ export const PLAYERS = [
     "era": "1998",
     "position": "FWD",
     "rarity": "epic",
-    "ovr": 85,
+    "ovr": 89,
     "stats": {
-      "pace": 85,
-      "shooting": 89,
+      "pace": 90,
+      "shooting": 95,
       "passing": 79,
       "dribbling": 83,
       "defending": 67,
-      "physical": 81
+      "physical": 91
     },
     "gk": null,
     "trait": null,
@@ -11161,11 +11161,11 @@ export const PLAYERS = [
     "era": "1994",
     "position": "DEF",
     "rarity": "legend",
-    "ovr": 95,
+    "ovr": 93,
     "stats": {
       "pace": 92,
-      "shooting": 80,
-      "passing": 90,
+      "shooting": 73,
+      "passing": 79,
       "dribbling": 88,
       "defending": 99,
       "physical": 96
