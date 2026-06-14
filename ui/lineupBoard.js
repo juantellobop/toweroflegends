@@ -112,9 +112,9 @@ export function staticChipHTML(player, { portraitSrc, flagSrc, chipClass = '', i
   const rarity = player.rarity ? ` rarity-${player.rarity}` : '';
   const inner = `
       <span class="chip-face" aria-hidden="true">
-        <img src="${esc(portraitSrc)}" alt="" draggable="false" loading="lazy" decoding="async" data-hide-on-error="true" />
+        <img src="${esc(portraitSrc)}" alt="" draggable="false" loading="eager" decoding="async" data-hide-on-error="true" />
         <span>${esc(playerInitials(player.name))}</span>
-        ${flagSrc ? `<img class="chip-flag" src="${esc(flagSrc)}" alt="" draggable="false" loading="lazy" decoding="async" />` : ''}
+        ${flagSrc ? `<img class="chip-flag" src="${esc(flagSrc)}" alt="" draggable="false" loading="eager" decoding="async" />` : ''}
       </span>
       <span class="chip-ovr">${displayOVR(player)}</span>
       <span class="chip-name" title="${esc(player.name)}">${esc(playerSurname(player.name))}</span>`;

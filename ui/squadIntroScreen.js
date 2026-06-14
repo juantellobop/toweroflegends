@@ -51,7 +51,7 @@ function ratings(state) {
   return `<div class="scout-ratings arcade-panel">
     ${rows.map(([label, value, icon]) => `
       <div class="scout-rating">
-        <img src="${icon}" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <img src="${icon}" alt="" aria-hidden="true" loading="eager" decoding="async" />
         <span>${label}</span>
         <b>${value}</b>
         <i><span style="width:${Math.min(100, value)}%"></span></i>
@@ -69,9 +69,9 @@ function benchStrip(subs) {
       <button class="bench-item rarity-${p.rarity}" data-uid="${p.uid}"
               aria-label="${esc(t('build.viewStatsAria', { name: p.name }))}">
         <span class="bench-face" aria-hidden="true">
-          <img src="${esc(portraitPathForPlayer(p))}" alt="" loading="lazy" decoding="async" data-hide-on-error="true" />
+          <img src="${esc(portraitPathForPlayer(p))}" alt="" loading="eager" decoding="async" data-hide-on-error="true" />
           <span>${esc(playerInitials(p.name))}</span>
-          <img class="chip-flag" src="${esc(flagSrcForNation(p.nation))}" alt="" loading="lazy" decoding="async" />
+          <img class="chip-flag" src="${esc(flagSrcForNation(p.nation))}" alt="" loading="eager" decoding="async" />
         </span>
         <span class="bench-topline" aria-hidden="true">
           <span class="bench-ovr">${playerOVR(p)}</span>
@@ -89,7 +89,7 @@ export function renderSquadIntro(root, state, handlers) {
   const flagHTML = state.team.nation ? `
         <div class="scout-team-meta">
           <div class="scout-team-card" aria-hidden="true">
-            <img class="scout-flag-img" src="${esc(flagSrcForNation(state.team.nation))}" alt="" loading="lazy" decoding="async" />
+            <img class="scout-flag-img" src="${esc(flagSrcForNation(state.team.nation))}" alt="" loading="eager" decoding="async" />
           </div>
         </div>` : '';
 

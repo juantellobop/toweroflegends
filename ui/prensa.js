@@ -46,7 +46,7 @@ export function pressArticleHTML(state) {
           <span class="press-photo-frame">
             <span class="press-photo-fallback" aria-hidden="true">${esc(playerInitials(figureName))}</span>
             <img src="${esc(portraitPathForName(figureName))}" alt="${esc(t('press.photoAlt', { name: figureName }))}"
-              loading="lazy" decoding="async" data-hide-on-error="true" />
+              loading="eager" decoding="async" data-hide-on-error="true" />
           </span>
           <figcaption>${esc(t('press.caption', { name: figureName }))}</figcaption>
         </figure>

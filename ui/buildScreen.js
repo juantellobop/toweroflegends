@@ -117,9 +117,9 @@ function chipHTML(p, line, slotIndex) {
             data-line="${line}" data-slot="${slotIndex}" draggable="true"
             aria-label="${esc(t('build.playerDragAria', { name: p.name }))}">
       <span class="chip-face" aria-hidden="true">
-        <img src="${esc(portraitPathForPlayer(p))}" alt="" draggable="false" loading="lazy" decoding="async" data-hide-on-error="true" />
+        <img src="${esc(portraitPathForPlayer(p))}" alt="" draggable="false" loading="eager" decoding="async" data-hide-on-error="true" />
         <span>${esc(playerInitials(p.name))}</span>
-        <img class="chip-flag" src="${esc(flagSrcForNation(p.nation))}" alt="" draggable="false" loading="lazy" decoding="async" />
+        <img class="chip-flag" src="${esc(flagSrcForNation(p.nation))}" alt="" draggable="false" loading="eager" decoding="async" />
       </span>
       <span class="chip-ovr">${ovr}</span>
       <span class="chip-name" title="${esc(p.name)}">${esc(playerSurname(p.name))}</span>
@@ -203,7 +203,7 @@ function ratingsHeader(state) {
   ];
   const rowHTML = rows.map(([label, val, icon, d]) => `
     <div class="rating-row">
-      <img src="${icon}" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      <img src="${icon}" alt="" aria-hidden="true" loading="eager" decoding="async" />
       <span class="rt-label">${label}</span>
       <span class="rt-bar"><span class="rt-fill" style="width:${Math.min(100, Math.round(val))}%"></span></span>
       <span class="rt-valwrap"><b class="rt-val tabular" data-val="${Math.round(val)}">0</b>${itemDeltaHTML(d)}</span>
@@ -232,9 +232,9 @@ function bench(state) {
       <button class="bench-item${blocked ? '' : ' lineup-draggable'} rarity-${p.rarity}${stateClass}" data-uid="${p.uid}" data-line="${p.position}"${blocked ? ' data-suspended="1"' : ' draggable="true"'}
               aria-label="${esc(ariaLabel)}">
         <span class="bench-face" aria-hidden="true">
-          <img src="${esc(portraitPathForPlayer(p))}" alt="" draggable="false" loading="lazy" decoding="async" data-hide-on-error="true" />
+          <img src="${esc(portraitPathForPlayer(p))}" alt="" draggable="false" loading="eager" decoding="async" data-hide-on-error="true" />
           <span>${esc(playerInitials(p.name))}</span>
-          <img class="chip-flag" src="${esc(flagSrcForNation(p.nation))}" alt="" draggable="false" loading="lazy" decoding="async" />
+          <img class="chip-flag" src="${esc(flagSrcForNation(p.nation))}" alt="" draggable="false" loading="eager" decoding="async" />
           ${injured ? `<span class="bench-injury" title="${esc(t('build.injured'))}" aria-hidden="true"></span><span class="bench-injury-count" title="${esc(t('result.injuryMatchesTitle', { n: p.injuryMatches }))}" aria-hidden="true">${p.injuryMatches}</span>` : ''}
           ${suspended ? `<span class="bench-red-card" title="${esc(t('build.suspended'))}" aria-hidden="true"></span>` : ''}
         </span>
@@ -266,7 +266,7 @@ export function renderBuild(root, state, handlers) {
     : `<p class="empty-note">${t('build.noItems')}</p>`;
   const opponentHTML = state.opponent ? `
     <button class="opponent-brief" id="viewOpponent">
-      <img class="flag-img opponent-flag-img" src="${esc(flagSrcForNation(state.opponent.name, [state.opponent.colors.primary, state.opponent.colors.secondary]))}" alt="" loading="lazy" decoding="async" />
+      <img class="flag-img opponent-flag-img" src="${esc(flagSrcForNation(state.opponent.name, [state.opponent.colors.primary, state.opponent.colors.secondary]))}" alt="" loading="eager" decoding="async" />
       <span><small>${t('build.nextOpponent')}</small><b>${esc(localizeOpponentName(state.opponent))}</b></span>
       <span class="opponent-view">${t('build.viewLineup')}</span>
     </button>` : '';
@@ -804,7 +804,7 @@ function openTargetPicker(root, state, player, handlers) {
             <span class="bench-target-role">${esc(role)}</span>
             ${current ? `
               <span class="bench-target-face" aria-hidden="true">
-                <img src="${esc(portraitPathForPlayer(current))}" alt="" loading="lazy" decoding="async" data-hide-on-error="true" />
+                <img src="${esc(portraitPathForPlayer(current))}" alt="" loading="eager" decoding="async" data-hide-on-error="true" />
                 <span>${esc(playerInitials(current.name))}</span>
               </span>
               <span>${esc(playerSurname(current.name))}</span>

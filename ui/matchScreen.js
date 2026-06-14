@@ -44,7 +44,7 @@ export function renderMatch(root, state, result, handlers) {
       <!-- Capa 1: marcador Live Activity (cristal) -->
       <div class="match-scoreboard glass" id="scoreboard">
         <div class="sb-team home">
-          <img class="sb-crest sb-flag" src="${esc(homeFlag)}" alt="" loading="lazy" decoding="async" />
+          <img class="sb-crest sb-flag" src="${esc(homeFlag)}" alt="" loading="eager" decoding="async" />
           <span class="sb-name">${esc(HOME_NAME)}</span>
         </div>
         <div class="sb-center">
@@ -53,7 +53,7 @@ export function renderMatch(root, state, result, handlers) {
         </div>
         <div class="sb-team away">
           <span class="sb-name">${esc(awayName)}</span>
-          <img class="sb-crest sb-flag" src="${esc(flagSrcForNation(opp.name, [opp.colors.primary, opp.colors.secondary]))}" alt="" loading="lazy" decoding="async" />
+          <img class="sb-crest sb-flag" src="${esc(flagSrcForNation(opp.name, [opp.colors.primary, opp.colors.secondary]))}" alt="" loading="eager" decoding="async" />
         </div>
         <div class="sb-momentum"><span id="momentum" class="sb-momentum-fill" style="width:${Math.round(startMomentum * 100)}%"></span></div>
       </div>

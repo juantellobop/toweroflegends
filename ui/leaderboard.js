@@ -102,7 +102,7 @@ export function renderLeaderboard(entries, options = {}) {
       <li class="leaderboard-row${entry.id === currentId ? ' is-current' : ''}${hasLineup ? ' has-lineup' : ''}"${clickable}>
         <span class="leaderboard-rank">#${index + 1}</span>
         <span class="leaderboard-team">
-          <img class="leaderboard-flag" src="${esc(flagSrcForNation(nation))}" alt="" loading="lazy" decoding="async" />
+          <img class="leaderboard-flag" src="${esc(flagSrcForNation(nation))}" alt="" loading="eager" decoding="async" />
           <b>${esc(entry.teamName)}</b>
         </span>
         <span class="leaderboard-floor">${t('leaderboard.floor', { floor: entry.floor })}${hasLineup ? '<i class="leaderboard-more" aria-hidden="true">▸</i>' : ''}</span>
@@ -134,7 +134,7 @@ function lineupChip(player) {
   return `
     <div class="field-chip scout-chip${player.rarity ? ` filled rarity-${esc(player.rarity)}` : ''}${player.expelled ? ' chip-expelled' : player.injured ? ' chip-injured' : ''}">
       <span class="chip-face" aria-hidden="true">
-        <img src="${esc(portraitPathForName(player.name))}" alt="" loading="lazy" decoding="async" data-hide-on-error="true" />
+        <img src="${esc(portraitPathForName(player.name))}" alt="" loading="eager" decoding="async" data-hide-on-error="true" />
         <span>${esc(playerInitials(player.name))}</span>
       </span>
       <span class="chip-ovr">${player.ovr || '—'}</span>

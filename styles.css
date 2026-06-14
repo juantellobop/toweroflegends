@@ -87,17 +87,16 @@ h1, h2, h3, h4 { margin: 0 0 8px; }
    transform y sin will-change de ellos). Un ancestro con transform/filter/
    will-change se convierte en bloque contenedor de los elementos `position:
    fixed` descendientes y descoloca la barra de acción (que es fixed). Mantener
-   .screen "limpio" permite que el botón de avanzar quede anclado al viewport. */
-.screen-enter {
-  will-change: opacity;
-}
+   .screen "limpio" permite que el botón de avanzar quede anclado al viewport.
+   Tampoco usamos will-change: opacity: estas capas son del tamaño del viewport y
+   (entrante + saliente a la vez) agotaban el presupuesto de will-change de Firefox;
+   el fundido de opacidad va igual de fluido sin la pista. */
 .screen-enter-forward { animation: screen-in-forward 420ms var(--ease-emphasis) both; }
 .screen-enter-back { animation: screen-in-back 420ms var(--ease-emphasis) both; }
 .screen-exit {
   box-sizing: border-box;
   overflow: hidden;
   isolation: isolate;
-  will-change: opacity;
 }
 .screen-exit-forward { animation: screen-out-forward 360ms var(--ease-standard) both; }
 .screen-exit-back { animation: screen-out-back 360ms var(--ease-standard) both; }

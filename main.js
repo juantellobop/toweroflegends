@@ -548,6 +548,8 @@ function renderMenu(navHint = 'auto') {
           </label>
           <p class="ti-error" id="m-team-error" hidden>${t('menu.nameError')}</p>
           <span class="ti-label">${t('menu.flag')}</span>
+          <!-- Selector de 60 banderas: loading="lazy" a propósito (rejilla larga; no
+               todas se ven a la vez). El resto de imágenes del juego van eager. -->
           <div class="flag-picker" id="m-flagpicker" role="radiogroup" aria-label="${t('menu.flagAria')}" aria-describedby="m-flag-error">
             ${FLAG_NATIONS.map((n) => `
             <button type="button" class="flag-opt ${n === draftNation ? 'is-active' : ''}" data-nation="${esc(n)}" role="radio" aria-checked="${n === draftNation ? 'true' : 'false'}" title="${esc(localizeNation(n))}" aria-label="${esc(localizeNation(n))}">

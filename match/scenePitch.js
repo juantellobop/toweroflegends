@@ -203,7 +203,7 @@ function actorHTML({ name, role }) {
   return `
     <div class="scene-actor">
       <span class="scene-portrait">
-        <img src="${esc(src)}" alt="" loading="lazy" decoding="async" data-hide-on-error="true" />
+        <img src="${esc(src)}" alt="" loading="eager" decoding="async" data-hide-on-error="true" />
         <span>${esc(playerInitials(name))}</span>
       </span>
       <span class="scene-actor-copy">

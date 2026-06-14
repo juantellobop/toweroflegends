@@ -119,7 +119,7 @@ function packVisual(kind, label, count, muted = false) {
   const art = kind === 'item' ? UI_ASSETS.packs.item : UI_ASSETS.packs.player;
   return `
     <div class="result-pack ${muted ? 'muted' : ''}">
-      <img src="${art}" alt="" loading="lazy" decoding="async" />
+      <img src="${art}" alt="" loading="eager" decoding="async" />
       <span class="result-pack-count">${count}</span>
       <b>${label}</b>
     </div>`;
@@ -165,7 +165,7 @@ export function renderResult(root, state, reward, handlers) {
     <section class="screen result-screen pixel-screen result-${reward.result}">
       <div class="result-showcase">
         <div class="result-poster arcade-panel">
-          <img class="result-art" src="${resultAsset}" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+          <img class="result-art" src="${resultAsset}" alt="" aria-hidden="true" loading="eager" decoding="async" />
           <div class="result-title-chip">${esc(resultTitle)}</div>
         </div>
         <div class="result-score-card arcade-panel">
@@ -188,7 +188,7 @@ export function renderResult(root, state, reward, handlers) {
       ${pressArticleHTML(state)}
       <div class="result-progress-row">
         <div class="tower-next arcade-panel">
-          <img class="tower-next-img" src="${UI_ASSETS.results.tower}" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+          <img class="tower-next-img" src="${UI_ASSETS.results.tower}" alt="" aria-hidden="true" loading="eager" decoding="async" />
           <span>${t('generic.floor', { floor: state.level })}</span>
         </div>
         ${rewardHTML}
@@ -258,7 +258,7 @@ export function renderGameOver(root, state, best, handlers) {
   root.innerHTML = `
     <section class="screen gameover-screen pixel-screen">
       <div class="gameover-hero">
-        <img class="tower-art" src="${UI_ASSETS.results.tower}" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <img class="tower-art" src="${UI_ASSETS.results.tower}" alt="" aria-hidden="true" loading="eager" decoding="async" />
         <h1>${t('result.gameOver')}</h1>
         <div class="final-level">
           <span class="big-num">${reached}</span>

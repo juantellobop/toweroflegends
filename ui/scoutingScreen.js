@@ -3,11 +3,28 @@
 import { esc } from './dom.js';
 import { LINES } from '../data/config.js';
 import { calcularRatings } from '../engine/teamRatings.js';
-import { portraitPathForName } from '../data/playerAssets.js';
-import { UI_ASSETS } from '../data/uiAssets.js';
+import { portraitPathForName, portraitPathForPlayer } from '../data/playerAssets.js';
+import { UI_ASSETS, preloadImages } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { localizeAchievement, localizeOpponentName, t } from '../data/i18n.js';
 import { lineupFieldHTML, positionSlots, staticChipHTML } from './lineupBoard.js';
+import { sceneSources } from '../match/scenes.js';
+
+// Al conocer al rival, el partido es inminente: calienta en segundo plano lo que
+// viene para que no haya esperas. Las escenas (~2,9 MB) se descargan mientras se
+// scoutea/arma equipo y quedan en caché inmutable (?v=) ya tras el primer partido;
+// los retratos de ambos onces dejan listas la pantalla de armar equipo y los
+// highlights. Prioridad baja: no compiten con la UI visible del scouting.
+function warmUpcomingMatch(state) {
+  const squad = state.squad || [];
+  const rivals = state.opponent?.lineup || [];
+  preloadImages(sceneSources(), { priority: 'low' });
+  preloadImages([
+    ...squad.map((p) => portraitPathForPlayer(p)),
+    ...squad.map((p) => flagSrcForNation(p.nation)),
+    ...rivals.map((p) => portraitPathForName(p.name)),
+  ], { priority: 'low' });
+}
 
 // Mismo esquema que el tablero táctico propio: huecos por línea posicionados
 // con la misma lógica (alturas, reparto y matices del dibujo rival).
@@ -46,7 +63,7 @@ function ratings(opponent) {
   return `<div class="scout-ratings arcade-panel">
     ${rows.map(([label, value, icon]) => `
       <div class="scout-rating">
-        <img src="${icon}" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <img src="${icon}" alt="" aria-hidden="true" loading="eager" decoding="async" />
         <span>${label}</span>
         <b>${value}</b>
         <i><span style="width:${Math.min(100, value)}%"></span></i>
@@ -56,6 +73,7 @@ function ratings(opponent) {
 
 export function renderScouting(root, state, handlers) {
   const opponent = state.opponent;
+  warmUpcomingMatch(state);
   root.innerHTML = `
     <section class="screen scouting-screen pixel-screen">
       <header class="scout-hero" style="--team-primary:${opponent.colors.primary};--team-secondary:${opponent.colors.secondary}">
@@ -67,7 +85,7 @@ export function renderScouting(root, state, handlers) {
         </div>
         <div class="scout-team-meta">
           <div class="scout-team-card" aria-hidden="true">
-            <img class="scout-flag-img" src="${esc(flagSrcForNation(opponent.name, [opponent.colors.primary, opponent.colors.secondary]))}" alt="" loading="lazy" decoding="async" />
+            <img class="scout-flag-img" src="${esc(flagSrcForNation(opponent.name, [opponent.colors.primary, opponent.colors.secondary]))}" alt="" loading="eager" decoding="async" />
           </div>
           <div class="scout-strength"><span>${t('scouting.strength')}</span><b>${opponent.strength}</b></div>
         </div>
