@@ -1139,10 +1139,10 @@ select {
 /* Enlaces de química, web de cercanía con glow neón. El orden de apilado lo da
    fieldSVG (de abajo a arriba): web tenue → época (celeste) → boost (violeta) →
    nación (dorado, siempre encima). Glow estático (no animado) seguro en WebKit. */
-.chem-link { stroke: var(--arcade-cyan, #25E6FF); stroke-width: 2; vector-effect: non-scaling-stroke; opacity: 0.8; stroke-dasharray: none; filter: drop-shadow(0 0 2px var(--arcade-cyan, #25E6FF)); }
-.chem-link.web { stroke: var(--pitch-line); stroke-width: 1.2; opacity: 0.22; stroke-dasharray: none; filter: none; }
-.chem-link.boost { stroke: var(--chem-boost); stroke-width: 2.6; opacity: 0.95; stroke-dasharray: none; filter: drop-shadow(0 0 2.5px var(--chem-boost)); }
-.chem-link.strong { stroke: var(--brand); stroke-width: 3; opacity: 1; stroke-dasharray: none; filter: drop-shadow(0 0 2.5px var(--brand)) drop-shadow(0 0 1.5px var(--brand)); }
+.chem-link { stroke: var(--arcade-cyan, #25E6FF); stroke-width: 2.3; vector-effect: non-scaling-stroke; opacity: 0.85; stroke-dasharray: none; filter: drop-shadow(0 0 3px var(--arcade-cyan, #25E6FF)); }
+.chem-link.web { stroke: var(--pitch-line); stroke-width: 1.4; opacity: 0.24; stroke-dasharray: none; filter: none; }
+.chem-link.boost { stroke: var(--chem-boost); stroke-width: 2.9; opacity: 0.97; stroke-dasharray: none; filter: drop-shadow(0 0 3.5px var(--chem-boost)) drop-shadow(0 0 1.5px var(--chem-boost)); }
+.chem-link.strong { stroke: var(--brand); stroke-width: 3.4; opacity: 1; stroke-dasharray: none; filter: drop-shadow(0 0 3.5px var(--brand)) drop-shadow(0 0 1.8px var(--brand)); }
 
 .chip-anchor { position: absolute; transform: translate(-50%, -50%); }
 .field-chip {
@@ -1614,11 +1614,7 @@ select {
    width:100% (el .menu-shell ya ocupa el ancho útil): al ser 100% NO puede
    desbordar, así que se acaba el crecimiento de unos píxeles a la derecha que en
    iOS provocaban el 100vw y el margin-left negativo (Safari no recorta bien ese
-   desbordamiento con overflow-x:hidden). Solo en escritorio ancho (≥1200px, donde
-   #app ya está topado a 1180px) se ensancha con píxeles FIJOS para llenar el
-   contenido de #app: 720px del shell + 432px (216 por lado) = 1152px. Sin vw ni
-   dependencia de la barra de scroll; los márgenes simétricos dejan la fila
-   centrada y contenida tanto en el menú como en gameover. */
+   desbordamiento con overflow-x:hidden). */
 .menu-rankings {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1637,10 +1633,15 @@ select {
   }
 }
 
+/* En escritorio ancho la fila se ensancha más allá del .menu-shell (720px) con
+   píxeles FIJOS (sin vw ni barra de scroll). El ancho 1000px (720 + 280) deja ~60px
+   de margen a cada lado dentro del contenido de .menu-screen (1124px = #app 1152 −
+   14px de padding por lado), así que NUNCA toca ni se pasa de la caja del menú. Los
+   márgenes negativos simétricos la mantienen centrada (en el menú y en gameover). */
 @media (min-width: 1200px) {
   .menu-rankings {
-    width: calc(100% + 432px);
-    margin-inline: -216px;
+    width: calc(100% + 280px);
+    margin-inline: -140px;
   }
 }
 
@@ -2438,30 +2439,30 @@ select {
    pintado en fieldSVG. Glow estático (no animado) seguro en WebKit. */
 .chem-link {
   stroke: var(--arcade-cyan);
-  stroke-width: 1.7;
-  opacity: .9;
-  filter: drop-shadow(0 0 1.5px var(--arcade-cyan));
+  stroke-width: 2;
+  opacity: .92;
+  filter: drop-shadow(0 0 2.5px var(--arcade-cyan));
 }
 
 .chem-link.web {
   stroke: var(--arcade-cyan);
-  stroke-width: 1.1;
-  opacity: .28;
+  stroke-width: 1.3;
+  opacity: .3;
   filter: none;
 }
 
 .chem-link.boost {
   stroke: var(--chem-boost);
-  stroke-width: 2.2;
-  opacity: .95;
-  filter: drop-shadow(0 0 2px var(--chem-boost)) drop-shadow(0 0 1px var(--chem-boost));
+  stroke-width: 2.5;
+  opacity: .97;
+  filter: drop-shadow(0 0 3px var(--chem-boost)) drop-shadow(0 0 1.5px var(--chem-boost));
 }
 
 .chem-link.strong {
   stroke: var(--arcade-yellow);
-  stroke-width: 2.6;
+  stroke-width: 3;
   opacity: 1;
-  filter: drop-shadow(0 0 2.5px var(--arcade-yellow)) drop-shadow(0 0 1px var(--arcade-yellow));
+  filter: drop-shadow(0 0 3.5px var(--arcade-yellow)) drop-shadow(0 0 1.5px var(--arcade-yellow));
 }
 
 .field-chip {
