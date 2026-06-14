@@ -61,6 +61,11 @@ const MIME = {
   '.ico': 'image/x-icon',
 };
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.svg', '.ico']);
+// Caché en memoria del CSS/JS ya minificado: clave fichero+mtime+versión, valor
+// el Buffer servido. En producción los ficheros son estáticos (se procesan una
+// vez por proceso); en local el mtime invalida la entrada al editar. Solo texto
+// (~80 módulos): memoria despreciable, sin riesgo de OOM.
+const minifiedCache = new Map();
 
 function normalizedVersion(value) {
   return String(value || '').trim().replace(/[^a-zA-Z0-9._-]/g, '').slice(0, 40);
@@ -167,34 +172,84 @@ function versionedJavaScript(source) {
   return stripJsComments(versioned);
 }
 
-// --- Eliminación de comentarios del CSS/JS servido --------------------------
-// Los fuentes (styles.css, design/tokens.css, *.js) conservan sus comentarios;
-// el servidor los sirve SIN comentarios. Strippers propios (sin dependencias en
-// la ruta de request) que respetan cadenas/plantillas/regex para no romper
-// data-URIs, calc() ni literales.
+// --- Minificado del CSS/JS servido -----------------------------------------
+// Los fuentes (styles.css, design/tokens.css, *.js) conservan comentarios e
+// indentación; el servidor los sirve MINIFICADOS. Minificadores propios (sin
+// dependencias en la ruta de request) que respetan cadenas/plantillas/regex
+// para no romper data-URIs, calc() ni literales. El resultado se cachea en
+// memoria (minifiedCache): cada fichero se procesa una sola vez por proceso.
 
-function stripCssComments(src) {
+// CSS: quita comentarios y colapsa los espacios. Conserva intacto el contenido
+// de las cadenas y de url(...) (incluidos data-URIs sin comillas), nunca toca
+// el espacio antes de ':' (selectores tipo `a :hover`) ni alrededor de
+// operadores; solo recorta el espacio junto a los tokens estructurales seguros
+// { } ; , y el ';' redundante antes de '}'.
+function minifyCss(src) {
+  const n = src.length;
+  const TRIM = new Set(['{', '}', ';', ',']);
+  const isIdent = (ch) => ch !== undefined && /[A-Za-z0-9_-]/.test(ch);
   let out = '';
-  let quote = null;
-  for (let i = 0; i < src.length; i++) {
+  let pendingWs = false;
+  // Resuelve el espacio pendiente antes de emitir un token verbatim (cadena/url).
+  const openSpace = () => {
+    if (pendingWs) {
+      if (out && !TRIM.has(out[out.length - 1])) out += ' ';
+      pendingWs = false;
+    }
+  };
+  let i = 0;
+  while (i < n) {
     const c = src[i];
-    if (quote) {
-      out += c;
-      if (c === '\\') { if (i + 1 < src.length) out += src[++i]; continue; }
-      if (c === quote) quote = null;
-      continue;
-    }
-    if (c === '"' || c === "'") { quote = c; out += c; continue; }
-    if (c === '/' && src[i + 1] === '*') {
+    if (c === '/' && src[i + 1] === '*') {       // comentario de bloque -> separador
       i += 2;
-      while (i < src.length && !(src[i] === '*' && src[i + 1] === '/')) i++;
-      i++;                 // salta el '*'; el for salta el '/'
-      out += ' ';          // evita pegar tokens vecinos
+      while (i < n && !(src[i] === '*' && src[i + 1] === '/')) i++;
+      i += 2;
+      pendingWs = true;
       continue;
     }
+    if (c === ' ' || c === '\t' || c === '\n' || c === '\r' || c === '\f') {
+      pendingWs = true;                          // se resuelve al emitir el siguiente token
+      i++;
+      continue;
+    }
+    if (c === '"' || c === "'") {                // cadena -> verbatim
+      openSpace();
+      const q = c;
+      out += c; i++;
+      while (i < n) {
+        const ch = src[i];
+        out += ch;
+        if (ch === '\\') { if (i + 1 < n) out += src[++i]; i++; continue; }
+        i++;
+        if (ch === q) break;
+      }
+      continue;
+    }
+    if ((c === 'u' || c === 'U') && /^url\(/i.test(src.slice(i, i + 4)) && !isIdent(out[out.length - 1])) {
+      openSpace();                               // url(...) -> verbatim hasta el ')'
+      out += src.slice(i, i + 4);
+      i += 4;
+      let q = null;
+      while (i < n) {
+        const ch = src[i];
+        out += ch;
+        if (q) { if (ch === '\\') { if (i + 1 < n) out += src[++i]; } else if (ch === q) q = null; i++; continue; }
+        if (ch === '"' || ch === "'") { q = ch; i++; continue; }
+        i++;
+        if (ch === ')') break;
+      }
+      continue;
+    }
+    const prev = out[out.length - 1] || '';      // token de código normal
+    if (pendingWs) {
+      if (out && !TRIM.has(prev) && !TRIM.has(c)) out += ' ';
+      pendingWs = false;
+    }
+    if (c === '}') { while (out.endsWith(';')) out = out.slice(0, -1); }
     out += c;
+    i++;
   }
-  return out;
+  return out.trim();
 }
 
 const JS_REGEX_KEYWORDS = new Set([
@@ -203,19 +258,30 @@ const JS_REGEX_KEYWORDS = new Set([
 ]);
 const JS_REGEX_PREV = new Set('(,=:[!&|?{};+-*%^~<>'.split(''));
 
+// JS: además de quitar comentarios, colapsa los espacios SOLO en contexto de
+// código. Un run de espacios se sustituye por un único '\n' si contenía algún
+// salto de línea, o por un único ' ' si no. Así desaparecen indentación, líneas
+// en blanco y comentarios, pero los saltos de línea se conservan donde estaban
+// → 100% a salvo de la inserción automática de punto y coma (ASI). El contenido
+// de cadenas, plantillas y regex se emite literal (no pasa por el colapso).
 function stripJsComments(src) {
   const n = src.length;
   let out = '';
   let prevSig = '';   // último carácter significativo
   let prevWord = '';  // último identificador (para palabras clave antes de regex)
+  let pendingWs = false;  // espacio pendiente en contexto código
+  let pendingNl = false;  // ese run contenía un salto de línea
   const stack = [{ t: 'code', depth: 0, fromTemplate: false }];
-  const emit = (ch) => {
-    out += ch;
-    if (!/\s/.test(ch)) {
-      prevSig = ch;
-      prevWord = /[A-Za-z0-9_$]/.test(ch) ? prevWord + ch : '';
-    }
+  const flushWs = () => {
+    if (pendingWs) { out += pendingNl ? '\n' : ' '; pendingWs = false; pendingNl = false; }
   };
+  const emit = (ch) => {           // char de código significativo
+    flushWs();
+    out += ch;
+    prevSig = ch;
+    prevWord = /[A-Za-z0-9_$]/.test(ch) ? prevWord + ch : '';
+  };
+  const raw = (s) => { flushWs(); out += s; };   // verbatim, resolviendo el espacio antes
   let i = 0;
   while (i < n) {
     const top = stack[stack.length - 1];
@@ -246,19 +312,31 @@ function stripJsComments(src) {
       i++; continue;
     }
     // contexto de código
+    if (c === ' ' || c === '\t' || c === '\n' || c === '\r' || c === '\f' || c === '\v') {
+      pendingWs = true;
+      if (c === '\n' || c === '\r') pendingNl = true;
+      i++; continue;
+    }
     if (c === '/' && nx === '/') { i += 2; while (i < n && src[i] !== '\n') i++; continue; }
-    if (c === '/' && nx === '*') { i += 2; while (i < n && !(src[i] === '*' && src[i + 1] === '/')) i++; i += 2; emit(' '); continue; }
-    if (c === '"' || c === "'") { stack.push({ t: 'string', q: c }); out += c; prevSig = c; prevWord = ''; i++; continue; }
-    if (c === '`') { stack.push({ t: 'template' }); out += c; prevSig = '`'; prevWord = ''; i++; continue; }
+    if (c === '/' && nx === '*') {
+      i += 2; let nl = false;
+      while (i < n && !(src[i] === '*' && src[i + 1] === '/')) { if (src[i] === '\n') nl = true; i++; }
+      i += 2;
+      pendingWs = true;                  // un bloque actúa como separador
+      if (nl) pendingNl = true;          // si abarcaba líneas, cuenta como salto (ASI)
+      continue;
+    }
+    if (c === '"' || c === "'") { stack.push({ t: 'string', q: c }); raw(c); prevSig = c; prevWord = ''; i++; continue; }
+    if (c === '`') { stack.push({ t: 'template' }); raw('`'); prevSig = '`'; prevWord = ''; i++; continue; }
     if (c === '/') {
       const isRegex = prevSig === '' || JS_REGEX_PREV.has(prevSig) || JS_REGEX_KEYWORDS.has(prevWord);
-      if (isRegex) { stack.push({ t: 'regex', inClass: false }); out += c; prevSig = '/'; prevWord = ''; i++; continue; }
+      if (isRegex) { stack.push({ t: 'regex', inClass: false }); raw(c); prevSig = '/'; prevWord = ''; i++; continue; }
       emit(c); i++; continue;  // división
     }
     if (c === '{') { top.depth++; emit(c); i++; continue; }
     if (c === '}') {
       if (top.depth > 0) { top.depth--; emit(c); i++; continue; }
-      if (top.fromTemplate) { stack.pop(); out += '}'; prevSig = '}'; prevWord = ''; i++; continue; }
+      if (top.fromTemplate) { flushWs(); stack.pop(); out += '}'; prevSig = '}'; prevWord = ''; i++; continue; }
       emit(c); i++; continue;
     }
     emit(c); i++;
@@ -267,7 +345,7 @@ function stripJsComments(src) {
 }
 
 function versionedCss(source) {
-  return stripCssComments(source).replace(
+  return minifyCss(source).replace(
     /url\(\s*(['"]?)(?!data:|https?:|#)([^'")]+)\1\s*\)/gi,
     (_, quote, asset) => `url(${quote}${withBuildVersion(asset.trim())}${quote})`
   );
@@ -562,13 +640,19 @@ async function serveStatic(req, res) {
     const extension = path.extname(filePath).toLowerCase();
     const isCurrentVersion = url.searchParams.get('v') === BUILD_VERSION;
     if (isCurrentVersion && ['.css', '.js', '.mjs'].includes(extension)) {
-      const source = await fs.readFile(filePath, 'utf8');
-      const body = extension === '.css'
-        ? versionedCss(source)
-        : versionedJavaScript(source);
+      const cacheKey = `${filePath}:${stat.mtimeMs}:${BUILD_VERSION}`;
+      let body = minifiedCache.get(cacheKey);
+      if (!body) {
+        const source = await fs.readFile(filePath, 'utf8');
+        const text = extension === '.css'
+          ? versionedCss(source)
+          : versionedJavaScript(source);
+        body = Buffer.from(text, 'utf8');
+        minifiedCache.set(cacheKey, body);
+      }
       res.writeHead(200, securityHeaders({
         'Content-Type': MIME[extension],
-        'Content-Length': Buffer.byteLength(body),
+        'Content-Length': body.length,
         'Cache-Control': cacheControlFor(filePath, url),
         'ETag': `"${BUILD_VERSION}-${stat.size.toString(16)}"`,
         'X-App-Version': BUILD_VERSION,

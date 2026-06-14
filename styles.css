@@ -3573,7 +3573,7 @@ select {
   filter: drop-shadow(10px 14px 0 rgba(0,0,0,.34));
 }
 
-/* La copa (copa.png) es un póster completo: que llene el marco sin el césped. */
+/* La copa (copa.jpg) es un póster completo: que llene el marco sin el césped. */
 .result-win .result-poster { padding: 10px; }
 .result-win .result-poster::after { display: none; }
 .result-win .result-poster .result-art {

@@ -39,6 +39,10 @@ function cardFrame(rarity) {
 export function playerCardHTML(player, opts = {}) {
   const ovr = playerOVR(player);
   const idAttr = opts.idValue ? `data-id="${esc(opts.idValue)}"` : '';
+  // Retrato y bandera son diminutos (KB) y casi siempre visibles al renderizar:
+  // por defecto se cargan eager para que no haya pop-in al abrir el sobre. Solo
+  // las listas largas (p. ej. colección completa) pueden pasar opts.lazy.
+  const imgLoading = opts.lazy ? 'lazy' : 'eager';
   // Estado de baja (lesión tiene prioridad sobre sanción): atenúa la carta, la
   // hace no clicable y muestra el icono correspondiente (igual que el banquillo).
   const injured = Boolean(opts.injured);
@@ -62,13 +66,13 @@ export function playerCardHTML(player, opts = {}) {
       <div class="card-rarity">${RARITY_LABEL[player.rarity]}</div>
     </div>
     <div class="card-portrait" aria-hidden="true">
-      <img src="${esc(portraitPathForPlayer(player))}" alt="" loading="lazy" decoding="async" data-hide-on-error="true" />
+      <img src="${esc(portraitPathForPlayer(player))}" alt="" loading="${imgLoading}" decoding="async" data-hide-on-error="true" />
       <span>${esc(playerInitials(player.name))}</span>
       ${statusIcon}
     </div>
     <div class="card-name">${esc(player.name)}</div>
     <div class="card-meta">
-      <span class="chip nation"><img class="flag-img" src="${esc(flagSrcForNation(player.nation))}" alt="" loading="lazy" decoding="async" />${esc(localizeNation(player.nation))}</span>
+      <span class="chip nation"><img class="flag-img" src="${esc(flagSrcForNation(player.nation))}" alt="" loading="${imgLoading}" decoding="async" />${esc(localizeNation(player.nation))}</span>
       <span class="chip era">${esc(localizeEra(player.era))}</span>
       ${player.trait ? `<span class="chip trait">${esc(localizeTrait(player.trait))}</span>` : ''}
     </div>

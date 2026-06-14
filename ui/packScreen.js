@@ -8,8 +8,9 @@
 import { playerCardHTML, itemCardHTML } from './cards.js';
 import { esc, prefersReducedMotion } from './dom.js';
 import { haptic } from '../match/feedback.js';
-import { UI_ASSETS } from '../data/uiAssets.js';
+import { UI_ASSETS, preloadImages } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
+import { portraitPathForPlayer } from '../data/playerAssets.js';
 import { LINES } from '../data/config.js';
 import { playerOVR } from '../engine/ovr.js';
 import { localizeEra, localizeNation, t } from '../data/i18n.js';
@@ -136,6 +137,12 @@ function dealCard(innerHTML, idValue, i, kind, selectable = true) {
 }
 
 export function renderPlayerPack(root, state, choices, onPick) {
+  // Calienta los retratos y banderas de las cartas que se van a revelar para que
+  // el flip muestre la cara al instante (las cartas viven en un contenedor hidden).
+  preloadImages([
+    ...choices.map((c) => portraitPathForPlayer(c)),
+    ...choices.map((c) => flagSrcForNation(c.nation)),
+  ], { priority: 'high' });
   const body = choices.map((c, i) =>
     dealCard(playerCardHTML(c, { idValue: c.id, disabled: c.selectable === false }), c.id, i, 'player', c.selectable !== false)
   ).join('');
@@ -182,6 +189,7 @@ function nationTeamCardHTML(team) {
 // Sobre de selecciones: primero se elige una selección (cartas con bandera) y
 // después, de su plantel completo, el jugador que se quiera llevar.
 export function renderNationPack(root, state, teams, onPick) {
+  preloadImages(teams.map((team) => flagSrcForNation(team.nation)), { priority: 'high' });
   const body = teams.map((team, i) =>
     dealCard(nationTeamCardHTML(team), team.id, i, 'nation')
   ).join('');
@@ -192,6 +200,10 @@ export function renderNationPack(root, state, teams, onPick) {
 // Segunda etapa: plantel completo de la selección elegida. Las cartas brotan
 // con el mismo reparto escalonado del sobre; las ya poseídas van apagadas.
 function renderNationRoster(root, state, team, onPick) {
+  preloadImages([
+    ...team.players.map((p) => portraitPathForPlayer(p)),
+    ...team.players.map((p) => flagSrcForNation(p.nation)),
+  ], { priority: 'high' });
   const body = team.players.map((p, i) =>
     dealCard(playerCardHTML(p, { idValue: p.id, disabled: p.selectable === false }), p.id, i, 'nation', p.selectable !== false)
   ).join('');

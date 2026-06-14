@@ -15,8 +15,8 @@ export const UI_ASSETS = {
   },
   cards: {
     packBack: 'assets/ui/pixel/pack-back.svg',
-    backPlayer: 'assets/ui/item-player.png', // dorso de carta de jugador
-    backItem: 'assets/ui/item-back.png',     // dorso de carta de objeto
+    backPlayer: 'assets/ui/item-player.jpg', // dorso de carta de jugador
+    backItem: 'assets/ui/item-back.jpg',     // dorso de carta de objeto
     frames: {
       common: 'assets/ui/pixel/card-frame-common.svg',
       rare: 'assets/ui/pixel/card-frame-rare.svg',
@@ -31,9 +31,9 @@ export const UI_ASSETS = {
     gk: 'assets/ui/pixel/stat-gk.svg',
   },
   results: {
-    cup: 'assets/ui/copa.png',     // copa (póster de victoria)
-    tower: 'assets/ui/torre.png',  // torre (progreso / fin de run)
-    win: 'assets/ui/copa.png',
+    cup: 'assets/ui/copa.jpg',     // copa (póster de victoria)
+    tower: 'assets/ui/torre.jpg',  // torre (progreso / fin de run)
+    win: 'assets/ui/copa.jpg',
     winBadge: 'assets/ui/pixel/result-win.svg',
     loss: 'assets/ui/pixel/result-loss.svg',
   },
@@ -54,13 +54,28 @@ export function uiAssetList() {
   return [...new Set(paths)];
 }
 
-export function preloadUiAssets(ImageCtor = globalThis.Image) {
-  if (typeof ImageCtor !== 'function') return [];
-  return uiAssetList().map((src) => {
+// Inicia la descarga de una lista de imágenes en segundo plano (van a la caché
+// HTTP del navegador). Devuelve los objetos Image para conservar sus referencias
+// y que el navegador no aborte las descargas en curso.
+export function preloadImages(srcs, { priority = 'low', ImageCtor = globalThis.Image } = {}) {
+  if (typeof ImageCtor !== 'function' || !srcs) return [];
+  const seen = new Set();
+  const images = [];
+  for (const src of srcs) {
+    if (!src || seen.has(src)) continue;
+    seen.add(src);
     const image = new ImageCtor();
     image.decoding = 'async';
-    image.fetchPriority = src === UI_ASSETS.backgrounds.title ? 'high' : 'low';
+    image.fetchPriority = typeof priority === 'function' ? priority(src) : priority;
     image.src = src;
-    return image;
+    images.push(image);
+  }
+  return images;
+}
+
+export function preloadUiAssets(ImageCtor = globalThis.Image) {
+  return preloadImages(uiAssetList(), {
+    ImageCtor,
+    priority: (src) => (src === UI_ASSETS.backgrounds.title ? 'high' : 'low'),
   });
 }
