@@ -1610,23 +1610,23 @@ select {
   width: 100%;
 }
 
-/* La fila de los dos rankings rompe el ancho del .menu-shell (720px) para llegar
-   casi al borde de la pantalla. Se centra en el viewport sin transform: el borde
-   izquierdo va a (centro del contenedor − mitad del ancho propio) vía margin-left.
-   Como el contenedor —área de grid en el menú, sección en gameover— está centrado
-   en el viewport, su centro es 50vw en ambos casos, así que el resultado queda
-   centrado en pantalla independientemente del ancho del contenedor. justify-self:
-   start ancla el margen al inicio del área (anula el justify-items:center del
-   .menu-shell). El html ya tiene overflow-x:hidden: el desbordamiento de
-   maquetación no genera scroll horizontal. */
+/* La fila de los dos rankings rompe el ancho del .menu-shell (720px) para LLENAR la
+   caja del menú (#app, máx 1080px, centrado en el viewport) sin salirse de ella. El
+   ancho se topa en el contenido de #app —min(1048px, 100vw − 32px de padding)— y el
+   borde izquierdo va a (centro del contenedor − mitad del ancho propio) vía
+   margin-left. Como el contenedor —área de grid en el menú, sección en gameover—
+   comparte centro con #app (50vw), la fila queda centrada y contenida en ambos
+   casos. justify-self:start ancla el margen al inicio del área (anula el
+   justify-items:center del .menu-shell). */
 .menu-rankings {
+  --rankings-w: min(1048px, calc(100vw - 32px));
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  width: min(1440px, 94vw);
+  width: var(--rankings-w);
   align-items: start;
   justify-self: start;
-  margin-left: calc(50% - min(1440px, 94vw) / 2);
+  margin-left: calc(50% - var(--rankings-w) / 2);
 }
 
 .menu-ranking {

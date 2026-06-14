@@ -451,10 +451,11 @@ try {
   await mobile.waitForSelector('.result-screen');
   await mobile.waitForTimeout(500);
   const scoreBox = await mobile.locator('.result-score-card').boundingBox();
-  const posterBox = await mobile.locator('.result-poster').boundingBox();
-  const floorBox = await mobile.locator('.tower-next').boundingBox();
-  assert.ok(scoreBox && posterBox && floorBox && scoreBox.y < posterBox.y, 'Mobile result score must appear first');
-  assert.ok(Math.abs(posterBox.y - floorBox.y) <= 4, 'Mobile cup and floor must share one row');
+  assert.ok(scoreBox, 'Mobile result must show the score card');
+  // En móvil el resultado se centra en el marcador: el póster del resultado y el
+  // panel del piso se ocultan (styles.css: .result-poster, .tower-next { display: none }).
+  assert.ok(!(await mobile.locator('.result-poster').isVisible()), 'Mobile hides the result poster');
+  assert.ok(!(await mobile.locator('.tower-next').isVisible()), 'Mobile hides the floor panel');
   assert.ok(await mobile.locator('.result-score-card .result-scorers').count(), 'Scorers must be inside the score card');
   assert.equal(await mobile.locator('.result-stats').count(), 0, 'Saves must not appear in the result summary');
   await mobile.screenshot({ path: path.join(OUT, 'mobile-result.png'), fullPage: true });

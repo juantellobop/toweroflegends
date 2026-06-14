@@ -135,9 +135,15 @@ const baseLineup = () => ({
   const teamB = { name: 'B', formation: '4-3-3', ratings: { attack: 80, midfield: 80, defense: 80, gk: 80 } };
   const saved = CONFIG.DIRECT_RED_PROB;
   CONFIG.DIRECT_RED_PROB = 1; // cada falta es roja: garantiza expulsiones
-  const r = simularPartido(JSON.parse(JSON.stringify(teamA)), teamB, new RNG(3));
+  // Que la falta la cometa el lado A depende del reparto de jugadas, así que
+  // recorremos semillas hasta una con roja de A en vez de fijar una semilla mágica
+  // (frágil ante cambios en el consumo de RNG del motor).
+  let r = null;
+  for (let seed = 1; seed <= 50 && !(r && r.redsA >= 1); seed++) {
+    r = simularPartido(JSON.parse(JSON.stringify(teamA)), teamB, new RNG(seed));
+  }
   CONFIG.DIRECT_RED_PROB = saved;
-  assert.ok(r.redsA >= 1, 'se registran rojas del equipo del jugador');
+  assert.ok(r && r.redsA >= 1, 'se registran rojas del equipo del jugador');
   assert.equal(r.redsA, r.expulsadosA.length, 'cada roja de A produce un expulsado registrado');
   for (const e of r.expulsadosA) assert.ok(e.uid && e.position, 'el expulsado trae identidad real');
   if (r.redsA >= 4) assert.equal(r.forfeit, 'A', 'cuatro rojas marcan forfeit');
