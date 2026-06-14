@@ -710,11 +710,21 @@ function renderRunBusy(navHint = 'forward') {
 renderMenu();
 
 // Panel admin (#playeredit): vive solo en local/ (ignorado por git) y no se publica.
-// En producción (clon de GitHub) el módulo no existe y el import() falla en silencio:
-// el juego arranca igual, sin panel. El boot local gestiona su hash, su CSS y su init.
-try {
-  const { initAdminBoot } = await import('./local/admin-boot.js');
-  initAdminBoot({ root, renderRoute, renderMenu, getCurrentRoute: () => currentRoute });
-} catch (_) {
-  /* sin panel admin */
+// Solo se intenta cargar cuando el hash es #playeredit, así un jugador normal NUNCA
+// pide ./local/admin-boot.js (en producción no existe: daría 404 y un error de módulo
+// en consola). En producción, si alguien entra a #playeredit, el import() falla y se
+// captura: no hay panel. En local el módulo existe y el boot toma el control.
+const ADMIN_HASH = '#playeredit';
+let adminBootStarted = false;
+async function maybeLoadAdminPanel() {
+  if (adminBootStarted || window.location.hash !== ADMIN_HASH) return;
+  adminBootStarted = true;
+  try {
+    const { initAdminBoot } = await import('./local/admin-boot.js');
+    initAdminBoot({ root, renderRoute, renderMenu, getCurrentRoute: () => currentRoute });
+  } catch (_) {
+    /* sin panel admin (producción): el juego sigue, sin tocar la consola en cada carga */
+  }
 }
+window.addEventListener('hashchange', maybeLoadAdminPanel);
+maybeLoadAdminPanel();
