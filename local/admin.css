@@ -1,0 +1,508 @@
+/* Torre de Leyendas — Estilos del panel de administración (LOCAL, no público).
+   Lo carga local/admin-boot.js solo cuando existe local/ (clon del autor). NO se
+   publica ni pasa por tools/build-css.mjs. Extraído de styles.css conservando el
+   orden de cascada original. Reutiliza variables de tokens.min.css y los
+   keyframes globales (panel-rise, panel-refresh) que sí viven en el CSS público,
+   más la base #app::before (content/position) del CSS público. */
+
+/* Foco y pulsado de filas (antes en la base compartida de botones, styles.css) */
+.admin-player-row:focus-visible {
+  outline: 3px solid var(--arcade-yellow, var(--accent));
+  outline-offset: 4px;
+}
+
+.admin-player-row.is-pressing {
+  transform: translateY(2px) scale(.985) !important;
+  filter: brightness(.96) saturate(1.08);
+}
+
+/* Botón de acceso al admin en el menú */
+.menu-actions .menu-admin-button {
+  width: 100%;
+}
+
+.menu-admin-button {
+  border-radius: 0;
+  border: 3px solid var(--arcade-cyan);
+  background: rgba(7,20,89,.78);
+  color: #fff;
+  font-family: var(--font-pixel);
+  font-weight: 900;
+  text-transform: uppercase;
+  box-shadow: 0 4px 0 var(--arcade-blue-900);
+}
+
+/* Admin */
+.admin-screen {
+  background:
+    radial-gradient(circle at 50% -10%, rgba(255,212,42,.12), transparent 30%),
+    linear-gradient(180deg, rgba(18,58,209,.18), transparent 46%);
+  color: #fff;
+}
+
+.admin-nav {
+  display: flex;
+  align-items: end;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.admin-nav .large-title {
+  margin: 6px 0 0;
+  color: #fff;
+  font-size: clamp(2rem, 4vw, 3rem);
+  text-shadow: 3px 3px 0 var(--arcade-blue-900);
+}
+
+.admin-nav .ghost {
+  border-radius: 0;
+  border: 3px solid var(--arcade-cyan);
+  background: rgba(7,20,89,.82);
+  color: #fff;
+  font-family: var(--font-pixel);
+  box-shadow: 0 4px 0 var(--arcade-blue-900);
+}
+
+.admin-layout {
+  display: grid;
+  grid-template-columns: minmax(270px, 340px) minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.admin-list-panel,
+.admin-editor-panel {
+  padding: 12px;
+}
+
+.admin-list-panel {
+  position: sticky;
+  top: calc(env(safe-area-inset-top) + 12px);
+}
+
+.admin-list-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 124px;
+  gap: 10px;
+}
+
+.admin-list-tools label,
+.admin-player-form label,
+.admin-ovr-display {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  color: rgba(255,255,255,.78);
+  font-size: var(--t-caption-1);
+  font-weight: 800;
+}
+
+.admin-list-tools input,
+.admin-list-tools select,
+.admin-player-form input,
+.admin-player-form select,
+.admin-ovr-display b {
+  width: 100%;
+  min-width: 0;
+  border-radius: 0;
+  border: 3px solid var(--arcade-cyan);
+  background: var(--arcade-paper);
+  color: var(--arcade-blue-900);
+  font: inherit;
+  font-weight: 800;
+  padding: 8px 9px;
+}
+
+.admin-ovr-display b {
+  display: grid;
+  place-items: center;
+  min-height: 42px;
+  font-family: var(--font-pixel);
+  font-size: 1.2rem;
+  color: var(--arcade-red);
+}
+
+.admin-count {
+  margin: 10px 0;
+  color: rgba(255,255,255,.7);
+  font-size: var(--t-caption-1);
+}
+
+.admin-player-list {
+  display: grid;
+  gap: 8px;
+  max-height: calc(100vh - 230px);
+  overflow-y: auto;
+  padding: 2px 4px 12px 2px;
+}
+
+.admin-player-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 9px;
+  align-items: center;
+  min-height: 66px;
+  padding: 7px;
+  border-radius: 0;
+  border: 3px solid rgba(37,230,255,.48);
+  background: rgba(7,20,89,.72);
+  color: #fff;
+  text-align: left;
+}
+
+.admin-player-row.is-selected {
+  border-color: var(--arcade-yellow);
+  box-shadow: 0 0 0 3px var(--arcade-blue-900), 0 0 0 5px rgba(255,212,42,.32);
+}
+
+.admin-player-face {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  border: 3px solid var(--common);
+  background: #009ac6;
+  image-rendering: pixelated;
+}
+
+.admin-player-face.rarity-rare { border-color: var(--rare); }
+.admin-player-face.rarity-epic { border-color: var(--epic); }
+.admin-player-face.rarity-legend { border-color: var(--legend); }
+
+.admin-player-face img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+
+.admin-player-face span {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-pixel);
+  color: var(--arcade-yellow);
+  text-shadow: 2px 2px 0 var(--arcade-blue-900);
+}
+
+.admin-player-main {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.admin-player-main b,
+.admin-player-side b,
+.admin-kicker,
+.admin-editor-head h2,
+.admin-tool-head h3 {
+  font-family: var(--font-pixel);
+}
+
+.admin-player-main b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-player-main small {
+  color: rgba(255,255,255,.66);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-player-side {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+
+.admin-player-side b {
+  color: var(--arcade-yellow);
+  font-size: 1.2rem;
+}
+
+.admin-player-side i {
+  padding: 2px 5px;
+  background: var(--arcade-red);
+  color: #fff;
+  font-size: 10px;
+  font-style: normal;
+}
+
+.admin-editor-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-editor-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+}
+
+.admin-kicker {
+  color: var(--arcade-yellow);
+  text-transform: uppercase;
+  font-size: var(--t-caption-2);
+}
+
+.admin-editor-head h2,
+.admin-tool-head h3 {
+  margin: 4px 0 0;
+  color: #fff;
+  text-shadow: 2px 2px 0 var(--arcade-blue-900);
+  text-transform: uppercase;
+}
+
+.admin-editor-head p {
+  margin: 6px 0 0;
+  color: rgba(255,255,255,.62);
+  overflow-wrap: anywhere;
+}
+
+.admin-card-preview .card {
+  width: 190px;
+  transform: none;
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,.62) inset,
+    0 8px 0 rgba(0,0,0,.26);
+}
+
+.admin-card-preview .card-stats {
+  display: none;
+}
+
+.admin-player-form,
+.admin-portrait-tool {
+  display: grid;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 3px solid rgba(37,230,255,.36);
+}
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-stat-field input {
+  font-family: var(--font-pixel);
+  color: var(--arcade-blue-900);
+}
+
+.admin-form-actions,
+.admin-portrait-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.admin-form-actions button,
+.admin-portrait-actions button {
+  border-radius: 0;
+  font-family: var(--font-pixel);
+  text-transform: uppercase;
+}
+
+.admin-tool-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: end;
+}
+
+.admin-portrait-state,
+#adminPortraitStatus {
+  color: rgba(255,255,255,.68);
+  font-size: var(--t-caption-1);
+}
+
+.admin-portrait-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr);
+  gap: 12px;
+}
+
+.portrait-drop,
+.portrait-result {
+  min-height: 260px;
+  border: 3px dashed rgba(37,230,255,.78);
+  background: rgba(7,20,89,.62);
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.portrait-drop.is-dragging {
+  border-color: var(--arcade-yellow);
+  background: rgba(255,212,42,.14);
+}
+
+.portrait-drop input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.portrait-drop span,
+.portrait-result-label {
+  font-family: var(--font-pixel);
+  color: #fff;
+  text-transform: uppercase;
+  z-index: 1;
+}
+
+.portrait-drop small {
+  color: rgba(255,255,255,.65);
+  z-index: 1;
+}
+
+.portrait-drop img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: var(--arcade-blue-900);
+}
+
+.portrait-result {
+  border-style: solid;
+}
+
+.portrait-result-frame {
+  width: min(192px, 80%);
+  aspect-ratio: 1;
+  border: 4px solid var(--arcade-yellow);
+  background: #009ac6;
+  box-shadow: 0 0 0 4px var(--arcade-blue-900), 0 8px 0 rgba(0,0,0,.28);
+}
+
+.portrait-result-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+
+@media (max-width: 1023px) {
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-list-panel {
+    position: relative;
+    top: auto;
+  }
+
+  .admin-player-list {
+    max-height: 360px;
+  }
+
+  .admin-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-stat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .admin-nav {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .admin-editor-head,
+  .admin-portrait-grid,
+  .admin-list-tools {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-card-preview {
+    display: none;
+  }
+
+  .admin-form-grid,
+  .admin-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-player-row {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+  }
+
+  .portrait-drop,
+  .portrait-result {
+    min-height: 220px;
+  }
+}
+
+/* Pantalla admin: contenedor y fondo (la base #app::before vive en el CSS
+   público; aquí solo el override de fondo del route "admin"). */
+.admin-screen { position: relative; z-index: 0; }
+
+#app[data-route="admin"]::before {
+  background-image:
+    linear-gradient(180deg, rgba(5,12,44,.72), rgba(3,6,22,.92)),
+    radial-gradient(80% 54% at 50% 12%, rgba(255,212,42,.16), transparent 62%),
+    url('assets/ui/background.jpg');
+  filter: saturate(.82) brightness(.86);
+}
+
+/* Animaciones/transiciones de elementos admin (antes compartidas en styles.css).
+   panel-rise y panel-refresh son keyframes definidos en el CSS público. */
+.screen-enter .admin-player-row {
+  animation: panel-rise 500ms var(--ease-emphasis) both;
+}
+
+.admin-player-row {
+  transition:
+    transform var(--dur-fast) var(--ease-emphasis),
+    filter var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    background-color var(--dur-fast) var(--ease-standard),
+    opacity var(--dur-fast) var(--ease-standard);
+}
+
+.admin-player-row.is-selected {
+  filter: saturate(1.12) brightness(1.04);
+}
+
+.screen-refresh .admin-editor-panel {
+  animation: panel-refresh 180ms var(--ease-standard) both;
+}
+
+/* Pulsado: anula el translate del estado is-pressing (igual que en styles.css,
+   debe ir DESPUÉS de la regla de arriba con el translateY). */
+.admin-player-row.is-pressing {
+  transform: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-enter .admin-player-row,
+  .screen-refresh .admin-editor-panel {
+    animation: none;
+  }
+}
