@@ -27,16 +27,6 @@ const STATS_FILE = path.resolve(process.env.STATS_FILE || path.join(path.dirname
 const PRESENCE_TTL_MS = 120_000;
 const PRESENCE_MAX = 5000;
 const presence = new Map();
-const PLAYER_DB_FILE = path.resolve(process.env.PLAYER_DB_FILE || path.join(ROOT, 'data', 'players.js'));
-const PLAYER_PORTRAITS_DIR = path.join(ROOT, 'assets', 'player-portraits');
-const ADMIN_USER = process.env.ADMIN_USER || 'admin';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || crypto.randomBytes(18).toString('base64url');
-const USING_EPHEMERAL_ADMIN_PASSWORD = !process.env.ADMIN_PASSWORD;
-const ADMIN_SESSION_TTL_MS = 8 * 60 * 60 * 1000;
-const adminSessions = new Map(); // token -> expiresAt (ms)
-const FIELD_STAT_KEYS = ['pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'];
-const GK_STAT_KEYS = ['reflexes', 'handling', 'positioning'];
-const TACTICAL_TYPES = ['posesion', 'presion', 'contra'];
 const POSITIONS = new Set(LINES);
 const RARITY_SET = new Set(RARITIES);
 const INDEX_FILE = path.join(ROOT, 'index.html');
@@ -156,8 +146,8 @@ function versionedJavaScript(source) {
     `${prefix}${quote}${withBuildVersion(specifier)}${quote}`;
 
   // El ?v= se inyecta sobre el código aún con espacios (sus regex esperan
-  // `import ... from`); los comentarios se eliminan AL FINAL.
-  const versioned = source
+  // `import ... from`). La minificación/eliminación de comentarios va DESPUÉS.
+  return source
     .replace(
       /(\b(?:import|export)\s+[^;]*?\sfrom\s*)(['"])(\.{1,2}\/[^'"]+)\2/g,
       rewrite
@@ -174,7 +164,6 @@ function versionedJavaScript(source) {
       /(['"])((?:assets|scenes)\/[^'"`\s)]+\.(?:ico|jpe?g|png|svg|webp)(?:\?[^'"]*)?)\1/gi,
       (_, quote, asset) => `${quote}${withBuildVersion(asset)}${quote}`
     );
-  return stripJsComments(versioned);
 }
 
 // --- Eliminación de comentarios del CSS/JS servido --------------------------
@@ -277,10 +266,47 @@ function stripJsComments(src) {
 }
 
 function versionedCss(source) {
-  return stripCssComments(source).replace(
+  // Solo inyecta ?v= en url(); la minificación/eliminación de comentarios va
+  // después (minifyCssSafe). El strip propio queda como red de seguridad.
+  return source.replace(
     /url\(\s*(['"]?)(?!data:|https?:|#)([^'")]+)\1\s*\)/gi,
     (_, quote, asset) => `url(${quote}${withBuildVersion(asset.trim())}${quote})`
   );
+}
+
+// --- Minificación del CSS/JS servido ---------------------------------------
+// Se minifica al vuelo con css-tree (CSS) y terser (JS), cacheado por archivo
+// (BUILD_VERSION + mtime). Si la librería no está disponible o la minificación
+// falla, se cae al strip de comentarios: nunca se sirve algo roto.
+let cssMinifier = null;   // módulo css-tree (o null)
+let jsMinify = null;      // terser.minify (o null)
+try { cssMinifier = await import('css-tree'); } catch (_) { cssMinifier = null; }
+try { ({ minify: jsMinify } = await import('terser')); } catch (_) { jsMinify = null; }
+
+const minifiedCache = new Map(); // key -> string
+
+async function minifyCss(css) {
+  if (cssMinifier) {
+    try {
+      return cssMinifier.generate(cssMinifier.parse(css));
+    } catch (_) { /* fallback abajo */ }
+  }
+  return stripCssComments(css);
+}
+
+async function minifyJs(code) {
+  if (jsMinify) {
+    try {
+      const result = await jsMinify(code, {
+        module: true,
+        compress: true,
+        mangle: true,
+        format: { comments: false },
+      });
+      if (result && typeof result.code === 'string') return result.code;
+    } catch (_) { /* fallback abajo */ }
+  }
+  return stripJsComments(code);
 }
 
 function cacheControlFor(filePath, url) {
@@ -357,13 +383,6 @@ function readBody(req) {
   });
 }
 
-function parseDataUrl(dataUrl) {
-  const match = /^data:(image\/(?:png|jpeg|jpg|webp));base64,([a-z0-9+/=\s]+)$/i.exec(String(dataUrl || ''));
-  if (!match) throw new Error('La imagen subida no tiene un formato válido.');
-  const mime = match[1].toLowerCase().replace('image/jpg', 'image/jpeg');
-  const ext = mime === 'image/png' ? '.png' : mime === 'image/webp' ? '.webp' : '.jpg';
-  return { ext, buffer: Buffer.from(match[2].replace(/\s/g, ''), 'base64') };
-}
 
 function clampText(value, max) {
   return String(value || '').trim().replace(/\s+/g, ' ').slice(0, max);
@@ -425,169 +444,6 @@ async function readRankingFile() {
 async function writeRankingFile(entries) {
   await fs.mkdir(path.dirname(RANKING_FILE), { recursive: true });
   await fs.writeFile(RANKING_FILE, `${JSON.stringify({ entries }, null, 2)}\n`, 'utf8');
-}
-
-function playerDatabaseSource(players) {
-  return `// Torre de Leyendas — Base directa de jugadores.
-// Este archivo es la fuente de verdad del roster jugable. El panel admin lo
-// reescribe directamente cuando se guardan estadisticas o metadatos.
-// Retratos: assets/player-portraits/{id}.png.
-
-export const PLAYERS = ${JSON.stringify(players, null, 2)};
-`;
-}
-
-async function readPlayerDatabase() {
-  const raw = await fs.readFile(PLAYER_DB_FILE, 'utf8');
-  const match = /export\s+const\s+PLAYERS\s*=\s*(\[[\s\S]*\]);?\s*$/.exec(raw);
-  if (!match) throw new Error('No se pudo leer data/players.js como base directa.');
-  const players = JSON.parse(match[1]);
-  if (!Array.isArray(players)) throw new Error('data/players.js no contiene un array de jugadores.');
-  return players;
-}
-
-async function writePlayerDatabase(players) {
-  const tmp = `${PLAYER_DB_FILE}.${process.pid}.${Date.now()}.tmp`;
-  await fs.writeFile(tmp, playerDatabaseSource(players), 'utf8');
-  await fs.rename(tmp, PLAYER_DB_FILE);
-}
-
-function clampStat(value, fallback = 50) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return clampStat(fallback, 50);
-  return Math.max(1, Math.min(99, Math.round(n)));
-}
-
-function cleanText(value, fallback, max = 72) {
-  const text = String(value ?? '').trim();
-  return (text || fallback || '').slice(0, max);
-}
-
-function cleanNullableText(value, max = 48) {
-  const text = String(value ?? '').trim();
-  return text ? text.slice(0, max) : null;
-}
-
-function cloneGroup(group, keys) {
-  if (!group || typeof group !== 'object') return null;
-  const out = {};
-  for (const key of keys) out[key] = clampStat(group[key]);
-  return out;
-}
-
-function defaultFieldStats(base, ovr) {
-  if (base?.stats) return cloneGroup(base.stats, FIELD_STAT_KEYS);
-  return Object.fromEntries(FIELD_STAT_KEYS.map((key) => [key, clampStat(ovr, 60)]));
-}
-
-function defaultGkStats(base, ovr) {
-  if (base?.gk) return cloneGroup(base.gk, GK_STAT_KEYS);
-  return Object.fromEntries(GK_STAT_KEYS.map((key) => [key, clampStat(ovr, 60)]));
-}
-
-function normalizeDbPlayer(player) {
-  const isGK = player.position === 'GK';
-  return {
-    id: player.id,
-    name: player.name,
-    nation: player.nation,
-    era: String(player.era ?? ''),
-    position: player.position,
-    rarity: player.rarity,
-    ovr: playerOVR(player),
-    stats: isGK ? null : { ...player.stats },
-    gk: isGK ? { ...player.gk } : null,
-    trait: player.trait ?? null,
-    tacticalType: player.tacticalType ?? null,
-  };
-}
-
-function sanitizePlayerDraft(draft, base = {}) {
-  if (!draft || typeof draft !== 'object') throw new Error('Jugador inválido.');
-  const position = POSITIONS.has(draft.position) ? draft.position : (base.position || 'MID');
-  const rarity = RARITY_SET.has(draft.rarity) ? draft.rarity : (base.rarity || 'common');
-  const fallbackOVR = clampStat(draft.ovr ?? base.ovr ?? 60);
-  const isGK = position === 'GK';
-  const portraitDataUrl = typeof draft.portraitDataUrl === 'string' && draft.portraitDataUrl.startsWith('data:image/')
-    ? draft.portraitDataUrl
-    : null;
-
-  const clean = {
-    id: base.id || draft.id,
-    name: cleanText(draft.name, base.name || 'Jugador'),
-    nation: cleanText(draft.nation, base.nation || 'Leyendas', 48),
-    era: cleanText(draft.era, base.era || 'Actual', 24),
-    position,
-    rarity,
-    ovr: fallbackOVR,
-    stats: isGK ? null : cloneGroup(draft.stats, FIELD_STAT_KEYS) || defaultFieldStats(base, fallbackOVR),
-    gk: isGK ? cloneGroup(draft.gk, GK_STAT_KEYS) || defaultGkStats(base, fallbackOVR) : null,
-    trait: cleanNullableText(draft.trait),
-    tacticalType: TACTICAL_TYPES.includes(draft.tacticalType) ? draft.tacticalType : null,
-    portraitDataUrl,
-  };
-  clean.ovr = playerOVR(clean);
-  return clean;
-}
-
-async function replacePlayerPortrait(playerId, dataUrl) {
-  if (!dataUrl) return false;
-  const { ext, buffer } = parseDataUrl(dataUrl);
-  if (ext !== '.png') throw new Error('El retrato debe llegar convertido a PNG.');
-  await fs.mkdir(PLAYER_PORTRAITS_DIR, { recursive: true });
-  await fs.writeFile(path.join(PLAYER_PORTRAITS_DIR, `${playerId}.png`), buffer);
-  return true;
-}
-
-function safeEqual(a, b) {
-  const bufA = Buffer.from(String(a ?? ''), 'utf8');
-  const bufB = Buffer.from(String(b ?? ''), 'utf8');
-  if (bufA.length !== bufB.length) {
-    crypto.timingSafeEqual(bufA, bufA); // mantener el coste constante
-    return false;
-  }
-  return crypto.timingSafeEqual(bufA, bufB);
-}
-
-function isAuthorized(req) {
-  const header = req.headers.authorization || '';
-  const match = /^Bearer\s+(.+)$/i.exec(header);
-  if (!match) return false;
-  const token = match[1].trim();
-  const expiresAt = adminSessions.get(token);
-  if (!expiresAt) return false;
-  if (Date.now() > expiresAt) {
-    adminSessions.delete(token);
-    return false;
-  }
-  return true;
-}
-
-function requireAdmin(req, res) {
-  if (isAuthorized(req)) return true;
-  json(res, 401, { error: 'No autorizado. Inicia sesión en el panel de administración.' });
-  return false;
-}
-
-async function handleAdminLogin(req, res) {
-  try {
-    if (req.method !== 'POST') {
-      methodNotAllowed(res);
-      return;
-    }
-    const payload = JSON.parse(await readBody(req));
-    const userOk = safeEqual(payload?.user, ADMIN_USER);
-    const passOk = safeEqual(payload?.password, ADMIN_PASSWORD);
-    if (!(userOk && passOk)) {
-      json(res, 401, { error: 'Usuario o contraseña incorrectos.' });
-      return;
-    }
-    const token = crypto.randomBytes(32).toString('hex');
-    adminSessions.set(token, Date.now() + ADMIN_SESSION_TTL_MS);
-    json(res, 200, { token, expiresIn: ADMIN_SESSION_TTL_MS });
-  } catch (error) {
-    json(res, 400, { error: error.message || String(error) });
-  }
 }
 
 async function handleRanking(req, res) {
@@ -705,95 +561,6 @@ async function handleStats(req, res) {
   }
 }
 
-async function handleAdminPlayer(req, res) {
-  try {
-    if (!requireAdmin(req, res)) return;
-    if (req.method === 'GET') {
-      json(res, 200, {
-        players: await readPlayerDatabase(),
-        file: path.relative(ROOT, PLAYER_DB_FILE),
-      });
-      return;
-    }
-
-    if (req.method === 'PUT' || req.method === 'POST') {
-      const payload = JSON.parse(await readBody(req));
-      const players = await readPlayerDatabase();
-      const draft = payload?.player;
-      const idx = players.findIndex((player) => player.id === draft?.id);
-      if (idx < 0) throw new Error(`Jugador no encontrado: ${draft?.id || ''}`);
-
-      const clean = sanitizePlayerDraft(draft, players[idx]);
-      await replacePlayerPortrait(clean.id, clean.portraitDataUrl);
-      delete clean.portraitDataUrl;
-
-      const saved = normalizeDbPlayer(clean);
-      players[idx] = saved;
-      await writePlayerDatabase(players);
-      json(res, 200, {
-        player: saved,
-        file: path.relative(ROOT, PLAYER_DB_FILE),
-        portrait: `assets/player-portraits/${saved.id}.png`,
-      });
-      return;
-    }
-
-    methodNotAllowed(res);
-  } catch (error) {
-    json(res, 500, { error: error.message || String(error) });
-  }
-}
-
-function runPythonConvert(input, output, playerId, playerName) {
-  return new Promise((resolve, reject) => {
-    const child = spawn('python3', [
-      path.join(ROOT, 'tools', 'convert_admin_portrait.py'),
-      '--input', input,
-      '--output', output,
-      '--player-id', playerId || '',
-      '--player-name', playerName || '',
-    ], { cwd: ROOT });
-    let stdout = '';
-    let stderr = '';
-    child.stdout.on('data', (chunk) => { stdout += chunk.toString(); });
-    child.stderr.on('data', (chunk) => { stderr += chunk.toString(); });
-    child.on('error', reject);
-    child.on('close', (code) => {
-      if (code !== 0) {
-        reject(new Error((stderr || stdout || `Python terminó con código ${code}`).trim()));
-        return;
-      }
-      const line = stdout.trim().split(/\n/).filter(Boolean).at(-1);
-      try {
-        resolve(line ? JSON.parse(line) : {});
-      } catch (_) {
-        resolve({});
-      }
-    });
-  });
-}
-
-async function handlePortrait(req, res) {
-  try {
-    if (!requireAdmin(req, res)) return;
-    const payload = JSON.parse(await readBody(req));
-    const { ext, buffer } = parseDataUrl(payload.imageDataUrl);
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'tdl-admin-portrait-'));
-    const input = path.join(tempDir, `source${ext}`);
-    const output = path.join(tempDir, 'portrait.png');
-    await fs.writeFile(input, buffer);
-    const meta = await runPythonConvert(input, output, payload.playerId, payload.playerName);
-    const png = await fs.readFile(output);
-    await fs.rm(tempDir, { recursive: true, force: true });
-    json(res, 200, {
-      portraitDataUrl: `data:image/png;base64,${png.toString('base64')}`,
-      ...meta,
-    });
-  } catch (error) {
-    json(res, 500, { error: error.message || String(error) });
-  }
-}
-
 async function serveStatic(req, res) {
   let url;
   let pathname;
@@ -832,15 +599,26 @@ async function serveStatic(req, res) {
     const extension = path.extname(filePath).toLowerCase();
     const isCurrentVersion = url.searchParams.get('v') === BUILD_VERSION;
     if (isCurrentVersion && ['.css', '.js', '.mjs'].includes(extension)) {
-      const source = await fs.readFile(filePath, 'utf8');
-      const body = extension === '.css'
-        ? versionedCss(source)
-        : versionedJavaScript(source);
+      // Caché por archivo: BUILD_VERSION es fijo durante el proceso y mtime
+      // invalida en caliente si se edita el fuente (uso local). Así la
+      // minificación (costosa) se hace una vez por archivo.
+      const cacheKey = `${filePath}:${BUILD_VERSION}:${stat.mtimeMs}`;
+      let body = minifiedCache.get(cacheKey);
+      if (body === undefined) {
+        const source = await fs.readFile(filePath, 'utf8');
+        const versioned = extension === '.css'
+          ? versionedCss(source)
+          : versionedJavaScript(source);
+        body = extension === '.css'
+          ? await minifyCss(versioned)
+          : await minifyJs(versioned);
+        minifiedCache.set(cacheKey, body);
+      }
       res.writeHead(200, securityHeaders({
         'Content-Type': MIME[extension],
         'Content-Length': Buffer.byteLength(body),
         'Cache-Control': cacheControlFor(filePath, url),
-        'ETag': `"${BUILD_VERSION}-${stat.size.toString(16)}"`,
+        'ETag': `"${BUILD_VERSION}-${Buffer.byteLength(body).toString(16)}"`,
         'X-App-Version': BUILD_VERSION,
       }));
       if (req.method === 'HEAD') res.end();
@@ -872,6 +650,17 @@ async function serveStatic(req, res) {
   }
 }
 
+// Panel de administración: SOLO en local. Sus endpoints viven en
+// local/admin_api.mjs (ignorado por git, no se publica). Si el módulo no existe
+// (producción / clon público), adminApi queda null y no hay /api/admin/*.
+let adminApi = null;
+try {
+  const mod = await import('../local/admin_api.mjs');
+  adminApi = mod.createAdminApi({ ROOT, json, readBody, methodNotAllowed, POSITIONS, RARITY_SET, playerOVR });
+} catch (_) {
+  adminApi = null;
+}
+
 // Dispatcher reutilizable: lo usa tanto el http nativo (local) como Express (producción).
 export function handleRequest(req, res) {
   if (req.url?.startsWith('/api/ranking')) {
@@ -882,16 +671,10 @@ export function handleRequest(req, res) {
     handleStats(req, res);
     return;
   }
-  if (req.url?.startsWith('/api/admin/login')) {
-    handleAdminLogin(req, res);
-    return;
-  }
-  if (req.url?.startsWith('/api/admin/player')) {
-    handleAdminPlayer(req, res);
-    return;
-  }
-  if (req.method === 'POST' && req.url?.startsWith('/api/admin/portrait')) {
-    handlePortrait(req, res);
+  if (req.url?.startsWith('/api/admin/')) {
+    if (adminApi && adminApi.handle(req, res)) return;
+    // Sin admin (producción): no revelar la existencia del panel.
+    json(res, 404, { error: 'No encontrado.' });
     return;
   }
   if (req.method === 'GET' || req.method === 'HEAD') {
@@ -921,11 +704,13 @@ if (runningDirectly) {
     console.log(`Versión de assets: ${BUILD_VERSION}`);
     console.log(`Ranking persistente: ${RANKING_FILE}`);
     console.log(`Contador de partidas: ${STATS_FILE}`);
-    console.log(`Base directa de jugadores: ${PLAYER_DB_FILE}`);
-    console.log('POST /api/admin/portrait usa tools/convert_admin_portrait.py');
-    console.log(`Panel admin protegido en #playeredit · usuario: ${ADMIN_USER}`);
-    if (USING_EPHEMERAL_ADMIN_PASSWORD) {
-      console.warn(`AVISO: ADMIN_PASSWORD no definida. Contraseña admin temporal: ${ADMIN_PASSWORD}`);
+    if (adminApi) {
+      console.log(`Panel admin (local) protegido en #playeredit · usuario: ${adminApi.ADMIN_USER}`);
+      if (adminApi.USING_EPHEMERAL_ADMIN_PASSWORD) {
+        console.warn(`AVISO: ADMIN_PASSWORD no definida. Contraseña admin temporal: ${adminApi.EPHEMERAL_PASSWORD}`);
+      }
+    } else {
+      console.log('Panel admin: deshabilitado (local/admin_api.mjs no presente).');
     }
   });
 }

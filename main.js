@@ -15,15 +15,11 @@ import { renderBuild } from './ui/buildScreen.js';
 import { renderScouting } from './ui/scoutingScreen.js';
 import { renderMatch } from './ui/matchScreen.js';
 import { renderResult, renderGameOver } from './ui/resultScreen.js';
-import { renderAdmin } from './ui/adminScreen.js';
-import { renderAdminLogin } from './ui/adminLogin.js';
-import { getAdminToken, clearAdminToken } from './data/adminAuth.js';
 import { fetchLeaderboard, openLeaderboardLineup, renderLeaderboard, submitLeaderboardEntry } from './ui/leaderboard.js';
 import { CONFIG, LINES } from './data/config.js';
 import { playerOVR } from './engine/ovr.js';
 import { preloadUiAssets, UI_ASSETS } from './data/uiAssets.js';
 import { flagSrcForNation, FLAG_NATIONS } from './data/flags.js';
-import { initAdminPlayerDatabase } from './data/adminPlayers.js';
 import {
   TEAM_NAME_MAX_LENGTH,
   filterTeamNameInput, hasDisallowedTeamNameChars, sanitizeTeamName,
@@ -711,43 +707,17 @@ function renderRunBusy(navHint = 'forward') {
   }, navHint);
 }
 
-const ADMIN_HASH = '#playeredit';
+renderMenu();
 
-function leaveAdmin() {
-  // Limpia el hash sin disparar hashchange (replaceState no lo emite).
-  window.history.replaceState(null, '', window.location.pathname + window.location.search);
-  renderMenu('back');
-}
-
-function renderAdminScreen(navHint = 'forward') {
-  renderRoute('admin', () => {
-    if (getAdminToken()) {
-      renderAdmin(root, {
-        onBack: () => leaveAdmin(),
-        onLogout: () => { clearAdminToken(); renderAdminScreen('refresh'); },
-      });
-    } else {
-      renderAdminLogin(root, {
-        onSuccess: () => renderAdminScreen('refresh'),
-        onBack: () => leaveAdmin(),
-      });
-    }
-  }, navHint);
-}
-
-function handleAdminHash() {
-  if (window.location.hash === ADMIN_HASH) {
-    if (currentRoute !== 'admin') renderAdminScreen('forward');
-  } else if (currentRoute === 'admin') {
-    renderMenu('back');
-  }
-}
-
-window.addEventListener('hashchange', handleAdminHash);
-
-await initAdminPlayerDatabase();
-if (window.location.hash === ADMIN_HASH) {
-  renderAdminScreen('forward');
-} else {
-  renderMenu();
-}
+// Panel de administración: SOLO en local. Todo su código vive en local/ (que
+// está ignorado por git y no se publica). Carga 100% opcional: si el módulo no
+// existe (producción / clon público), el import falla y el juego sigue sin
+// admin. local/admin-boot.js engancha el hash #playeredit y la navegación.
+import('./local/admin-boot.js')
+  .then((mod) => mod.initAdminBoot({
+    root,
+    renderRoute,
+    renderMenu,
+    getCurrentRoute: () => currentRoute,
+  }))
+  .catch(() => { /* sin admin fuera de local */ });
