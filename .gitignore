@@ -9,6 +9,3 @@ node_modules/
 # Contador global de partidas: lo escribe el servidor en producción y debe
 # sobrevivir a los deploys (si estuviera versionado, cada push lo resetearía).
 data/stats.json
-
-# Panel admin y herramientas: SOLO local, no se publican.
-local/

@@ -6,7 +6,7 @@ import {
   CONFIG, FORMATIONS, LINES, RARITY_BIAS,
   formationLineSlots, slotAcceptsPosition,
 } from '../data/config.js';
-import { getPlayableRoster } from '../data/playableRoster.js';
+import { getPlayableRoster } from '../data/adminPlayers.js';
 import { ITEMS } from '../data/items.js';
 import { RNG, randomSeed } from '../engine/rng.js';
 import { generateOpponent } from '../data/opponents.js';
