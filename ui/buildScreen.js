@@ -84,10 +84,22 @@ function fieldSVG(positions, formation, boost = false) {
     ? links.filter((l) => !l.nation && !l.era).map((l) => lineEl(l, 'boost')).join('')
     : '';
   const nation = links.filter((l) => l.nation).map((l) => lineEl(l, 'strong')).join('');
+  // Glow neón con FILTRO SVG (no CSS `filter`, que no se renderiza sobre líneas
+  // horizontales por su bbox de altura 0). feGaussianBlur preserva el color de
+  // cada trazo, así dorado/violeta/celeste brillan en su tono; la región fija
+  // userSpaceOnUse evita que se recorte el halo. El web tenue queda fuera del
+  // grupo (sin glow). Los enlaces con química se apilan encima: época → boost →
+  // nación (dorado siempre arriba).
   return `
     <svg class="field-bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <filter id="chemGlow" filterUnits="userSpaceOnUse" x="-5" y="-5" width="110" height="110">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="0.85" result="b" />
+          <feMerge><feMergeNode in="b" /><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
       ${PITCH_MARKINGS}
-      <g class="chem-links">${web}${era}${boostLinks}${nation}</g>
+      <g class="chem-links">${web}<g filter="url(#chemGlow)">${era}${boostLinks}${nation}</g></g>
     </svg>`;
 }
 
