@@ -6,6 +6,11 @@ node_modules/
 .env
 .env.*
 
+# Panel admin / editor de jugadores (playeredit) y su tooling de retratos:
+# viven solo en local y NUNCA se publican en GitHub. El juego funciona sin esto;
+# el admin solo está disponible en local vía `npm run serve`.
+local/
+
 # Contador global de partidas: lo escribe el servidor en producción y debe
 # sobrevivir a los deploys (si estuviera versionado, cada push lo resetearía).
 data/stats.json

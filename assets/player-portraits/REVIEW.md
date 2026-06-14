@@ -1,6 +1,6 @@
 # Retratos para revisar
 
-Pasa una mejor foto en `tools/portrait_overrides.json` con la clave `source` (URL de Commons o ruta local) para los que aparezcan aqui.
+Pasa una mejor foto en `local/tools/portrait_overrides.json` con la clave `source` (URL de Commons o ruta local) para los que aparezcan aqui.
 
 
 ## Sin cara detectada (encuadre de respaldo; conviene mejor foto) (66)
