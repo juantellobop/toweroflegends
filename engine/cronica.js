@@ -5,7 +5,7 @@
 // sembrado con el propio resultado).
 
 import { RNG } from './rng.js';
-import { t, tVariant } from '../data/i18n.js';
+import { t, tVariant, tIndexed } from '../data/i18n.js';
 import { playerSurname } from '../data/playerAssets.js';
 
 // Solo cuentan como asistencia los goles de jugada o cabeza: en penaltis y
@@ -248,8 +248,9 @@ export function buildCronica(match, ctx) {
     }, rng));
   }
   // Reorganización forzada por una expulsión de DEF/ARQ: el banquillo cubre el
-  // hueco atrás y un atacante deja su puesto. Se narra el primer cambio.
-  for (const sub of (match.sustitucionesA || []).slice(0, 1)) {
+  // hueco atrás y un atacante deja su puesto. Se narra el primer cambio. Los
+  // cambios por lesión (reason='injury') los cuenta el bloque de lesiones.
+  for (const sub of (match.sustitucionesA || []).filter((s) => s.reason !== 'injury').slice(0, 1)) {
     const key = sub.outName ? 'subSwap' : 'subIn';
     push(sub.minute, tVariant(`press.body.${key}`, {
       team: ctx.teamName,
@@ -258,6 +259,25 @@ export function buildCronica(match, ctx) {
       cause: sub.cause,
       minute: sub.minute,
     }, rng));
+  }
+  // Lesión del partido (siempre del equipo del jugador → ctx.teamName). El tipo
+  // se resuelve por typeIndex para que coincida con la pantalla de resultado.
+  // Si entró un suplente, se narra también su entrada.
+  for (const injury of (match.lesionadosA || []).slice(0, 1)) {
+    push(injury.minute, tVariant(`press.body.injury.${injury.severity}`, {
+      player: injury.name,
+      team: ctx.teamName,
+      minute: injury.minute,
+      type: tIndexed(`injury.types.${injury.severity}`, injury.typeIndex),
+    }, rng));
+    if (injury.inName) {
+      push(injury.minute, tVariant('press.body.injurySub', {
+        inName: injury.inName,
+        outName: injury.name,
+        team: ctx.teamName,
+        minute: injury.minute,
+      }, rng));
+    }
   }
   // Cuatro rojas: el partido se da por perdido (incomparecencia).
   if (match.forfeit) {

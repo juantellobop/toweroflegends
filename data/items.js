@@ -86,8 +86,11 @@ export const ITEMS = [
   },
   {
     id: 'presion_alta', name: 'Presión alta', type: 'tactica', rarity: 'rare', synergyType: 'presion',
-    desc: '+6% de robo: el rival pierde más balones.',
-    effects: [{ target: 'match', stat: 'stealChance', op: 'add', value: 0.12 }],
+    desc: '+4% de robo, −1,5% defensa.',
+    effects: [
+      { target: 'match', stat: 'stealChance', op: 'add', value: 0.08 },
+      { target: 'team', stat: 'defense', op: 'mult', value: 0.97 },
+    ],
   },
   {
     id: 'contraataque', name: 'Contraataque letal', type: 'tactica', rarity: 'rare', synergyType: 'contra',
@@ -133,8 +136,11 @@ export const ITEMS = [
   },
   {
     id: 'gegenpressing', name: 'Gegenpressing', type: 'tactica', rarity: 'epic', synergyType: 'presion',
-    desc: '+5% de robo: asfixia la salida rival.',
-    effects: [{ target: 'match', stat: 'stealChance', op: 'add', value: 0.1 }],
+    desc: '+6% de robo, −2,5% defensa.',
+    effects: [
+      { target: 'match', stat: 'stealChance', op: 'add', value: 0.12 },
+      { target: 'team', stat: 'defense', op: 'mult', value: 0.95 },
+    ],
   },
   {
     id: 'contragolpe_ensayado', name: 'Contragolpe ensayado', type: 'tactica', rarity: 'rare', synergyType: 'contra',

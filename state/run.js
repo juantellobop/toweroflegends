@@ -268,6 +268,17 @@ export function isSuspended(player) {
   return (player && player.banMatches > 0) || false;
 }
 
+// Un jugador lesionado (moderada o peor) está de baja varios partidos. Las
+// lesiones simples no dejan baja (injuryMatches = 0): solo retiran del partido.
+export function isInjured(player) {
+  return (player && player.injuryMatches > 0) || false;
+}
+
+// No disponible para alinearse: sancionado o lesionado.
+export function isUnavailable(player) {
+  return isSuspended(player) || isInjured(player);
+}
+
 function hasAlignedDuplicate(state, player) {
   return LINES.some((line) =>
     (state.starting11[line] || []).some((p) => p && p.id === player.id && p.uid !== player.uid)
@@ -428,7 +439,7 @@ export function autoFillStarting11(state) {
   const bySlot = new Map();
   for (const slot of allSlots.slice().sort((a, b) => a.accepts.length - b.accepts.length)) {
     const player = state.squad
-      .filter((p) => slot.accepts.includes(p.position) && !used.has(p.id) && !isSuspended(p))
+      .filter((p) => slot.accepts.includes(p.position) && !used.has(p.id) && !isUnavailable(p))
       .sort((a, b) =>
         (playerOVR(b) - playerOVR(a)) ||
         ((b.position === slot.line ? 1 : 0) - (a.position === slot.line ? 1 : 0))
@@ -469,6 +480,7 @@ export function togglePlayerInLineup(state, player) {
     return { placed: false };
   }
 
+  if (isInjured(player)) return { placed: false, injured: true };
   if (isSuspended(player)) return { placed: false, suspended: true };
   if (hasAlignedDuplicate(state, player)) return { placed: false, duplicate: true };
 
@@ -480,9 +492,9 @@ export function togglePlayerInLineup(state, player) {
 // Coloca un jugador en un slot concreto de su línea. Sirve para drag & drop:
 // desde banquillo coloca/reemplaza; desde el campo reordena dentro de la línea.
 export function placePlayerInLineup(state, player, line = player.position, slotIndex = 0) {
-  // Un sancionado que viene del banquillo no puede entrar a la táctica.
-  if (isSuspended(player) && !starterLineFor(state, player)) {
-    return { placed: false, suspended: true };
+  // Un sancionado o lesionado que viene del banquillo no puede entrar a la táctica.
+  if (isUnavailable(player) && !starterLineFor(state, player)) {
+    return { placed: false, suspended: isSuspended(player), injured: isInjured(player) };
   }
   const plan = evaluatePlacement(state, player, line, slotIndex);
   if (!plan) {
@@ -543,8 +555,9 @@ export function liveItemDelta(state) {
 
 // Genera el sobre de jugador del nivel actual (cartas a elegir).
 export function rollPlayerPack(state) {
-  const meta = metaBonuses(state.items);
-  const count = (state.pendingPlayerPack ?? CONFIG.PACK_EMPATE) + meta.extraPlayerCard;
+  // Los extras de reliquias ya están incluidos en pendingPlayerPack (los aplica
+  // rewardFor al calcular la recompensa); aquí no se vuelven a sumar.
+  const count = state.pendingPlayerPack ?? CONFIG.PACK_EMPATE;
   state.playerChoices = drawPlayerPack(state.roster || getPlayableRoster(), state.squad, count, CONFIG.PACK_BAND_WEIGHTS, state.rng);
   return state.playerChoices;
 }
@@ -601,8 +614,9 @@ export function rollNationPack(state) {
 
 // Genera el sobre de objeto del nivel actual.
 export function rollItemPack(state) {
-  const meta = metaBonuses(state.items);
-  const count = (state.pendingItemPack ?? CONFIG.ITEM_PACK_BASE) + meta.extraItemCard;
+  // Los extras de reliquias ya están incluidos en pendingItemPack (los aplica
+  // rewardFor al calcular la recompensa); aquí no se vuelven a sumar.
+  const count = state.pendingItemPack ?? CONFIG.ITEM_PACK_BASE;
   const bias = state.pendingBias || RARITY_BIAS.inicial;
   state.itemChoices = drawCards(ITEMS, count, bias, state.rng);
   return state.itemChoices;
@@ -648,9 +662,9 @@ export function playMatch(state) {
     formation: state.formation,
     starting11: state.starting11,
     items: state.items,
-    // Banquillo disponible para sustituir tras una expulsión (suplentes que no
-    // están en el once y no están sancionados).
-    bench: state.squad.filter((p) => !isStarter(state, p) && !isSuspended(p)),
+    // Banquillo disponible para sustituir tras una expulsión o lesión (suplentes
+    // que no están en el once y están disponibles).
+    bench: state.squad.filter((p) => !isStarter(state, p) && !isUnavailable(p)),
   };
   const result = simularPartido(team, state.opponent, matchRng);
   // Regla oculta: el primer partido de la torre es imposible de perder; como
@@ -693,26 +707,42 @@ function forceAtLeastDraw(result) {
   return result;
 }
 
-// Procesa las sanciones por tarjeta roja: primero descuenta un partido a quien
-// ya estaba sancionado (cumplió la pena en este partido) y luego sanciona a los
-// expulsados de este partido. El orden garantiza que el recién expulsado se
-// pierde exactamente el siguiente partido. A los expulsados que estuvieran en el
-// once se los envía al banquillo.
+// Vacía el hueco de un jugador en el once (en su sitio), si estaba alineado.
+function clearLineupSlot(state, uid) {
+  const line = LINES.find((L) => (state.starting11[L] || []).some((q) => q && q.uid === uid));
+  if (!line) return;
+  const arr = state.starting11[line];
+  const idx = arr.findIndex((q) => q && q.uid === uid);
+  if (idx >= 0) arr[idx] = null;
+}
+
+// Procesa las ausencias por tarjeta roja y por lesión: primero descuenta un
+// partido a quien ya estaba sancionado o lesionado (cumplió la baja en este
+// partido) y luego aplica las nuevas ausencias del partido recién jugado. El
+// orden garantiza que el recién ausente se pierde exactamente los siguientes
+// partidos. A los que estuvieran en el once se los envía al banquillo.
 function applySuspensions(state) {
   for (const p of state.squad) {
     if (p.banMatches > 0) p.banMatches -= 1;
+    if (p.injuryMatches > 0) p.injuryMatches -= 1;
   }
   const expulsados = state.lastMatch.expulsadosA || [];
   for (const { uid } of expulsados) {
     const player = state.squad.find((p) => p.uid === uid);
     if (!player) continue;
     player.banMatches = 1;
-    const line = LINES.find((L) => (state.starting11[L] || []).some((q) => q && q.uid === uid));
-    if (line) {
-      const arr = state.starting11[line];
-      const idx = arr.findIndex((q) => q && q.uid === uid);
-      if (idx >= 0) arr[idx] = null; // hueco del sancionado, en su sitio
-    }
+    clearLineupSlot(state, uid); // hueco del sancionado, en su sitio
+  }
+  // Lesiones: la simple (ban 0) solo retira en el partido, sigue disponible. Las
+  // demás dejan al jugador de baja varios partidos y vacían su puesto del once.
+  const lesionados = state.lastMatch.lesionadosA || [];
+  for (const { uid, severity } of lesionados) {
+    const ban = CONFIG.INJURY_BAN[severity] || 0;
+    if (!ban) continue;
+    const player = state.squad.find((p) => p.uid === uid);
+    if (!player) continue;
+    player.injuryMatches = ban;
+    clearLineupSlot(state, uid);
   }
 }
 

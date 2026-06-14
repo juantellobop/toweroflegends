@@ -25,7 +25,8 @@ function normalizeLineup(raw) {
     const line = LINES.includes(player?.line) ? player.line : player.position;
     const ovr = Math.max(0, Math.min(199, Math.round(Number(player?.ovr) || 0)));
     const rarity = String(player?.rarity || '').trim().slice(0, 12);
-    return { name, position: player.position, line, ovr, rarity };
+    const expelled = Boolean(player?.expelled);
+    return { name, position: player.position, line, ovr, rarity, ...(expelled ? { expelled } : {}) };
   }).filter(Boolean);
   return players.length ? players : null;
 }
@@ -131,7 +132,7 @@ export function renderLeaderboard(entries, options = {}) {
 
 function lineupChip(player) {
   return `
-    <div class="field-chip scout-chip${player.rarity ? ` filled rarity-${esc(player.rarity)}` : ''}">
+    <div class="field-chip scout-chip${player.rarity ? ` filled rarity-${esc(player.rarity)}` : ''}${player.expelled ? ' chip-expelled' : player.injured ? ' chip-injured' : ''}">
       <span class="chip-face" aria-hidden="true">
         <img src="${esc(portraitPathForName(player.name))}" alt="" loading="lazy" decoding="async" data-hide-on-error="true" />
         <span>${esc(playerInitials(player.name))}</span>

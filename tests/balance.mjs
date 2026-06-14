@@ -62,7 +62,9 @@ const gloves = item('guantes_magicos');
 assert.deepEqual(effectiveItemEffects([gloves, gloves, gloves]).map((e) => e.value), [3, 1.5, 0.75]);
 assert.equal(applyItemsToRatings({ attack: 50, midfield: 50, defense: 50, gk: 50 }, [gloves, gloves, gloves]).gk, 55.25);
 const pressure = item('presion_alta');
-assert.equal(matchStealBonus([pressure, pressure, pressure]), 0.105);
+// 0.08 × ITEM_POWER_SCALE (0.5) × serie geométrica de copias (1 + 0.5 + 0.25) = 0.07.
+assert.ok(Math.abs(matchStealBonus([pressure, pressure, pressure]) - 0.07) < 1e-9,
+  `robo de 3 presión alta = ${matchStealBonus([pressure, pressure, pressure])}`);
 assert.equal(item('suplentes_lujo'), undefined);
 assert.equal(item('ojeador'), undefined);
 

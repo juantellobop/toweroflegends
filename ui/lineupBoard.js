@@ -18,6 +18,10 @@ export const FORMATION_LINE_TOP = {
   '4-3-1-2': { GK: 91, DEF: 72, MID: 51, ENG: 31, FWD: 9 },
   // 4-2-3-1: pivotes (MID) por detrás de la línea de creación (ENG) y el delantero.
   '4-2-3-1': { GK: 91, DEF: 72, MID: 52, ENG: 30, FWD: 9 },
+  // 3-2-4-1: zaga de 3, dos mediocentros (MID), la línea ofensiva de 4 (ENG) y el 9.
+  // Mismo reparto vertical que el 4-2-3-1 (5 filas equiespaciadas ~20%) para que
+  // las cartas no se pisen y el tablero quede consistente entre dibujos de 4 líneas.
+  '3-2-4-1': { GK: 91, DEF: 72, MID: 52, ENG: 30, FWD: 9 },
 };
 
 // Ajuste fino (dx/dy en % del campo) por hueco concreto, sobre la posición de su
@@ -59,8 +63,10 @@ function spreadLeft(n, line, formation) {
   // Trío de mediocampo compacto (interiores cerca del pivote): mismo esquema
   // en 4-3-3, 5-3-2 y 4-3-1-2.
   if (['4-3-3', '5-3-2', '4-3-1-2'].includes(formation) && line === 'MID' && n === 3) return [22, 50, 78];
-  if ((formation === '4-2-3-1' || formation === '4-2-4') && line === 'MID' && n === 2) return [30, 70]; // pivotes
+  if ((formation === '4-2-3-1' || formation === '4-2-4' || formation === '3-2-4-1') && line === 'MID' && n === 2) return [30, 70]; // pivotes / mediocentros
   if (formation === '4-2-3-1' && line === 'ENG' && n === 3) return [18, 50, 82]; // creación
+  // 3-2-4-1: la línea de 4 (extremos abiertos, enganches por dentro) abre el ancho.
+  if (formation === '3-2-4-1' && line === 'ENG' && n === 4) return [12, 38, 62, 88];
   if (line === 'FWD') {
     // La dupla va abierta (4-4-2, 3-5-2, 5-3-2): con [42,58] las dos cartas
     // se tocaban y el enlace de química entre ellas quedaba oculto.

@@ -26,6 +26,15 @@ export const CONFIG = {
   YELLOW_PROB: 0.62, // prob. de que una falta se sancione con amarilla (si no es roja directa)
   DANGEROUS_FOUL_MULT: 1.8, // las faltas peligrosas (tiro libre) multiplican el riesgo de tarjeta
 
+  // --- Lesiones ---
+  // Un solo sorteo por partido reparte estas bandas (mutuamente excluyentes): a
+  // lo sumo hay una lesión por encuentro. El lesionado se retira en el acto y un
+  // suplente ocupa su puesto el resto del partido (recalcula ratings y química).
+  // INJURY_BAN = partidos que se pierde DESPUÉS (simple = 0: solo sale en este).
+  INJURY_PROB: { simple: 0.15, moderada: 0.075, grave: 0.015, muy_grave: 0.005 },
+  INJURY_BAN: { simple: 0, moderada: 1, grave: 3, muy_grave: 6 },
+  INJURY_TYPE_COUNT: 4, // tipos de lesión por grado (rango del typeIndex guardado)
+
   // --- Vidas / fin de run ---
   LIVES: 1, // 1 = perder termina la run; 3 = sistema de vidas
 
@@ -142,6 +151,9 @@ export const FORMATIONS = {
   '4-3-1-2': { GK: 1, DEF: 4, MID: 4, FWD: 2 },
   '3-4-3': { GK: 1, DEF: 3, MID: 4, FWD: 3 },
   '4-2-4': { GK: 1, DEF: 4, MID: 2, FWD: 4 },
+  // 3-2-4-1: 3 centrales, y un mediocampo de 6 = 2 mediocentros (MID, corte) +
+  // la línea de 4 (ENG): 2 extremos por fuera y 2 enganches por dentro, tras el 9.
+  '3-2-4-1': { GK: 1, DEF: 3, MID: 6, FWD: 1 },
 };
 
 // Identidad de cada formación: multiplicadores modestos (±2-6%) a los ratings de
@@ -156,6 +168,7 @@ export const FORMATION_MODIFIERS = {
   '5-3-2': { attack: 0.95, midfield: 0.99, defense: 1.06 }, // defensivo
   '4-3-1-2': { attack: 1.02, midfield: 1.04, defense: 0.97 }, // creativo (enganche)
   '4-2-4': { attack: 1.08, midfield: 0.93, defense: 0.98 }, // ataque total, medio puenteado
+  '3-2-4-1': { attack: 1.04, midfield: 1.05, defense: 0.94 }, // presión: medio poblado, zaga de 3
 };
 
 // Tipo/identidad de juego que proyecta cada dibujo. Se usa para la cohesión de
@@ -164,7 +177,7 @@ export const FORMATION_MODIFIERS = {
 // propios trade-offs (FORMATION_MODIFIERS).
 export const FORMATION_TYPE = {
   '3-5-2': 'posesion', '4-3-1-2': 'posesion', '4-2-3-1': 'posesion',
-  '4-3-3': 'presion', '3-4-3': 'presion',
+  '4-3-3': 'presion', '3-4-3': 'presion', '3-2-4-1': 'presion',
   '5-3-2': 'contra', '4-4-2': 'contra', '4-2-4': 'contra',
 };
 
@@ -227,6 +240,13 @@ export const SLOT_PROFILES = {
     MID: ['pivote', 'pivote'],
     FWD: ['extremo', 'delantero', 'delantero', 'extremo'],
   },
+  '3-2-4-1': {
+    DEF: ['central', 'central', 'central'],
+    // 0-1 = mediocentros de corte; 2-5 = línea de 4 (extremo · enganche ·
+    // enganche · extremo) por delante, todos puntúan como ENG.
+    MID: ['pivote', 'pivote', 'extremo', 'mediapunta', 'mediapunta', 'extremo'],
+    FWD: ['delantero'],
+  },
 };
 
 // Perfil por defecto cuando la formación no define uno para el hueco.
@@ -274,6 +294,16 @@ export const FORMATION_SLOT_RULES = {
       3: { accepts: ['FWD', 'MID'], role: 'FWD' }, // punta derecha
     },
   },
+  '3-2-4-1': {
+    MID: {
+      // 0-1 = mediocentros (MID puro). 2-5 = línea ofensiva de 4 (extremos y
+      // enganches): admiten medios o delanteros y puntúan como enganche.
+      2: { accepts: ['MID', 'FWD'], role: 'ENG' },
+      3: { accepts: ['MID', 'FWD'], role: 'ENG' },
+      4: { accepts: ['MID', 'FWD'], role: 'ENG' },
+      5: { accepts: ['MID', 'FWD'], role: 'ENG' },
+    },
+  },
 };
 
 // Enlaces de química extra por formación: pares de huecos (línea, slotIndex)
@@ -300,10 +330,26 @@ export const CHEM_FORMATION_LINKS = {
     { a: ['MID', 0], b: ['FWD', 0] },
     { a: ['MID', 3], b: ['FWD', 2] },
   ],
+  // 3-2-4-1: enganches y extremos (toda la línea de 4 es rol ENG) ya juegan
+  // química con el delantero por el mecanismo de enganches, sin enlace extra.
 };
 
 export function chemFormationLinks(formation) {
   return CHEM_FORMATION_LINKS[formation] || [];
+}
+
+// Pares de huecos de una MISMA línea que el dibujo declara SIN química entre sí,
+// rompiendo la clique completa que une por defecto a toda la línea. En el 3-2-4-1
+// los mediocentros (huecos 0,1) y los extremos (huecos 2,5) son bandas distintas
+// del mediocampo y no enlazan: solo lo hacen a través de los enganches (3,4).
+export const CHEM_LINE_BREAKS = {
+  '3-2-4-1': {
+    MID: [[0, 2], [0, 5], [1, 2], [1, 5]],
+  },
+};
+
+export function chemLineBreaks(formation, line) {
+  return CHEM_LINE_BREAKS[formation]?.[line] || [];
 }
 
 export function formationLineSlots(formation, line) {

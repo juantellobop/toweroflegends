@@ -39,12 +39,23 @@ function cardFrame(rarity) {
 export function playerCardHTML(player, opts = {}) {
   const ovr = playerOVR(player);
   const idAttr = opts.idValue ? `data-id="${esc(opts.idValue)}"` : '';
+  // Estado de baja (lesión tiene prioridad sobre sanción): atenúa la carta, la
+  // hace no clicable y muestra el icono correspondiente (igual que el banquillo).
+  const injured = Boolean(opts.injured);
+  const suspended = Boolean(opts.suspended) && !injured;
+  const unavailable = injured || suspended;
   const cls = ['card', 'player-card', `rarity-${player.rarity}`];
   if (opts.selected) cls.push('selected');
-  if (opts.clickable) cls.push('clickable');
+  if (opts.clickable && !unavailable) cls.push('clickable');
   if (opts.disabled) cls.push('disabled-card');
+  if (unavailable) cls.push('card--unavailable');
+  const statusIcon = injured
+    ? `<span class="card-injury" aria-hidden="true"></span><span class="card-injury-count" aria-hidden="true">${opts.injuryMatches ?? ''}</span>`
+    : suspended
+      ? `<span class="card-redcard" aria-hidden="true"></span>`
+      : '';
   return `
-  <div class="${cls.join(' ')}" ${idAttr} style="--card-frame:url('${esc(cardFrame(player.rarity))}')" ${opts.disabled ? 'aria-disabled="true"' : ''}>
+  <div class="${cls.join(' ')}" ${idAttr} style="--card-frame:url('${esc(cardFrame(player.rarity))}')" ${opts.disabled || unavailable ? 'aria-disabled="true"' : ''}>
     <div class="card-head">
       <div class="card-ovr">${ovr}</div>
       <div class="card-pos">${POSITION_LABEL[player.position]}</div>
@@ -53,6 +64,7 @@ export function playerCardHTML(player, opts = {}) {
     <div class="card-portrait" aria-hidden="true">
       <img src="${esc(portraitPathForPlayer(player))}" alt="" loading="lazy" decoding="async" data-hide-on-error="true" />
       <span>${esc(playerInitials(player.name))}</span>
+      ${statusIcon}
     </div>
     <div class="card-name">${esc(player.name)}</div>
     <div class="card-meta">

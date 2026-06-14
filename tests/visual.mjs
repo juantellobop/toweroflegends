@@ -238,7 +238,7 @@ async function assertCenteredForwards(page) {
   }
 
   for (const formation of ['4-4-2', '3-5-2', '5-3-2']) {
-    await page.click(`.formation-seg .seg[data-formation="${formation}"]`);
+    await page.selectOption('#formationSelect', formation);
     await page.waitForTimeout(120);
     const xs = await page.locator('.chip-anchor[data-line="FWD"]').evaluateAll((nodes) =>
       nodes.map((node) => parseFloat(node.style.left)).sort((a, b) => a - b)
@@ -252,7 +252,7 @@ async function assertCenteredForwards(page) {
 
   // Hueco mínimo entre fichas de una misma línea: el enlace de química nunca
   // queda tapado por dos cartas vecinas (líneas de 5 incluidas).
-  await page.click('.formation-seg .seg[data-formation="3-5-2"]');
+  await page.selectOption('#formationSelect', '3-5-2');
   await page.waitForTimeout(120);
   const midXs = await page.locator('.chip-anchor[data-line="MID"]').evaluateAll((nodes) =>
     nodes.map((node) => parseFloat(node.style.left)).sort((a, b) => a - b)
@@ -261,7 +261,7 @@ async function assertCenteredForwards(page) {
   for (let i = 1; i < midXs.length; i++) {
     assert.ok(midXs[i] - midXs[i - 1] >= 19.5, `3-5-2 midfield chips too close: ${midXs.join(', ')}`);
   }
-  await page.click('.formation-seg .seg[data-formation="4-3-3"]');
+  await page.selectOption('#formationSelect', '4-3-3');
   await page.waitForTimeout(120);
   const xs433 = await page.locator('.chip-anchor[data-line="FWD"]').evaluateAll((nodes) =>
     nodes.map((node) => parseFloat(node.style.left)).sort((a, b) => a - b)
@@ -269,7 +269,7 @@ async function assertCenteredForwards(page) {
   assert.equal(xs433.length, 3, '4-3-3 must have three attacking slots');
   assert.ok(xs433[0] <= 25 && xs433[1] >= 45 && xs433[1] <= 55 && xs433[2] >= 75, `4-3-3 forwards must be wide-center-wide, got ${xs433.join(', ')}`);
 
-  await page.click('.formation-seg .seg[data-formation="4-3-1-2"]');
+  await page.selectOption('#formationSelect', '4-3-1-2');
   await page.waitForTimeout(120);
   const slots4312 = await page.locator('.chip-anchor').evaluateAll((nodes) =>
     nodes.map((node) => ({
@@ -289,7 +289,7 @@ async function assertCenteredForwards(page) {
   assert.ok(fwds4312.some((slot) => slot.left <= 30) && fwds4312.some((slot) => slot.left >= 70), `4-3-1-2 forwards must be separated, got ${JSON.stringify(fwds4312)}`);
   await assertNoFieldChipOverlap('4-3-1-2');
 
-  await page.click('.formation-seg .seg[data-formation="3-4-3"]');
+  await page.selectOption('#formationSelect', '3-4-3');
   await page.waitForTimeout(120);
   const defs343 = await page.locator('.chip-anchor[data-line="DEF"]').evaluateAll((nodes) =>
     nodes.map((node) => parseFloat(node.style.left)).sort((a, b) => a - b)
@@ -302,7 +302,7 @@ async function assertCenteredForwards(page) {
   assert.equal(fwds343.length, 3, '3-4-3 must have three attacking slots');
   assert.ok(fwds343[0] <= 25 && fwds343[1] >= 45 && fwds343[1] <= 55 && fwds343[2] >= 75, `3-4-3 forwards must be wide-center-wide, got ${fwds343.join(', ')}`);
 
-  await page.click('.formation-seg .seg[data-formation="4-3-3"]');
+  await page.selectOption('#formationSelect', '4-3-3');
   await page.waitForTimeout(120);
 }
 

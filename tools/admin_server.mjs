@@ -277,7 +277,8 @@ function sanitizeRankingLineup(raw) {
     const line = POSITIONS.has(player?.line) ? player.line : player.position;
     const ovr = Math.max(0, Math.min(199, Math.round(Number(player?.ovr) || 0)));
     const rarity = RARITY_SET.has(player?.rarity) ? player.rarity : '';
-    return { name, position: player.position, line, ovr, rarity };
+    const expelled = player?.expelled === true;
+    return { name, position: player.position, line, ovr, rarity, ...(expelled ? { expelled: true } : {}) };
   }).filter(Boolean);
   return players.length ? players : null;
 }

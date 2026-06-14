@@ -4,6 +4,8 @@
    El cristal (Liquid Glass) vive solo en la capa de navegación / marcador. */
 
 :root {
+  /* Icono de lesión: cruz pixel-art con capas (negro · granate · ámbar · rojo). */
+  --injury-cross: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' shape-rendering='crispEdges'><path d='M8 2H16V8H22V16H16V22H8V16H2V8H8Z' fill='%23140a0a'/><path d='M8 2H16V8H22V16H16V22H8V16H2V8H8Z' fill='%237c1722' transform='translate(0.96 0.96) scale(0.92)'/><path d='M8 2H16V8H22V16H16V22H8V16H2V8H8Z' fill='%23f7a324' transform='translate(2.4 2.4) scale(0.8)'/><path d='M8 2H16V8H22V16H16V22H8V16H2V8H8Z' fill='%23e8472b' transform='translate(3.6 3.6) scale(0.7)'/></svg>");
   --bg:     var(--bg-grouped);
   --bg2:    var(--fill-secondary);
   --panel:  var(--bg-tertiary);
@@ -1078,8 +1080,6 @@ select {
 .chem-pill span { font-size: var(--t-caption-2); color: var(--arcade-yellow); }
 .chem-pill b { font-family: var(--font-rounded); font-size: var(--t-title-3); color: var(--success); }
 
-.header-pills { display: flex; align-items: stretch; gap: var(--space-3); }
-
 /* Aporte de objetos junto al rating del equipo */
 .rt-valwrap { display: inline-flex; align-items: baseline; gap: 4px; }
 .rt-delta { font-size: var(--t-caption-2); font-weight: 800; font-family: var(--font-rounded); line-height: 1; }
@@ -1111,8 +1111,6 @@ select {
 }
 .item-stack-note { margin-top: 4px; font-size: var(--t-caption-2); color: var(--label-secondary); font-style: italic; }
 .tactic-pill b { color: var(--label-primary); font-size: var(--t-callout); }
-
-.formation-seg { margin-bottom: var(--space-4); }
 
 .opponent-brief {
   width: 100%; display: flex; align-items: center; gap: var(--space-3);
@@ -1214,7 +1212,16 @@ select {
 
 .slot-picker { border-radius: var(--radius-l); padding: var(--space-4); margin-top: var(--space-4); }
 .picker-head { font-size: var(--t-headline); font-weight: 600; margin-bottom: var(--space-3); }
-.picker-grid { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-3); }
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.picker-grid .card { width: 100%; min-width: 0; }
+@media (max-width: 760px) {
+  .picker-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 
 .bench-strip { display: flex; gap: var(--space-2); overflow-x: auto; padding-bottom: var(--space-2); -webkit-overflow-scrolling: touch; }
 .bench-item {
@@ -1237,6 +1244,24 @@ select {
   position: absolute; top: 4px; right: 4px; width: 13px; height: 18px;
   border-radius: 2px; background: #d11a1a; border: 1px solid rgba(0,0,0,.45);
   box-shadow: 0 1px 2px rgba(0,0,0,.4); rotate: 8deg; pointer-events: none;
+}
+/* Lesionado: cruz médica pixel-art (capas negro/granate/ámbar/rojo), estática. */
+.bench-item--injured { cursor: not-allowed; opacity: .62; border-top-color: #e8472b; }
+.bench-injury {
+  position: absolute; top: 4px; right: 4px; width: 21px; height: 21px;
+  pointer-events: none;
+  background: var(--injury-cross) center / contain no-repeat;
+  image-rendering: pixelated;
+}
+/* Nº de partidos de baja restantes, flotando arriba a la derecha de la cruz. */
+.bench-injury-count {
+  position: absolute; top: 1px; right: 1px; z-index: 2;
+  min-width: 13px; height: 14px; padding: 0 2px;
+  display: flex; align-items: center; justify-content: center;
+  background: #140a0a; color: #fff; border-radius: 3px;
+  border: 1px solid rgba(0,0,0,.45);
+  font-family: var(--font-pixel); font-size: 9px; line-height: 1;
+  pointer-events: none;
 }
 
 .items-fold { margin: var(--space-4) 0; }
@@ -2442,6 +2467,28 @@ select {
   text-shadow: 2px 2px 0 #071459;
 }
 
+/* Carta no disponible (lesionado/sancionado) en el selector de hueco: atenuada,
+   con el icono de estado y, en lesión, el nº de partidos de baja arriba a la
+   derecha de la cruz (igual criterio que el banquillo). Estado estático. */
+.card--unavailable { opacity: .5; filter: grayscale(.6); cursor: not-allowed; }
+.card-injury {
+  position: absolute; top: 6px; right: 6px; width: 28px; height: 28px;
+  background: var(--injury-cross) center / contain no-repeat; image-rendering: pixelated;
+  z-index: 3; pointer-events: none;
+}
+.card-injury-count {
+  position: absolute; top: 0; right: 0; z-index: 4;
+  min-width: 16px; height: 17px; padding: 0 3px;
+  display: flex; align-items: center; justify-content: center;
+  background: #140a0a; color: #fff; border-radius: 3px; border: 1px solid rgba(0,0,0,.5);
+  font-family: var(--font-pixel); font-size: 10px; line-height: 1; pointer-events: none;
+}
+.card-redcard {
+  position: absolute; top: 6px; right: 6px; width: 18px; height: 24px;
+  border-radius: 2px; background: #d11a1a; border: 1px solid rgba(0,0,0,.5);
+  box-shadow: 0 1px 2px rgba(0,0,0,.4); rotate: 8deg; z-index: 3; pointer-events: none;
+}
+
 .card-name {
   min-height: 2.25em;
   font-weight: 900;
@@ -2675,8 +2722,8 @@ select {
 }
 
 /* Ratings en la columna lateral (solo desktop; en móvil la columna se disuelve
-   y los ratings conservan su barra compacta propia): rejilla 2×2 con barras
-   y las píldoras de química/táctica debajo. */
+   y los ratings conservan su barra compacta propia): rejilla 2×2 de barras.
+   El Estilo y la Química viven ahora junto al selector, en la cabecera del tablero. */
 @media (min-width: 761px) {
   .team-side .ratings-glass {
     flex-direction: column;
@@ -2689,21 +2736,6 @@ select {
   .team-side .rt-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px 14px;
-  }
-
-  .team-side .header-pills {
-    justify-content: space-around;
-    align-items: center;
-    border-top: 1px solid var(--separator);
-    padding-top: 8px;
-  }
-
-  .team-side .chem-pill {
-    flex-direction: row;
-    align-items: center;
-    gap: 6px;
-    border-left: 0;
-    padding-left: 0;
   }
 
   .team-side .opponent-brief {
@@ -2922,16 +2954,17 @@ select {
 }
 
 .team-panel-head {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
   justify-content: space-between;
   gap: 12px;
-  align-items: end;
+  align-items: center;
   margin-bottom: 10px;
 }
 
 .team-panel-head h2 {
   margin: 0;
-  font-family: var(--font-pixel);
+  font-family: var(--font-game);
   color: #fff;
   text-transform: uppercase;
   text-shadow: 2px 2px 0 #071459;
@@ -2943,18 +2976,17 @@ select {
   font-size: var(--t-caption-1);
 }
 
-.team-field-panel .formation-seg {
-  flex: 0 0 min(360px, 48%);
-  margin: 0;
+/* Controles del tablero: el selector de formación (dropdown que reutiliza
+   .bench-filter) con el Estilo de la táctica y la Química a su lado. Cada
+   chem-pill aporta su propia separación (border-left) como divisor. */
+.tactic-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
 }
-/* Con 6 formaciones, las etiquetas (p. ej. "4-3-1-2") deben caber en una línea
-   sin desbordar al estrecharse cada segmento. */
-.formation-seg .seg {
-  padding-inline: 4px;
-  white-space: nowrap;
-  letter-spacing: -0.2px;
-  font-variant-numeric: tabular-nums;
-}
+.formation-select { align-self: center; }
 
 .team-select-screen .field {
   /* Los topes (vh + el max-width de la capa pixel) eran el cuello de botella:
@@ -2978,13 +3010,15 @@ select {
 /* Dibujos de 5 líneas (enganche/creación entre medio y ataque): carta algo
    menor en cualquier tablero para que las líneas extra no se pisen... */
 .field.lineup-board[data-formation="4-3-1-2"],
-.field.lineup-board[data-formation="4-2-3-1"] {
+.field.lineup-board[data-formation="4-2-3-1"],
+.field.lineup-board[data-formation="3-2-4-1"] {
   --lineup-card: clamp(74px, 7.6vw, 94px);
 }
 
 /* ...y en el armado, además, campo más alto. */
 .team-select-screen .field[data-formation="4-3-1-2"],
-.team-select-screen .field[data-formation="4-2-3-1"] {
+.team-select-screen .field[data-formation="4-2-3-1"],
+.team-select-screen .field[data-formation="3-2-4-1"] {
   height: min(88vh, 900px, calc(100vh - 190px));
   min-height: 580px;
 }
@@ -3032,7 +3066,8 @@ select {
   }
 
   .team-select-screen .field[data-formation="4-3-1-2"],
-  .team-select-screen .field[data-formation="4-2-3-1"] {
+  .team-select-screen .field[data-formation="4-2-3-1"],
+  .team-select-screen .field[data-formation="3-2-4-1"] {
     height: calc(100vh - 190px);
     min-height: 0;
     width: min(100%, 78vh, 800px);
@@ -3130,7 +3165,7 @@ select {
   border: 2px solid var(--arcade-cyan);
   border-radius: 0;
   font-family: var(--font-pixel);
-  font-size: 10px;
+  font-size: 13px;
   text-transform: uppercase;
   cursor: pointer;
 }
@@ -3922,6 +3957,24 @@ select {
   transform: rotate(7deg);
 }
 
+/* Carta del lesionado en la táctica: cruz médica arriba a la derecha (misma
+   colocación que la roja, en ::before; la rareza va en ::after). Estático. */
+.field-chip.chip-injured {
+  opacity: .8;
+}
+
+.field-chip.chip-injured::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 4;
+  width: 19px;
+  height: 19px;
+  background: var(--injury-cross) center / contain no-repeat;
+  image-rendering: pixelated;
+}
+
 .result-screen {
   max-width: 960px;
   display: grid;
@@ -4055,8 +4108,27 @@ select {
 .result-red { display: inline-flex; align-items: center; gap: 6px; }
 .result-red small { color: rgba(255,255,255,.62); }
 .result-red-card {
-  width: 11px; height: 15px; border-radius: 2px; flex: 0 0 auto;
+  width: 14px; height: 20px; border-radius: 2px; flex: 0 0 auto;
   background: #d11a1a; border: 1px solid rgba(0,0,0,.5); box-shadow: 0 1px 2px rgba(0,0,0,.4);
+}
+/* Fila de lesionados del resumen: cruz médica + nombre + minuto + tipo. */
+.result-injuries b { display: flex; flex-wrap: wrap; gap: 10px 16px; }
+.result-injury { display: inline-flex; align-items: center; gap: 6px; }
+.result-injury small { color: rgba(255,255,255,.62); }
+/* Cruz con el nº de partidos de baja flotando arriba a la derecha. */
+.result-injury-badge { position: relative; flex: 0 0 auto; display: inline-block; }
+.result-injury-cross {
+  display: block; width: 25px; height: 25px;
+  background: var(--injury-cross) center / contain no-repeat;
+  image-rendering: pixelated;
+}
+.result-injury-count {
+  position: absolute; top: -3px; right: -5px; z-index: 2;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 16px; height: 17px; padding: 0 3px;
+  background: #140a0a; color: #fff; border-radius: 3px;
+  border: 1px solid rgba(0,0,0,.5);
+  font-family: var(--font-pixel); font-size: 10px; line-height: 1;
 }
 
 /* Fila de cambios del resumen: quién entró (▲) y quién dejó su puesto (▼). */
@@ -4423,7 +4495,7 @@ select {
 
   .team-panel-head {
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     text-align: left;
   }
 
@@ -4432,9 +4504,9 @@ select {
     padding: 10px;
   }
 
-  .team-field-panel .formation-seg {
-    flex-basis: auto;
+  .team-field-panel .tactic-controls {
     width: 100%;
+    justify-content: flex-start;
   }
 
   /* Tamaños del campo y de las cartas en mobile: una sola fuente de verdad,
@@ -5473,16 +5545,12 @@ button.primary:active:not(:disabled),
   .team-field-panel .team-panel-head {
     gap: 8px;
     margin-bottom: 8px;
+    display: grid !important;
+    grid-template-columns: 1fr 2fr;
   }
 
   .team-field-panel .team-panel-head p {
     display: none;
-  }
-
-  .team-field-panel .formation-seg .seg {
-    min-height: 38px;
-    padding: 5px 3px;
-    font-size: 9px;
   }
 
   /* Campo a sangre dentro del panel (margen negativo) y apenas más alto que
@@ -5513,12 +5581,14 @@ button.primary:active:not(:disabled),
   /* Dibujos de 5 líneas (enganche/creación): carta menor en cualquier tablero
      y, en el armado, campo aún más alto para que las líneas no se pisen. */
   .field.lineup-board[data-formation="4-3-1-2"],
-  .field.lineup-board[data-formation="4-2-3-1"] {
+  .field.lineup-board[data-formation="4-2-3-1"],
+  .field.lineup-board[data-formation="3-2-4-1"] {
     --lineup-card: 62px;
   }
 
   .team-select-screen .field[data-formation="4-3-1-2"],
-  .team-select-screen .field[data-formation="4-2-3-1"] {
+  .team-select-screen .field[data-formation="4-2-3-1"],
+  .team-select-screen .field[data-formation="3-2-4-1"] {
     height: min(calc((100vw - 20px) * 1.32), calc(100svh - 225px), 505px);
     min-height: 450px;
   }

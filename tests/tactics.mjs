@@ -98,6 +98,35 @@ const f4231bt = buildBattleTeam(f4231team);
 assert.ok(f4231bt.attackers.some((p) => p.name === byId('fwd_pele_1970').name), 'el 9 está en ataque');
 assert.ok(f4231bt.midfielders.length >= 5, '5 jugadores nutren el mediocampo');
 
+// === 5b. 3-2-4-1 (presión): 2 mediocentros + línea de 4 (extremos+enganches) + 9 ===
+assert.equal(formationType('3-2-4-1'), 'presion');
+assert.ok(FORMATION_MODIFIERS['3-2-4-1'], '3-2-4-1 tiene modificador');
+const m3241 = formationLineSlots('3-2-4-1', 'MID');
+assert.deepEqual(m3241[0].accepts, ['MID'], 'mediocentro = solo MID');
+assert.deepEqual(m3241[1].accepts, ['MID'], 'mediocentro = solo MID');
+assert.equal(m3241[2].role, 'ENG', 'el extremo puntúa como enganche');
+assert.equal(m3241[5].role, 'ENG', 'el extremo puntúa como enganche');
+for (const i of [2, 3, 4, 5]) {
+  assert.deepEqual(m3241[i].accepts.sort(), ['FWD', 'MID'], `el hueco ofensivo ${i} admite MID o FWD`);
+}
+assert.equal(m3241[2].profile, 'extremo', 'flanco izquierdo = extremo');
+assert.equal(m3241[3].profile, 'mediapunta', 'interior izquierdo = enganche');
+assert.equal(m3241[5].profile, 'extremo', 'flanco derecho = extremo');
+// La línea de 4 admite delanteros: un FWD puede jugar de extremo o enganche.
+const offensive4 = ['mid_zidane_1998', 'mid_platini_1984', 'mid_iniesta_2010', 'mid_xavi_2010'].map(byId);
+const m3241team = {
+  name: '3241', formation: '3-2-4-1', items: [],
+  starting11: {
+    GK: [byId('gk_yashin_1966')],
+    DEF: ['def_beckenbauer_1974', 'def_maldini_1994', 'def_baresi_1990'].map(byId),
+    MID: [byId('mid_gerrard_2006'), byId('mid_xavi_2010'), ...offensive4],
+    FWD: [byId('fwd_pele_1970')],
+  },
+};
+const bt3241 = buildBattleTeam(m3241team);
+assert.ok(bt3241.attackers.some((p) => p.name === byId('fwd_pele_1970').name), 'el 9 está en ataque');
+assert.ok(bt3241.midfielders.length >= 6, 'los 6 del medio nutren el mediocampo');
+
 // === 6. Química profunda (sin cambios) ===
 const sameNation = ['1990', '1990', '1990'].map((era) => ({ nation: 'Italia', era, position: 'DEF' }));
 assert.equal(computeChemistry({ GK: [], DEF: sameNation, MID: [], FWD: [] }).DEF, 9, 'nación + época');
@@ -150,6 +179,38 @@ const xi352 = {
 // dentro de la delantera f0-f1 comparten nación (+2).
 assert.equal(computeChemistry(xi352, '3-5-2').MID, 2.5, 'carrilero↔delanteros suma al medio');
 assert.equal(computeChemistry(xi352, '3-5-2').FWD, 4.5, 'carrilero↔delanteros suma al ataque');
+
+// === 6b-bis. Química del 3-2-4-1: mediocentros aislados de extremos y del 9 ===
+// Once de control: épocas espaciadas ≥30 años (sin química de época) y naciones
+// únicas, salvo el par concreto que se hermana para medir su aporte.
+const mk3241 = (id, position, nation, era) => ({ id, name: id, position, nation, era, trait: null });
+const xi3241 = () => ({
+  GK: [mk3241('g', 'GK', 'NG', '1900')],
+  DEF: [mk3241('d0', 'DEF', 'ND0', '1900'), mk3241('d1', 'DEF', 'ND1', '1960'), mk3241('d2', 'DEF', 'ND2', '2020')],
+  // Huecos MID por orden: 0,1 = mediocentros; 2,5 = extremos; 3,4 = enganches.
+  MID: [mk3241('m0', 'MID', 'NM0', '1900'), mk3241('m1', 'MID', 'NM1', '1960'),
+    mk3241('e2', 'MID', 'NE2', '2020'), mk3241('e3', 'MID', 'NE3', '1930'),
+    mk3241('e4', 'MID', 'NE4', '1990'), mk3241('e5', 'MID', 'NE5', '2050')],
+  FWD: [mk3241('f0', 'FWD', 'NF0', '1900')],
+});
+const chem3241 = (a, b) => {
+  const xi = xi3241();
+  const find = (id) => ['GK', 'DEF', 'MID', 'FWD'].flatMap((l) => xi[l]).find((p) => p.id === id);
+  find(b).nation = find(a).nation; // hermana el par a medir
+  const baseDef = computeChemistry(xi3241(), '3-2-4-1');
+  const withPair = computeChemistry(xi, '3-2-4-1');
+  return { MID: withPair.MID - baseDef.MID, FWD: withPair.FWD - baseDef.FWD };
+};
+assert.deepEqual(chem3241('m0', 'm1'), { MID: 2, FWD: 0 }, 'mediocentros entre sí');
+assert.deepEqual(chem3241('m0', 'e3'), { MID: 2, FWD: 0 }, 'mediocentro↔enganche');
+assert.deepEqual(chem3241('e3', 'e4'), { MID: 2, FWD: 0 }, 'enganches entre sí');
+assert.deepEqual(chem3241('e2', 'e3'), { MID: 2, FWD: 0 }, 'extremo↔enganche');
+assert.deepEqual(chem3241('e2', 'e5'), { MID: 2, FWD: 0 }, 'extremos entre sí');
+assert.deepEqual(chem3241('e3', 'f0'), { MID: 0, FWD: 2 }, 'enganche↔delantero');
+assert.deepEqual(chem3241('e2', 'f0'), { MID: 0, FWD: 2 }, 'extremo↔delantero');
+assert.deepEqual(chem3241('m0', 'e2'), { MID: 0, FWD: 0 }, 'mediocentro NO enlaza con extremo');
+assert.deepEqual(chem3241('m1', 'e5'), { MID: 0, FWD: 0 }, 'mediocentro NO enlaza con extremo');
+assert.deepEqual(chem3241('m0', 'f0'), { MID: 0, FWD: 0 }, 'mediocentro NO enlaza con el delantero');
 
 // === 6c. Sinergia de ítems: si la táctica coincide, el coste se anula ===
 // Tiki-taka (posesión): +8% medio, −5% defensa. Con dibujo de posesión el

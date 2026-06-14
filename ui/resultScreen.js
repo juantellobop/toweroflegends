@@ -7,8 +7,8 @@ import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { renderLeaderboard } from './leaderboard.js';
 import { pressArticleHTML } from './prensa.js';
-import { localizeNation, localizeOpponentName, t } from '../data/i18n.js';
-import { FORMATIONS, LINES } from '../data/config.js';
+import { localizeNation, localizeOpponentName, t, tIndexed } from '../data/i18n.js';
+import { CONFIG, FORMATIONS, LINES } from '../data/config.js';
 import { assignLineToSlots } from '../state/run.js';
 import { portraitPathForPlayer } from '../data/playerAssets.js';
 import { lineupFieldHTML, positionSlots, staticChipHTML } from './lineupBoard.js';
@@ -47,12 +47,16 @@ function lastTacticHTML(state) {
     ? (kickoff[line] || []).map((uid) => (uid != null && byUid.get(uid)) || null)
     : (state.starting11?.[line] || []);
   const expelled = new Set((m?.expulsadosA || []).map((e) => e.uid));
+  const injured = new Set((m?.lesionadosA || []).map((e) => e.uid));
   const slots = LINES.flatMap((line) => {
     const filled = assignLineToSlots(state.formation, line, lineFor(line))
       .filter((slot) => slot.player);
     return positionSlots(state.formation, line, filled);
   });
   if (!slots.length) return '';
+  const chipClassFor = (uid) => expelled.has(uid)
+    ? 'scout-chip chip-expelled'
+    : injured.has(uid) ? 'scout-chip chip-injured' : 'scout-chip';
   const field = lineupFieldHTML({
     formation: state.formation,
     slots,
@@ -60,7 +64,7 @@ function lastTacticHTML(state) {
     chip: (slot) => staticChipHTML(slot.player, {
       portraitSrc: portraitPathForPlayer(slot.player),
       flagSrc: flagSrcForNation(slot.player.nation),
-      chipClass: expelled.has(slot.player.uid) ? 'scout-chip chip-expelled' : 'scout-chip',
+      chipClass: chipClassFor(slot.player.uid),
     }),
   });
   return `
@@ -88,6 +92,25 @@ function subsRowHTML(subs) {
   return `
     <div class="result-scorers result-subs">
       <span>${t('result.subs')}</span>
+      <b>${items}</b>
+    </div>`;
+}
+
+// Fila de lesionados del resumen: cruz médica con el nº de partidos que se
+// perderá (0/1/3/6 según gravedad) + nombre + minuto + tipo de lesión.
+function injuriesRowHTML(injuries) {
+  if (!injuries || !injuries.length) return '';
+  const items = injuries.map((inj) => {
+    const type = tIndexed(`injury.types.${inj.severity}`, inj.typeIndex);
+    const ban = CONFIG.INJURY_BAN[inj.severity] || 0;
+    return `<span class="result-injury">
+        <span class="result-injury-badge" title="${esc(t('result.injuryMatchesTitle', { n: ban }))}"><span class="result-injury-cross" aria-hidden="true"></span><span class="result-injury-count">${ban}</span></span>
+        ${esc(inj.name)} <small>${inj.minute}'</small> <small>${esc(type)}</small>
+      </span>`;
+  }).join('');
+  return `
+    <div class="result-scorers result-injuries">
+      <span>${t('result.injuries')}</span>
       <b>${items}</b>
     </div>`;
 }
@@ -158,9 +181,11 @@ export function renderResult(root, state, reward, handlers) {
             <b>${scorers.length ? esc(scorers.join(', ')) : '—'}</b>
           </div>
           ${redsRowHTML(reds)}
+          ${injuriesRowHTML(m.lesionadosA)}
           ${subsRowHTML(m.sustitucionesA)}
         </div>
       </div>
+      ${pressArticleHTML(state)}
       <div class="result-progress-row">
         <div class="tower-next arcade-panel">
           <img class="tower-next-img" src="${UI_ASSETS.results.tower}" alt="" aria-hidden="true" loading="lazy" decoding="async" />
@@ -168,7 +193,6 @@ export function renderResult(root, state, reward, handlers) {
         </div>
         ${rewardHTML}
       </div>
-      ${pressArticleHTML(state)}
       <div class="result-cta action-bar">
         <button id="next" class="primary big glass-cta">▶ ${nextLabel}</button>
       </div>
@@ -211,6 +235,7 @@ export function renderGameOver(root, state, best, handlers) {
           <b>${scorers.length ? esc(scorers.join(', ')) : '—'}</b>
         </div>
         ${redsRowHTML(reds)}
+        ${injuriesRowHTML(m.lesionadosA)}
         ${subsRowHTML(m.sustitucionesA)}
       </div>
       ${lastTacticHTML(state)}

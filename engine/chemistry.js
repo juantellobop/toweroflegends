@@ -9,7 +9,7 @@
 // (premia construir el XI en torno a 1-2 naciones) y una "cohesión táctica" (premia
 // que tus jugadores encajen con el tipo del dibujo). Ambos modestos.
 
-import { CONFIG, LINES, chemFormationLinks, formationLineSlots, formationType } from '../data/config.js';
+import { CONFIG, LINES, chemFormationLinks, chemLineBreaks, formationLineSlots, formationType } from '../data/config.js';
 
 // Naciones históricas que cuentan como la misma selección a efectos de química
 // (y de enlaces en el campo): Alemania Occidental ≡ Alemania.
@@ -35,16 +35,35 @@ function pairChem(a, b) {
 
 // Suma la química de todos los pares del grupo. `skip` excluye los pares cuyos
 // dos miembros pertenezcan a ese conjunto (p. ej. enganche-enganche, que ya
-// puntuó en el mediocampo y no debe repetir en la delantera).
-function groupChem(players, skip = null) {
+// puntuó en el mediocampo y no debe repetir en la delantera). `excludePair`
+// descarta pares concretos (p. ej. huecos que el dibujo declara sin química).
+function groupChem(players, skip = null, excludePair = null) {
   let total = 0;
   for (let i = 0; i < players.length; i++) {
     for (let j = i + 1; j < players.length; j++) {
       if (skip && skip.has(players[i]) && skip.has(players[j])) continue;
+      if (excludePair && excludePair(players[i], players[j])) continue;
       total += pairChem(players[i], players[j]);
     }
   }
   return total;
+}
+
+// Predicado (a,b)→bool para los pares de una línea que el dibujo declara sin
+// química (CHEM_LINE_BREAKS): resuelve qué hueco ocupa cada jugador y descarta
+// los pares de huecos listados. Sin rupturas declaradas devuelve null.
+function lineBreakPredicate(starting11, formation, line) {
+  const breaks = chemLineBreaks(formation, line);
+  if (!breaks.length) return null;
+  const slotOf = new Map();
+  for (const [idx, player] of lineSlotOccupants(starting11, formation, line)) slotOf.set(player, idx);
+  const key = (i, j) => (i < j ? `${i}-${j}` : `${j}-${i}`);
+  const broken = new Set(breaks.map(([i, j]) => key(i, j)));
+  return (a, b) => {
+    const ia = slotOf.get(a);
+    const ib = slotOf.get(b);
+    return ia != null && ib != null && broken.has(key(ia, ib));
+  };
 }
 
 // Asignación hueco→jugador de una línea, replicando teamRatings/run.js: cada
@@ -115,7 +134,7 @@ export function computeChemistry(starting11, formation = null) {
   return {
     GK: captain(gk) + links.GK,
     DEF: groupChem([...gk, ...def]) + captain(def) + links.DEF,
-    MID: groupChem(mid) + captain(mid) + links.MID,
+    MID: groupChem(mid, null, lineBreakPredicate(starting11, formation, 'MID')) + captain(mid) + links.MID,
     FWD: groupChem([...fwd, ...eng], enganches) + captain(fwd) + links.FWD,
   };
 }

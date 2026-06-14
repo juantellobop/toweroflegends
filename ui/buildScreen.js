@@ -8,7 +8,7 @@
 import { playerCardHTML, itemCardHTML, POSITION_LABEL, LINE_LABEL } from './cards.js';
 import { esc } from './dom.js';
 import {
-  liveRatings, liveChemistry, liveItemDelta, isLineupComplete, isStarter, isSuspended, formationSlots,
+  liveRatings, liveChemistry, liveItemDelta, isLineupComplete, isStarter, isSuspended, isInjured, formationSlots,
   canPlacePlayerInSlot, assignLineToSlots,
 } from '../state/run.js';
 import { playerOVR } from '../engine/ovr.js';
@@ -143,15 +143,26 @@ function fieldNodes(positions) {
   }).join('');
 }
 
-// Identidad del dibujo (Posesión / Presión / Contra). Es informativa: describe el
-// estilo propio de la formación, sin comparar con el rival.
-function tacticPill(state) {
+// Controles del tablero: selector de formación (dropdown que reutiliza el estilo
+// de .bench-filter), seguido del Estilo de la táctica (Posesión / Presión /
+// Contra, informativo) y de la Química total. Antes el estilo y la química vivían
+// en el ratings-glass; ahora acompañan al selector en la cabecera del tablero.
+function tacticControls(state) {
   const myType = formationType(state.formation);
-  if (!myType) return '';
+  const chemTotal = liveChemistry(state).total;
+  const options = Object.keys(FORMATIONS)
+    .map((f) => `<option value="${f}"${f === state.formation ? ' selected' : ''}>${f}</option>`).join('');
   return `
-    <div class="chem-pill tactic-pill">
-      <span>${t('tactics.style')}</span>
-      <b>${esc(t(`admin.tactical.${myType}`))}</b>
+    <div class="tactic-controls">
+      <select id="formationSelect" class="bench-filter formation-select" aria-label="${esc(t('build.formationAria'))}">${options}</select>
+      ${myType ? `<div class="chem-pill tactic-pill">
+        <span>${t('tactics.style')}</span>
+        <b>${esc(t(`admin.tactical.${myType}`))}</b>
+      </div>` : ''}
+      <div class="chem-pill">
+        <span>${t('build.chemistry')}</span>
+        <b class="tabular" id="chemTotal" data-val="${chemTotal}">0</b>
+      </div>
     </div>`;
 }
 
@@ -183,7 +194,6 @@ function chemLegend(state) {
 
 function ratingsHeader(state) {
   const r = liveRatings(state);
-  const chem = liveChemistry(state);
   const itemD = liveItemDelta(state);
   const rows = [
     [t('ratings.attack'), r.attack, UI_ASSETS.icons.attack, itemD.attack],
@@ -201,13 +211,6 @@ function ratingsHeader(state) {
   return `
     <div class="ratings-glass glass" id="ratingsHeader">
       <div class="rt-grid">${rowHTML}</div>
-      <div class="header-pills">
-        <div class="chem-pill">
-          <span>${t('build.chemistry')}</span>
-          <b class="tabular" id="chemTotal" data-val="${chem.total}">0</b>
-        </div>
-        ${tacticPill(state)}
-      </div>
     </div>`;
 }
 
@@ -216,14 +219,23 @@ function bench(state) {
   if (!subs.length) return `<p class="empty-note">${t('build.noSubs')}</p>`;
   return `<div class="bench-strip">
     ${subs.map((p) => {
-    const suspended = isSuspended(p);
+    const injured = isInjured(p);
+    const suspended = !injured && isSuspended(p);
+    const blocked = injured || suspended;
+    const stateClass = injured ? ' bench-item--injured' : suspended ? ' bench-item--suspended' : '';
+    const ariaLabel = injured
+      ? t('build.benchInjuredAria', { name: p.name })
+      : suspended
+        ? t('build.benchSuspendedAria', { name: p.name })
+        : t('build.benchAria', { name: p.name });
     return `
-      <button class="bench-item${suspended ? '' : ' lineup-draggable'} rarity-${p.rarity}${suspended ? ' bench-item--suspended' : ''}" data-uid="${p.uid}" data-line="${p.position}"${suspended ? ' data-suspended="1"' : ' draggable="true"'}
-              aria-label="${esc(suspended ? t('build.benchSuspendedAria', { name: p.name }) : t('build.benchAria', { name: p.name }))}">
+      <button class="bench-item${blocked ? '' : ' lineup-draggable'} rarity-${p.rarity}${stateClass}" data-uid="${p.uid}" data-line="${p.position}"${blocked ? ' data-suspended="1"' : ' draggable="true"'}
+              aria-label="${esc(ariaLabel)}">
         <span class="bench-face" aria-hidden="true">
           <img src="${esc(portraitPathForPlayer(p))}" alt="" draggable="false" loading="lazy" decoding="async" data-hide-on-error="true" />
           <span>${esc(playerInitials(p.name))}</span>
           <img class="chip-flag" src="${esc(flagSrcForNation(p.nation))}" alt="" draggable="false" loading="lazy" decoding="async" />
+          ${injured ? `<span class="bench-injury" title="${esc(t('build.injured'))}" aria-hidden="true"></span><span class="bench-injury-count" title="${esc(t('result.injuryMatchesTitle', { n: p.injuryMatches }))}" aria-hidden="true">${p.injuryMatches}</span>` : ''}
           ${suspended ? `<span class="bench-red-card" title="${esc(t('build.suspended'))}" aria-hidden="true"></span>` : ''}
         </span>
         <span class="bench-topline" aria-hidden="true">
@@ -231,7 +243,7 @@ function bench(state) {
           <span class="bench-pos">${POSITION_LABEL[p.position]}</span>
         </span>
         <span class="bench-name">${esc(p.name)}</span>
-        ${suspended ? '' : '<span class="bench-add" aria-hidden="true">+</span>'}
+        ${blocked ? '' : '<span class="bench-add" aria-hidden="true">+</span>'}
         <span class="chip-info bench-info" role="button" tabindex="0" data-info-uid="${p.uid}" aria-label="${esc(t('build.viewStatsAria', { name: p.name }))}">i</span>
       </button>`;
   }).join('')}
@@ -242,8 +254,6 @@ function bench(state) {
 export function renderBuild(root, state, handlers) {
   const complete = isLineupComplete(state);
   const positions = lineupPositions(state);
-  const formationSegs = Object.keys(FORMATIONS)
-    .map((f) => `<button class="seg ${f === state.formation ? 'active' : ''}" data-formation="${f}">${f}</button>`).join('');
   // Agrupa objetos idénticos para mostrarlos una vez con ×N (copias acumuladas).
   const grouped = [];
   const byId = new Map();
@@ -269,7 +279,7 @@ export function renderBuild(root, state, handlers) {
             <div>
               <h2>${t('build.tacticalBoard')}</h2>
             </div>
-            <div class="seg-control formation-seg" role="tablist" aria-label="${t('build.formationAria')}">${formationSegs}</div>
+            ${tacticControls(state)}
           </div>
 
           <div class="field lineup-board" id="field" data-formation="${esc(state.formation)}">
@@ -338,9 +348,9 @@ export function renderBuild(root, state, handlers) {
     setTimeout(() => { suppressClick = false; }, 0);
   });
 
-  // === Formación (segmented) ===
-  root.querySelectorAll('.formation-seg .seg').forEach((b) => {
-    b.addEventListener('click', () => handlers.onSetFormation(b.dataset.formation));
+  // === Formación (dropdown) ===
+  root.querySelector('#formationSelect')?.addEventListener('change', (e) => {
+    handlers.onSetFormation(e.target.value);
   });
 
   // === Fichas del campo: filled → quitar; empty → abrir selector ===
@@ -833,7 +843,17 @@ function openPicker(root, state, line, slotIndex, handlers) {
     picker.innerHTML = `
       <div class="picker-head">${esc(t('build.pickerHead', { label }))}</div>
       <div class="picker-grid">
-        ${candidates.map((p) => playerCardHTML(p, { idValue: p.uid, clickable: true })).join('')}
+        ${candidates.map((p) => {
+          const injured = isInjured(p);
+          const suspended = !injured && isSuspended(p);
+          return playerCardHTML(p, {
+            idValue: p.uid,
+            clickable: true,
+            injured,
+            suspended,
+            injuryMatches: p.injuryMatches,
+          });
+        }).join('')}
       </div>
       <button class="ctl" data-close>${t('generic.close')}</button>`;
   }

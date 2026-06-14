@@ -67,36 +67,105 @@ export function expelFromLineup(team, offender) {
   return replacement ? { replacement, sacrificed } : null;
 }
 
+// Sustitución por lesión: el lesionado deja la táctica (su lugar queda vacío) y
+// entra desde el banquillo, uno por uno, el mejor suplente de su posición; si no
+// hay de esa posición, el mejor disponible; si el banco está vacío, queda el
+// hueco. A diferencia de la expulsión, el equipo sigue con once y nadie más sale.
+// Devuelve { replacement } cuando alguien entró, o null si no había suplente.
+export function substituteInjured(team, injured) {
+  if (!team.starting11 || !injured || !injured.uid) return null;
+  const s11 = cloneLineup(team.starting11);
+  const injuredLine = LINES.find((line) => s11[line].some((p) => p.uid === injured.uid));
+  if (injuredLine) s11[injuredLine] = s11[injuredLine].filter((p) => p.uid !== injured.uid);
+
+  let bench = (team.bench || []).slice();
+  const byOvr = (a, b) => playerOVR(b) - playerOVR(a);
+  let replacement = bench.filter((p) => p.position === injured.position).sort(byOvr)[0]
+    || bench.slice().sort(byOvr)[0]
+    || null;
+  if (replacement && injuredLine) {
+    bench = bench.filter((p) => p.uid !== replacement.uid);
+    s11[injuredLine] = [...s11[injuredLine], replacement];
+  }
+  team.starting11 = s11;
+  team.bench = bench;
+  return replacement ? { replacement } : null;
+}
+
+// Sorteo de lesión del partido (un único intento). Reparte las bandas de
+// CONFIG.INJURY_PROB, mutuamente excluyentes, así que a lo sumo hay una lesión.
+// Devuelve { severity, minute, typeIndex } o null. El minuto y el tipo se
+// sortean aquí para que la lesión sea reproducible con la misma semilla.
+function rollInjury(rng) {
+  const r = rng.next();
+  const p = CONFIG.INJURY_PROB;
+  let acc = 0;
+  let severity = null;
+  for (const grade of ['muy_grave', 'grave', 'moderada', 'simple']) {
+    acc += p[grade] || 0;
+    if (r < acc) { severity = grade; break; }
+  }
+  if (!severity) return null;
+  return {
+    severity,
+    minute: 1 + Math.floor(rng.next() * 90),
+    typeIndex: Math.floor(rng.next() * CONFIG.INJURY_TYPE_COUNT),
+  };
+}
+
+// Quita por nombre a un jugador de todos los pools de actores del equipo de
+// batalla. El rival sintético no tiene once ni banquillo que reorganizar, así que
+// tras una roja se le retira de los pools para que no vuelva a salir como
+// tirador, asistente o infractor en jugadas posteriores.
+function removeActorFromPools(team, name) {
+  if (!team || !name) return;
+  for (const pool of ['shooters', 'assisters', 'defenders', 'midfielders', 'attackers', 'keepers']) {
+    if (Array.isArray(team[pool])) team[pool] = team[pool].filter((p) => p.name !== name);
+  }
+}
+
 const inferiorityFactor = (reds) => Math.pow(1 - CONFIG.RED_CARD_PENALTY, reds);
 
+// Rehace pools de actores, ratings naturales y ratings de juego del equipo desde
+// su alineación actual (refleja sustituciones, huecos y la química resultante).
+// Las jugadas se procesan en orden cronológico, así que mutar el equipo afecta
+// solo a las jugadas posteriores. Deja team.ratings = naturales (sin penalizar).
+function rebuildBattleTeam(team) {
+  if (!team.starting11) return;
+  const rebuilt = buildBattleTeam({
+    name: team.name,
+    color: team.color,
+    formation: team.formation,
+    starting11: team.starting11,
+    items: team.items,
+    bench: team.bench,
+  });
+  Object.assign(team, {
+    shooters: rebuilt.shooters,
+    assisters: rebuilt.assisters,
+    keepers: rebuilt.keepers,
+    defenders: rebuilt.defenders,
+    midfielders: rebuilt.midfielders,
+    attackers: rebuilt.attackers,
+    gkName: rebuilt.gkName,
+  });
+  team.naturalRatings = rebuilt.ratings;
+  team.ratings = { ...rebuilt.ratings };
+}
+
+// Lesión: como un cambio normal, el equipo sigue con once. Se rehace desde la
+// alineación con el suplente ya dentro, sin penalización por inferioridad.
+function applyInjurySwap(team) {
+  rebuildBattleTeam(team);
+}
+
 // Tarjeta roja: el equipo que comete la falta juega en inferioridad el resto del
-// partido (las jugadas se procesan en orden cronológico, así que mutar sus
-// ratings/pools afecta solo a las jugadas posteriores). Para el equipo del
-// jugador se rehacen ratings y pools desde la alineación ya reorganizada
-// (refleja la sustitución y el hueco); para ambos se aplica además una
-// penalización por inferioridad numérica a defensa y medio.
+// partido. Para el equipo del jugador se rehacen ratings y pools desde la
+// alineación ya reorganizada (refleja la sustitución y el hueco); para ambos se
+// aplica además una penalización por inferioridad numérica a defensa y medio.
 function applyRedCard(team) {
   team.redCount = (team.redCount || 0) + 1;
-  if (team.starting11) {
-    const rebuilt = buildBattleTeam({
-      name: team.name,
-      color: team.color,
-      formation: team.formation,
-      starting11: team.starting11,
-      items: team.items,
-      bench: team.bench,
-    });
-    Object.assign(team, {
-      shooters: rebuilt.shooters,
-      assisters: rebuilt.assisters,
-      keepers: rebuilt.keepers,
-      defenders: rebuilt.defenders,
-      midfielders: rebuilt.midfielders,
-      attackers: rebuilt.attackers,
-      gkName: rebuilt.gkName,
-    });
-    team.naturalRatings = rebuilt.ratings;
-  }
+  rebuildBattleTeam(team);
   const natural = team.naturalRatings;
   const f = inferiorityFactor(team.redCount);
   team.ratings = {
@@ -178,6 +247,11 @@ function recordEvent(event, A, B, score, events, tracker, rng) {
       const team = foulSide === 'A' ? A : B;
       const sub = expelFromLineup(team, event.offender);
       applyRedCard(team);
+      // El rival sintético no se reorganiza desde un once: se le quita el
+      // expulsado de los pools para que no actúe de nuevo el resto del partido.
+      if (foulSide === 'B' && event.offender && event.offender.name) {
+        removeActorFromPools(B, event.offender.name);
+      }
       // Solo el equipo del jugador (lado A) arrastra la sanción al próximo
       // partido; se registra al expulsado con su identidad real.
       if (foulSide === 'A' && event.offender && event.offender.uid) {
@@ -240,7 +314,47 @@ export function simularPartido(teamA, teamB, rng) {
   const stealAgainstB = A.matchBonuses.stealChance; // A presiona → B pierde más
   const stealAgainstA = B.matchBonuses.stealChance;
 
+  // Lesión del partido (solo el equipo del jugador, lado A). Se sortea antes del
+  // bucle y se aplica al llegar su minuto: el suplente que entra recalcula
+  // ratings y química de A el resto del encuentro. La víctima se elige en ese
+  // momento entre los titulares en pie (refleja una posible expulsión previa).
+  const injury = rollInjury(rng);
+  const applyInjury = () => {
+    if (!injury) return;
+    const onField = LINES.flatMap((line) => A.starting11?.[line] || []);
+    const victim = onField.length ? onField[Math.floor(rng.next() * onField.length)] : null;
+    if (victim) {
+      const sub = substituteInjured(A, victim);
+      applyInjurySwap(A);
+      (A.lesionados || (A.lesionados = [])).push({
+        uid: victim.uid,
+        name: victim.name,
+        position: victim.position,
+        minute: injury.minute,
+        severity: injury.severity,
+        typeIndex: injury.typeIndex,
+        inName: sub && sub.replacement ? sub.replacement.name : null,
+      });
+      // El cambio forzado por lesión también va a la lista de cambios (1-por-1:
+      // entra el suplente, sale el lesionado). reason='injury' lo distingue del
+      // cambio por roja para la crónica.
+      if (sub && sub.replacement) {
+        (A.sustituciones || (A.sustituciones = [])).push({
+          minute: injury.minute,
+          cause: victim.name,
+          inName: sub.replacement.name,
+          inPos: sub.replacement.position,
+          outName: victim.name,
+          outPos: victim.position,
+          reason: 'injury',
+        });
+      }
+    }
+    injury.applied = true;
+  };
+
   for (const { minute, side } of queue) {
+    if (injury && !injury.applied && minute >= injury.minute) applyInjury();
     const steal = side === 'A' ? stealAgainstA : stealAgainstB;
     const phaseHint = steal > 0 && rng.bernoulli(steal) ? 'high_press' : null;
     const event = makeHighlight({
@@ -259,6 +373,8 @@ export function simularPartido(teamA, teamB, rng) {
       maybeCounter(minute, side === 'A' ? 'B' : 'A', A, B, score, events, rng, () => `hl_${++eventSeq}`, cardTracker);
     }
   }
+  // Si ninguna jugada alcanzó el minuto de la lesión, se registra igualmente.
+  if (injury && !injury.applied) applyInjury();
 
   // Desempate por número de secuencia: comparar ids como texto ordenaría
   // "hl_10" antes que "hl_9" y desordenaría los marcadores acumulados.
@@ -279,6 +395,7 @@ export function simularPartido(teamA, teamB, rng) {
     forfeit,
     expulsadosA: A.expulsados || [],
     sustitucionesA: A.sustituciones || [],
+    lesionadosA: A.lesionados || [],
   };
 }
 

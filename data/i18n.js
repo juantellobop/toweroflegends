@@ -207,7 +207,7 @@ const COMMON_ITEMS = {
     brazalete_lider: { name: 'Brazalete de líder', desc: '+2 al mediocampo.' },
     tiki_taka: { name: 'Tiki-taka', desc: '+4% mediocampo, −2,5% defensa.' },
     catenaccio: { name: 'Catenaccio', desc: '+4% defensa, −2,5% ataque.' },
-    presion_alta: { name: 'Presión alta', desc: '+6% de robo: el rival pierde más balones.' },
+    presion_alta: { name: 'Presión alta', desc: '+4% de robo, −1,5% defensa.' },
     contraataque: { name: 'Contraataque letal', desc: '+3% al ataque.' },
     muralla: { name: 'Muralla defensiva', desc: '+2,5 defensa.' },
     localia: { name: 'Localía', desc: '+2,5% a todos los ratings de equipo.' },
@@ -219,7 +219,7 @@ const COMMON_ITEMS = {
     laterales_profundos: { name: 'Laterales profundos', desc: '+3% ataque, −1,5% defensa.' },
     vertigo: { name: 'Vértigo', desc: '+4% ataque, −2% mediocampo.' },
     juego_posicion: { name: 'Juego de posición', desc: '+3% mediocampo, +1,5% ataque.' },
-    gegenpressing: { name: 'Gegenpressing', desc: '+5% de robo: asfixia la salida rival.' },
+    gegenpressing: { name: 'Gegenpressing', desc: '+6% de robo, −2,5% defensa.' },
     contragolpe_ensayado: { name: 'Contragolpe ensayado', desc: '+3 a la definición en contraataques.' },
     balon_parado: { name: 'Pizarra a balón parado', desc: '+3 a la definición en córners y tiros libres.' },
     remontada: { name: 'Remontada', desc: 'Si vas perdiendo, +2% extra de empuje por gol de desventaja.' },
@@ -244,7 +244,7 @@ const COMMON_ITEMS = {
     brazalete_lider: { name: 'Leader’s Armband', desc: '+2 to midfield.' },
     tiki_taka: { name: 'Tiki-taka', desc: '+4% midfield, −2.5% defense.' },
     catenaccio: { name: 'Catenaccio', desc: '+4% defense, −2.5% attack.' },
-    presion_alta: { name: 'High Press', desc: '+6% steal rate: the opponent loses more balls.' },
+    presion_alta: { name: 'High Press', desc: '+4% steal rate, −1.5% defense.' },
     contraataque: { name: 'Lethal Counterattack', desc: '+3% to attack.' },
     muralla: { name: 'Defensive Wall', desc: '+2.5 defense.' },
     localia: { name: 'Home Advantage', desc: '+2.5% to all team ratings.' },
@@ -256,7 +256,7 @@ const COMMON_ITEMS = {
     laterales_profundos: { name: 'Overlapping Fullbacks', desc: '+3% attack, −1.5% defense.' },
     vertigo: { name: 'Vertigo', desc: '+4% attack, −2% midfield.' },
     juego_posicion: { name: 'Positional Play', desc: '+3% midfield, +1.5% attack.' },
-    gegenpressing: { name: 'Gegenpressing', desc: '+5% steal rate: smothers the opponent’s build-up.' },
+    gegenpressing: { name: 'Gegenpressing', desc: '+6% steal rate, −2.5% defense.' },
     contragolpe_ensayado: { name: 'Rehearsed Counter', desc: '+3 to finishing on counterattacks.' },
     balon_parado: { name: 'Set-piece Playbook', desc: '+3 to finishing on corners and free kicks.' },
     remontada: { name: 'Comeback', desc: 'When trailing, +2% extra push per goal down.' },
@@ -281,7 +281,7 @@ const COMMON_ITEMS = {
     brazalete_lider: { name: 'Brassard de leader', desc: '+2 au milieu.' },
     tiki_taka: { name: 'Tiki-taka', desc: '+4% milieu, −2,5% défense.' },
     catenaccio: { name: 'Catenaccio', desc: '+4% défense, −2,5% attaque.' },
-    presion_alta: { name: 'Pressing haut', desc: '+6% de récupération : l’adversaire perd plus de ballons.' },
+    presion_alta: { name: 'Pressing haut', desc: '+4% de récupération, −1,5% défense.' },
     contraataque: { name: 'Contre-attaque létale', desc: '+3% en attaque.' },
     muralla: { name: 'Muraille défensive', desc: '+2,5 défense.' },
     localia: { name: 'Avantage du terrain', desc: '+2,5% à toutes les notes d’équipe.' },
@@ -293,7 +293,7 @@ const COMMON_ITEMS = {
     laterales_profundos: { name: 'Latéraux offensifs', desc: '+3% attaque, −1,5% défense.' },
     vertigo: { name: 'Vertige', desc: '+4% attaque, −2% milieu.' },
     juego_posicion: { name: 'Jeu de position', desc: '+3% milieu, +1,5% attaque.' },
-    gegenpressing: { name: 'Gegenpressing', desc: '+5% de récupération : étouffe la relance adverse.' },
+    gegenpressing: { name: 'Gegenpressing', desc: '+6% de récupération, −2,5% défense.' },
     contragolpe_ensayado: { name: 'Contre répété', desc: '+3 à la finition en contre-attaque.' },
     balon_parado: { name: 'Cahier des coups de pied arrêtés', desc: '+3 à la finition sur corners et coups francs.' },
     remontada: { name: 'Remontada', desc: 'Mené au score, +2% de poussée par but de retard.' },
@@ -318,7 +318,7 @@ const COMMON_ITEMS = {
     brazalete_lider: { name: 'Braçadeira de líder', desc: '+2 ao meio-campo.' },
     tiki_taka: { name: 'Tiki-taka', desc: '+4% meio-campo, −2,5% defesa.' },
     catenaccio: { name: 'Catenaccio', desc: '+4% defesa, −2,5% ataque.' },
-    presion_alta: { name: 'Pressão alta', desc: '+6% de roubo: o rival perde mais bolas.' },
+    presion_alta: { name: 'Pressão alta', desc: '+4% de roubo, −1,5% defesa.' },
     contraataque: { name: 'Contra-ataque letal', desc: '+3% ao ataque.' },
     muralla: { name: 'Muralha defensiva', desc: '+2,5 defesa.' },
     localia: { name: 'Fator casa', desc: '+2,5% a todos os ratings da equipe.' },
@@ -330,7 +330,7 @@ const COMMON_ITEMS = {
     laterales_profundos: { name: 'Laterais ofensivos', desc: '+3% ataque, −1,5% defesa.' },
     vertigo: { name: 'Vertigem', desc: '+4% ataque, −2% meio-campo.' },
     juego_posicion: { name: 'Jogo de posição', desc: '+3% meio-campo, +1,5% ataque.' },
-    gegenpressing: { name: 'Gegenpressing', desc: '+5% de roubo: sufoca a saída rival.' },
+    gegenpressing: { name: 'Gegenpressing', desc: '+6% de roubo, −2,5% defesa.' },
     contragolpe_ensayado: { name: 'Contra-ataque ensaiado', desc: '+3 à finalização em contra-ataques.' },
     balon_parado: { name: 'Prancheta de bola parada', desc: '+3 à finalização em escanteios e faltas.' },
     remontada: { name: 'Virada', desc: 'Perdendo, +2% extra de impulso por gol de desvantagem.' },
@@ -355,7 +355,7 @@ const COMMON_ITEMS = {
     brazalete_lider: { name: 'Fascia da leader', desc: '+2 al centrocampo.' },
     tiki_taka: { name: 'Tiki-taka', desc: '+4% centrocampo, −2,5% difesa.' },
     catenaccio: { name: 'Catenaccio', desc: '+4% difesa, −2,5% attacco.' },
-    presion_alta: { name: 'Pressing alto', desc: '+6% recuperi: l’avversario perde più palloni.' },
+    presion_alta: { name: 'Pressing alto', desc: '+4% recuperi, −1,5% difesa.' },
     contraataque: { name: 'Contropiede letale', desc: '+3% all’attacco.' },
     muralla: { name: 'Muraglia difensiva', desc: '+2,5 difesa.' },
     localia: { name: 'Fattore campo', desc: '+2,5% a tutti i rating di squadra.' },
@@ -367,7 +367,7 @@ const COMMON_ITEMS = {
     laterales_profundos: { name: 'Terzini di spinta', desc: '+3% attacco, −1,5% difesa.' },
     vertigo: { name: 'Vertigine', desc: '+4% attacco, −2% centrocampo.' },
     juego_posicion: { name: 'Gioco di posizione', desc: '+3% centrocampo, +1,5% attacco.' },
-    gegenpressing: { name: 'Gegenpressing', desc: '+5% recuperi: soffoca la costruzione avversaria.' },
+    gegenpressing: { name: 'Gegenpressing', desc: '+6% recuperi, −2,5% difesa.' },
     contragolpe_ensayado: { name: 'Ripartenza provata', desc: '+3 alla finalizzazione in contropiede.' },
     balon_parado: { name: 'Schemi su palla inattiva', desc: '+3 alla finalizzazione su corner e punizioni.' },
     remontada: { name: 'Rimonta', desc: 'In svantaggio, +2% di spinta extra per gol di distacco.' },
@@ -502,6 +502,8 @@ const DICTIONARIES = {
       benchAria: ({ name }) => `${name}, arrastrar al campo o tocar para alinear`,
       suspended: 'Expulsado: no disponible este partido',
       benchSuspendedAria: ({ name }) => `${name}, expulsado el partido anterior: no puede alinearse`,
+      injured: 'Lesionado: en recuperación',
+      benchInjuredAria: ({ name }) => `${name}, lesionado: en recuperación, no puede alinearse`,
       noCandidates: ({ label }) => `No tienes suplentes compatibles para ${label}. Consíguelos en los sobres.`,
       pickerHead: ({ label }) => `${label} — elige quién entra`,
       targetPickerHead: ({ name }) => `${name} — elige dónde entra`,
@@ -560,6 +562,8 @@ const DICTIONARIES = {
       rewardCopy: ({ players, items }) => `Recompensa lista: sobre de ${players} jugadores y ${items} objetos a elegir.`,
       scorers: 'Goleadores',
       reds: 'Expulsados',
+      injuries: 'Lesionados',
+      injuryMatchesTitle: ({ n }) => n > 0 ? `Se pierde ${n} partido${n === 1 ? '' : 's'}` : 'No se pierde ningún partido',
       saves: 'Paradas',
       lastMatch: 'Último partido',
       lastTactic: 'Tu táctica',
@@ -692,6 +696,15 @@ const DICTIONARIES = {
         default: ({ attacker }) => `${attacker} no encuentra remate`,
       },
     },
+    injury: {
+      severity: { simple: 'leve', moderada: '1 partido', grave: '3 partidos', muy_grave: '6 partidos' },
+      types: {
+        simple: ['molestia muscular', 'contusión', 'sobrecarga leve', 'desgarro mínimo'],
+        moderada: ['distensión muscular', 'torcedura de rodilla', 'contractura', 'sobrecarga muscular'],
+        grave: ['rotura fibrilar', 'lesión de grado 2', 'luxación de hombro', 'microrrotura muscular'],
+        muy_grave: ['rotura del ligamento cruzado', 'fractura de peroné', 'rotura del tendón de Aquiles', 'luxación grave de rodilla'],
+      },
+    },
     press: {
       masthead: 'La Gaceta de la Torre',
       edition: ({ level }) => `Edición especial · Piso ${level}`,
@@ -756,6 +769,33 @@ const DICTIONARIES = {
           ({ player, team, minute }) => `El partido se complicó con la expulsión de ${player} a los ${minute} minutos, que dejó a ${team} en inferioridad y condicionó por completo el tramo final.`,
           ({ player, team, minute }) => `Todo se torció con la roja directa a ${player} en el minuto ${minute}: ${team} se quedó con uno menos y tuvo que reescribir su plan para el tramo decisivo.`,
           ({ player, team, minute }) => `El choque dio un vuelco con la tarjeta roja a ${player} en el minuto ${minute}: ${team} se vio obligado a jugar en inferioridad y a replegarse para proteger el resultado.`,
+        ],
+        injury: {
+          simple: [
+            ({ player, team, minute, type }) => `${player} pidió el cambio a los ${minute}' por ${type} y dejó su sitio sobre la marcha, aunque el susto no fue a mayores.`,
+            ({ player, team, minute, type }) => `${player} tuvo que ser retirado en el minuto ${minute} por ${type}: ${team} movió el banquillo, pero la cosa no pasó de un percance leve.`,
+            ({ player, team, minute, type }) => `${team} perdió a ${player} en el minuto ${minute} por ${type}; nada serio, pero suficiente para dejar el campo en el acto.`,
+          ],
+          moderada: [
+            ({ player, team, minute, type }) => `${player} cayó lesionado a los ${minute}' por ${type} y tuvo que ser sustituido: ${team} pierde una pieza importante para el próximo compromiso.`,
+            ({ player, team, minute, type }) => `${player} se marchó en el minuto ${minute} aquejado de ${type}, y en ${team} saltaron las alarmas de cara a las próximas semanas.`,
+            ({ player, team, minute, type }) => `Mala noticia para ${team}: ${player} se marchó al ${minute}' aquejado de ${type} que lo dejará fuera del siguiente encuentro.`,
+          ],
+          grave: [
+            ({ player, team, minute, type }) => `Imagen preocupante a los ${minute}': ${player} se desplomó por ${type} y abandonó el campo visiblemente dolorido, un golpe duro para los planes de ${team}.`,
+            ({ player, team, minute, type }) => `${player} tuvo que ser retirado de urgencia en el minuto ${minute} por ${type}; ${team} encara las próximas jornadas sin una de sus referencias.`,
+            ({ player, team, minute, type }) => `${team} encajó un revés serio cuando ${player} dejó el césped al ${minute}' aquejado de ${type}, con varias semanas de baja por delante.`,
+          ],
+          muy_grave: [
+            ({ player, team, minute, type }) => `Drama en el minuto ${minute}: ${player} fue retirado entre aplausos por ${type} de extrema gravedad que lo tendrá de baja una larga temporada y ensombrece la noche de ${team}.`,
+            ({ player, team, minute, type }) => `El partido quedó marcado cuando ${player} sufrió ${type} a los ${minute}': una lesión gravísima que deja a ${team} sin su jugador durante meses.`,
+            ({ player, team, minute, type }) => `${team} se llevó la peor de las noticias al ${minute}': ${player} sufrió ${type} de máxima gravedad y su regreso se antoja muy lejano.`,
+          ],
+        },
+        injurySub: [
+          ({ inName }) => `En su lugar saltó al césped ${inName}.`,
+          ({ inName }) => `${inName} ocupó su puesto desde el banquillo.`,
+          ({ inName }) => `El banquillo respondió de inmediato con la entrada de ${inName}.`,
         ],
         subSwap: [
           ({ inName, outName, cause, minute }) => `Para tapar el hueco que dejó ${cause}, ${inName} entró desde el banquillo al ${minute}' y ${outName} dejó su puesto para rearmar la zaga.`,
@@ -1017,6 +1057,8 @@ const DICTIONARIES = {
       benchAria: ({ name }) => `${name}, drag onto the field or tap to line up`,
       suspended: 'Sent off: unavailable this match',
       benchSuspendedAria: ({ name }) => `${name}, sent off last match: cannot be lined up`,
+      injured: 'Injured: recovering',
+      benchInjuredAria: ({ name }) => `${name}, injured: recovering, cannot be lined up`,
       noCandidates: ({ label }) => `You have no compatible substitutes for ${label}. Find them in packs.`,
       pickerHead: ({ label }) => `${label} — choose who comes in`,
       targetPickerHead: ({ name }) => `${name} — choose a position`,
@@ -1075,6 +1117,8 @@ const DICTIONARIES = {
       rewardCopy: ({ players, items }) => `Reward ready: choose from a pack of ${players} players and ${items} items.`,
       scorers: 'Scorers',
       reds: 'Sent off',
+      injuries: 'Injured',
+      injuryMatchesTitle: ({ n }) => n > 0 ? `Out for ${n} match${n === 1 ? '' : 'es'}` : 'No matches missed',
       saves: 'Saves',
       lastMatch: 'Last match',
       lastTactic: 'Your tactic',
@@ -1207,6 +1251,15 @@ const DICTIONARIES = {
         default: ({ attacker }) => `${attacker} cannot find a shot`,
       },
     },
+    injury: {
+      severity: { simple: 'minor', moderada: '1 match', grave: '3 matches', muy_grave: '6 matches' },
+      types: {
+        simple: ['cramp', 'knock', 'ankle blow', 'mild overload'],
+        moderada: ['ankle sprain', 'muscle strain', 'twisted knee', 'muscle tightness'],
+        grave: ['torn muscle fibre', 'grade 2 sprain', 'dislocated shoulder', 'partial muscle tear'],
+        muy_grave: ['cruciate ligament rupture', 'broken fibula', 'ruptured Achilles tendon', 'severe knee dislocation'],
+      },
+    },
     press: {
       masthead: 'The Tower Gazette',
       edition: ({ level }) => `Special edition · Floor ${level}`,
@@ -1228,7 +1281,32 @@ const DICTIONARIES = {
         opener: ({ att, def, minute, scorer, how, score }) => `From the opening minutes, ${att} showed an attacking mindset and a high press that troubled ${def}'s build-up. The insistence paid off in minute ${minute}, when ${scorer} ${how} to make it ${score}. The goal brought confidence, and they began to control possession and create constant danger down the flanks.`,
         scoreless: ({ team, opp, keeper }) => `The first half was a tactical arm-wrestle in which ${team} and ${opp} sized each other up without conceding space. The defenses got the better of the attacks and, when needed, ${keeper} stepped up to put out the fires in the box. It was goalless at the break, with the feeling that a single detail would decide the match.`,
         quiet: ({ team, opp, keeper }) => `The scoreboard did not move again in the second half: ${team} and ${opp} traded approaches without clarity in the final third, and every attempt died in ${keeper}'s gloves or at the boots of a well-drilled defense. The duel closed without further scares, settled by what was sown before the break.`,
-        red: ({ player, team, minute }) => `The match took a turn with ${player}'s sending-off in minute ${minute}, leaving ${team} a man down and completely conditioning the final stretch.`, subSwap: ({ inName, outName, cause, minute }) => `To cover the gap left by ${cause}, ${inName} came off the bench on ${minute}' and ${outName} gave up his spot to patch up the back line.`, subIn: ({ inName, cause, minute }) => `After ${cause}'s dismissal, ${inName} came on from the bench on ${minute}' to shore up the defence.`, forfeit: ({ team }) => `With four players sent off, ${team} could no longer field a side and the referee awarded the match as lost.`,
+        red: ({ player, team, minute }) => `The match took a turn with ${player}'s sending-off in minute ${minute}, leaving ${team} a man down and completely conditioning the final stretch.`, injury: {
+          simple: [
+            ({ player, team, minute, type }) => `${player} came off in minute ${minute} with a ${type}, giving up his place on the spot, though the scare came to nothing.`,
+            ({ player, team, minute, type }) => `A ${type} forced ${player} off in minute ${minute}: ${team} reshuffled the bench, but it was only a minor knock.`,
+            ({ player, team, minute, type }) => `${team} lost ${player} in minute ${minute} to a ${type}; nothing serious, but enough to leave the pitch right away.`,
+          ],
+          moderada: [
+            ({ player, team, minute, type }) => `${player} went down in minute ${minute} with a ${type} and had to be replaced: ${team} lose a key piece for the next fixture.`,
+            ({ player, team, minute, type }) => `${player}'s ${type} in minute ${minute} set off alarms at ${team}, who pulled him off in clear discomfort for the weeks ahead.`,
+            ({ player, team, minute, type }) => `Bad news for ${team}: ${player} left in minute ${minute} with a ${type} that will rule him out of the next match.`,
+          ],
+          grave: [
+            ({ player, team, minute, type }) => `A worrying sight in minute ${minute}: ${player} collapsed with a ${type} and left the pitch visibly in pain, a heavy blow to ${team}'s plans.`,
+            ({ player, team, minute, type }) => `${player}'s ${type} in minute ${minute} forced an urgent withdrawal; ${team} face the coming weeks without one of their mainstays.`,
+            ({ player, team, minute, type }) => `${team} suffered a serious setback when ${player} had to leave the field in minute ${minute} with a ${type} pointing to several weeks out.`,
+          ],
+          muy_grave: [
+            ({ player, team, minute, type }) => `Drama in minute ${minute}: ${player} was carried off to applause after a ${type} of extreme severity that will sideline him for a long spell and cast a shadow over ${team}'s night.`,
+            ({ player, team, minute, type }) => `The match was marked by ${player}'s ${type} in minute ${minute}: a very serious injury that leaves ${team} without their man for months.`,
+            ({ player, team, minute, type }) => `${team} got the worst possible news in minute ${minute}: ${player} suffered a ${type} of the highest severity and his return looks a long way off.`,
+          ],
+        }, injurySub: [
+          ({ inName }) => `${inName} took his place from the bench.`,
+          ({ inName }) => `In his stead, ${inName} came on.`,
+          ({ inName }) => `The bench responded at once with ${inName}.`,
+        ], subSwap: ({ inName, outName, cause, minute }) => `To cover the gap left by ${cause}, ${inName} came off the bench on ${minute}' and ${outName} gave up his spot to patch up the back line.`, subIn: ({ inName, cause, minute }) => `After ${cause}'s dismissal, ${inName} came on from the bench on ${minute}' to shore up the defence.`, forfeit: ({ team }) => `With four players sent off, ${team} could no longer field a side and the referee awarded the match as lost.`,
         penaltyMiss: ({ shooter, keeper, minute }) => `There was drama from the spot in minute ${minute}: ${shooter} had the goal at his mercy, but ${keeper} and fortune denied him the celebration.`,
         nearMissSave: ({ shooter, keeper, minute }) => `Not everything came off in the final third: the clearest chance that got away fell to ${shooter} in minute ${minute}, but ${keeper} won the one-on-one with a save of real merit.`,
         nearMissWide: ({ shooter, minute }) => `Not everything came off in the final third: the clearest chance that got away fell to ${shooter} in minute ${minute}, whose effort flew inches wide to groans from the stands.`,
@@ -1283,12 +1361,12 @@ const DICTIONARIES = {
     generic: { level: ({ level }) => `Niveau ${level}`, floor: ({ floor }) => `Étage ${floor}`, vs: 'vs', close: 'Fermer', choose: 'Choisir', players: 'Joueurs', items: 'Objets', player: 'joueur', item: 'objet', loading: 'Chargement...', noData: 'Aucun score pour le moment.', current: 'Actuel', final: 'Fin', local: 'Domicile', opponent: 'Adversaire' },
     pack: { playerTitle: 'Pack de joueur', itemTitle: 'Pack d’objet', playerHint: 'Lisez poste, attributs, rareté, nation et époque. Construisez des synergies.', itemHint: 'Les objets modifient votre équipe. Intégrez-les à votre plan.', playerOpen: 'Ouvrir un pack de joueurs', itemOpen: 'Ouvrir un pack d’objets', chooseOne: ({ count, hint }) => `Choisissez 1 sur ${count}. ${hint}`, tap: 'Touchez pour ouvrir', nationTitle: 'Pack de sélections', nationHint: 'Pack spécial : choisissez une sélection historique et prenez le joueur que vous voulez.', nationOpen: 'Ouvrir un pack de sélections', nationBadge: 'Sélection', nationNew: ({ n }) => `${n} nouveaux joueurs`, nationTopOvr: ({ ovr }) => `OVR max ${ovr}`, nationPickHint: 'Choisissez n’importe quel joueur de cette sélection pour votre effectif.', review: 'Voir mon équipe', reviewTitle: ({ count }) => `Votre effectif (${count} cartes)` },
     card: { owned: 'Déjà dans votre effectif', rarity: { common: 'Commune', rare: 'Rare', epic: 'Épique', legend: 'Légende' }, position: { GK: 'GB', DEF: 'DEF', MID: 'MIL', FWD: 'ATT', ENG: 'MOC' }, line: { GK: 'But', DEF: 'Défense', MID: 'Milieu', FWD: 'Attaque', ENG: 'Meneur' }, stat: { pace: 'VIT', shooting: 'TIR', passing: 'PAS', dribbling: 'DRI', defending: 'DEF', physical: 'PHY', reflexes: 'REF', handling: 'PRI', positioning: 'POS' }, trait: { Francotirador: 'Tireur d’élite', Cañón: 'Canon', Muro: 'Mur', Motor: 'Moteur', Maestro: 'Maestro', Líbero: 'Libéro', Paradón: 'Arrêt réflexe', Killer: 'Tueur', Velocista: 'Sprinteur', Especialista: 'Spécialiste', Penalero: 'Tireur de penalty', Capitán: 'Capitaine', Garra: 'Hargne', Mariscal: 'Maréchal' }, synergy: ({ type }) => `Synergie : ${type}`, itemType: { equipamiento: 'équipement', tactica: 'tactique', reliquia: 'relique' } },
-    build: { title: 'Composez votre équipe', nextOpponent: 'Prochain adversaire', viewLineup: 'Voir le onze', chemistry: 'Collectif', tacticalBoard: 'Tableau tactique', formationAria: 'Formation', roster: 'Effectif', benchAll: 'Tous', benchFilterAria: 'Filtrer les remplaçants par ligne', rosterCount: ({ total, missing }) => `${total} cartes · ${missing} place${missing === 1 ? '' : 's'} libre${missing === 1 ? '' : 's'}`, noSubs: 'Aucun remplaçant disponible.', noItems: 'Aucun objet pour l’instant.', activeItems: ({ count }) => `Objets actifs (${count})`, play: 'Jouer le match', missing: ({ count }) => `Complétez le onze (${count} manquant${count === 1 ? '' : 's'})`, statsDialog: 'Statistiques du joueur', playerDragAria: ({ name }) => `${name}, glisser pour déplacer ou toucher pour retirer du onze`, emptyAria: ({ label }) => `Place ${label} libre, ajouter un joueur`, viewStatsAria: ({ name }) => `Voir les statistiques de ${name}`, benchAria: ({ name }) => `${name}, glisser sur le terrain ou toucher pour aligner`, noCandidates: ({ label }) => `Vous n’avez aucun remplaçant compatible pour ${label}. Trouvez-en dans les packs.`, pickerHead: ({ label }) => `${label} — choisissez qui entre`, targetPickerHead: ({ name }) => `${name} — choisissez sa place`, suspended: 'Expulsé : indisponible ce match', benchSuspendedAria: ({ name }) => `${name}, expulsé au match précédent : ne peut pas être aligné`, openSlot: 'Place libre' },
+    build: { title: 'Composez votre équipe', nextOpponent: 'Prochain adversaire', viewLineup: 'Voir le onze', chemistry: 'Collectif', tacticalBoard: 'Tableau tactique', formationAria: 'Formation', roster: 'Effectif', benchAll: 'Tous', benchFilterAria: 'Filtrer les remplaçants par ligne', rosterCount: ({ total, missing }) => `${total} cartes · ${missing} place${missing === 1 ? '' : 's'} libre${missing === 1 ? '' : 's'}`, noSubs: 'Aucun remplaçant disponible.', noItems: 'Aucun objet pour l’instant.', activeItems: ({ count }) => `Objets actifs (${count})`, play: 'Jouer le match', missing: ({ count }) => `Complétez le onze (${count} manquant${count === 1 ? '' : 's'})`, statsDialog: 'Statistiques du joueur', playerDragAria: ({ name }) => `${name}, glisser pour déplacer ou toucher pour retirer du onze`, emptyAria: ({ label }) => `Place ${label} libre, ajouter un joueur`, viewStatsAria: ({ name }) => `Voir les statistiques de ${name}`, benchAria: ({ name }) => `${name}, glisser sur le terrain ou toucher pour aligner`, noCandidates: ({ label }) => `Vous n’avez aucun remplaçant compatible pour ${label}. Trouvez-en dans les packs.`, pickerHead: ({ label }) => `${label} — choisissez qui entre`, targetPickerHead: ({ name }) => `${name} — choisissez sa place`, suspended: 'Expulsé : indisponible ce match', benchSuspendedAria: ({ name }) => `${name}, expulsé au match précédent : ne peut pas être aligné`, injured: 'Blessé : en récupération', benchInjuredAria: ({ name }) => `${name}, blessé : en récupération, ne peut pas être aligné`, openSlot: 'Place libre' },
     scouting: { report: 'Rapport adversaire', formation: ({ formation }) => `Formation ${formation}`, strength: 'Force', opponentEleven: 'Onze principal adverse', note: 'Notes de jeu pour la Coupe des Légendes. Onze historique représentatif du tournoi.', continue: 'Composer mon équipe' },
     squadIntro: { kicker: 'Votre équipe est prête', cards: ({ count }) => `${count} cartes`, eleven: 'Onze de départ', bench: 'Remplaçants', note: 'Voici votre effectif de départ. Touchez une carte pour voir ses attributs ; vous pourrez ajuster le onze avant chaque match.', continue: 'Ouvrir mon premier pack' },
     ratings: { attack: 'ATT', midfield: 'MIL', defense: 'DÉF', gk: 'GAR' },
     match: { plays: ({ count }) => `${count} actions`, tickerStart: ({ level }) => `Niveau ${level} · Highlights en direct.`, playPauseAria: 'Lire ou mettre en pause', speedAria: 'Vitesse', nextAria: 'Highlight suivant', skipAria: 'Aller à la fin', skipFinal: '⏩ Fin', viewResult: 'Voir le résultat', continue: 'Continuer', modesAria: 'Mode d’affichage', modes: { full: 'Highlights', key: 'Temps forts', commentary: 'Commentaire', instant: 'Instantané' }, anticipation: { gol: ({ minute }) => `Min ${minute}' - Attaque dangereuse...`, parada: ({ minute }) => `Min ${minute}' - Tir cadré...`, shot: ({ minute }) => `Min ${minute}' - Le tir se prépare...`, falta: ({ minute }) => `Min ${minute}' - Contact sous pression...`, default: ({ minute }) => `Min ${minute}' - L’action se construit...` }, finalLine: ({ home, homeGoals, awayGoals, away }) => `Fin · ${home} ${homeGoals}–${awayGoals} ${away}`, finalAnnounce: ({ homeGoals, awayGoals }) => `Fin du match. ${homeGoals} à ${awayGoals}.` },
-    result: { tier: { goleada: 'ROUSTE !', amplia: 'Large victoire', ajustada: 'Victoire serrée', empate: 'Match nul', derrota: 'Défaite' }, lostStep: 'Échelon perdu', towerFall: 'Chute de la tour', retry: 'Retenter l’échelon', nextLevel: 'Niveau suivant', reward: 'Récompense', lossCopy: ({ lives }) => `Vous avez perdu cet échelon. Il vous reste ${lives} vie${lives === 1 ? '' : 's'}.`, rewardCopy: ({ players, items }) => `Récompense prête : pack de ${players} joueurs et ${items} objets à choisir.`, scorers: 'Buteurs', reds: 'Expulsés', saves: 'Arrêts', lastMatch: 'Dernier match', lastTactic: 'Votre tactique', subs: 'Changements', gameOver: 'Fin de run', floorsReached: 'étages atteints', newRecord: '★ Nouveau record', best: ({ best }) => `Meilleure marque : ${best}`, winsRoster: ({ wins, count }) => `${wins} victoire${wins === 1 ? '' : 's'} · effectif de ${count} joueurs`, route: 'Parcours', finalSquad: 'Effectif final', playAgain: 'Rejouer', pathLevel: ({ level }) => `Nv ${level}` },
+    result: { tier: { goleada: 'ROUSTE !', amplia: 'Large victoire', ajustada: 'Victoire serrée', empate: 'Match nul', derrota: 'Défaite' }, lostStep: 'Échelon perdu', towerFall: 'Chute de la tour', retry: 'Retenter l’échelon', nextLevel: 'Niveau suivant', reward: 'Récompense', lossCopy: ({ lives }) => `Vous avez perdu cet échelon. Il vous reste ${lives} vie${lives === 1 ? '' : 's'}.`, rewardCopy: ({ players, items }) => `Récompense prête : pack de ${players} joueurs et ${items} objets à choisir.`, scorers: 'Buteurs', reds: 'Expulsés', injuries: 'Blessés', injuryMatchesTitle: ({ n }) => n > 0 ? `Absent ${n} match${n === 1 ? '' : 's'}` : 'Aucun match manqué', saves: 'Arrêts', lastMatch: 'Dernier match', lastTactic: 'Votre tactique', subs: 'Changements', gameOver: 'Fin de run', floorsReached: 'étages atteints', newRecord: '★ Nouveau record', best: ({ best }) => `Meilleure marque : ${best}`, winsRoster: ({ wins, count }) => `${wins} victoire${wins === 1 ? '' : 's'} · effectif de ${count} joueurs`, route: 'Parcours', finalSquad: 'Effectif final', playAgain: 'Rejouer', pathLevel: ({ level }) => `Nv ${level}` },
     leaderboard: { floor: ({ floor }) => `Étage ${floor}`, updating: 'Mise à jour du classement...', readOnly: 'Serveur sans écriture : affichage du classement sauvegardé.', rank: ({ rank }) => `Votre run termine #${rank}.`, notTop: 'Vous n’êtes pas dans le top 20.', title: 'Classement', top: 'Top 20', empty: 'Aucun score pour le moment.', lineup: 'Dernier onze' },
     adminLogin: { title: 'Accès restreint', kicker: 'Panneau d’édition des joueurs.', user: 'Utilisateur', password: 'Mot de passe', submit: 'Entrer', back: 'Retour au jeu', checking: 'Vérification...', genericError: 'Impossible de se connecter.', invalidCredentials: 'Utilisateur ou mot de passe incorrect.', httpError: ({ status }) => `Impossible de se connecter (HTTP ${status}).`, missingToken: 'Le serveur n’a pas renvoyé de jeton de session.' },
     admin: { back: 'Retour', badge: 'Admin', title: 'Panneau des joueurs', logout: 'Déconnexion', search: 'Rechercher', searchPlaceholder: 'Nom, pays, époque...', position: 'Poste', all: 'Toutes', count: ({ visible, total }) => `${visible} sur ${total} joueurs · du meilleur au moins bon`, selected: 'Joueur sélectionné', name: 'Nom', nation: 'Nation', era: 'Époque', rarity: 'Rareté', ovr: 'OVR calculé', trait: 'Trait', noTrait: 'Sans trait', tacticalType: 'Type tactique', noType: 'Sans type', saveStats: 'Enregistrer les stats', portraitAria: 'Éditeur d’image de profil', portrait: 'Image de profil', toolEffect: 'Effet tool', replaceImage: 'Remplace l’image actuelle', pickImage: 'Glissez ou choisissez une image', imageHint: 'Gros plan recommandé', converted: 'Convertie', savePortrait: 'Enregistrer l’image du joueur', noPlayers: 'Aucun joueur à éditer.', invalidImage: 'Choisissez un fichier image valide.', converting: 'Conversion avec l’outil Python...', convertedReady: 'Image convertie avec l’outil Python, prête à enregistrer.', convertError: ({ message }) => `Conversion impossible : ${message}`, savingImage: 'Enregistrement de l’image sur le disque...', readFailed: 'échec de lecture', expired: 'Session expirée. Reconnectez-vous au panneau.', startServer: 'Lancez l’app avec npm run serve pour utiliser le convertisseur Python exact.', invalidPortrait: 'Le convertisseur Python n’a pas renvoyé de portrait valide.', saveNeedsServer: 'Impossible d’enregistrer. Lancez l’app avec `npm run serve` pour modifier la base de joueurs.', saveHttpError: ({ status }) => `Impossible d’enregistrer la base de joueurs (HTTP ${status}).`, playerNotFound: ({ id }) => `Joueur introuvable : ${id}`, stat: { pace: 'Vitesse', shooting: 'Tir', passing: 'Passe', dribbling: 'Dribble', defending: 'Défense', physical: 'Physique', reflexes: 'Réflexes', handling: 'Prise', positioning: 'Placement' }, positionOption: { GK: 'Gardien', DEF: 'Défenseur', MID: 'Milieu', FWD: 'Attaquant' }, tactical: { posesion: 'Possession', presion: 'Pressing', contra: 'Contre' } },
@@ -1298,6 +1376,15 @@ const DICTIONARIES = {
     },
     scene: {
       badge: { penalty: 'PENALTY', free_kick: 'COUP FRANC', corner: 'CORNER', gol: 'BUT', parada: 'ARRÊT', tiro_fuera: 'TIR À CÔTÉ', bloqueo: 'CONTRE', roja: 'ROUGE', amarilla: 'JAUNE', falta: 'FAUTE', fuera_juego: 'HORS-JEU', despeje: 'DÉGAGEMENT', perdida: 'RÉCUPÉRATION', pase_fuera: 'PASSE LONGUE', default: 'ACTION' }, role: { protagonist: 'Protagoniste', scorer: 'Buteur', shooter: 'Tireur', assistant: 'Passeur', keeper: 'Gardien', defender: 'Défenseur', receiver: 'Receveur' }, title: { midfield_pass: 'Passe au milieu', defensive_pass: 'Relance depuis l’arrière', defensive_recovery: 'Récupération défensive', shot: 'Frappe', cross: 'Centre dans la surface', free_kick: 'Coup franc', free_kick_goal: 'But sur coup franc', penalty: 'Penalty', penalty_goal: 'But sur penalty', shot_goal: 'But sur frappe', shot_goal_alt: 'But sur frappe', header_goal: 'But de la tête', yellow_foul: 'Faute et jaune', red_foul: 'Faute et rouge', goal_kick: 'Six mètres' }, alt: { midfield_pass: 'Scène pixelart d’une passe au milieu', defensive_pass: 'Scène pixelart d’une passe défensive', defensive_recovery: 'Scène pixelart d’une récupération défensive', shot: 'Scène pixelart d’un attaquant qui frappe', cross: 'Scène pixelart d’un centre dans la surface', free_kick: 'Scène pixelart d’un coup franc', free_kick_goal: 'Scène pixelart d’un coup franc dangereux', penalty: 'Scène pixelart d’un penalty', penalty_goal: 'Scène pixelart d’un but sur penalty', shot_goal: 'Scène pixelart d’un but sur frappe', shot_goal_alt: 'Scène pixelart alternative d’un but sur frappe', header_goal: 'Scène pixelart d’un but de la tête', yellow_foul: 'Scène pixelart d’une faute avec carton jaune', red_foul: 'Scène pixelart d’une faute avec carton rouge', goal_kick: 'Scène pixelart d’un six mètres' }, highlight: 'Highlight', goalStamp: 'BUT !', headline: { gol: ({ attacker }) => `But de ${attacker}`, parada: ({ keeper }) => `Arrêt de ${keeper}`, tiro_fuera: ({ shooter }) => `Frappe à côté de ${shooter}`, bloqueo: ({ defender }) => `Contre de ${defender}`, faltaRoja: 'Faute dure', falta: 'Faute tactique', fuera_juego: 'Hors-jeu', despeje: 'La défense dégage', pase_fuera: 'Passe trop longue', perdida: 'Récupération défensive', default: ({ attacker }) => `${attacker} ne trouve pas de tir` },
+    },
+    injury: {
+      severity: { simple: 'léger', moderada: '1 match', grave: '3 matchs', muy_grave: '6 matchs' },
+      types: {
+        simple: ['crampe', 'contusion', 'douleur à la cheville', 'légère surcharge'],
+        moderada: ['entorse de la cheville', 'élongation musculaire', 'torsion du genou', 'contracture'],
+        grave: ['déchirure musculaire', 'entorse de grade 2', 'luxation de l’épaule', 'micro-déchirure musculaire'],
+        muy_grave: ['rupture des ligaments croisés', 'fracture du péroné', 'rupture du tendon d’Achille', 'grave luxation du genou'],
+      },
     },
     press: {
       masthead: 'La Gazette de la Tour',
@@ -1320,7 +1407,32 @@ const DICTIONARIES = {
         opener: ({ att, def, minute, scorer, how, score }) => `Dès l’entame, ${att} a affiché un état d’esprit offensif et un pressing haut qui a gêné la relance de ${def}. L’insistance a payé à la ${minute}e minute, lorsque ${scorer} ${how} pour porter le score à ${score}. Ce but a donné confiance aux siens, qui ont commencé à contrôler la possession et à créer un danger constant sur les ailes.`,
         scoreless: ({ team, opp, keeper }) => `La première période fut un bras de fer tactique au cours duquel ${team} et ${opp} se sont jaugés sans concéder d’espaces. Les défenses ont pris le dessus sur les attaques et, quand il l’a fallu, ${keeper} a éteint les incendies dans la surface. On a atteint la pause sans but, avec le sentiment qu’un détail déciderait du match.`,
         quiet: ({ team, opp, keeper }) => `Le tableau d’affichage n’a plus bougé en seconde période : ${team} et ${opp} ont échangé des offensives sans lucidité dans les derniers mètres, et chaque tentative est morte dans les gants de ${keeper} ou sur les pieds d’une défense bien en place. Le duel s’est refermé sans frayeur, scellé par ce qui s’était semé avant la pause.`,
-        red: ({ player, team, minute }) => `Le match s’est compliqué avec l’expulsion de ${player} à la ${minute}e minute, laissant ${team} en infériorité et conditionnant totalement la fin de rencontre.`, subSwap: ({ inName, outName, cause, minute }) => `Pour combler le vide laissé par ${cause}, ${inName} est entré en jeu à la ${minute}e et ${outName} a cédé sa place pour reconstruire la défense.`, subIn: ({ inName, cause, minute }) => `Après l’expulsion de ${cause}, ${inName} est entré du banc à la ${minute}e pour renforcer la défense.`, forfeit: ({ team }) => `Avec quatre expulsés, ${team} n’avait plus assez de joueurs et l’arbitre a déclaré le match perdu.`,
+        red: ({ player, team, minute }) => `Le match s’est compliqué avec l’expulsion de ${player} à la ${minute}e minute, laissant ${team} en infériorité et conditionnant totalement la fin de rencontre.`, injury: {
+          simple: [
+            ({ player, team, minute, type }) => `${player} a demandé le changement à la ${minute}e à cause d’une ${type} et a cédé sa place sur-le-champ, mais la frayeur est restée sans suite.`,
+            ({ player, team, minute, type }) => `Une ${type} a contraint ${player} à sortir à la ${minute}e : ${team} a puisé dans le banc, mais ce ne fut qu’un pépin léger.`,
+            ({ player, team, minute, type }) => `${team} a perdu ${player} à la ${minute}e sur une ${type} ; rien de grave, mais assez pour quitter le terrain aussitôt.`,
+          ],
+          moderada: [
+            ({ player, team, minute, type }) => `${player} est tombé à la ${minute}e avec une ${type} et a dû être remplacé : ${team} perd un élément important pour le prochain rendez-vous.`,
+            ({ player, team, minute, type }) => `La ${type} de ${player} à la ${minute}e a déclenché l’alarme à ${team}, qui l’a sorti visiblement gêné pour les semaines à venir.`,
+            ({ player, team, minute, type }) => `Mauvaise nouvelle pour ${team} : ${player} est sorti à la ${minute}e avec une ${type} qui le privera du prochain match.`,
+          ],
+          grave: [
+            ({ player, team, minute, type }) => `Image inquiétante à la ${minute}e : ${player} s’est effondré sur une ${type} et a quitté le terrain visiblement souffrant, coup dur pour les plans de ${team}.`,
+            ({ player, team, minute, type }) => `La ${type} de ${player} à la ${minute}e a imposé une sortie en urgence ; ${team} aborde les prochaines journées sans l’une de ses références.`,
+            ({ player, team, minute, type }) => `${team} a encaissé un sérieux revers lorsque ${player} a dû quitter la pelouse à la ${minute}e sur une ${type} annonçant plusieurs semaines d’absence.`,
+          ],
+          muy_grave: [
+            ({ player, team, minute, type }) => `Drame à la ${minute}e : ${player} est sorti sous les applaudissements après une ${type} d’une extrême gravité qui l’éloignera longtemps et assombrit la soirée de ${team}.`,
+            ({ player, team, minute, type }) => `Le match a été marqué par la ${type} de ${player} à la ${minute}e : une blessure très grave qui prive ${team} de son joueur pour des mois.`,
+            ({ player, team, minute, type }) => `${team} a reçu la pire des nouvelles à la ${minute}e : ${player} a subi une ${type} de la plus haute gravité et son retour s’annonce très lointain.`,
+          ],
+        }, injurySub: [
+          ({ inName }) => `${inName} a pris sa place depuis le banc.`,
+          ({ inName }) => `À sa place est entré ${inName}.`,
+          ({ inName }) => `Le banc a répondu aussitôt avec ${inName}.`,
+        ], subSwap: ({ inName, outName, cause, minute }) => `Pour combler le vide laissé par ${cause}, ${inName} est entré en jeu à la ${minute}e et ${outName} a cédé sa place pour reconstruire la défense.`, subIn: ({ inName, cause, minute }) => `Après l’expulsion de ${cause}, ${inName} est entré du banc à la ${minute}e pour renforcer la défense.`, forfeit: ({ team }) => `Avec quatre expulsés, ${team} n’avait plus assez de joueurs et l’arbitre a déclaré le match perdu.`,
         penaltyMiss: ({ shooter, keeper, minute }) => `Il y eut du drame depuis le point de penalty à la ${minute}e minute : ${shooter} tenait le but au bout du pied, mais ${keeper} et la chance lui ont refusé la célébration.`,
         nearMissSave: ({ shooter, keeper, minute }) => `Tout n’a pas souri dans les derniers mètres : la plus belle occasion envolée fut pour ${shooter} à la ${minute}e minute, mais ${keeper} a remporté le face-à-face d’une intervention de grande valeur.`,
         nearMissWide: ({ shooter, minute }) => `Tout n’a pas souri dans les derniers mètres : la plus belle occasion envolée fut pour ${shooter} à la ${minute}e minute, dont la frappe a frôlé le poteau sous les soupirs des tribunes.`,
@@ -1375,12 +1487,12 @@ const DICTIONARIES = {
     generic: { level: ({ level }) => `Nível ${level}`, floor: ({ floor }) => `Andar ${floor}`, vs: 'vs', close: 'Fechar', choose: 'Escolher', players: 'Jogadores', items: 'Objetos', player: 'jogador', item: 'objeto', loading: 'Carregando...', noData: 'Sem marcas ainda.', current: 'Atual', final: 'Final', local: 'Mandante', opponent: 'Rival' },
     pack: { playerTitle: 'Pacote de jogador', itemTitle: 'Pacote de objeto', playerHint: 'Leia posição, atributos, raridade, nação e era. Construa sinergias.', itemHint: 'Os objetos modificam sua equipe. Encaixe-os no seu plano.', playerOpen: 'Abrir pacote de jogadores', itemOpen: 'Abrir pacote de objetos', chooseOne: ({ count, hint }) => `Escolha 1 de ${count}. ${hint}`, tap: 'Toque para abrir', nationTitle: 'Pacote de seleções', nationHint: 'Pacote especial: escolha uma seleção histórica e leve o jogador que quiser.', nationOpen: 'Abrir pacote de seleções', nationBadge: 'Seleção', nationNew: ({ n }) => `${n} jogadores novos`, nationTopOvr: ({ ovr }) => `OVR máx. ${ovr}`, nationPickHint: 'Escolha qualquer jogador desta seleção para o seu elenco.', review: 'Revisar minha equipe', reviewTitle: ({ count }) => `Seu elenco (${count} cartas)` },
     card: { owned: 'Já está no seu elenco', rarity: { common: 'Comum', rare: 'Rara', epic: 'Épica', legend: 'Lenda' }, position: { GK: 'GOL', DEF: 'DEF', MID: 'MEI', FWD: 'ATA', ENG: 'MEI' }, line: { GK: 'Gol', DEF: 'Defesa', MID: 'Meio-campo', FWD: 'Ataque', ENG: 'Meia' }, stat: { pace: 'RIT', shooting: 'FIN', passing: 'PAS', dribbling: 'DRI', defending: 'DEF', physical: 'FIS', reflexes: 'REF', handling: 'BLO', positioning: 'POS' }, trait: { Francotirador: 'Franco-atirador', Cañón: 'Canhão', Muro: 'Muralha', Motor: 'Motor', Maestro: 'Maestro', Líbero: 'Líbero', Paradón: 'Defesaça', Killer: 'Matador', Velocista: 'Velocista', Especialista: 'Especialista', Penalero: 'Cobrador de pênalti', Capitán: 'Capitão', Garra: 'Garra', Mariscal: 'Xerife' }, synergy: ({ type }) => `Sinergia: ${type}`, itemType: { equipamiento: 'equipamento', tactica: 'tática', reliquia: 'relíquia' } },
-    build: { title: 'Monte sua equipe', nextOpponent: 'Próximo rival', viewLineup: 'Ver onze', chemistry: 'Química', tacticalBoard: 'Quadro tático', formationAria: 'Formação', roster: 'Elenco', benchAll: 'Todos', benchFilterAria: 'Filtrar reservas por linha', rosterCount: ({ total, missing }) => `${total} cartas · ${missing} vaga${missing === 1 ? '' : 's'} livre${missing === 1 ? '' : 's'}`, noSubs: 'Sem reservas disponíveis.', noItems: 'Sem objetos ainda.', activeItems: ({ count }) => `Objetos ativos (${count})`, play: 'Jogar partida', missing: ({ count }) => `Complete o onze (${count} faltando)`, statsDialog: 'Estatísticas do jogador', playerDragAria: ({ name }) => `${name}, arraste para mover ou toque para tirar do onze`, emptyAria: ({ label }) => `Vaga ${label} livre, adicionar jogador`, viewStatsAria: ({ name }) => `Ver estatísticas de ${name}`, benchAria: ({ name }) => `${name}, arraste para o campo ou toque para escalar`, noCandidates: ({ label }) => `Você não tem reservas compatíveis para ${label}. Encontre-as nos pacotes.`, pickerHead: ({ label }) => `${label} — escolha quem entra`, targetPickerHead: ({ name }) => `${name} — escolha a posição`, suspended: 'Expulso: indisponível nesta partida', benchSuspendedAria: ({ name }) => `${name}, expulso na partida anterior: não pode ser escalado`, openSlot: 'Vaga livre' },
+    build: { title: 'Monte sua equipe', nextOpponent: 'Próximo rival', viewLineup: 'Ver onze', chemistry: 'Química', tacticalBoard: 'Quadro tático', formationAria: 'Formação', roster: 'Elenco', benchAll: 'Todos', benchFilterAria: 'Filtrar reservas por linha', rosterCount: ({ total, missing }) => `${total} cartas · ${missing} vaga${missing === 1 ? '' : 's'} livre${missing === 1 ? '' : 's'}`, noSubs: 'Sem reservas disponíveis.', noItems: 'Sem objetos ainda.', activeItems: ({ count }) => `Objetos ativos (${count})`, play: 'Jogar partida', missing: ({ count }) => `Complete o onze (${count} faltando)`, statsDialog: 'Estatísticas do jogador', playerDragAria: ({ name }) => `${name}, arraste para mover ou toque para tirar do onze`, emptyAria: ({ label }) => `Vaga ${label} livre, adicionar jogador`, viewStatsAria: ({ name }) => `Ver estatísticas de ${name}`, benchAria: ({ name }) => `${name}, arraste para o campo ou toque para escalar`, noCandidates: ({ label }) => `Você não tem reservas compatíveis para ${label}. Encontre-as nos pacotes.`, pickerHead: ({ label }) => `${label} — escolha quem entra`, targetPickerHead: ({ name }) => `${name} — escolha a posição`, suspended: 'Expulso: indisponível nesta partida', benchSuspendedAria: ({ name }) => `${name}, expulso na partida anterior: não pode ser escalado`, injured: 'Lesionado: em recuperação', benchInjuredAria: ({ name }) => `${name}, lesionado: em recuperação, não pode ser escalado`, openSlot: 'Vaga livre' },
     scouting: { report: 'Relatório do rival', formation: ({ formation }) => `Formação ${formation}`, strength: 'Força', opponentEleven: 'Onze principal do rival', note: 'Ratings de jogo para a Copa das Lendas. Onze histórico representativo do torneio.', continue: 'Montar minha equipe' },
     squadIntro: { kicker: 'Sua equipe está pronta', cards: ({ count }) => `${count} cartas`, eleven: 'Onze titular', bench: 'Reservas', note: 'Este é o seu elenco inicial. Toque em qualquer carta para ver os atributos; antes de cada partida você pode ajustar o onze.', continue: 'Abrir meu primeiro pacote' },
     ratings: { attack: 'ATA', midfield: 'MEI', defense: 'DEF', gk: 'GOL' },
     match: { plays: ({ count }) => `${count} jogadas`, tickerStart: ({ level }) => `Nível ${level} · Highlights ao vivo.`, playPauseAria: 'Reproduzir ou pausar', speedAria: 'Velocidade', nextAria: 'Próximo highlight', skipAria: 'Pular para o final', skipFinal: '⏩ Final', viewResult: 'Ver resultado', continue: 'Continuar', modesAria: 'Modo de visualização', modes: { full: 'Highlights', key: 'Só chave', commentary: 'Comentário', instant: 'Instantâneo' }, anticipation: { gol: ({ minute }) => `Min ${minute}' - Ataque perigoso...`, parada: ({ minute }) => `Min ${minute}' - Finalização no gol...`, shot: ({ minute }) => `Min ${minute}' - O chute vem aí...`, falta: ({ minute }) => `Min ${minute}' - Contato sob pressão...`, default: ({ minute }) => `Min ${minute}' - A jogada se constrói...` }, finalLine: ({ home, homeGoals, awayGoals, away }) => `Final · ${home} ${homeGoals}–${awayGoals} ${away}`, finalAnnounce: ({ homeGoals, awayGoals }) => `Fim de jogo. ${homeGoals} a ${awayGoals}.` },
-    result: { tier: { goleada: 'GOLEADA!', amplia: 'Vitória ampla', ajustada: 'Vitória apertada', empate: 'Empate', derrota: 'Derrota' }, lostStep: 'Degrau perdido', towerFall: 'Queda da torre', retry: 'Tentar o degrau de novo', nextLevel: 'Próximo nível', reward: 'Recompensa', lossCopy: ({ lives }) => `Você perdeu este degrau. Restam ${lives} vida${lives === 1 ? '' : 's'}.`, rewardCopy: ({ players, items }) => `Recompensa pronta: pacote de ${players} jogadores e ${items} objetos para escolher.`, scorers: 'Artilheiros', reds: 'Expulsos', saves: 'Defesas', lastMatch: 'Última partida', lastTactic: 'Sua tática', subs: 'Mudanças', gameOver: 'Fim da run', floorsReached: 'andares alcançados', newRecord: '★ Novo recorde', best: ({ best }) => `Melhor marca: ${best}`, winsRoster: ({ wins, count }) => `${wins} vitória${wins === 1 ? '' : 's'} · elenco de ${count} jogadores`, route: 'Percurso', finalSquad: 'Elenco final', playAgain: 'Jogar de novo', pathLevel: ({ level }) => `Nv ${level}` },
+    result: { tier: { goleada: 'GOLEADA!', amplia: 'Vitória ampla', ajustada: 'Vitória apertada', empate: 'Empate', derrota: 'Derrota' }, lostStep: 'Degrau perdido', towerFall: 'Queda da torre', retry: 'Tentar o degrau de novo', nextLevel: 'Próximo nível', reward: 'Recompensa', lossCopy: ({ lives }) => `Você perdeu este degrau. Restam ${lives} vida${lives === 1 ? '' : 's'}.`, rewardCopy: ({ players, items }) => `Recompensa pronta: pacote de ${players} jogadores e ${items} objetos para escolher.`, scorers: 'Artilheiros', reds: 'Expulsos', injuries: 'Lesionados', injuryMatchesTitle: ({ n }) => n > 0 ? `Fora por ${n} partida${n === 1 ? '' : 's'}` : 'Não perde nenhuma partida', saves: 'Defesas', lastMatch: 'Última partida', lastTactic: 'Sua tática', subs: 'Mudanças', gameOver: 'Fim da run', floorsReached: 'andares alcançados', newRecord: '★ Novo recorde', best: ({ best }) => `Melhor marca: ${best}`, winsRoster: ({ wins, count }) => `${wins} vitória${wins === 1 ? '' : 's'} · elenco de ${count} jogadores`, route: 'Percurso', finalSquad: 'Elenco final', playAgain: 'Jogar de novo', pathLevel: ({ level }) => `Nv ${level}` },
     leaderboard: { floor: ({ floor }) => `Andar ${floor}`, updating: 'Atualizando ranking...', readOnly: 'Servidor sem escrita: mostrando o ranking salvo.', rank: ({ rank }) => `Sua run ficou em #${rank}.`, notTop: 'Você não entrou no top 20.', title: 'Ranking', top: 'Top 20', empty: 'Sem marcas ainda.', lineup: 'Último onze' },
     adminLogin: { title: 'Acesso restrito', kicker: 'Painel de edição de jogadores.', user: 'Usuário', password: 'Senha', submit: 'Entrar', back: 'Voltar ao jogo', checking: 'Verificando...', genericError: 'Não foi possível iniciar sessão.', invalidCredentials: 'Usuário ou senha incorretos.', httpError: ({ status }) => `Não foi possível iniciar sessão (HTTP ${status}).`, missingToken: 'O servidor não devolveu um token de sessão.' },
     admin: { back: 'Voltar', badge: 'Admin', title: 'Painel de jogadores', logout: 'Sair', search: 'Buscar', searchPlaceholder: 'Nome, país, era...', position: 'Posição', all: 'Todas', count: ({ visible, total }) => `${visible} de ${total} jogadores · melhor para pior`, selected: 'Jogador selecionado', name: 'Nome', nation: 'Nação', era: 'Era', rarity: 'Raridade', ovr: 'OVR calculado', trait: 'Traço', noTrait: 'Sem traço', tacticalType: 'Tipo tático', noType: 'Sem tipo', saveStats: 'Salvar estatísticas', portraitAria: 'Editor de imagem de perfil', portrait: 'Imagem de perfil', toolEffect: 'Efeito tool', replaceImage: 'Substitui a imagem atual', pickImage: 'Arraste ou escolha uma imagem', imageHint: 'Primeiro plano recomendado', converted: 'Convertida', savePortrait: 'Salvar imagem no jogador', noPlayers: 'Não há jogadores para editar.', invalidImage: 'Escolha um arquivo de imagem válido.', converting: 'Convertendo com o tool Python...', convertedReady: 'Imagem convertida com o tool Python, pronta para salvar.', convertError: ({ message }) => `Não foi possível converter: ${message}`, savingImage: 'Salvando imagem no disco...', readFailed: 'falha na leitura', expired: 'Sessão expirada. Entre novamente no painel.', startServer: 'Inicie a app com npm run serve para usar o conversor Python exato.', invalidPortrait: 'O conversor Python não devolveu um retrato válido.', saveNeedsServer: 'Não foi possível salvar. Inicie a app com `npm run serve` para editar a base de jogadores.', saveHttpError: ({ status }) => `Não foi possível salvar a base de jogadores (HTTP ${status}).`, playerNotFound: ({ id }) => `Jogador não encontrado: ${id}`, stat: { pace: 'Ritmo', shooting: 'Finalização', passing: 'Passe', dribbling: 'Drible', defending: 'Defesa', physical: 'Físico', reflexes: 'Reflexos', handling: 'Bloqueio', positioning: 'Posicionamento' }, positionOption: { GK: 'Goleiro', DEF: 'Defensor', MID: 'Meio-campista', FWD: 'Atacante' }, tactical: { posesion: 'Posse', presion: 'Pressão', contra: 'Contra' } },
@@ -1390,6 +1502,15 @@ const DICTIONARIES = {
     },
     scene: {
       badge: { penalty: 'PÊNALTI', free_kick: 'FALTA', corner: 'ESCANTEIO', gol: 'GOL', parada: 'DEFESA', tiro_fuera: 'CHUTE FORA', bloqueo: 'BLOQUEIO', roja: 'VERMELHO', amarilla: 'AMARELO', falta: 'FALTA', fuera_juego: 'IMPEDIMENTO', despeje: 'AFASTADA', perdida: 'ROUBO', pase_fuera: 'PASSE LONGO', default: 'JOGADA' }, role: { protagonist: 'Protagonista', scorer: 'Autor do gol', shooter: 'Finalizador', assistant: 'Assistente', keeper: 'Goleiro', defender: 'Defensor', receiver: 'Recebedor' }, title: { midfield_pass: 'Passe no meio-campo', defensive_pass: 'Saída desde trás', defensive_recovery: 'Recuperação defensiva', shot: 'Finalização', cross: 'Cruzamento na área', free_kick: 'Cobrança de falta', free_kick_goal: 'Gol de falta', penalty: 'Pênalti', penalty_goal: 'Gol de pênalti', shot_goal: 'Gol de finalização', shot_goal_alt: 'Gol de finalização', header_goal: 'Gol de cabeça', yellow_foul: 'Falta e amarelo', red_foul: 'Falta e vermelho', goal_kick: 'Tiro de meta' }, alt: { midfield_pass: 'Cena pixelart de um passe no meio-campo', defensive_pass: 'Cena pixelart de passe na defesa', defensive_recovery: 'Cena pixelart de uma recuperação defensiva', shot: 'Cena pixelart de um atacante finalizando', cross: 'Cena pixelart de um cruzamento na área', free_kick: 'Cena pixelart de uma cobrança de falta', free_kick_goal: 'Cena pixelart de uma falta perigosa', penalty: 'Cena pixelart de um pênalti', penalty_goal: 'Cena pixelart de um gol de pênalti', shot_goal: 'Cena pixelart de um gol de finalização', shot_goal_alt: 'Cena pixelart alternativa de um gol de finalização', header_goal: 'Cena pixelart de um gol de cabeça', yellow_foul: 'Cena pixelart de uma falta com cartão amarelo', red_foul: 'Cena pixelart de uma falta com cartão vermelho', goal_kick: 'Cena pixelart de um tiro de meta' }, highlight: 'Highlight', goalStamp: 'GOL!', headline: { gol: ({ attacker }) => `Gol de ${attacker}`, parada: ({ keeper }) => `Defesa de ${keeper}`, tiro_fuera: ({ shooter }) => `Chute para fora de ${shooter}`, bloqueo: ({ defender }) => `Bloqueio de ${defender}`, faltaRoja: 'Falta dura', falta: 'Falta tática', fuera_juego: 'Impedimento', despeje: 'A defesa afasta', pase_fuera: 'Passe longo demais', perdida: 'Recuperação defensiva', default: ({ attacker }) => `${attacker} não encontra finalização` },
+    },
+    injury: {
+      severity: { simple: 'leve', moderada: '1 partida', grave: '3 partidas', muy_grave: '6 partidas' },
+      types: {
+        simple: ['cãibra', 'contusão', 'pancada no tornozelo', 'sobrecarga leve'],
+        moderada: ['entorse de tornozelo', 'distensão muscular', 'torção no joelho', 'contratura'],
+        grave: ['ruptura de fibras', 'entorse de grau 2', 'luxação no ombro', 'microrruptura muscular'],
+        muy_grave: ['ruptura do ligamento cruzado', 'fratura da fíbula', 'ruptura do tendão de Aquiles', 'luxação grave no joelho'],
+      },
     },
     press: {
       masthead: 'A Gazeta da Torre',
@@ -1412,7 +1533,32 @@ const DICTIONARIES = {
         opener: ({ att, def, minute, scorer, how, score }) => `Desde o início, ${att} mostrou postura ofensiva e uma pressão alta que complicou a saída de bola de ${def}. A insistência foi premiada aos ${minute} minutos, quando ${scorer} ${how} para colocar o ${score} no placar. O gol trouxe confiança, e a equipe passou a controlar a posse e a gerar perigo constante pelos lados do campo.`,
         scoreless: ({ team, opp, keeper }) => `O primeiro tempo foi um duelo tático em que ${team} e ${opp} se estudaram sem conceder espaços. As defesas levaram a melhor sobre os ataques e, quando foi preciso, ${keeper} apareceu para apagar os incêndios dentro da área. Foi-se ao intervalo sem gols e com a sensação de que um detalhe decidiria a partida.`,
         quiet: ({ team, opp, keeper }) => `O placar não se moveu mais no segundo tempo: ${team} e ${opp} trocaram chegadas sem clareza nos metros finais, e cada tentativa morreu nas luvas de ${keeper} ou nos pés de uma defesa bem postada. O duelo se fechou sem mais sustos, decidido pelo que se plantou antes do intervalo.`,
-        red: ({ player, team, minute }) => `A partida se complicou com a expulsão de ${player} aos ${minute} minutos, que deixou ${team} em inferioridade e condicionou por completo a reta final.`, subSwap: ({ inName, outName, cause, minute }) => `Para tapar o buraco deixado por ${cause}, ${inName} entrou do banco aos ${minute}' e ${outName} cedeu seu lugar para refazer a defesa.`, subIn: ({ inName, cause, minute }) => `Após a expulsão de ${cause}, ${inName} entrou do banco aos ${minute}' para reforçar a defesa.`, forfeit: ({ team }) => `Com quatro expulsos, ${team} ficou sem equipe em campo e o árbitro deu a partida como perdida.`,
+        red: ({ player, team, minute }) => `A partida se complicou com a expulsão de ${player} aos ${minute} minutos, que deixou ${team} em inferioridade e condicionou por completo a reta final.`, injury: {
+          simple: [
+            ({ player, team, minute, type }) => `${player} pediu a substituição aos ${minute}' por uma ${type} e deixou seu lugar na hora, embora o susto não tenha passado disso.`,
+            ({ player, team, minute, type }) => `Uma ${type} obrigou a tirar ${player} no minuto ${minute}: ${team} mexeu no banco, mas não passou de um percalço leve.`,
+            ({ player, team, minute, type }) => `${team} perdeu ${player} no minuto ${minute} por uma ${type}; nada sério, mas o suficiente para deixar o campo de imediato.`,
+          ],
+          moderada: [
+            ({ player, team, minute, type }) => `${player} caiu lesionado aos ${minute}' com uma ${type} e teve de ser substituído: ${team} perde uma peça importante para o próximo compromisso.`,
+            ({ player, team, minute, type }) => `A ${type} de ${player} no minuto ${minute} acendeu o alerta no ${team}, que o retirou com dores evidentes para as próximas semanas.`,
+            ({ player, team, minute, type }) => `Má notícia para ${team}: ${player} saiu aos ${minute}' com uma ${type} que o deixará fora do próximo jogo.`,
+          ],
+          grave: [
+            ({ player, team, minute, type }) => `Imagem preocupante aos ${minute}': ${player} desabou com uma ${type} e deixou o campo visivelmente dolorido, um duro golpe nos planos do ${team}.`,
+            ({ player, team, minute, type }) => `A ${type} de ${player} no minuto ${minute} forçou uma saída de urgência; ${team} encara as próximas rodadas sem uma de suas referências.`,
+            ({ player, team, minute, type }) => `${team} sofreu um sério revés quando ${player} teve de deixar o gramado aos ${minute}' com uma ${type} que aponta para várias semanas de baixa.`,
+          ],
+          muy_grave: [
+            ({ player, team, minute, type }) => `Drama no minuto ${minute}: ${player} foi retirado sob aplausos após uma ${type} de extrema gravidade que o afastará por longa temporada e ofusca a noite do ${team}.`,
+            ({ player, team, minute, type }) => `A partida ficou marcada pela ${type} de ${player} aos ${minute}': uma lesão gravíssima que deixa ${team} sem seu jogador por meses.`,
+            ({ player, team, minute, type }) => `${team} recebeu a pior das notícias aos ${minute}': ${player} sofreu uma ${type} de máxima gravidade e seu retorno parece muito distante.`,
+          ],
+        }, injurySub: [
+          ({ inName }) => `Em seu lugar entrou ${inName}.`,
+          ({ inName }) => `${inName} assumiu sua posição vindo do banco.`,
+          ({ inName }) => `O banco respondeu na hora com ${inName}.`,
+        ], subSwap: ({ inName, outName, cause, minute }) => `Para tapar o buraco deixado por ${cause}, ${inName} entrou do banco aos ${minute}' e ${outName} cedeu seu lugar para refazer a defesa.`, subIn: ({ inName, cause, minute }) => `Após a expulsão de ${cause}, ${inName} entrou do banco aos ${minute}' para reforçar a defesa.`, forfeit: ({ team }) => `Com quatro expulsos, ${team} ficou sem equipe em campo e o árbitro deu a partida como perdida.`,
         penaltyMiss: ({ shooter, keeper, minute }) => `Houve drama na marca da cal aos ${minute} minutos: ${shooter} teve o gol nos pés, mas ${keeper} e a sorte lhe negaram a comemoração.`,
         nearMissSave: ({ shooter, keeper, minute }) => `Nem tudo deu certo nos metros finais: a chance mais clara desperdiçada foi de ${shooter} aos ${minute} minutos, mas ${keeper} venceu o mano a mano com uma intervenção de muito mérito.`,
         nearMissWide: ({ shooter, minute }) => `Nem tudo deu certo nos metros finais: a chance mais clara desperdiçada foi de ${shooter} aos ${minute} minutos, com uma finalização que passou raspando a trave sob lamentos da torcida.`,
@@ -1467,12 +1613,12 @@ const DICTIONARIES = {
     generic: { level: ({ level }) => `Livello ${level}`, floor: ({ floor }) => `Piano ${floor}`, vs: 'vs', close: 'Chiudi', choose: 'Scegli', players: 'Giocatori', items: 'Oggetti', player: 'giocatore', item: 'oggetto', loading: 'Caricamento...', noData: 'Nessun punteggio ancora.', current: 'Attuale', final: 'Fine', local: 'Casa', opponent: 'Rivale' },
     pack: { playerTitle: 'Pacchetto giocatore', itemTitle: 'Pacchetto oggetto', playerHint: 'Leggi ruolo, attributi, rarità, nazione ed epoca. Costruisci sinergie.', itemHint: 'Gli oggetti modificano la squadra. Inseriscili nel tuo piano.', playerOpen: 'Apri pacchetto giocatori', itemOpen: 'Apri pacchetto oggetti', chooseOne: ({ count, hint }) => `Scegli 1 di ${count}. ${hint}`, tap: 'Tocca per aprire', nationTitle: 'Pacchetto nazionali', nationHint: 'Pacchetto speciale: scegli una nazionale storica e prendi il giocatore che vuoi.', nationOpen: 'Apri pacchetto nazionali', nationBadge: 'Nazionale', nationNew: ({ n }) => `${n} nuovi giocatori`, nationTopOvr: ({ ovr }) => `OVR max ${ovr}`, nationPickHint: 'Scegli qualsiasi giocatore di questa nazionale per la tua rosa.', review: 'Rivedi la mia squadra', reviewTitle: ({ count }) => `La tua rosa (${count} carte)` },
     card: { owned: 'Già nella tua rosa', rarity: { common: 'Comune', rare: 'Rara', epic: 'Epica', legend: 'Leggenda' }, position: { GK: 'POR', DEF: 'DIF', MID: 'CEN', FWD: 'ATT', ENG: 'TRQ' }, line: { GK: 'Porta', DEF: 'Difesa', MID: 'Centrocampo', FWD: 'Attacco', ENG: 'Trequarti' }, stat: { pace: 'VEL', shooting: 'TIR', passing: 'PAS', dribbling: 'DRI', defending: 'DIF', physical: 'FIS', reflexes: 'RIF', handling: 'PRE', positioning: 'POS' }, trait: { Francotirador: 'Cecchino', Cañón: 'Cannone', Muro: 'Muro', Motor: 'Motore', Maestro: 'Maestro', Líbero: 'Libero', Paradón: 'Paratona', Killer: 'Killer', Velocista: 'Velocista', Especialista: 'Specialista', Penalero: 'Rigorista', Capitán: 'Capitano', Garra: 'Grinta', Mariscal: 'Maresciallo' }, synergy: ({ type }) => `Sinergia: ${type}`, itemType: { equipamiento: 'equipaggiamento', tactica: 'tattica', reliquia: 'reliquia' } },
-    build: { title: 'Costruisci la squadra', nextOpponent: 'Prossimo rivale', viewLineup: 'Vedi undici', chemistry: 'Intesa', tacticalBoard: 'Lavagna tattica', formationAria: 'Formazione', roster: 'Rosa', benchAll: 'Tutti', benchFilterAria: 'Filtra le riserve per reparto', rosterCount: ({ total, missing }) => `${total} carte · ${missing} slot liber${missing === 1 ? 'o' : 'i'}`, noSubs: 'Nessuna riserva disponibile.', noItems: 'Nessun oggetto per ora.', activeItems: ({ count }) => `Oggetti attivi (${count})`, play: 'Gioca partita', missing: ({ count }) => `Completa l’undici (${count} mancanti)`, statsDialog: 'Statistiche giocatore', playerDragAria: ({ name }) => `${name}, trascina per spostare o tocca per togliere dall’undici`, emptyAria: ({ label }) => `Slot ${label} libero, aggiungi giocatore`, viewStatsAria: ({ name }) => `Vedi statistiche di ${name}`, benchAria: ({ name }) => `${name}, trascina in campo o tocca per schierare`, noCandidates: ({ label }) => `Non hai riserve compatibili per ${label}. Trovale nei pacchetti.`, pickerHead: ({ label }) => `${label} — scegli chi entra`, targetPickerHead: ({ name }) => `${name} — scegli la posizione`, suspended: 'Espulso: non disponibile in questa partita', benchSuspendedAria: ({ name }) => `${name}, espulso nella partita precedente: non può essere schierato`, openSlot: 'Slot libero' },
+    build: { title: 'Costruisci la squadra', nextOpponent: 'Prossimo rivale', viewLineup: 'Vedi undici', chemistry: 'Intesa', tacticalBoard: 'Lavagna tattica', formationAria: 'Formazione', roster: 'Rosa', benchAll: 'Tutti', benchFilterAria: 'Filtra le riserve per reparto', rosterCount: ({ total, missing }) => `${total} carte · ${missing} slot liber${missing === 1 ? 'o' : 'i'}`, noSubs: 'Nessuna riserva disponibile.', noItems: 'Nessun oggetto per ora.', activeItems: ({ count }) => `Oggetti attivi (${count})`, play: 'Gioca partita', missing: ({ count }) => `Completa l’undici (${count} mancanti)`, statsDialog: 'Statistiche giocatore', playerDragAria: ({ name }) => `${name}, trascina per spostare o tocca per togliere dall’undici`, emptyAria: ({ label }) => `Slot ${label} libero, aggiungi giocatore`, viewStatsAria: ({ name }) => `Vedi statistiche di ${name}`, benchAria: ({ name }) => `${name}, trascina in campo o tocca per schierare`, noCandidates: ({ label }) => `Non hai riserve compatibili per ${label}. Trovale nei pacchetti.`, pickerHead: ({ label }) => `${label} — scegli chi entra`, targetPickerHead: ({ name }) => `${name} — scegli la posizione`, suspended: 'Espulso: non disponibile in questa partita', benchSuspendedAria: ({ name }) => `${name}, espulso nella partita precedente: non può essere schierato`, injured: 'Infortunato: in recupero', benchInjuredAria: ({ name }) => `${name}, infortunato: in recupero, non può essere schierato`, openSlot: 'Slot libero' },
     scouting: { report: 'Report rivale', formation: ({ formation }) => `Formazione ${formation}`, strength: 'Forza', opponentEleven: 'Undici principale del rivale', note: 'Rating di gioco per la Coppa delle Leggende. Undici storico rappresentativo del torneo.', continue: 'Costruisci la mia squadra' },
     squadIntro: { kicker: 'La tua squadra è pronta', cards: ({ count }) => `${count} carte`, eleven: 'Undici titolare', bench: 'Riserve', note: 'Questa è la tua rosa iniziale. Tocca una carta per vedere gli attributi; prima di ogni partita potrai ritoccare l’undici.', continue: 'Apri il mio primo pacchetto' },
     ratings: { attack: 'ATT', midfield: 'CEN', defense: 'DIF', gk: 'POR' },
     match: { plays: ({ count }) => `${count} azioni`, tickerStart: ({ level }) => `Livello ${level} · Highlights in diretta.`, playPauseAria: 'Riproduci o pausa', speedAria: 'Velocità', nextAria: 'Highlight successivo', skipAria: 'Vai alla fine', skipFinal: '⏩ Fine', viewResult: 'Vedi risultato', continue: 'Continua', modesAria: 'Modalità di visualizzazione', modes: { full: 'Highlights', key: 'Solo chiave', commentary: 'Commento', instant: 'Istantaneo' }, anticipation: { gol: ({ minute }) => `Min ${minute}' - Attacco pericoloso...`, parada: ({ minute }) => `Min ${minute}' - Tiro in porta...`, shot: ({ minute }) => `Min ${minute}' - Sta arrivando il tiro...`, falta: ({ minute }) => `Min ${minute}' - Contatto in pressione...`, default: ({ minute }) => `Min ${minute}' - L’azione si costruisce...` }, finalLine: ({ home, homeGoals, awayGoals, away }) => `Fine · ${home} ${homeGoals}–${awayGoals} ${away}`, finalAnnounce: ({ homeGoals, awayGoals }) => `Fine partita. ${homeGoals} a ${awayGoals}.` },
-    result: { tier: { goleada: 'GOLEADA!', amplia: 'Vittoria larga', ajustada: 'Vittoria stretta', empate: 'Pareggio', derrota: 'Sconfitta' }, lostStep: 'Gradino perso', towerFall: 'Caduta dalla torre', retry: 'Riprova gradino', nextLevel: 'Livello successivo', reward: 'Ricompensa', lossCopy: ({ lives }) => `Hai perso questo gradino. Ti restano ${lives} vit${lives === 1 ? 'a' : 'e'}.`, rewardCopy: ({ players, items }) => `Ricompensa pronta: pacchetto da ${players} giocatori e ${items} oggetti da scegliere.`, scorers: 'Marcatori', reds: 'Espulsi', saves: 'Parate', lastMatch: 'Ultima partita', lastTactic: 'La tua tattica', subs: 'Cambi', gameOver: 'Fine run', floorsReached: 'piani raggiunti', newRecord: '★ Nuovo record', best: ({ best }) => `Miglior risultato: ${best}`, winsRoster: ({ wins, count }) => `${wins} vittori${wins === 1 ? 'a' : 'e'} · rosa di ${count} giocatori`, route: 'Percorso', finalSquad: 'Rosa finale', playAgain: 'Gioca di nuovo', pathLevel: ({ level }) => `Lv ${level}` },
+    result: { tier: { goleada: 'GOLEADA!', amplia: 'Vittoria larga', ajustada: 'Vittoria stretta', empate: 'Pareggio', derrota: 'Sconfitta' }, lostStep: 'Gradino perso', towerFall: 'Caduta dalla torre', retry: 'Riprova gradino', nextLevel: 'Livello successivo', reward: 'Ricompensa', lossCopy: ({ lives }) => `Hai perso questo gradino. Ti restano ${lives} vit${lives === 1 ? 'a' : 'e'}.`, rewardCopy: ({ players, items }) => `Ricompensa pronta: pacchetto da ${players} giocatori e ${items} oggetti da scegliere.`, scorers: 'Marcatori', reds: 'Espulsi', injuries: 'Infortunati', injuryMatchesTitle: ({ n }) => n > 0 ? `Fuori per ${n} partit${n === 1 ? 'a' : 'e'}` : 'Nessuna partita saltata', saves: 'Parate', lastMatch: 'Ultima partita', lastTactic: 'La tua tattica', subs: 'Cambi', gameOver: 'Fine run', floorsReached: 'piani raggiunti', newRecord: '★ Nuovo record', best: ({ best }) => `Miglior risultato: ${best}`, winsRoster: ({ wins, count }) => `${wins} vittori${wins === 1 ? 'a' : 'e'} · rosa di ${count} giocatori`, route: 'Percorso', finalSquad: 'Rosa finale', playAgain: 'Gioca di nuovo', pathLevel: ({ level }) => `Lv ${level}` },
     leaderboard: { floor: ({ floor }) => `Piano ${floor}`, updating: 'Aggiornamento classifica...', readOnly: 'Server senza scrittura: mostro la classifica salvata.', rank: ({ rank }) => `La tua run è arrivata #${rank}.`, notTop: 'Non sei entrato nella top 20.', title: 'Classifica', top: 'Top 20', empty: 'Nessun punteggio ancora.', lineup: 'Ultimo undici' },
     adminLogin: { title: 'Accesso riservato', kicker: 'Pannello di modifica giocatori.', user: 'Utente', password: 'Password', submit: 'Entra', back: 'Torna al gioco', checking: 'Controllo...', genericError: 'Accesso non riuscito.', invalidCredentials: 'Utente o password errati.', httpError: ({ status }) => `Accesso non riuscito (HTTP ${status}).`, missingToken: 'Il server non ha restituito un token di sessione.' },
     admin: { back: 'Indietro', badge: 'Admin', title: 'Pannello giocatori', logout: 'Esci', search: 'Cerca', searchPlaceholder: 'Nome, paese, epoca...', position: 'Ruolo', all: 'Tutte', count: ({ visible, total }) => `${visible} di ${total} giocatori · dal migliore al peggiore`, selected: 'Giocatore selezionato', name: 'Nome', nation: 'Nazione', era: 'Epoca', rarity: 'Rarità', ovr: 'OVR calcolato', trait: 'Tratto', noTrait: 'Nessun tratto', tacticalType: 'Tipo tattico', noType: 'Nessun tipo', saveStats: 'Salva statistiche', portraitAria: 'Editor immagine profilo', portrait: 'Immagine profilo', toolEffect: 'Effetto tool', replaceImage: 'Sostituisce l’immagine attuale', pickImage: 'Trascina o scegli un’immagine', imageHint: 'Primo piano consigliato', converted: 'Convertita', savePortrait: 'Salva immagine sul giocatore', noPlayers: 'Nessun giocatore da modificare.', invalidImage: 'Scegli un file immagine valido.', converting: 'Conversione con il tool Python...', convertedReady: 'Immagine convertita con il tool Python, pronta da salvare.', convertError: ({ message }) => `Conversione non riuscita: ${message}`, savingImage: 'Salvataggio immagine su disco...', readFailed: 'lettura non riuscita', expired: 'Sessione scaduta. Accedi di nuovo al pannello.', startServer: 'Avvia l’app con npm run serve per usare il convertitore Python esatto.', invalidPortrait: 'Il convertitore Python non ha restituito un ritratto valido.', saveNeedsServer: 'Salvataggio non riuscito. Avvia l’app con `npm run serve` per modificare il database giocatori.', saveHttpError: ({ status }) => `Salvataggio database giocatori non riuscito (HTTP ${status}).`, playerNotFound: ({ id }) => `Giocatore non trovato: ${id}`, stat: { pace: 'Velocità', shooting: 'Tiro', passing: 'Passaggio', dribbling: 'Dribbling', defending: 'Difesa', physical: 'Fisico', reflexes: 'Riflessi', handling: 'Presa', positioning: 'Posizionamento' }, positionOption: { GK: 'Portiere', DEF: 'Difensore', MID: 'Centrocampista', FWD: 'Attaccante' }, tactical: { posesion: 'Possesso', presion: 'Pressing', contra: 'Contropiede' } },
@@ -1482,6 +1628,15 @@ const DICTIONARIES = {
     },
     scene: {
       badge: { penalty: 'RIGORE', free_kick: 'PUNIZIONE', corner: 'CORNER', gol: 'GOL', parada: 'PARATA', tiro_fuera: 'TIRO FUORI', bloqueo: 'MURO', roja: 'ROSSO', amarilla: 'GIALLO', falta: 'FALLO', fuera_juego: 'FUORIGIOCO', despeje: 'RINVIO', perdida: 'RECUPERO', pase_fuera: 'PASSAGGIO LUNGO', default: 'AZIONE' }, role: { protagonist: 'Protagonista', scorer: 'Marcatore', shooter: 'Tiratore', assistant: 'Assistente', keeper: 'Portiere', defender: 'Difensore', receiver: 'Ricevente' }, title: { midfield_pass: 'Passaggio a centrocampo', defensive_pass: 'Uscita dal basso', defensive_recovery: 'Recupero difensivo', shot: 'Tiro', cross: 'Cross in area', free_kick: 'Punizione', free_kick_goal: 'Gol su punizione', penalty: 'Rigore', penalty_goal: 'Gol su rigore', shot_goal: 'Gol su tiro', shot_goal_alt: 'Gol su tiro', header_goal: 'Gol di testa', yellow_foul: 'Fallo e giallo', red_foul: 'Fallo e rosso', goal_kick: 'Rimessa dal fondo' }, alt: { midfield_pass: 'Scena pixelart di un passaggio a centrocampo', defensive_pass: 'Scena pixelart di un passaggio in difesa', defensive_recovery: 'Scena pixelart di un recupero difensivo', shot: 'Scena pixelart di un attaccante al tiro', cross: 'Scena pixelart di un cross in area', free_kick: 'Scena pixelart di una punizione', free_kick_goal: 'Scena pixelart di una punizione pericolosa', penalty: 'Scena pixelart di un rigore', penalty_goal: 'Scena pixelart di un gol su rigore', shot_goal: 'Scena pixelart di un gol su tiro', shot_goal_alt: 'Scena pixelart alternativa di un gol su tiro', header_goal: 'Scena pixelart di un gol di testa', yellow_foul: 'Scena pixelart di un fallo con cartellino giallo', red_foul: 'Scena pixelart di un fallo con cartellino rosso', goal_kick: 'Scena pixelart di una rimessa dal fondo' }, highlight: 'Highlight', goalStamp: 'GOL!', headline: { gol: ({ attacker }) => `Gol di ${attacker}`, parada: ({ keeper }) => `Parata di ${keeper}`, tiro_fuera: ({ shooter }) => `Tiro fuori di ${shooter}`, bloqueo: ({ defender }) => `Muro di ${defender}`, faltaRoja: 'Fallo duro', falta: 'Fallo tattico', fuera_juego: 'Fuorigioco', despeje: 'La difesa libera', pase_fuera: 'Passaggio troppo lungo', perdida: 'Recupero difensivo', default: ({ attacker }) => `${attacker} non trova il tiro` },
+    },
+    injury: {
+      severity: { simple: 'lieve', moderada: '1 partita', grave: '3 partite', muy_grave: '6 partite' },
+      types: {
+        simple: ['contusione', 'botta alla caviglia', 'lieve distorsione', 'tensione muscolare'],
+        moderada: ['distorsione alla caviglia', 'lesione muscolare', 'torsione al ginocchio', 'contrattura'],
+        grave: ['lesione alle fibre', 'distorsione di grado 2', 'lussazione alla spalla', 'micro-lesione muscolare'],
+        muy_grave: ['rottura del legamento crociato', 'frattura del perone', 'rottura del tendine d’Achille', 'grave lussazione al ginocchio'],
+      },
     },
     press: {
       masthead: 'La Gazzetta della Torre',
@@ -1504,7 +1659,32 @@ const DICTIONARIES = {
         opener: ({ att, def, minute, scorer, how, score }) => `Fin dall’avvio, ${att} ha mostrato un atteggiamento offensivo e un pressing alto che ha complicato l’uscita di ${def}. L’insistenza ha pagato al minuto ${minute}, quando ${scorer} ${how} portando il punteggio sul ${score}. Il gol ha dato fiducia ai suoi, che hanno iniziato a controllare il possesso e a creare pericoli costanti sulle fasce.`,
         scoreless: ({ team, opp, keeper }) => `Il primo tempo è stato un braccio di ferro tattico in cui ${team} e ${opp} si sono studiate senza concedere spazi. Le difese hanno avuto la meglio sugli attacchi e, quando è servito, ${keeper} ha spento gli incendi in area. Si è arrivati all’intervallo senza reti, con la sensazione che la partita si sarebbe decisa su un dettaglio.`,
         quiet: ({ team, opp, keeper }) => `Nella ripresa il punteggio non si è più mosso: ${team} e ${opp} si sono scambiate offensive senza lucidità negli ultimi metri, e ogni tentativo è morto tra i guanti di ${keeper} o sui piedi di una difesa ben messa. Il duello si è chiuso senza altri brividi, deciso da quanto seminato prima dell’intervallo.`,
-        red: ({ player, team, minute }) => `La partita si è complicata con l’espulsione di ${player} al minuto ${minute}, che ha lasciato ${team} in inferiorità condizionando del tutto il finale.`, subSwap: ({ inName, outName, cause, minute }) => `Per coprire il vuoto lasciato da ${cause}, ${inName} è entrato dalla panchina al ${minute}' e ${outName} ha ceduto il posto per ricomporre la difesa.`, subIn: ({ inName, cause, minute }) => `Dopo l’espulsione di ${cause}, ${inName} è entrato dalla panchina al ${minute}' per rinforzare la difesa.`, forfeit: ({ team }) => `Con quattro espulsi, ${team} è rimasta senza giocatori in campo e l’arbitro ha dato la partita per persa.`,
+        red: ({ player, team, minute }) => `La partita si è complicata con l’espulsione di ${player} al minuto ${minute}, che ha lasciato ${team} in inferiorità condizionando del tutto il finale.`, injury: {
+          simple: [
+            ({ player, team, minute, type }) => `${player} ha chiesto il cambio al ${minute}' per una ${type} e ha lasciato il posto all’istante, ma lo spavento non è andato oltre.`,
+            ({ player, team, minute, type }) => `Una ${type} ha costretto ${player} a uscire al minuto ${minute}: ${team} ha pescato dalla panchina, ma è stato solo un contrattempo lieve.`,
+            ({ player, team, minute, type }) => `${team} ha perso ${player} al minuto ${minute} per una ${type}; nulla di serio, ma abbastanza per lasciare il campo subito.`,
+          ],
+          moderada: [
+            ({ player, team, minute, type }) => `${player} è caduto infortunato al ${minute}' con una ${type} ed è stato sostituito: ${team} perde una pedina importante per il prossimo impegno.`,
+            ({ player, team, minute, type }) => `La ${type} di ${player} al minuto ${minute} ha fatto scattare l’allarme nel ${team}, che lo ha tolto con evidente dolore in vista delle prossime settimane.`,
+            ({ player, team, minute, type }) => `Brutta notizia per ${team}: ${player} è uscito al ${minute}' con una ${type} che lo terrà fuori dalla prossima partita.`,
+          ],
+          grave: [
+            ({ player, team, minute, type }) => `Immagine preoccupante al ${minute}': ${player} è crollato per una ${type} e ha lasciato il campo visibilmente sofferente, un duro colpo per i piani del ${team}.`,
+            ({ player, team, minute, type }) => `La ${type} di ${player} al minuto ${minute} ha imposto un’uscita d’urgenza; ${team} affronta le prossime giornate senza uno dei suoi punti di riferimento.`,
+            ({ player, team, minute, type }) => `${team} ha subito un brutto colpo quando ${player} ha dovuto lasciare il campo al ${minute}' con una ${type} che fa pensare a diverse settimane di stop.`,
+          ],
+          muy_grave: [
+            ({ player, team, minute, type }) => `Dramma al minuto ${minute}: ${player} è stato portato fuori tra gli applausi dopo una ${type} di estrema gravità che lo terrà fuori a lungo e offusca la serata del ${team}.`,
+            ({ player, team, minute, type }) => `La partita è stata segnata dalla ${type} di ${player} al ${minute}': un infortunio gravissimo che priva ${team} del suo giocatore per mesi.`,
+            ({ player, team, minute, type }) => `${team} ha ricevuto la peggiore delle notizie al ${minute}': ${player} ha subito una ${type} di massima gravità e il suo ritorno appare molto lontano.`,
+          ],
+        }, injurySub: [
+          ({ inName }) => `Al suo posto è entrato ${inName}.`,
+          ({ inName }) => `${inName} ha preso il suo posto dalla panchina.`,
+          ({ inName }) => `La panchina ha risposto subito con ${inName}.`,
+        ], subSwap: ({ inName, outName, cause, minute }) => `Per coprire il vuoto lasciato da ${cause}, ${inName} è entrato dalla panchina al ${minute}' e ${outName} ha ceduto il posto per ricomporre la difesa.`, subIn: ({ inName, cause, minute }) => `Dopo l’espulsione di ${cause}, ${inName} è entrato dalla panchina al ${minute}' per rinforzare la difesa.`, forfeit: ({ team }) => `Con quattro espulsi, ${team} è rimasta senza giocatori in campo e l’arbitro ha dato la partita per persa.`,
         penaltyMiss: ({ shooter, keeper, minute }) => `C’è stato il dramma dal dischetto al minuto ${minute}: ${shooter} aveva il gol sui piedi, ma ${keeper} e la sorte gli hanno negato la festa.`,
         nearMissSave: ({ shooter, keeper, minute }) => `Non tutto è riuscito negli ultimi metri: l’occasione più nitida sprecata è capitata a ${shooter} al minuto ${minute}, ma ${keeper} ha vinto il faccia a faccia con un intervento di grande valore.`,
         nearMissWide: ({ shooter, minute }) => `Non tutto è riuscito negli ultimi metri: l’occasione più nitida sprecata è capitata a ${shooter} al minuto ${minute}, con una conclusione uscita di un soffio tra i sospiri degli spalti.`,
@@ -1637,6 +1817,17 @@ export function tVariant(key, vars = {}, rng = null) {
   let value = getByPath(DICTIONARIES[currentLanguage], key);
   if (value == null) value = getByPath(DICTIONARIES[DEFAULT_LANGUAGE], key);
   if (Array.isArray(value)) value = rng ? rng.pick(value) : value[0];
+  return interpolate(value ?? key, vars);
+}
+
+// Como tVariant(), pero elige la variante por ÍNDICE en vez de por rng. Sirve
+// para resolver datos guardados (p. ej. el tipo de lesión, cuyo typeIndex se fija
+// al simular) de forma que coincidan crónica y pantalla de resultado. El índice
+// se acota al tamaño del array. Con fallback al idioma por defecto.
+export function tIndexed(key, index = 0, vars = {}) {
+  let value = getByPath(DICTIONARIES[currentLanguage], key);
+  if (value == null) value = getByPath(DICTIONARIES[DEFAULT_LANGUAGE], key);
+  if (Array.isArray(value)) value = value[((index % value.length) + value.length) % value.length];
   return interpolate(value ?? key, vars);
 }
 

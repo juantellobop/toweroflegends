@@ -13566,15 +13566,15 @@ export const PLAYERS = [
     "nation": "Checoslovaquia",
     "era": "1990",
     "position": "FWD",
-    "rarity": "rare",
-    "ovr": 77,
+    "rarity": "epic",
+    "ovr": 84,
     "stats": {
-      "pace": 77,
-      "shooting": 81,
+      "pace": 84,
+      "shooting": 92,
       "passing": 71,
       "dribbling": 75,
       "defending": 59,
-      "physical": 73
+      "physical": 94
     },
     "gk": null,
     "trait": null,

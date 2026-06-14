@@ -320,11 +320,23 @@ function updateMenuLeaderboard() {
   });
 }
 
-// Once del último partido tal como se vio en el campo: por línea y en el orden
+// Once del último partido tal como saltó al campo: por línea y en el orden
 // visible de los huecos (assignLineToSlots), con OVR y rareza para el modal.
+// Parte de kickoff11 (el once antes de que applySuspensions vacíe el puesto del
+// expulsado), así que el sancionado sigue en su sitio y se marca con `expelled`
+// para pintarle la tarjeta roja. Sin kickoff11 (no debería en gameover) cae al
+// once actual.
 function lineupSnapshot(run) {
+  const m = run.lastMatch;
+  const byUid = new Map((run.squad || []).map((p) => [p.uid, p]));
+  const kickoff = m?.kickoff11;
+  const lineFor = (line) => kickoff
+    ? (kickoff[line] || []).map((uid) => (uid != null && byUid.get(uid)) || null)
+    : (run.starting11[line] || []);
+  const expelled = new Set((m?.expulsadosA || []).map((e) => e.uid));
+  const injured = new Set((m?.lesionadosA || []).map((e) => e.uid));
   return LINES.flatMap((line) =>
-    assignLineToSlots(run.formation, line, run.starting11[line] || [])
+    assignLineToSlots(run.formation, line, lineFor(line))
       .filter((slot) => slot.player)
       .map((slot) => ({
         name: slot.player.name,
@@ -332,6 +344,8 @@ function lineupSnapshot(run) {
         line,
         ovr: playerOVR(slot.player),
         rarity: slot.player.rarity || '',
+        ...(expelled.has(slot.player.uid) ? { expelled: true } : {}),
+        ...(injured.has(slot.player.uid) ? { injured: true } : {}),
       }))
   );
 }
