@@ -306,50 +306,128 @@ export const FORMATION_SLOT_RULES = {
   },
 };
 
-// Enlaces de química extra por formación: pares de huecos (línea, slotIndex)
-// que juegan química entre sí además de la de su propia línea. Reflejan
-// sociedades tácticas reales: extremo↔interior de su lado (4-3-3),
-// lateral↔volante de banda (4-4-2), carrilero↔delanteros (3-5-2) y volante de
-// banda↔extremo (3-4-3). Cada par reparte su química mitad a cada línea.
-export const CHEM_FORMATION_LINKS = {
-  '4-3-3': [
-    { a: ['MID', 0], b: ['FWD', 0] },
-    { a: ['MID', 2], b: ['FWD', 2] },
-  ],
+// Web de química "estilo FIFA": el grafo de cercanía de cada formación. Cada
+// arista une dos huecos [línea, slotIndex] (los slotIndex van de izquierda a
+// derecha tal como pinta la UI) y declara que esos dos jugadores hacen química
+// entre sí — y SOLO entre sí: no hay clique de línea, solo estas vecindades.
+// Cada arista reparte su pairChem mitad a la línea de cada extremo, así un
+// enlace dentro de una línea vale lo mismo que uno entre líneas.
+//
+// Regla de autoría (cercanía): misma línea → huecos contiguos; portero → los
+// centrales más interiores; entre líneas contiguas → cada jugador con su columna
+// y el vecino diagonal inmediato hacia el centro (laterales/carrileros con el
+// central y el hombre de banda de delante; extremos con el interior de su lado;
+// el 9 y los enganches con los medios cercanos). Nunca se salta una línea entera
+// ni se enlazan bandas opuestas.
+export const CHEM_LINKS = {
   '4-4-2': [
-    { a: ['DEF', 0], b: ['MID', 0] },
-    { a: ['DEF', 3], b: ['MID', 3] },
+    [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]],
+    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]], [['DEF', 2], ['DEF', 3]],
+    [['DEF', 0], ['MID', 0]], [['DEF', 0], ['MID', 1]], [['DEF', 1], ['MID', 1]],
+    [['DEF', 2], ['MID', 2]], [['DEF', 3], ['MID', 2]], [['DEF', 3], ['MID', 3]],
+    [['MID', 0], ['MID', 1]], [['MID', 1], ['MID', 2]], [['MID', 2], ['MID', 3]],
+    [['MID', 0], ['FWD', 0]], [['MID', 1], ['FWD', 0]],
+    [['MID', 2], ['FWD', 1]], [['MID', 3], ['FWD', 1]],
+    [['FWD', 0], ['FWD', 1]],
+  ],
+  '4-3-3': [
+    [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]],
+    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]], [['DEF', 2], ['DEF', 3]],
+    [['DEF', 0], ['MID', 0]], [['DEF', 1], ['MID', 0]], [['DEF', 1], ['MID', 1]],
+    [['DEF', 2], ['MID', 1]], [['DEF', 2], ['MID', 2]], [['DEF', 3], ['MID', 2]],
+    [['MID', 0], ['MID', 1]], [['MID', 1], ['MID', 2]],
+    [['MID', 0], ['FWD', 0]], [['MID', 0], ['FWD', 1]],
+    [['MID', 2], ['FWD', 1]], [['MID', 2], ['FWD', 2]],
+    [['FWD', 0], ['FWD', 1]], [['FWD', 1], ['FWD', 2]],
+  ],
+  '4-2-3-1': [
+    [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]],
+    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]], [['DEF', 2], ['DEF', 3]],
+    [['DEF', 0], ['MID', 0]], [['DEF', 1], ['MID', 0]],
+    [['DEF', 2], ['MID', 1]], [['DEF', 3], ['MID', 1]],
+    [['MID', 0], ['MID', 1]],
+    // pivotes (0,1) → línea de creación (2=extremo izq, 3=mediapunta, 4=extremo der)
+    [['MID', 0], ['MID', 2]], [['MID', 0], ['MID', 3]],
+    [['MID', 1], ['MID', 3]], [['MID', 1], ['MID', 4]],
+    [['MID', 2], ['MID', 3]], [['MID', 3], ['MID', 4]],
+    [['MID', 2], ['FWD', 0]], [['MID', 3], ['FWD', 0]], [['MID', 4], ['FWD', 0]],
   ],
   '3-5-2': [
-    { a: ['MID', 0], b: ['FWD', 0] },
-    { a: ['MID', 0], b: ['FWD', 1] },
-    { a: ['MID', 4], b: ['FWD', 0] },
-    { a: ['MID', 4], b: ['FWD', 1] },
+    [['GK', 0], ['DEF', 0]], [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]],
+    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]],
+    // MID: 0=carrilero izq, 1=interior, 2=pivote, 3=interior, 4=carrilero der
+    [['DEF', 0], ['MID', 0]], [['DEF', 0], ['MID', 1]], [['DEF', 1], ['MID', 1]],
+    [['DEF', 1], ['MID', 2]], [['DEF', 1], ['MID', 3]], [['DEF', 2], ['MID', 3]],
+    [['DEF', 2], ['MID', 4]],
+    [['MID', 0], ['MID', 1]], [['MID', 1], ['MID', 2]], [['MID', 2], ['MID', 3]],
+    [['MID', 3], ['MID', 4]],
+    [['MID', 0], ['FWD', 0]], [['MID', 1], ['FWD', 0]],
+    [['MID', 2], ['FWD', 0]], [['MID', 2], ['FWD', 1]],
+    [['MID', 3], ['FWD', 1]], [['MID', 4], ['FWD', 1]],
+    [['FWD', 0], ['FWD', 1]],
+  ],
+  '5-3-2': [
+    [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]], [['GK', 0], ['DEF', 3]],
+    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]], [['DEF', 2], ['DEF', 3]],
+    [['DEF', 3], ['DEF', 4]],
+    [['DEF', 0], ['MID', 0]], [['DEF', 1], ['MID', 0]], [['DEF', 2], ['MID', 1]],
+    [['DEF', 3], ['MID', 2]], [['DEF', 4], ['MID', 2]],
+    [['MID', 0], ['MID', 1]], [['MID', 1], ['MID', 2]],
+    [['MID', 0], ['FWD', 0]], [['MID', 1], ['FWD', 0]],
+    [['MID', 1], ['FWD', 1]], [['MID', 2], ['FWD', 1]],
+    [['FWD', 0], ['FWD', 1]],
+  ],
+  '4-3-1-2': [
+    [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]],
+    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]], [['DEF', 2], ['DEF', 3]],
+    [['DEF', 0], ['MID', 0]], [['DEF', 1], ['MID', 0]], [['DEF', 1], ['MID', 1]],
+    [['DEF', 2], ['MID', 1]], [['DEF', 2], ['MID', 2]], [['DEF', 3], ['MID', 2]],
+    [['MID', 0], ['MID', 1]], [['MID', 1], ['MID', 2]],
+    // 3 = enganche (mediapunta) por delante del triángulo
+    [['MID', 0], ['MID', 3]], [['MID', 1], ['MID', 3]], [['MID', 2], ['MID', 3]],
+    [['MID', 0], ['FWD', 0]], [['MID', 2], ['FWD', 1]],
+    [['MID', 3], ['FWD', 0]], [['MID', 3], ['FWD', 1]],
+    [['FWD', 0], ['FWD', 1]],
   ],
   '3-4-3': [
-    { a: ['MID', 0], b: ['FWD', 0] },
-    { a: ['MID', 3], b: ['FWD', 2] },
+    [['GK', 0], ['DEF', 0]], [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]],
+    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]],
+    // MID: 0=banda izq, 1=mixto, 2=mixto, 3=banda der
+    [['DEF', 0], ['MID', 0]], [['DEF', 0], ['MID', 1]], [['DEF', 1], ['MID', 1]],
+    [['DEF', 1], ['MID', 2]], [['DEF', 2], ['MID', 2]], [['DEF', 2], ['MID', 3]],
+    [['MID', 0], ['MID', 1]], [['MID', 1], ['MID', 2]], [['MID', 2], ['MID', 3]],
+    [['MID', 0], ['FWD', 0]], [['MID', 1], ['FWD', 0]], [['MID', 1], ['FWD', 1]],
+    [['MID', 2], ['FWD', 1]], [['MID', 2], ['FWD', 2]], [['MID', 3], ['FWD', 2]],
+    [['FWD', 0], ['FWD', 1]], [['FWD', 1], ['FWD', 2]],
   ],
-  // 3-2-4-1: enganches y extremos (toda la línea de 4 es rol ENG) ya juegan
-  // química con el delantero por el mecanismo de enganches, sin enlace extra.
+  '4-2-4': [
+    [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]],
+    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]], [['DEF', 2], ['DEF', 3]],
+    [['DEF', 0], ['MID', 0]], [['DEF', 1], ['MID', 0]],
+    [['DEF', 2], ['MID', 1]], [['DEF', 3], ['MID', 1]],
+    [['MID', 0], ['MID', 1]],
+    // FWD: 0=extremo izq, 1=punta, 2=punta, 3=extremo der
+    [['MID', 0], ['FWD', 0]], [['MID', 0], ['FWD', 1]],
+    [['MID', 1], ['FWD', 2]], [['MID', 1], ['FWD', 3]],
+    [['FWD', 0], ['FWD', 1]], [['FWD', 1], ['FWD', 2]], [['FWD', 2], ['FWD', 3]],
+  ],
+  '3-2-4-1': [
+    [['GK', 0], ['DEF', 0]], [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]],
+    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]],
+    // MID: 0,1 = mediocentros; 2=extremo izq, 3,4=enganches, 5=extremo der
+    [['DEF', 0], ['MID', 0]], [['DEF', 1], ['MID', 0]],
+    [['DEF', 1], ['MID', 1]], [['DEF', 2], ['MID', 1]],
+    [['MID', 0], ['MID', 1]],
+    [['MID', 0], ['MID', 2]], [['MID', 0], ['MID', 3]],
+    [['MID', 1], ['MID', 4]], [['MID', 1], ['MID', 5]],
+    [['MID', 2], ['MID', 3]], [['MID', 3], ['MID', 4]], [['MID', 4], ['MID', 5]],
+    [['MID', 3], ['FWD', 0]], [['MID', 4], ['FWD', 0]],
+  ],
 };
 
-export function chemFormationLinks(formation) {
-  return CHEM_FORMATION_LINKS[formation] || [];
-}
-
-// Pares de huecos de una MISMA línea que el dibujo declara SIN química entre sí,
-// rompiendo la clique completa que une por defecto a toda la línea. En el 3-2-4-1
-// los mediocentros (huecos 0,1) y los extremos (huecos 2,5) son bandas distintas
-// del mediocampo y no enlazan: solo lo hacen a través de los enganches (3,4).
-export const CHEM_LINE_BREAKS = {
-  '3-2-4-1': {
-    MID: [[0, 2], [0, 5], [1, 2], [1, 5]],
-  },
-};
-
-export function chemLineBreaks(formation, line) {
-  return CHEM_LINE_BREAKS[formation]?.[line] || [];
+// Aristas del web de química de una formación: lista de pares [[línea, slot], [línea, slot]].
+export function chemLinks(formation) {
+  return CHEM_LINKS[formation] || [];
 }
 
 export function formationLineSlots(formation, line) {

@@ -1,15 +1,15 @@
 // Torre de Leyendas — Cálculo de química / sinergias (§4.7).
-// Por cada par de titulares en la misma línea que comparten nación → +CHEM_NATION.
-// Por cada par que comparte época (década exacta) → +CHEM_ERA; décadas contiguas
-// → +CHEM_ERA_ADJACENT. Sin tope por línea: toda la química construida suma.
-// Algunas formaciones añaden pares entre líneas (CHEM_FORMATION_LINKS): p. ej.
-// en 4-3-3 cada extremo juega química con el interior de su lado. Cada par
-// extra reparte su valor mitad a cada una de las dos líneas implicadas.
+// Modelo "estilo FIFA": cada formación define un web de cercanía (CHEM_LINKS),
+// un grafo de aristas entre huecos vecinos. Dos titulares hacen química SOLO si
+// hay arista entre sus huecos (no hay clique de línea). Cada arista vale el
+// pairChem del par —nación compartida (+CHEM_NATION) y época (década exacta
+// +CHEM_ERA; contiguas la mitad)— repartido mitad a la línea de cada extremo,
+// así un enlace dentro de una línea vale lo mismo que uno entre líneas.
 // Además, dos bonus globales de equipo (computeTeamChem): un "núcleo nacional"
 // (premia construir el XI en torno a 1-2 naciones) y una "cohesión táctica" (premia
 // que tus jugadores encajen con el tipo del dibujo). Ambos modestos.
 
-import { CONFIG, LINES, chemFormationLinks, chemLineBreaks, formationLineSlots, formationType } from '../data/config.js';
+import { CONFIG, LINES, chemLinks, formationLineSlots, formationType } from '../data/config.js';
 
 // Naciones históricas que cuentan como la misma selección a efectos de química
 // (y de enlaces en el campo): Alemania Occidental ≡ Alemania.
@@ -33,39 +33,6 @@ function pairChem(a, b) {
   return total;
 }
 
-// Suma la química de todos los pares del grupo. `skip` excluye los pares cuyos
-// dos miembros pertenezcan a ese conjunto (p. ej. enganche-enganche, que ya
-// puntuó en el mediocampo y no debe repetir en la delantera). `excludePair`
-// descarta pares concretos (p. ej. huecos que el dibujo declara sin química).
-function groupChem(players, skip = null, excludePair = null) {
-  let total = 0;
-  for (let i = 0; i < players.length; i++) {
-    for (let j = i + 1; j < players.length; j++) {
-      if (skip && skip.has(players[i]) && skip.has(players[j])) continue;
-      if (excludePair && excludePair(players[i], players[j])) continue;
-      total += pairChem(players[i], players[j]);
-    }
-  }
-  return total;
-}
-
-// Predicado (a,b)→bool para los pares de una línea que el dibujo declara sin
-// química (CHEM_LINE_BREAKS): resuelve qué hueco ocupa cada jugador y descarta
-// los pares de huecos listados. Sin rupturas declaradas devuelve null.
-function lineBreakPredicate(starting11, formation, line) {
-  const breaks = chemLineBreaks(formation, line);
-  if (!breaks.length) return null;
-  const slotOf = new Map();
-  for (const [idx, player] of lineSlotOccupants(starting11, formation, line)) slotOf.set(player, idx);
-  const key = (i, j) => (i < j ? `${i}-${j}` : `${j}-${i}`);
-  const broken = new Set(breaks.map(([i, j]) => key(i, j)));
-  return (a, b) => {
-    const ia = slotOf.get(a);
-    const ib = slotOf.get(b);
-    return ia != null && ib != null && broken.has(key(ia, ib));
-  };
-}
-
 // Asignación hueco→jugador de una línea, replicando teamRatings/run.js: cada
 // hueco toma el primer jugador compatible que quede. Devuelve slotIndex→player.
 function lineSlotOccupants(starting11, formation, line) {
@@ -79,64 +46,30 @@ function lineSlotOccupants(starting11, formation, line) {
   return occupants;
 }
 
-// Jugadores del once que ocupan huecos de enganche (rol ENG) según el dibujo.
-function engancheSet(starting11, formation) {
-  const set = new Set();
-  if (!formation) return set;
-  for (const line of LINES) {
-    const slots = formationLineSlots(formation, line);
-    if (!slots.some((slot) => slot.role === 'ENG')) continue;
-    const occupants = lineSlotOccupants(starting11, formation, line);
-    for (const slot of slots) {
-      const player = occupants.get(slot.slotIndex);
-      if (slot.role === 'ENG' && player) set.add(player);
+// Devuelve la química por línea: { GK, DEF, MID, FWD }, sin tope. Recorre el web
+// de cercanía de la formación (CHEM_LINKS): por cada arista cuyos dos huecos están
+// ocupados, suma pairChem mitad a la línea de cada extremo (una arista dentro de
+// una línea suma su valor completo a esa línea; una entre líneas, mitad a cada una).
+// Un Capitán alineado suma +1 a la química de su línea.
+export function computeChemistry(starting11, formation = null) {
+  const chem = { GK: 0, DEF: 0, MID: 0, FWD: 0 };
+  if (formation) {
+    const occupants = {};
+    for (const line of LINES) occupants[line] = lineSlotOccupants(starting11, formation, line);
+    for (const [a, b] of chemLinks(formation)) {
+      const pa = occupants[a[0]].get(a[1]);
+      const pb = occupants[b[0]].get(b[1]);
+      if (!pa || !pb) continue;
+      const half = pairChem(pa, pb) / 2;
+      chem[a[0]] += half;
+      chem[b[0]] += half;
     }
   }
-  return set;
-}
-
-// Química de los pares entre líneas que define la formación (extremo↔interior
-// en 4-3-3, lateral↔volante en 4-4-2, etc.). Cada par reparte su valor mitad a
-// cada línea implicada, así un par cruzado vale lo mismo que uno de línea.
-function formationLinkChem(starting11, formation) {
-  const extra = { GK: 0, DEF: 0, MID: 0, FWD: 0 };
-  if (!formation) return extra;
-  const links = chemFormationLinks(formation);
-  if (!links.length) return extra;
-  const occupants = {};
-  for (const line of LINES) occupants[line] = lineSlotOccupants(starting11, formation, line);
-  for (const { a, b } of links) {
-    const pa = occupants[a[0]].get(a[1]);
-    const pb = occupants[b[0]].get(b[1]);
-    if (!pa || !pb) continue;
-    const half = pairChem(pa, pb) / 2;
-    extra[a[0]] += half;
-    extra[b[0]] += half;
+  for (const line of LINES) {
+    const players = (starting11[line] || []).filter(Boolean);
+    if (players.some((p) => p.trait === 'Capitán')) chem[line] += 1;
   }
-  return extra;
-}
-
-// Devuelve la química por línea: { GK, DEF, MID, FWD }, sin tope: todo par suma.
-// El portero hace química con la defensa (suma en DEF) y los enganches juegan
-// química con el mediocampo Y con la delantera (sus pares entre sí puntúan una
-// sola vez, en MID). Los pares entre líneas de la formación (CHEM_FORMATION_LINKS)
-// suman mitad a cada línea. Un Capitán alineado suma +1 a la química de su línea.
-export function computeChemistry(starting11, formation = null) {
-  const linePlayers = (line) => (starting11[line] || []).filter(Boolean);
-  const captain = (players) => (players.some((p) => p.trait === 'Capitán') ? 1 : 0);
-  const gk = linePlayers('GK');
-  const def = linePlayers('DEF');
-  const mid = linePlayers('MID');
-  const fwd = linePlayers('FWD');
-  const enganches = engancheSet(starting11, formation);
-  const eng = mid.filter((p) => enganches.has(p));
-  const links = formationLinkChem(starting11, formation);
-  return {
-    GK: captain(gk) + links.GK,
-    DEF: groupChem([...gk, ...def]) + captain(def) + links.DEF,
-    MID: groupChem(mid, null, lineBreakPredicate(starting11, formation, 'MID')) + captain(mid) + links.MID,
-    FWD: groupChem([...fwd, ...eng], enganches) + captain(fwd) + links.FWD,
-  };
+  return chem;
 }
 
 // Bonus globales de equipo (no por línea):

@@ -127,9 +127,7 @@ const bt3241 = buildBattleTeam(m3241team);
 assert.ok(bt3241.attackers.some((p) => p.name === byId('fwd_pele_1970').name), 'el 9 está en ataque');
 assert.ok(bt3241.midfielders.length >= 6, 'los 6 del medio nutren el mediocampo');
 
-// === 6. Química profunda (sin cambios) ===
-const sameNation = ['1990', '1990', '1990'].map((era) => ({ nation: 'Italia', era, position: 'DEF' }));
-assert.equal(computeChemistry({ GK: [], DEF: sameNation, MID: [], FWD: [] }).DEF, 9, 'nación + época');
+// === 6. Química: bonus globales de equipo (computeTeamChem, sin cambios) ===
 const core = (n) => {
   const players = Array.from({ length: 11 }, (_, i) => ({ nation: i < n ? 'Brasil' : `X${i}`, era: '2000', position: i === 0 ? 'GK' : 'DEF' }));
   return computeTeamChem({ GK: [players[0]], DEF: players.slice(1), MID: [], FWD: [] }, '4-4-2').all;
@@ -138,51 +136,70 @@ assert.equal(core(4), 0);
 assert.equal(core(5), 1);
 assert.equal(core(11), 4, 'núcleo nacional sin tope: 11 connacionales → +4');
 
-// === 6b. Química entre líneas por formación (CHEM_FORMATION_LINKS) ===
-// Once de control: nadie comparte nación y las épocas van espaciadas ≥20 años
-// (sin pares de línea), salvo los jugadores enlazados que se marcan a mano.
+// === 6b. Web de cercanía (CHEM_LINKS): solo los huecos vecinos hacen química ===
+// Once de control: naciones únicas y épocas espaciadas (ninguna pareja con diff 0
+// o 10 años), salvo el par enlazado que se marca a mano.
 const mkChemP = (id, position, nation, era) => ({ id, name: id, position, nation, era, trait: null });
+
+// 4-4-2: una zaga de 4 misma nación+época son 3 aristas contiguas (0-1,1-2,2-3);
+// cada una vale 3 (dentro de línea suma completo) → DEF 9. El portero (sin nada en
+// común) no aporta por sus aristas GK↔central.
+const xiZaga = {
+  GK: [mkChemP('g', 'GK', 'NG', '1600')],
+  DEF: ['1990', '1990', '1990', '1990'].map((era, i) => mkChemP(`d${i}`, 'DEF', 'Italia', era)),
+  MID: [], FWD: [],
+};
+assert.equal(computeChemistry(xiZaga, '4-4-2').DEF, 9, 'cadena de zaga: 3 aristas × 3');
+assert.equal(computeChemistry(xiZaga, '4-4-2').GK, 0, 'portero sin química no aporta');
+
+// Sin formación no hay web (no hay aristas que recorrer).
+assert.equal(computeChemistry(xiZaga).DEF, 0, 'sin formación no hay web');
+
+// Un Capitán alineado suma +1 a la química de su línea.
+const xiCap = {
+  GK: [mkChemP('g', 'GK', 'NG', '1600')],
+  DEF: [{ ...mkChemP('c', 'DEF', 'NA', '1700'), trait: 'Capitán' }, mkChemP('q1', 'DEF', 'NB', '1740'), mkChemP('q2', 'DEF', 'NC', '1780'), mkChemP('q3', 'DEF', 'ND', '1820')],
+  MID: [], FWD: [],
+};
+assert.equal(computeChemistry(xiCap, '4-4-2').DEF, 1, 'capitán: +1 a su línea');
+
+// 4-3-3: el interior izquierdo (m0) y el extremo de su lado (f0) son vecinos:
+// nación+época = 3, arista entre líneas → mitad (1.5) a cada una.
 const xi433 = {
   GK: [mkChemP('g', 'GK', 'NG', '1900')],
   DEF: ['1920', '1940', '1960', '1980'].map((era, i) => mkChemP(`d${i}`, 'DEF', `ND${i}`, era)),
   MID: [mkChemP('m0', 'MID', 'Brasil', '1970'), mkChemP('m1', 'MID', 'NM1', '1900'), mkChemP('m2', 'MID', 'NM2', '1930')],
   FWD: [mkChemP('f0', 'FWD', 'Brasil', '1970'), mkChemP('f1', 'FWD', 'NF1', '2000'), mkChemP('f2', 'FWD', 'NF2', '2030')],
 };
-// Sin formación no hay enlaces extra; en 4-3-3 el extremo izquierdo (f0) juega
-// química con el interior de su lado (m0): nación+época = 3, mitad a cada línea.
-assert.equal(computeChemistry(xi433).MID, 0, 'sin formación no hay pares cruzados');
-assert.equal(computeChemistry(xi433).FWD, 0, 'sin formación no hay pares cruzados');
-assert.equal(computeChemistry(xi433, '4-3-3').MID, 1.5, 'extremo↔interior suma al medio');
-assert.equal(computeChemistry(xi433, '4-3-3').FWD, 1.5, 'extremo↔interior suma al ataque');
-// El lado contrario no enlaza: extremo derecho (slot 2) con interior izquierdo no puntúa.
+assert.equal(computeChemistry(xi433, '4-3-3').MID, 1.5, 'interior↔extremo del mismo lado: mitad al medio');
+assert.equal(computeChemistry(xi433, '4-3-3').FWD, 1.5, 'interior↔extremo del mismo lado: mitad al ataque');
+// El lado contrario no enlaza: extremo derecho (slot 2) con interior izquierdo no es vecino.
 const xiCruzado = { ...xi433, FWD: [xi433.FWD[1], xi433.FWD[2], xi433.FWD[0]] };
 assert.equal(computeChemistry(xiCruzado, '4-3-3').FWD, 0, 'cada extremo solo con el interior de su lado');
 
-// 4-4-2: el lateral izquierdo (d0) enlaza con el volante de banda izquierdo (m0).
+// 4-4-2: el lateral izquierdo (d0) y el volante de banda izquierdo (m0) son vecinos.
 const xi442 = {
   GK: [mkChemP('g', 'GK', 'NG', '1900')],
   DEF: [mkChemP('d0', 'DEF', 'Italia', '1990'), mkChemP('d1', 'DEF', 'ND1', '1920'), mkChemP('d2', 'DEF', 'ND2', '1940'), mkChemP('d3', 'DEF', 'ND3', '1960')],
-  MID: [mkChemP('m0', 'MID', 'Italia', '1990'), mkChemP('m1', 'MID', 'NM1', '1900'), mkChemP('m2', 'MID', 'NM2', '1930'), mkChemP('m3', 'MID', 'NM3', '2030')],
-  FWD: [mkChemP('f0', 'FWD', 'NF0', '1900'), mkChemP('f1', 'FWD', 'NF1', '1930')],
+  MID: [mkChemP('m0', 'MID', 'Italia', '1990'), mkChemP('m1', 'MID', 'NM1', '1900'), mkChemP('m2', 'MID', 'NM2', '1870'), mkChemP('m3', 'MID', 'NM3', '2030')],
+  FWD: [mkChemP('f0', 'FWD', 'NF0', '1840'), mkChemP('f1', 'FWD', 'NF1', '1930')],
 };
-assert.equal(computeChemistry(xi442, '4-4-2').DEF, 1.5, 'lateral↔volante de banda suma a la defensa');
-assert.equal(computeChemistry(xi442, '4-4-2').MID, 1.5, 'lateral↔volante de banda suma al medio');
+assert.equal(computeChemistry(xi442, '4-4-2').DEF, 1.5, 'lateral↔volante de banda: mitad a la defensa');
+assert.equal(computeChemistry(xi442, '4-4-2').MID, 1.5, 'lateral↔volante de banda: mitad al medio');
 
-// 3-5-2: los carrileros (slots 0 y 4 del medio) enlazan con ambos delanteros.
-const xi352 = {
-  GK: [mkChemP('g', 'GK', 'NG', '1900')],
-  DEF: [mkChemP('d0', 'DEF', 'ND0', '1920'), mkChemP('d1', 'DEF', 'ND1', '1940'), mkChemP('d2', 'DEF', 'ND2', '1960')],
-  MID: [mkChemP('m0', 'MID', 'Brasil', '1970'), mkChemP('m1', 'MID', 'NM1', '1900'), mkChemP('m2', 'MID', 'NM2', '1930'), mkChemP('m3', 'MID', 'NM3', '2000'), mkChemP('m4', 'MID', 'NM4', '2030')],
-  FWD: [mkChemP('f0', 'FWD', 'Brasil', '1970'), mkChemP('f1', 'FWD', 'Brasil', '1940')],
+// Dos medios de bandas opuestas (slots 0 y 3) comparten nación+época pero NO son
+// vecinos: sin arista, no hay química.
+const xiNoVecinos = {
+  GK: [mkChemP('g', 'GK', 'NG', '1600')],
+  DEF: ['1700', '1740', '1780', '1820'].map((era, i) => mkChemP(`d${i}`, 'DEF', `ND${i}`, era)),
+  MID: [mkChemP('m0', 'MID', 'Japon', '1990'), mkChemP('m1', 'MID', 'NM1', '1500'), mkChemP('m2', 'MID', 'NM2', '1540'), mkChemP('m3', 'MID', 'Japon', '1990')],
+  FWD: [mkChemP('f0', 'FWD', 'NF0', '1860'), mkChemP('f1', 'FWD', 'NF1', '1450')],
 };
-// Enlaces: m0-f0 (nación+época = 3) y m0-f1 (nación = 2) → MID +2.5, FWD +2.5;
-// dentro de la delantera f0-f1 comparten nación (+2).
-assert.equal(computeChemistry(xi352, '3-5-2').MID, 2.5, 'carrilero↔delanteros suma al medio');
-assert.equal(computeChemistry(xi352, '3-5-2').FWD, 4.5, 'carrilero↔delanteros suma al ataque');
+assert.equal(computeChemistry(xiNoVecinos, '4-4-2').MID, 0, 'medios de bandas opuestas no son vecinos');
 
-// === 6b-bis. Química del 3-2-4-1: mediocentros aislados de extremos y del 9 ===
-// Once de control: épocas espaciadas ≥30 años (sin química de época) y naciones
-// únicas, salvo el par concreto que se hermana para medir su aporte.
+// === 6b-bis. Web del 3-2-4-1 (estilo FIFA): mide el aporte de cada par ===
+// Once de control: naciones únicas y épocas espaciadas ≥30 años (sin química de
+// época incidental en aristas); se hermana un par y se mide su delta por línea.
 const mk3241 = (id, position, nation, era) => ({ id, name: id, position, nation, era, trait: null });
 const xi3241 = () => ({
   GK: [mk3241('g', 'GK', 'NG', '1900')],
@@ -196,21 +213,24 @@ const xi3241 = () => ({
 const chem3241 = (a, b) => {
   const xi = xi3241();
   const find = (id) => ['GK', 'DEF', 'MID', 'FWD'].flatMap((l) => xi[l]).find((p) => p.id === id);
-  find(b).nation = find(a).nation; // hermana el par a medir
-  const baseDef = computeChemistry(xi3241(), '3-2-4-1');
+  find(b).nation = find(a).nation; // hermana el par a medir (+CHEM_NATION en su arista, si la hay)
+  const base = computeChemistry(xi3241(), '3-2-4-1');
   const withPair = computeChemistry(xi, '3-2-4-1');
-  return { MID: withPair.MID - baseDef.MID, FWD: withPair.FWD - baseDef.FWD };
+  return { MID: withPair.MID - base.MID, FWD: withPair.FWD - base.FWD };
 };
-assert.deepEqual(chem3241('m0', 'm1'), { MID: 2, FWD: 0 }, 'mediocentros entre sí');
-assert.deepEqual(chem3241('m0', 'e3'), { MID: 2, FWD: 0 }, 'mediocentro↔enganche');
-assert.deepEqual(chem3241('e3', 'e4'), { MID: 2, FWD: 0 }, 'enganches entre sí');
-assert.deepEqual(chem3241('e2', 'e3'), { MID: 2, FWD: 0 }, 'extremo↔enganche');
-assert.deepEqual(chem3241('e2', 'e5'), { MID: 2, FWD: 0 }, 'extremos entre sí');
-assert.deepEqual(chem3241('e3', 'f0'), { MID: 0, FWD: 2 }, 'enganche↔delantero');
-assert.deepEqual(chem3241('e2', 'f0'), { MID: 0, FWD: 2 }, 'extremo↔delantero');
-assert.deepEqual(chem3241('m0', 'e2'), { MID: 0, FWD: 0 }, 'mediocentro NO enlaza con extremo');
-assert.deepEqual(chem3241('m1', 'e5'), { MID: 0, FWD: 0 }, 'mediocentro NO enlaza con extremo');
-assert.deepEqual(chem3241('m0', 'f0'), { MID: 0, FWD: 0 }, 'mediocentro NO enlaza con el delantero');
+// Aristas dentro del medio → suman completo (+2) a MID:
+assert.deepEqual(chem3241('m0', 'm1'), { MID: 2, FWD: 0 }, 'mediocentros vecinos');
+assert.deepEqual(chem3241('m0', 'e2'), { MID: 2, FWD: 0 }, 'mediocentro izq ↔ extremo izq');
+assert.deepEqual(chem3241('m0', 'e3'), { MID: 2, FWD: 0 }, 'mediocentro ↔ enganche de su lado');
+assert.deepEqual(chem3241('e2', 'e3'), { MID: 2, FWD: 0 }, 'extremo ↔ enganche contiguos');
+assert.deepEqual(chem3241('e3', 'e4'), { MID: 2, FWD: 0 }, 'enganches contiguos');
+// Arista entre líneas (enganche central ↔ 9) → mitad a cada línea:
+assert.deepEqual(chem3241('e3', 'f0'), { MID: 1, FWD: 1 }, 'enganche ↔ 9: mitad al medio, mitad al ataque');
+// Pares sin arista → sin química:
+assert.deepEqual(chem3241('e2', 'f0'), { MID: 0, FWD: 0 }, 'extremo no enlaza directo con el 9');
+assert.deepEqual(chem3241('e2', 'e5'), { MID: 0, FWD: 0 }, 'extremos opuestos no son vecinos');
+assert.deepEqual(chem3241('m0', 'e5'), { MID: 0, FWD: 0 }, 'mediocentro izq no enlaza con extremo der');
+assert.deepEqual(chem3241('m0', 'f0'), { MID: 0, FWD: 0 }, 'mediocentro no enlaza con el 9');
 
 // === 6c. Sinergia de ítems: si la táctica coincide, el coste se anula ===
 // Tiki-taka (posesión): +8% medio, −5% defensa. Con dibujo de posesión el
@@ -258,11 +278,12 @@ assert.equal(
   computeChemistry({ GK: [], DEF: [{ nation: 'A', era: '1900', trait: 'Capitán' }], MID: [], FWD: [] }).DEF,
   1, 'Capitán aporta +1 a su línea aunque no haya pares'
 );
-// Sin tope por línea: 4 italianos de 1990 = 6 pares × 3 + 1 de Capitán = 19.
+// Sin tope por línea: en 4-4-2 una zaga de 4 italianos de 1990 son 3 aristas
+// contiguas × 3 = 9, + 1 de Capitán = 10 (suma entera del web, sin recorte).
 const stackedLine = ['1990', '1990', '1990', '1990'].map((era) => ({ nation: 'Italia', era, position: 'DEF', trait: 'Capitán' }));
 assert.equal(
-  computeChemistry({ GK: [], DEF: stackedLine, MID: [], FWD: [] }).DEF,
-  19, 'la química de línea suma entera, sin recorte'
+  computeChemistry({ GK: [], DEF: stackedLine, MID: [], FWD: [] }, '4-4-2').DEF,
+  10, 'la química del web suma entera, sin recorte'
 );
 
 // === 7. Realismo: constantes presentes y peso individual subido ===

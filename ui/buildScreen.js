@@ -14,7 +14,7 @@ import {
 import { playerOVR } from '../engine/ovr.js';
 import { chemNation } from '../engine/chemistry.js';
 import { chemTeamBonus } from '../engine/items.js';
-import { FORMATIONS, LINES, chemFormationLinks, formationLineSlots, formationType } from '../data/config.js';
+import { FORMATIONS, LINES, chemLinks, formationLineSlots, formationType } from '../data/config.js';
 import { countTo } from '../match/feedback.js';
 import { playerInitials, playerSurname, portraitPathForPlayer } from '../data/playerAssets.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
@@ -55,58 +55,38 @@ function lineupPositions(state) {
   return pos;
 }
 
-// Enlaces de química del campo, espejando los grupos del motor: el portero
-// enlaza con la defensa, el mediocampo incluye a los enganches, los enganches
-// enlazan también con la delantera y la formación añade sus pares entre líneas
-// (CHEM_FORMATION_LINKS; cada par se dibuja una sola vez). Con el Duodécimo
-// jugador (boost) todo par del grupo se enlaza en violeta.
-function chemLinks(positions, formation, boost = false) {
-  const filled = positions.filter((p) => p.player);
-  const groups = [
-    filled.filter((p) => p.line === 'GK' || p.line === 'DEF'),
-    filled.filter((p) => p.line === 'MID'),
-    filled.filter((p) => p.line === 'FWD' || p.role === 'ENG'),
-  ];
+// Enlaces de química del campo = el web de cercanía de la formación (CHEM_LINKS):
+// cada arista [línea, slot] ↔ [línea, slot] se dibuja siempre que ambos huecos
+// estén ocupados. Cada enlace se etiqueta según den química sus dos jugadores
+// (nación / época) para resaltarlo; con el Duodécimo jugador (boost) todo el web
+// se pinta en violeta.
+function webLinks(positions, formation, boost = false) {
+  const at = (ref) => positions.find((p) => p.player && p.line === ref[0] && p.slotIndex === ref[1]);
   const links = [];
-  const seen = new Set();
-  const addPair = (a, b) => {
-    const key = [a.player.uid, b.player.uid].sort().join('|');
-    if (seen.has(key)) return;
-    seen.add(key);
+  for (const [refA, refB] of chemLinks(formation)) {
+    const a = at(refA);
+    const b = at(refB);
+    if (!a || !b) continue;
     const nation = chemNation(a.player.nation) === chemNation(b.player.nation);
     const era = a.player.era === b.player.era;
-    if (boost || nation || era) {
-      links.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, nation, era, boost });
-    }
-  };
-  for (const arr of groups) {
-    for (let i = 0; i < arr.length; i++) {
-      for (let j = i + 1; j < arr.length; j++) addPair(arr[i], arr[j]);
-    }
-  }
-  for (const link of chemFormationLinks(formation)) {
-    const at = (ref) => filled.find((p) => p.line === ref[0] && p.slotIndex === ref[1]);
-    const a = at(link.a);
-    const b = at(link.b);
-    if (a && b) addPair(a, b);
+    links.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, nation, era, boost });
   }
   return links;
 }
 
 function fieldSVG(positions, formation, boost = false) {
-  const links = chemLinks(positions, formation, boost);
+  const links = webLinks(positions, formation, boost);
   const lineEl = (l, cls) => `<line x1="${l.x1}" y1="${l.y1}" x2="${l.x2}" y2="${l.y2}" class="chem-link ${cls}" />`;
-  // Dos capas: la base (violeta con boost; época discontinua sin él) y, encima,
-  // el dorado de nación, que se superpone gráficamente a la línea violeta.
-  const under = links
-    .filter((l) => boost || (l.era && !l.nation))
-    .map((l) => lineEl(l, boost ? 'boost' : ''))
-    .join('');
-  const over = links.filter((l) => l.nation).map((l) => lineEl(l, 'strong')).join('');
+  // Capa base: todo el web (violeta con boost; tenue sin él). Encima, sin boost,
+  // se resaltan los enlaces con química: primero la época (cian) y luego la nación
+  // (dorado), que se superpone gráficamente.
+  const base = links.map((l) => lineEl(l, boost ? 'boost' : 'web')).join('');
+  const era = boost ? '' : links.filter((l) => l.era && !l.nation).map((l) => lineEl(l, '')).join('');
+  const nation = boost ? '' : links.filter((l) => l.nation).map((l) => lineEl(l, 'strong')).join('');
   return `
     <svg class="field-bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
       ${PITCH_MARKINGS}
-      <g class="chem-links">${under}${over}</g>
+      <g class="chem-links">${base}${era}${nation}</g>
     </svg>`;
 }
 

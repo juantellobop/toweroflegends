@@ -1140,6 +1140,7 @@ select {
    Con el Duodécimo jugador todo par se enlaza en violeta (boost); el dorado
    de nación tiene su propia clase y pisa al violeta. */
 .chem-link { stroke: var(--pitch-line); stroke-width: 1.5; vector-effect: non-scaling-stroke; opacity: 0.5; stroke-dasharray: 3 3; }
+.chem-link.web { stroke: var(--pitch-line); stroke-width: 1; opacity: 0.22; stroke-dasharray: none; }
 .chem-link.boost { stroke: var(--chem-boost); stroke-width: 1.8; opacity: 0.8; stroke-dasharray: none; }
 .chem-link.strong { stroke: var(--brand); stroke-width: 2; opacity: 0.85; stroke-dasharray: none; }
 
@@ -1609,12 +1610,23 @@ select {
   width: 100%;
 }
 
+/* La fila de los dos rankings rompe el ancho del .menu-shell (720px) para llegar
+   casi al borde de la pantalla. Se centra en el viewport sin transform: el borde
+   izquierdo va a (centro del contenedor − mitad del ancho propio) vía margin-left.
+   Como el contenedor —área de grid en el menú, sección en gameover— está centrado
+   en el viewport, su centro es 50vw en ambos casos, así que el resultado queda
+   centrado en pantalla independientemente del ancho del contenedor. justify-self:
+   start ancla el margen al inicio del área (anula el justify-items:center del
+   .menu-shell). El html ya tiene overflow-x:hidden: el desbordamiento de
+   maquetación no genera scroll horizontal. */
 .menu-rankings {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  width: min(960px, 100%);
+  gap: 20px;
+  width: min(1440px, 94vw);
   align-items: start;
+  justify-self: start;
+  margin-left: calc(50% - min(1440px, 94vw) / 2);
 }
 
 .menu-ranking {
@@ -2420,6 +2432,12 @@ select {
   stroke: var(--arcade-cyan);
   stroke-width: 1.2;
   opacity: .65;
+}
+
+.chem-link.web {
+  stroke: var(--arcade-cyan);
+  stroke-width: 1;
+  opacity: .25;
 }
 
 .chem-link.boost {
