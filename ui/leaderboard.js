@@ -14,6 +14,7 @@ export const LEADERBOARD_LIMIT = 20;
 
 const API_URL = '/api/ranking';
 const STATIC_URL = '/data/ranking.json';
+const WEEKLY_API_URL = '/api/ranking/semanal';
 
 // Once del último partido tal como llega del servidor (o del JSON estático):
 // se acotan textos/números y se descartan posiciones desconocidas.
@@ -84,6 +85,32 @@ export async function submitLeaderboardEntry(entry) {
   return { ...fallback, entryId: null, rank: null, readOnly: true };
 }
 
+// === Ranking semanal: mismo formato y helpers, archivo/endpoint paralelos ===
+// Sin fallback estático: el JSON de la semana en curso no está versionado, así que
+// sin servidor el panel queda vacío (el histórico sí conserva su copia estática).
+export async function fetchWeeklyLeaderboard() {
+  const payload = await requestJson(WEEKLY_API_URL);
+  return normalizePayload(payload || { entries: [] });
+}
+
+export async function submitWeeklyLeaderboardEntry(entry) {
+  const payload = await requestJson(WEEKLY_API_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      runId: entry.runId,
+      teamName: entry.teamName,
+      nation: entry.nation,
+      floor: entry.floor,
+      formation: entry.formation,
+      lineup: entry.lineup,
+    }),
+  });
+  if (payload) return normalizePayload(payload);
+
+  const fallback = await fetchWeeklyLeaderboard();
+  return { ...fallback, entryId: null, rank: null, readOnly: true };
+}
+
 // Entradas con once renderizadas, indexadas por id para abrir su modal al
 // hacer click en la fila (el HTML se inyecta con innerHTML, sin listeners).
 const lineupIndex = new Map();
@@ -115,11 +142,14 @@ export function renderLeaderboard(entries, options = {}) {
   else if (options.rank) note = `<p class="leaderboard-note">${t('leaderboard.rank', { rank: options.rank })}</p>`;
   else if (options.submitted) note = `<p class="leaderboard-note">${t('leaderboard.notTop')}</p>`;
 
+  const weekly = options.variant === 'weekly';
+  const titleKey = weekly ? 'leaderboard.titleWeekly' : 'leaderboard.title';
+  const topKey = weekly ? 'leaderboard.topWeekly' : 'leaderboard.top';
   return `
-    <section class="leaderboard-panel arcade-panel${options.compact ? ' compact' : ''}">
+    <section class="leaderboard-panel arcade-panel${options.compact ? ' compact' : ''}${weekly ? ' weekly' : ''}">
       <div class="leaderboard-head">
-        <span>${t('leaderboard.title')}</span>
-        <b>${t('leaderboard.top')}</b>
+        <span>${t(titleKey)}</span>
+        <b>${t(topKey)}</b>
       </div>
       ${note}
       ${rows

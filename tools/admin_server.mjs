@@ -15,6 +15,10 @@ const PORT = Number(process.argv[2] || process.env.PORT || 8080);
 const MAX_BODY = 18 * 1024 * 1024;
 const RANKING_FILE = path.resolve(process.env.RANKING_FILE || path.join(ROOT, 'data', 'ranking.json'));
 const RANKING_LIMIT = 20;
+// Ranking semanal: un JSON por semana ISO (ranking-2026-W25.json) junto al ranking
+// histórico. Hereda la carpeta persistente de RANKING_FILE igual que stats.json, así
+// que los deploys no lo pisan si RANKING_FILE apunta fuera del árbol reescrito.
+const RANKING_WEEKLY_DIR = path.resolve(process.env.RANKING_WEEKLY_DIR || path.join(path.dirname(RANKING_FILE), 'semanal'));
 // El contador global de partidas vive por defecto JUNTO al ranking: si
 // RANKING_FILE apunta a una carpeta persistente (fuera del directorio que los
 // deploys reescriben), stats.json la comparte sin configuración extra.
@@ -469,9 +473,9 @@ function sortRanking(entries) {
     .sort((a, b) => b.floor - a.floor || Date.parse(a.createdAt) - Date.parse(b.createdAt) || a.teamName.localeCompare(b.teamName));
 }
 
-async function readRankingFile() {
+async function readRankingFrom(file) {
   try {
-    const raw = await fs.readFile(RANKING_FILE, 'utf8');
+    const raw = await fs.readFile(file, 'utf8');
     const parsed = JSON.parse(raw);
     const rawEntries = Array.isArray(parsed) ? parsed : parsed.entries;
     const entries = Array.isArray(rawEntries) ? rawEntries.map(sanitizeRankingEntry) : [];
@@ -482,22 +486,25 @@ async function readRankingFile() {
   }
 }
 
-async function writeRankingFile(entries) {
-  await fs.mkdir(path.dirname(RANKING_FILE), { recursive: true });
-  await fs.writeFile(RANKING_FILE, `${JSON.stringify({ entries }, null, 2)}\n`, 'utf8');
+async function writeRankingTo(file, entries) {
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, `${JSON.stringify({ entries }, null, 2)}\n`, 'utf8');
 }
 
-async function handleRanking(req, res) {
+// Núcleo GET/POST del ranking, parametrizado por archivo: lo comparten el histórico
+// (ranking.json) y el semanal (ranking-AAAA-Wnn.json). Misma lógica de dedup anti-clon
+// por runId, orden y top RANKING_LIMIT; archivos independientes, ids propios por entrada.
+async function handleRankingFile(req, res, file) {
   try {
     if (req.method === 'GET') {
-      json(res, 200, { entries: await readRankingFile(), limit: RANKING_LIMIT });
+      json(res, 200, { entries: await readRankingFrom(file), limit: RANKING_LIMIT });
       return;
     }
 
     if (req.method === 'POST') {
       const payload = JSON.parse(await readBody(req));
       const entry = sanitizeRankingEntry(payload);
-      const existing = await readRankingFile();
+      const existing = await readRankingFrom(file);
       // Anti-clon: una sola entrada por runId, conservando la de mayor floor. Un
       // save clonado/reenviado comparte runId y no puede duplicar su puesto.
       let pool = existing;
@@ -516,7 +523,7 @@ async function handleRanking(req, res) {
         pool = existing.filter((item) => item.runId !== entry.runId);
       }
       const entries = sortRanking([entry, ...pool]).slice(0, RANKING_LIMIT);
-      await writeRankingFile(entries);
+      await writeRankingTo(file, entries);
       const rank = entries.findIndex((item) => item.id === entry.id);
       json(res, 200, {
         entries,
@@ -531,6 +538,46 @@ async function handleRanking(req, res) {
   } catch (error) {
     json(res, 500, { error: error.message || String(error) });
   }
+}
+
+// Ranking histórico: envoltorio sobre el núcleo con el archivo de siempre.
+async function handleRanking(req, res) {
+  return handleRankingFile(req, res, RANKING_FILE);
+}
+
+// Clave de semana ISO 8601 ("2026-W25") en horario de Madrid. El cambio de archivo
+// ocurre exactamente el lunes 00:00 Madrid: ICU resuelve el desfase/DST al extraer la
+// fecha civil, y la aritmética ISO se hace sobre ese día tratado como UTC fijo. Así la
+// rotación es automática (sin cron) y las semanas pasadas quedan en disco.
+function weekKey(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Madrid',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const get = (type) => Number(parts.find((p) => p.type === type)?.value);
+  const target = new Date(Date.UTC(get('year'), get('month') - 1, get('day')));
+  // Mover al jueves de la semana (lunes=0 … domingo=6): el año ISO es el del jueves.
+  const dayNum = (target.getUTCDay() + 6) % 7;
+  target.setUTCDate(target.getUTCDate() - dayNum + 3);
+  const isoYear = target.getUTCFullYear();
+  const firstThursday = new Date(Date.UTC(isoYear, 0, 4));
+  firstThursday.setUTCDate(firstThursday.getUTCDate() - ((firstThursday.getUTCDay() + 6) % 7) + 3);
+  const week = 1 + Math.round((target - firstThursday) / (7 * 24 * 3600 * 1000));
+  return `${isoYear}-W${String(week).padStart(2, '0')}`;
+}
+
+const isValidWeekKey = (value) => /^\d{4}-W\d{2}$/.test(value || '');
+
+// Ranking semanal: mismo núcleo, archivo por semana ISO. El POST siempre escribe la
+// semana actual; el GET admite ?semana=AAAA-Wnn (validado contra path traversal) para
+// recuperar en solo lectura una semana pasada archivada.
+async function handleWeeklyRanking(req, res) {
+  const requested = new URL(req.url, 'http://x').searchParams.get('semana');
+  const key = (req.method === 'GET' && isValidWeekKey(requested)) ? requested : weekKey();
+  const file = path.join(RANKING_WEEKLY_DIR, `ranking-${key}.json`);
+  return handleRankingFile(req, res, file);
 }
 
 // === Estadísticas en vivo (contadores del pie del menú) ===
@@ -705,6 +752,10 @@ const adminReady = ADMIN_ENABLED
 
 // Dispatcher reutilizable: lo usa tanto el http nativo (local) como Express (producción).
 export function handleRequest(req, res) {
+  if (req.url?.startsWith('/api/ranking/semanal')) {
+    handleWeeklyRanking(req, res);
+    return;
+  }
   if (req.url?.startsWith('/api/ranking')) {
     handleRanking(req, res);
     return;

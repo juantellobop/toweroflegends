@@ -214,6 +214,7 @@ export function renderGameOver(root, state, best, handlers) {
   const wins = state.history.filter((h) => h.result === 'win').length;
   const isRecord = reached >= best;
   const leaderboard = handlers.leaderboard || { entries: [], loading: true };
+  const weeklyLeaderboard = handlers.weeklyLeaderboard || { entries: [], loading: true };
 
   // Resumen del partido que cerró la run: al caer se llega aquí sin pasar por
   // la pantalla de resultado, así que el marcador va arriba, a la vista.
@@ -268,13 +269,23 @@ export function renderGameOver(root, state, best, handlers) {
         <p class="go-stat">${t('result.winsRoster', { wins, count: state.squad.length })}</p>
       </div>
       ${lastMatchHTML}
-      ${renderLeaderboard(leaderboard.entries || [], {
-        currentId: leaderboard.entryId,
-        rank: leaderboard.rank,
-        loading: leaderboard.loading,
-        submitted: leaderboard.submitted,
-        readOnly: leaderboard.readOnly,
-      })}
+      <div class="menu-rankings">
+        ${renderLeaderboard(leaderboard.entries || [], {
+          currentId: leaderboard.entryId,
+          rank: leaderboard.rank,
+          loading: leaderboard.loading,
+          submitted: leaderboard.submitted,
+          readOnly: leaderboard.readOnly,
+        })}
+        ${renderLeaderboard(weeklyLeaderboard.entries || [], {
+          variant: 'weekly',
+          currentId: weeklyLeaderboard.entryId,
+          rank: weeklyLeaderboard.rank,
+          loading: weeklyLeaderboard.loading,
+          submitted: weeklyLeaderboard.submitted,
+          readOnly: weeklyLeaderboard.readOnly,
+        })}
+      </div>
       <h3>${t('result.route')}</h3>
       <ul class="path">${path}</ul>
       <h3>${t('result.finalSquad')}</h3>

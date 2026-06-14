@@ -15,7 +15,7 @@ import { renderBuild } from './ui/buildScreen.js';
 import { renderScouting } from './ui/scoutingScreen.js';
 import { renderMatch } from './ui/matchScreen.js';
 import { renderResult, renderGameOver } from './ui/resultScreen.js';
-import { fetchLeaderboard, openLeaderboardLineup, renderLeaderboard, submitLeaderboardEntry } from './ui/leaderboard.js';
+import { fetchLeaderboard, fetchWeeklyLeaderboard, openLeaderboardLineup, renderLeaderboard, submitLeaderboardEntry, submitWeeklyLeaderboardEntry } from './ui/leaderboard.js';
 import { CONFIG, LINES } from './data/config.js';
 import { playerOVR } from './engine/ovr.js';
 import { preloadUiAssets, UI_ASSETS } from './data/uiAssets.js';
@@ -111,6 +111,8 @@ function loadRun() {
 let state = null;
 let leaderboardCache = { entries: [], loaded: false };
 let leaderboardPromise = null;
+let weeklyLeaderboardCache = { entries: [], loaded: false };
+let weeklyLeaderboardPromise = null;
 let currentRoute = '';
 let menuDraft = { teamName: '', nation: '' };
 
@@ -265,6 +267,19 @@ function loadLeaderboard() {
   return leaderboardPromise;
 }
 
+function loadWeeklyLeaderboard() {
+  if (weeklyLeaderboardCache.loaded) return Promise.resolve(weeklyLeaderboardCache);
+  if (!weeklyLeaderboardPromise) {
+    weeklyLeaderboardPromise = fetchWeeklyLeaderboard()
+      .then((data) => {
+        weeklyLeaderboardCache = { ...data, loaded: true };
+        return weeklyLeaderboardCache;
+      })
+      .finally(() => { weeklyLeaderboardPromise = null; });
+  }
+  return weeklyLeaderboardPromise;
+}
+
 // Contadores en vivo del pie del menú: jugadores conectados y partidas
 // totales. Sin servidor (stats === null) el bloque queda oculto. Un único
 // temporizador refresca mientras el menú siga montado y muere al salir de él.
@@ -312,6 +327,22 @@ function updateMenuLeaderboard() {
     const currentMount = root.querySelector('#menu-ranking');
     if (currentMount) {
       currentMount.innerHTML = renderLeaderboard(data.entries, { compact: true });
+    }
+  });
+}
+
+function updateMenuWeeklyLeaderboard() {
+  const mount = root.querySelector('#menu-ranking-weekly');
+  if (!mount) return;
+  mount.innerHTML = renderLeaderboard(weeklyLeaderboardCache.entries, {
+    compact: true,
+    variant: 'weekly',
+    loading: !weeklyLeaderboardCache.loaded,
+  });
+  loadWeeklyLeaderboard().then((data) => {
+    const currentMount = root.querySelector('#menu-ranking-weekly');
+    if (currentMount) {
+      currentMount.innerHTML = renderLeaderboard(data.entries, { compact: true, variant: 'weekly' });
     }
   });
 }
@@ -370,6 +401,37 @@ function submitGameOverRanking() {
 
   return state.leaderboardResult || {
     entries: leaderboardCache.entries,
+    loading: true,
+  };
+}
+
+// Envío paralelo al ranking semanal: mismo payload y mismo runId que el histórico
+// (el anti-clon por runId actúa en cada archivo por separado). Falla de forma
+// independiente: si un endpoint cae por el WAF, el otro sigue su curso.
+function submitGameOverWeeklyRanking() {
+  if (!state.weeklyLeaderboardPromise && !state.weeklyLeaderboardResult) {
+    const run = state;
+    run.weeklyLeaderboardPromise = submitWeeklyLeaderboardEntry({
+      runId: run.runId,
+      teamName: run.team?.name || 'Leyendas',
+      nation: run.team?.nation || '',
+      floor: run.level,
+      formation: run.formation,
+      lineup: lineupSnapshot(run),
+    }).then((data) => {
+      run.weeklyLeaderboardResult = { ...data, submitted: true };
+      weeklyLeaderboardCache = { ...data, loaded: true };
+      if (state === run && state.phase === 'gameover') render();
+      return run.weeklyLeaderboardResult;
+    }).catch(() => {
+      run.weeklyLeaderboardResult = { entries: weeklyLeaderboardCache.entries, submitted: true, readOnly: true };
+      if (state === run && state.phase === 'gameover') render();
+      return run.weeklyLeaderboardResult;
+    });
+  }
+
+  return state.weeklyLeaderboardResult || {
+    entries: weeklyLeaderboardCache.entries,
     loading: true,
   };
 }
@@ -497,6 +559,7 @@ function render(navHint = 'auto') {
       renderRoute('gameover', () => {
         renderGameOver(root, state, getBest(), {
           leaderboard: submitGameOverRanking(),
+          weeklyLeaderboard: submitGameOverWeeklyRanking(),
           onRestart: () => {
             clearSavedRun();
             releaseRunLock();
@@ -562,7 +625,10 @@ function renderMenu(navHint = 'auto') {
           ${savedRun ? `<button id="continue" class="primary big start-prompt">${t('menu.continueRun')}<small class="continue-meta">${esc(savedRun.team?.name || t('menu.namePlaceholder'))} · ${t('menu.continueFloor', { level: savedRun.level || 1 })}</small></button>` : ''}
           <button id="start" class="${savedRun ? 'ghost' : 'primary'} big start-prompt" ${hasDraftNation ? '' : 'disabled'}>${hasDraftNation ? t('menu.newRun') : t('menu.chooseFlag')}</button>
         </div>
-        <div id="menu-ranking" class="menu-ranking"></div>
+        <div class="menu-rankings">
+          <div id="menu-ranking" class="menu-ranking"></div>
+          <div id="menu-ranking-weekly" class="menu-ranking"></div>
+        </div>
         <div id="menu-stats" class="menu-live" aria-live="polite" hidden></div>
         <p class="disclaimer menu-legal">${t('menu.disclaimer')}</p>
         <p class="menu-version">v${GAME_VERSION}</p>
@@ -570,6 +636,7 @@ function renderMenu(navHint = 'auto') {
     </section>`;
 
     updateMenuLeaderboard();
+    updateMenuWeeklyLeaderboard();
     updateMenuStats();
 
     // --- Identidad del equipo: nombre + selector de bandera ---

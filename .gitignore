@@ -14,3 +14,7 @@ local/
 # Contador global de partidas: lo escribe el servidor en producción y debe
 # sobrevivir a los deploys (si estuviera versionado, cada push lo resetearía).
 data/stats.json
+
+# Rankings semanales (un JSON por semana ISO): estado de runtime que el servidor
+# escribe y archiva. No se versiona, por la misma razón que stats.json.
+data/semanal/
