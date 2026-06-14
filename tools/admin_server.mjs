@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 import { execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';
-import { createReadStream, readdirSync, readFileSync, statSync } from 'node:fs';
+import { createReadStream, existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { FORMATIONS, LINES, RARITIES } from '../data/config.js';
 import { playerOVR } from '../engine/ovr.js';
 import { sanitizeTeamName } from '../data/teamName.js';
@@ -602,17 +602,22 @@ async function serveStatic(req, res) {
   }
 }
 
-// Panel admin: vive solo en local/ (ignorado por git) y NO se publica. Se carga de
-// forma opcional; si el módulo no existe (clon público / producción), adminApi queda
-// null y el servidor sirve el juego igual, sin endpoints de admin.
+// Panel admin: vive solo en local/ (ignorado por git) y NO se publica. En producción
+// (clon público) el archivo no existe: ADMIN_ENABLED queda false con una simple
+// comprobación síncrona y NO se intenta cargar nada. Sin top-level await ni ninguna
+// dependencia de local/ en tiempo de evaluación del módulo, para que el arranque del
+// servidor de producción sea idéntico al de un build sin admin.
+const ADMIN_API_PATH = path.join(ROOT, 'local', 'admin_api.mjs');
+export const ADMIN_ENABLED = existsSync(ADMIN_API_PATH);
 let adminApi = null;
-try {
-  const { createAdminApi } = await import('../local/admin_api.mjs');
-  adminApi = createAdminApi({ ROOT, json, readBody, methodNotAllowed, POSITIONS, RARITY_SET, playerOVR });
-} catch (_) {
-  /* sin panel admin en este despliegue */
-}
-export const ADMIN_ENABLED = Boolean(adminApi);
+// Solo en local (ADMIN_ENABLED): carga en segundo plano, sin bloquear la evaluación.
+const adminReady = ADMIN_ENABLED
+  ? import(pathToFileURL(ADMIN_API_PATH).href)
+      .then(({ createAdminApi }) => {
+        adminApi = createAdminApi({ ROOT, json, readBody, methodNotAllowed, POSITIONS, RARITY_SET, playerOVR });
+      })
+      .catch(() => { adminApi = null; })
+  : Promise.resolve();
 
 // Dispatcher reutilizable: lo usa tanto el http nativo (local) como Express (producción).
 export function handleRequest(req, res) {
@@ -625,10 +630,18 @@ export function handleRequest(req, res) {
     return;
   }
   if (req.url?.startsWith('/api/admin/')) {
-    // El admin solo existe en local. En producción no hay adminApi: 404.
-    if (adminApi?.handle(req, res)) return;
-    if (req.method === 'GET' || req.method === 'HEAD') { serveStatic(req, res); return; }
-    methodNotAllowed(res);
+    // El admin solo existe en local. En producción ADMIN_ENABLED es false: ruta
+    // 100% síncrona que NUNCA toca local/. En local esperamos a que cargue la API.
+    if (!ADMIN_ENABLED) {
+      if (req.method === 'GET' || req.method === 'HEAD') { serveStatic(req, res); return; }
+      methodNotAllowed(res);
+      return;
+    }
+    adminReady.then(() => {
+      if (adminApi && adminApi.handle(req, res)) return;
+      if (req.method === 'GET' || req.method === 'HEAD') { serveStatic(req, res); return; }
+      methodNotAllowed(res);
+    });
     return;
   }
   if (req.method === 'GET' || req.method === 'HEAD') {
@@ -658,13 +671,15 @@ if (runningDirectly) {
     console.log(`Versión de assets: ${BUILD_VERSION}`);
     console.log(`Ranking persistente: ${RANKING_FILE}`);
     console.log(`Contador de partidas: ${STATS_FILE}`);
-    if (adminApi) {
-      console.log(`Panel admin protegido en #playeredit · usuario: ${adminApi.ADMIN_USER}`);
-      if (adminApi.USING_EPHEMERAL_ADMIN_PASSWORD) {
-        console.warn(`AVISO: ADMIN_PASSWORD no definida. Contraseña admin temporal: ${adminApi.EPHEMERAL_PASSWORD}`);
+    adminReady.then(() => {
+      if (adminApi) {
+        console.log(`Panel admin protegido en #playeredit · usuario: ${adminApi.ADMIN_USER}`);
+        if (adminApi.USING_EPHEMERAL_ADMIN_PASSWORD) {
+          console.warn(`AVISO: ADMIN_PASSWORD no definida. Contraseña admin temporal: ${adminApi.EPHEMERAL_PASSWORD}`);
+        }
+      } else {
+        console.log('Sin panel admin (local/admin_api.mjs no presente).');
       }
-    } else {
-      console.log('Sin panel admin (local/admin_api.mjs no presente).');
-    }
+    });
   });
 }
