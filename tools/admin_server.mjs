@@ -155,7 +155,9 @@ function versionedJavaScript(source) {
   const rewrite = (_, prefix, quote, specifier) =>
     `${prefix}${quote}${withBuildVersion(specifier)}${quote}`;
 
-  return source
+  // El ?v= se inyecta sobre el código aún con espacios (sus regex esperan
+  // `import ... from`); los comentarios se eliminan AL FINAL.
+  const versioned = source
     .replace(
       /(\b(?:import|export)\s+[^;]*?\sfrom\s*)(['"])(\.{1,2}\/[^'"]+)\2/g,
       rewrite
@@ -172,10 +174,110 @@ function versionedJavaScript(source) {
       /(['"])((?:assets|scenes)\/[^'"`\s)]+\.(?:ico|jpe?g|png|svg|webp)(?:\?[^'"]*)?)\1/gi,
       (_, quote, asset) => `${quote}${withBuildVersion(asset)}${quote}`
     );
+  return stripJsComments(versioned);
+}
+
+// --- Eliminación de comentarios del CSS/JS servido --------------------------
+// Los fuentes (styles.css, design/tokens.css, *.js) conservan sus comentarios;
+// el servidor los sirve SIN comentarios. Strippers propios (sin dependencias en
+// la ruta de request) que respetan cadenas/plantillas/regex para no romper
+// data-URIs, calc() ni literales.
+
+function stripCssComments(src) {
+  let out = '';
+  let quote = null;
+  for (let i = 0; i < src.length; i++) {
+    const c = src[i];
+    if (quote) {
+      out += c;
+      if (c === '\\') { if (i + 1 < src.length) out += src[++i]; continue; }
+      if (c === quote) quote = null;
+      continue;
+    }
+    if (c === '"' || c === "'") { quote = c; out += c; continue; }
+    if (c === '/' && src[i + 1] === '*') {
+      i += 2;
+      while (i < src.length && !(src[i] === '*' && src[i + 1] === '/')) i++;
+      i++;                 // salta el '*'; el for salta el '/'
+      out += ' ';          // evita pegar tokens vecinos
+      continue;
+    }
+    out += c;
+  }
+  return out;
+}
+
+const JS_REGEX_KEYWORDS = new Set([
+  'return', 'typeof', 'instanceof', 'in', 'of', 'new', 'delete', 'void',
+  'throw', 'else', 'do', 'yield', 'await', 'case',
+]);
+const JS_REGEX_PREV = new Set('(,=:[!&|?{};+-*%^~<>'.split(''));
+
+function stripJsComments(src) {
+  const n = src.length;
+  let out = '';
+  let prevSig = '';   // último carácter significativo
+  let prevWord = '';  // último identificador (para palabras clave antes de regex)
+  const stack = [{ t: 'code', depth: 0, fromTemplate: false }];
+  const emit = (ch) => {
+    out += ch;
+    if (!/\s/.test(ch)) {
+      prevSig = ch;
+      prevWord = /[A-Za-z0-9_$]/.test(ch) ? prevWord + ch : '';
+    }
+  };
+  let i = 0;
+  while (i < n) {
+    const top = stack[stack.length - 1];
+    const c = src[i];
+    const nx = src[i + 1];
+    if (top.t === 'string') {
+      out += c;
+      if (c === '\\') { if (i + 1 < n) out += src[++i]; i++; continue; }
+      if (c === top.q) { stack.pop(); prevSig = c; prevWord = ''; }
+      i++; continue;
+    }
+    if (top.t === 'template') {
+      if (c === '\\') { out += c; if (i + 1 < n) out += src[++i]; i++; continue; }
+      if (c === '`') { out += c; stack.pop(); prevSig = '`'; prevWord = ''; i++; continue; }
+      if (c === '$' && nx === '{') { out += '${'; stack.push({ t: 'code', depth: 0, fromTemplate: true }); prevSig = '{'; prevWord = ''; i += 2; continue; }
+      out += c; i++; continue;
+    }
+    if (top.t === 'regex') {
+      out += c;
+      if (c === '\\') { if (i + 1 < n) out += src[++i]; i++; continue; }
+      if (top.inClass) { if (c === ']') top.inClass = false; }
+      else if (c === '[') { top.inClass = true; }
+      else if (c === '/') {
+        stack.pop(); prevSig = '/'; prevWord = ''; i++;
+        while (i < n && /[a-z]/i.test(src[i])) { out += src[i]; i++; }  // flags
+        continue;
+      }
+      i++; continue;
+    }
+    // contexto de código
+    if (c === '/' && nx === '/') { i += 2; while (i < n && src[i] !== '\n') i++; continue; }
+    if (c === '/' && nx === '*') { i += 2; while (i < n && !(src[i] === '*' && src[i + 1] === '/')) i++; i += 2; emit(' '); continue; }
+    if (c === '"' || c === "'") { stack.push({ t: 'string', q: c }); out += c; prevSig = c; prevWord = ''; i++; continue; }
+    if (c === '`') { stack.push({ t: 'template' }); out += c; prevSig = '`'; prevWord = ''; i++; continue; }
+    if (c === '/') {
+      const isRegex = prevSig === '' || JS_REGEX_PREV.has(prevSig) || JS_REGEX_KEYWORDS.has(prevWord);
+      if (isRegex) { stack.push({ t: 'regex', inClass: false }); out += c; prevSig = '/'; prevWord = ''; i++; continue; }
+      emit(c); i++; continue;  // división
+    }
+    if (c === '{') { top.depth++; emit(c); i++; continue; }
+    if (c === '}') {
+      if (top.depth > 0) { top.depth--; emit(c); i++; continue; }
+      if (top.fromTemplate) { stack.pop(); out += '}'; prevSig = '}'; prevWord = ''; i++; continue; }
+      emit(c); i++; continue;
+    }
+    emit(c); i++;
+  }
+  return out;
 }
 
 function versionedCss(source) {
-  return source.replace(
+  return stripCssComments(source).replace(
     /url\(\s*(['"]?)(?!data:|https?:|#)([^'")]+)\1\s*\)/gi,
     (_, quote, asset) => `url(${quote}${withBuildVersion(asset.trim())}${quote})`
   );

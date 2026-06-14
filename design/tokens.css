@@ -1,30 +1,38 @@
 /* Torre de Leyendas — Sistema de diseño (§2 del plan UI/UX).
-   Tokens base: color (claro/oscuro), material de cristal Liquid Glass aproximado,
-   tipografía, espaciado, radios concéntricos, elevación y movimiento.
-   Todo lo demás (styles.css, /match) se construye encima de estos tokens. */
+   ARCHIVO ÚNICO DE VARIABLES de la app. Estructura:
+     1. :root — tokens base (esquema único oscuro, tipografía, paleta arcade,
+        escala, espaciado, radios, sombras, movimiento).
+     2. :root — capa de aplicación: alias semánticos (piel pixelart "arcade")
+        que se construyen sobre los tokens base y los pisan en cascada.
+     3. Utilidades de cristal (.glass*) + .tabular + reduce-motion global.
+   No hay @media (prefers-color-scheme): la app usa un esquema oscuro unificado
+   y se ve igual con cualquier ajuste del SO. styles.css se carga después. */
 
 :root {
-  /* === 2.1 Color (claro) — contenido limpio, sin cristal === */
-  --bg-primary:    #FFFFFF;
-  --bg-secondary:  #F2F2F7;
-  --bg-tertiary:   #FFFFFF;
-  --bg-grouped:    #F2F2F7;
+  /* === 2.1 Color (esquema ÚNICO oscuro) — contenido limpio, sin cristal ===
+     La app se diseña siempre en oscuro (texto claro). Estos valores eran antes
+     el override de prefers-color-scheme: dark; se han fijado como únicos para
+     no depender del ajuste del SO. */
+  --bg-primary:    #000000;
+  --bg-secondary:  #1C1C1E;
+  --bg-tertiary:   #2C2C2E;
+  --bg-grouped:    #000000;
 
-  --label-primary:   rgba(0,0,0,1);
-  --label-secondary: rgba(60,60,67,0.60);
-  --label-tertiary:  rgba(60,60,67,0.30);
-  --separator:       rgba(60,60,67,0.29);
-  --fill-secondary:  rgba(120,120,128,0.16);
+  --label-primary:   rgba(255,255,255,1);
+  --label-secondary: rgba(235,235,245,0.60);
+  --label-tertiary:  rgba(235,235,245,0.30);
+  --separator:       rgba(84,84,88,0.60);
+  --fill-secondary:  rgba(120,120,128,0.36);
 
   /* Acentos del sistema */
-  --accent:        #007AFF;   /* systemBlue  */
-  --success:       #34C759;   /* systemGreen */
-  --danger:        #FF3B30;   /* systemRed   */
-  --warning:       #FF9500;   /* systemOrange*/
+  --accent:        #0A84FF;   /* systemBlue  */
+  --success:       #30D158;   /* systemGreen */
+  --danger:        #FF453A;   /* systemRed   */
+  --warning:       #FF9F0A;   /* systemOrange*/
 
   /* Tema fútbol */
-  --pitch:         #2E9E5B;   /* césped */
-  --pitch-dark:    #2A914F;   /* franja alterna del césped */
+  --pitch:         #1F7D45;   /* césped */
+  --pitch-dark:    #1B6E3C;   /* franja alterna del césped */
   --pitch-line:    rgba(255,255,255,0.85);
   --brand:         #D4AF37;   /* dorado "Leyendas" — guiño de marca, uso moderado */
 
@@ -34,12 +42,12 @@
   --rarity-epic:   #BF5AF2;
   --rarity-legend: #FFD60A;
 
-  /* Cristal sobre fondo claro (reflejo especular + hairline) */
-  --glass-bg:        rgba(255,255,255,0.55);
-  --glass-bg-thin:   rgba(255,255,255,0.35);
-  --glass-bg-thick:  rgba(255,255,255,0.75);
-  --glass-border:    rgba(255,255,255,0.30);
-  --glass-spec:      rgba(255,255,255,0.45);
+  /* Cristal (reflejo especular + hairline) */
+  --glass-bg:        rgba(28,28,30,0.55);
+  --glass-bg-thin:   rgba(28,28,30,0.35);
+  --glass-bg-thick:  rgba(28,28,30,0.78);
+  --glass-border:    rgba(255,255,255,0.12);
+  --glass-spec:      rgba(255,255,255,0.16);
 
   /* === 2.3 Tipografía === */
   --font-game: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
@@ -98,30 +106,42 @@
   --dur-fast: 200ms; --dur-base: 320ms; --dur-slow: 480ms;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-primary:    #000000;
-    --bg-secondary:  #1C1C1E;
-    --bg-tertiary:   #2C2C2E;
-    --bg-grouped:    #000000;
-    --label-primary:   rgba(255,255,255,1);
-    --label-secondary: rgba(235,235,245,0.60);
-    --label-tertiary:  rgba(235,235,245,0.30);
-    --separator:       rgba(84,84,88,0.60);
-    --fill-secondary:  rgba(120,120,128,0.36);
-    --accent:        #0A84FF;
-    --success:       #30D158;
-    --danger:        #FF453A;
-    --warning:       #FF9F0A;
-    --pitch:         #1F7D45;
-    --pitch-dark:    #1B6E3C;
+/* === Capa de aplicación — alias semánticos (piel pixelart "arcade") =========
+   Se construye sobre los tokens base de arriba y los pisa en cascada: va
+   DESPUÉS del bloque dark, así que el acento y los fondos arcade ganan tanto en
+   claro como en oscuro (la piel arcade es fija). styles.css consume estos alias.
+   Las variables locales de componente (--lineup-card, --tone, --team-primary,
+   --card-border…) se definen junto a su componente en styles.css.
+   Nota: --accent aquí pisa al --accent base (systemBlue), que queda vestigial. */
+:root {
+  /* Icono de lesión: cruz pixel-art con capas (negro · granate · ámbar · rojo). */
+  --injury-cross: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' shape-rendering='crispEdges'><path d='M8 2H16V8H22V16H16V22H8V16H2V8H8Z' fill='%23140a0a'/><path d='M8 2H16V8H22V16H16V22H8V16H2V8H8Z' fill='%237c1722' transform='translate(0.96 0.96) scale(0.92)'/><path d='M8 2H16V8H22V16H16V22H8V16H2V8H8Z' fill='%23f7a324' transform='translate(2.4 2.4) scale(0.8)'/><path d='M8 2H16V8H22V16H16V22H8V16H2V8H8Z' fill='%23e8472b' transform='translate(3.6 3.6) scale(0.7)'/></svg>");
 
-    --glass-bg:        rgba(28,28,30,0.55);
-    --glass-bg-thin:   rgba(28,28,30,0.35);
-    --glass-bg-thick:  rgba(28,28,30,0.78);
-    --glass-border:    rgba(255,255,255,0.12);
-    --glass-spec:      rgba(255,255,255,0.16);
-  }
+  /* Alias de la app → tokens arcade */
+  --bg:      var(--arcade-blue-900);
+  --bg2:     var(--arcade-blue-800);
+  --panel:   var(--arcade-panel);
+  --panel2:  var(--arcade-panel-2);
+  --line:    var(--arcade-cyan);
+  --text:    #F8FBFF;
+  --muted:   rgba(232, 242, 255, .72);
+  --accent:  var(--arcade-yellow);
+  --accent2: var(--arcade-cyan);
+  --green:   var(--arcade-green);
+  --red:     var(--arcade-red);
+
+  /* Rarezas de carta */
+  --common: #B6BCCB;
+  --rare:   var(--arcade-cyan);
+  --epic:   var(--arcade-magenta);
+  --legend: var(--arcade-yellow);
+
+  /* Colores semánticos reutilizados en varias pantallas (fuente única). */
+  --red-card:    #d11a1a;   /* tarjeta roja (banco, carta, resumen) */
+  --injury-ink:  #140a0a;   /* fondo del contador de partidos de baja */
+  --chem-boost:  #a06bff;   /* enlace de química del "Duodécimo jugador" */
+  --press-paper: #F6EDD5;   /* crónica de prensa: papel envejecido */
+  --press-ink:   #1C1408;   /* crónica de prensa: tinta serifa */
 }
 
 /* === 2.2 Material de cristal (Liquid Glass aproximado) ===

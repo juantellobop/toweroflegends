@@ -529,6 +529,94 @@
       ]
     },
     {
+      "id": "c2872292-5c50-42a8-837d-be1bcaecab96",
+      "teamName": "River Plate",
+      "nation": "River Plate",
+      "floor": 6,
+      "createdAt": "2026-06-14T18:25:13.897Z",
+      "runId": "bf5238bc-06aa-49ad-9670-33d7f89a7e1c",
+      "formation": "4-3-3",
+      "lineup": [
+        {
+          "name": "Robin Olsen",
+          "position": "GK",
+          "line": "GK",
+          "ovr": 68,
+          "rarity": "common"
+        },
+        {
+          "name": "Hong Myung-bo",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 72,
+          "rarity": "common"
+        },
+        {
+          "name": "Lamine Diatta",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 69,
+          "rarity": "common"
+        },
+        {
+          "name": "Paulo da Silva",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 68,
+          "rarity": "common"
+        },
+        {
+          "name": "John Mensah",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 66,
+          "rarity": "common"
+        },
+        {
+          "name": "Sócrates",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 93,
+          "rarity": "legend"
+        },
+        {
+          "name": "Lucas Biglia",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 89,
+          "rarity": "epic"
+        },
+        {
+          "name": "James Rodríguez",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 82,
+          "rarity": "epic"
+        },
+        {
+          "name": "Sulley Muntari",
+          "position": "MID",
+          "line": "FWD",
+          "ovr": 69,
+          "rarity": "common"
+        },
+        {
+          "name": "Joel Campbell",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 69,
+          "rarity": "common"
+        },
+        {
+          "name": "André Ayew",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 68,
+          "rarity": "common"
+        }
+      ]
+    },
+    {
       "id": "f0a9c4c2-c8b1-4617-9348-5f910e9e52b0",
       "teamName": "Leyendas",
       "nation": "River Plate",

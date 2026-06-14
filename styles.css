@@ -1,28 +1,36 @@
 /* Torre de Leyendas — Estilos (§8 diseño + §2–§4 plan UI/UX).
-   Las variables heredadas se alían a los tokens de design/tokens.css, de modo
-   que toda la app respeta el modo claro/oscuro del sistema automáticamente.
-   El cristal (Liquid Glass) vive solo en la capa de navegación / marcador. */
+   Todas las variables (tokens base + alias de la app) viven en design/tokens.css,
+   cargado antes que este archivo. Aquí solo hay reglas.
 
-:root {
-  /* Icono de lesión: cruz pixel-art con capas (negro · granate · ámbar · rojo). */
-  --injury-cross: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' shape-rendering='crispEdges'><path d='M8 2H16V8H22V16H16V22H8V16H2V8H8Z' fill='%23140a0a'/><path d='M8 2H16V8H22V16H16V22H8V16H2V8H8Z' fill='%237c1722' transform='translate(0.96 0.96) scale(0.92)'/><path d='M8 2H16V8H22V16H16V22H8V16H2V8H8Z' fill='%23f7a324' transform='translate(2.4 2.4) scale(0.8)'/><path d='M8 2H16V8H22V16H16V22H8V16H2V8H8Z' fill='%23e8472b' transform='translate(3.6 3.6) scale(0.7)'/></svg>");
-  --bg:     var(--bg-grouped);
-  --bg2:    var(--fill-secondary);
-  --panel:  var(--bg-tertiary);
-  --panel2: var(--bg-secondary);
-  --line:   var(--separator);
-  --text:   var(--label-primary);
-  --muted:  var(--label-secondary);
-  --accent: var(--brand);          /* dorado "Leyendas": acento de marca */
-  --accent2: #0A84FF;              /* systemBlue de apoyo (barras/ratings) */
-  --green:  var(--success);
-  --red:    var(--danger);
+   El archivo tiene dos pieles superpuestas por cascada: una base iOS/cristal
+   ("Liquid Glass") y, encima, el rediseño pixelart "arcade" que la pisa. El
+   orden de aparición es deliberado: muchas reglas tardías (y los bloques
+   responsive) sobrescriben a las previas; no reordenar a la ligera.
 
-  --common: var(--rarity-common);
-  --rare:   var(--rarity-rare);
-  --epic:   var(--rarity-epic);
-  --legend: var(--rarity-legend);
-}
+   ── Índice (orden del archivo) ───────────────────────────────────────────
+   1. Base: reset, html/body, #app, transiciones de pantalla
+   2. Capa iOS/cristal: botones, menú, cartas, armar equipo, sobres, partido,
+      resultado, fin de run  (la pisa después la capa arcade)
+   3. Simulación gráfica del partido (escena/ticker/controles)
+   4. Rediseño de pantallas (nav, apertura de sobre 3D, barra de acción)
+   5. ===== PIXELART ARCADE (redesign que pisa lo anterior) =====
+      title screen · cartas/sobres · armar+scouting · tablero
+      compartido (.lineup-board) · partido · resultado/fin de run
+   6. Banderas · identidad de equipo · escena de highlights
+   7. Fondos por pantalla/ruta · animaciones de entrada de pantalla
+   8. Modales (ficha jugador, estadísticas, revisar equipo) + cruz de cierre
+   9. Tableros tácticos y gestión de equipo en móvil
+  10. Crónica de prensa
+
+   ── Responsive (3 grupos) ────────────────────────────────────────────────
+   Desktop = estilo base (sin media query) · reglas solo-desktop en
+   @media (min-width: 768px).
+   Tablet  = @media (max-width: 1023px).
+   Mobile  = @media (max-width: 767px).
+   (Ejes aparte, NO son grupos de ancho: @media (max-height: …) y
+   @media (prefers-reduced-motion: reduce).)
+   Los bloques responsive están repartidos junto a su sección; varios comparten
+   breakpoint y su orden en el archivo decide quién gana en los solapes. */
 
 * { box-sizing: border-box; }
 
@@ -140,15 +148,13 @@ select:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 .deal-card:focus-visible,
-.card.clickable:focus-visible,
-.admin-player-row:focus-visible {
+.card.clickable:focus-visible {
   outline: 3px solid var(--arcade-yellow, var(--accent));
   outline-offset: 4px;
 }
 button.is-pressing:not(:disabled),
 .deal-card.is-pressing,
-.card.clickable.is-pressing,
-.admin-player-row.is-pressing {
+.card.clickable.is-pressing {
   transform: translateY(2px) scale(.985) !important;
   filter: brightness(.96) saturate(1.08);
 }
@@ -326,8 +332,8 @@ select {
   object-fit: cover;
   image-rendering: pixelated;
   border: 2px solid rgba(255,255,255,.88);
-  box-shadow: 0 0 0 2px #071459;
-  background: #071459;
+  box-shadow: 0 0 0 2px var(--arcade-blue-900);
+  background: var(--arcade-blue-900);
   flex: 0 0 auto;
 }
 .score { font-size: 40px; font-weight: 800; font-variant-numeric: tabular-nums; }
@@ -798,7 +804,7 @@ select {
    verticalmente en la pantalla. La reserva inferior de .pixel-screen (120px)
    ya descuenta la barra de acción fija, así que el centro óptico queda entre
    la cabecera y el botón. */
-@media (min-width: 761px) {
+@media (min-width: 768px) {
   .pack-screen {
     display: flex;
     flex-direction: column;
@@ -912,7 +918,7 @@ select {
   position: absolute; z-index: 4; left: 50%; bottom: -10px;
   transform: translateX(-50%);
   font-family: var(--font-pixel); font-size: var(--t-caption-1); font-weight: 700;
-  color: #071459; background: var(--arcade-yellow);
+  color: var(--arcade-blue-900); background: var(--arcade-yellow);
   padding: 6px 12px; border: 3px solid #fff;
   text-transform: uppercase; letter-spacing: 1px; white-space: nowrap;
   box-shadow: 0 6px 0 rgba(0,0,0,.32);
@@ -1027,7 +1033,7 @@ select {
    se mueve". Aquí se eliminan o se congelan por completo, tanto en reposo como
    durante la apertura. Solo el sobre y las cartas (primer plano) se revelan,
    con un movimiento limpio; el fondo queda totalmente quieto y sólido. */
-@media (max-width: 760px) {
+@media (max-width: 767px) {
   /* Capas de fondo puramente decorativas: fuera (solo aportaban movimiento). */
   .pack-rays,
   .pack-sparks,
@@ -1095,7 +1101,7 @@ select {
 .chem-legend .cl-swatch { width: 16px; height: 0; border-top-width: 2px; border-top-style: solid; }
 .chem-legend .cl-swatch.nation { border-top-color: var(--arcade-yellow); }
 .chem-legend .cl-swatch.era { border-top-color: var(--arcade-cyan); border-top-style: dashed; }
-.chem-legend .cl-swatch.boost { border-top-color: #a06bff; }
+.chem-legend .cl-swatch.boost { border-top-color: var(--chem-boost); }
 .chem-legend .cl-sep { flex: 1; }
 .chem-legend .cl-line { font-weight: 600; opacity: 0.6; }
 .chem-legend .cl-line.has { opacity: 1; color: var(--label-primary); }
@@ -1135,7 +1141,7 @@ select {
    Con el Duodécimo jugador todo par se enlaza en violeta (boost); el dorado
    de nación tiene su propia clase y pisa al violeta. */
 .chem-link { stroke: var(--pitch-line); stroke-width: 1.5; vector-effect: non-scaling-stroke; opacity: 0.5; stroke-dasharray: 3 3; }
-.chem-link.boost { stroke: #a06bff; stroke-width: 1.8; opacity: 0.8; stroke-dasharray: none; }
+.chem-link.boost { stroke: var(--chem-boost); stroke-width: 1.8; opacity: 0.8; stroke-dasharray: none; }
 .chem-link.strong { stroke: var(--brand); stroke-width: 2; opacity: 0.85; stroke-dasharray: none; }
 
 .chip-anchor { position: absolute; transform: translate(-50%, -50%); }
@@ -1202,7 +1208,7 @@ select {
   width: 22px;
   height: auto;
   aspect-ratio: 4 / 2.8;
-  border: 2px solid #071459;
+  border: 2px solid var(--arcade-blue-900);
   box-shadow: 0 1px 0 rgba(0,0,0,.35);
   object-fit: cover;
   image-rendering: pixelated;
@@ -1219,7 +1225,7 @@ select {
   margin-bottom: var(--space-3);
 }
 .picker-grid .card { width: 100%; min-width: 0; }
-@media (max-width: 760px) {
+@media (max-width: 767px) {
   .picker-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
@@ -1239,10 +1245,10 @@ select {
 
 /* Suplente sancionado (expulsado el partido anterior): no seleccionable, con
    tarjeta roja sobre el retrato. Atenuado, sin cursor de acción. */
-.bench-item--suspended { cursor: not-allowed; opacity: .62; border-top-color: #d11a1a; }
+.bench-item--suspended { cursor: not-allowed; opacity: .62; border-top-color: var(--red-card); }
 .bench-red-card {
   position: absolute; top: 4px; right: 4px; width: 13px; height: 18px;
-  border-radius: 2px; background: #d11a1a; border: 1px solid rgba(0,0,0,.45);
+  border-radius: 2px; background: var(--red-card); border: 1px solid rgba(0,0,0,.45);
   box-shadow: 0 1px 2px rgba(0,0,0,.4); rotate: 8deg; pointer-events: none;
 }
 /* Lesionado: cruz médica pixel-art (capas negro/granate/ámbar/rojo), estática. */
@@ -1258,7 +1264,7 @@ select {
   position: absolute; top: 1px; right: 1px; z-index: 2;
   min-width: 13px; height: 14px; padding: 0 2px;
   display: flex; align-items: center; justify-content: center;
-  background: #140a0a; color: #fff; border-radius: 3px;
+  background: var(--injury-ink); color: #fff; border-radius: 3px;
   border: 1px solid rgba(0,0,0,.45);
   font-family: var(--font-pixel); font-size: 9px; line-height: 1;
   pointer-events: none;
@@ -1297,7 +1303,7 @@ select {
 .gameover-screen .big-num { font-family: var(--font-rounded); }
 
 /* === Responsive === */
-@media (max-width: 760px) {
+@media (max-width: 767px) {
   .build-body { grid-template-columns: 1fr; }
   .logo h1 { font-size: 34px; }
   .card { width: 150px; }
@@ -1311,25 +1317,8 @@ select {
 
 /* ============================================================= *
  *  Pixelart Premium arcade redesign                             *
+ *  (Los alias :root de esta piel se han movido a variables.css.) *
  * ============================================================= */
-
-:root {
-  --bg: var(--arcade-blue-900);
-  --bg2: var(--arcade-blue-800);
-  --panel: var(--arcade-panel);
-  --panel2: var(--arcade-panel-2);
-  --line: var(--arcade-cyan);
-  --text: #F8FBFF;
-  --muted: rgba(232, 242, 255, .72);
-  --accent: var(--arcade-yellow);
-  --accent2: var(--arcade-cyan);
-  --green: var(--arcade-green);
-  --red: var(--arcade-red);
-  --common: #B6BCCB;
-  --rare: var(--arcade-cyan);
-  --epic: var(--arcade-magenta);
-  --legend: var(--arcade-yellow);
-}
 
 html,
 body {
@@ -1370,10 +1359,7 @@ body::before {
   max-width: 1180px;
   padding: 14px;
 }
-
-.app-footer {
-  display: none;
-}
+/* (.app-footer ya se oculta con display:none en la capa base.) */
 
 button,
 select {
@@ -1393,7 +1379,7 @@ button.primary,
   border: var(--pixel-border) solid #3A2100;
   box-shadow:
     0 0 0 2px #FFF5A8 inset,
-    0 6px 0 #071459,
+    0 6px 0 var(--arcade-blue-900),
     0 12px 18px rgba(0,0,0,.35);
   font-family: var(--font-pixel);
   font-weight: 900;
@@ -1411,7 +1397,7 @@ button.primary:active:not(:disabled),
   transform: translateY(1px);
   box-shadow:
     0 0 0 2px #FFF5A8 inset,
-    0 3px 0 #071459,
+    0 3px 0 var(--arcade-blue-900),
     0 8px 14px rgba(0,0,0,.35);
 }
 
@@ -1419,7 +1405,7 @@ select {
   border-radius: 0;
   border: 3px solid var(--arcade-cyan);
   background: var(--arcade-paper);
-  color: #071459;
+  color: var(--arcade-blue-900);
   font-family: var(--font-pixel);
   font-weight: 800;
 }
@@ -1442,7 +1428,7 @@ select {
   border: var(--pixel-border) solid var(--arcade-cyan);
   border-radius: var(--pixel-radius);
   box-shadow:
-    0 0 0 3px #071459,
+    0 0 0 3px var(--arcade-blue-900),
     0 0 0 5px rgba(255,255,255,.18),
     0 12px 0 rgba(0,0,0,.25);
 }
@@ -1480,8 +1466,8 @@ select {
 .level-badge {
   border-radius: 0;
   background: var(--arcade-yellow);
-  color: #071459;
-  border: 3px solid #071459;
+  color: var(--arcade-blue-900);
+  border: 3px solid var(--arcade-blue-900);
   box-shadow: 0 0 0 2px #FFF5A8 inset;
   text-transform: uppercase;
 }
@@ -1556,7 +1542,7 @@ select {
   justify-self: center;
   padding: 4px 10px;
   background: var(--arcade-red);
-  border: 3px solid #071459;
+  border: 3px solid var(--arcade-blue-900);
   color: #fff;
   font-family: var(--font-pixel);
   font-weight: 900;
@@ -1573,10 +1559,10 @@ select {
   -webkit-background-clip: initial;
   background-clip: initial;
   text-shadow:
-    4px 0 #071459,
-    -4px 0 #071459,
-    0 4px #071459,
-    0 -4px #071459,
+    4px 0 var(--arcade-blue-900),
+    -4px 0 var(--arcade-blue-900),
+    0 4px var(--arcade-blue-900),
+    0 -4px var(--arcade-blue-900),
     6px 6px 0 var(--arcade-red);
   text-transform: uppercase;
 }
@@ -1585,7 +1571,7 @@ select {
   margin: 0;
   font-size: var(--t-callout);
   font-weight: 700;
-  text-shadow: 0 2px 0 #071459;
+  text-shadow: 0 2px 0 var(--arcade-blue-900);
 }
 
 .start-prompt {
@@ -1620,8 +1606,7 @@ select {
   width: min(360px, 100%);
 }
 
-.menu-actions .start-prompt,
-.menu-actions .menu-admin-button {
+.menu-actions .start-prompt {
   width: 100%;
 }
 
@@ -1680,7 +1665,7 @@ select {
   align-items: center;
   gap: 8px;
   padding: 6px 8px;
-  background: #071459;
+  background: var(--arcade-blue-900);
   border: 2px solid rgba(37,230,255,.54);
   font-family: var(--font-pixel);
 }
@@ -1717,8 +1702,8 @@ select {
   object-fit: cover;
   image-rendering: pixelated;
   border: 2px solid rgba(255,255,255,.88);
-  box-shadow: 0 0 0 2px #071459;
-  background: #071459;
+  box-shadow: 0 0 0 2px var(--arcade-blue-900);
+  background: var(--arcade-blue-900);
   flex: 0 0 auto;
 }
 
@@ -1805,7 +1790,7 @@ select {
 /* La cruz de cierre de estos modales es la misma .player-modal-close global
    (un solo estilo para todos los botones de cerrar modal). */
 
-@media (max-width: 480px) {
+@media (max-width: 767px) {
 
   .chem-legend{
     display: none;
@@ -1827,17 +1812,6 @@ select {
   .lineup-modal .chip-name {
     max-width: 52px;
   }
-}
-
-.menu-admin-button {
-  border-radius: 0;
-  border: 3px solid var(--arcade-cyan);
-  background: rgba(7,20,89,.78);
-  color: #fff;
-  font-family: var(--font-pixel);
-  font-weight: 900;
-  text-transform: uppercase;
-  box-shadow: 0 4px 0 #071459;
 }
 
 .menu-legal {
@@ -1890,431 +1864,6 @@ select {
   text-transform: uppercase;
 }
 
-/* Admin */
-.admin-screen {
-  background:
-    radial-gradient(circle at 50% -10%, rgba(255,212,42,.12), transparent 30%),
-    linear-gradient(180deg, rgba(18,58,209,.18), transparent 46%);
-  color: #fff;
-}
-
-.admin-nav {
-  display: flex;
-  align-items: end;
-  gap: 14px;
-  margin-bottom: 14px;
-}
-
-.admin-nav .large-title {
-  margin: 6px 0 0;
-  color: #fff;
-  font-size: clamp(2rem, 4vw, 3rem);
-  text-shadow: 3px 3px 0 #071459;
-}
-
-.admin-nav .ghost {
-  border-radius: 0;
-  border: 3px solid var(--arcade-cyan);
-  background: rgba(7,20,89,.82);
-  color: #fff;
-  font-family: var(--font-pixel);
-  box-shadow: 0 4px 0 #071459;
-}
-
-.admin-layout {
-  display: grid;
-  grid-template-columns: minmax(270px, 340px) minmax(0, 1fr);
-  gap: 14px;
-  align-items: start;
-}
-
-.admin-list-panel,
-.admin-editor-panel {
-  padding: 12px;
-}
-
-.admin-list-panel {
-  position: sticky;
-  top: calc(env(safe-area-inset-top) + 12px);
-}
-
-.admin-list-tools {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 124px;
-  gap: 10px;
-}
-
-.admin-list-tools label,
-.admin-player-form label,
-.admin-ovr-display {
-  display: grid;
-  gap: 5px;
-  min-width: 0;
-  color: rgba(255,255,255,.78);
-  font-size: var(--t-caption-1);
-  font-weight: 800;
-}
-
-.admin-list-tools input,
-.admin-list-tools select,
-.admin-player-form input,
-.admin-player-form select,
-.admin-ovr-display b {
-  width: 100%;
-  min-width: 0;
-  border-radius: 0;
-  border: 3px solid var(--arcade-cyan);
-  background: var(--arcade-paper);
-  color: #071459;
-  font: inherit;
-  font-weight: 800;
-  padding: 8px 9px;
-}
-
-.admin-ovr-display b {
-  display: grid;
-  place-items: center;
-  min-height: 42px;
-  font-family: var(--font-pixel);
-  font-size: 1.2rem;
-  color: var(--arcade-red);
-}
-
-.admin-count {
-  margin: 10px 0;
-  color: rgba(255,255,255,.7);
-  font-size: var(--t-caption-1);
-}
-
-.admin-player-list {
-  display: grid;
-  gap: 8px;
-  max-height: calc(100vh - 230px);
-  overflow-y: auto;
-  padding: 2px 4px 12px 2px;
-}
-
-.admin-player-row {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) auto;
-  gap: 9px;
-  align-items: center;
-  min-height: 66px;
-  padding: 7px;
-  border-radius: 0;
-  border: 3px solid rgba(37,230,255,.48);
-  background: rgba(7,20,89,.72);
-  color: #fff;
-  text-align: left;
-}
-
-.admin-player-row.is-selected {
-  border-color: var(--arcade-yellow);
-  box-shadow: 0 0 0 3px #071459, 0 0 0 5px rgba(255,212,42,.32);
-}
-
-.admin-player-face {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  overflow: hidden;
-  border: 3px solid var(--common);
-  background: #009ac6;
-  image-rendering: pixelated;
-}
-
-.admin-player-face.rarity-rare { border-color: var(--rare); }
-.admin-player-face.rarity-epic { border-color: var(--epic); }
-.admin-player-face.rarity-legend { border-color: var(--legend); }
-
-.admin-player-face img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  image-rendering: pixelated;
-}
-
-.admin-player-face span {
-  position: relative;
-  z-index: 1;
-  font-family: var(--font-pixel);
-  color: var(--arcade-yellow);
-  text-shadow: 2px 2px 0 #071459;
-}
-
-.admin-player-main {
-  min-width: 0;
-  display: grid;
-  gap: 4px;
-}
-
-.admin-player-main b,
-.admin-player-side b,
-.admin-kicker,
-.admin-editor-head h2,
-.admin-tool-head h3 {
-  font-family: var(--font-pixel);
-}
-
-.admin-player-main b {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.admin-player-main small {
-  color: rgba(255,255,255,.66);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.admin-player-side {
-  display: grid;
-  justify-items: end;
-  gap: 4px;
-}
-
-.admin-player-side b {
-  color: var(--arcade-yellow);
-  font-size: 1.2rem;
-}
-
-.admin-player-side i {
-  padding: 2px 5px;
-  background: var(--arcade-red);
-  color: #fff;
-  font-size: 10px;
-  font-style: normal;
-}
-
-.admin-editor-panel {
-  display: grid;
-  gap: 14px;
-}
-
-.admin-editor-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 14px;
-  align-items: start;
-}
-
-.admin-kicker {
-  color: var(--arcade-yellow);
-  text-transform: uppercase;
-  font-size: var(--t-caption-2);
-}
-
-.admin-editor-head h2,
-.admin-tool-head h3 {
-  margin: 4px 0 0;
-  color: #fff;
-  text-shadow: 2px 2px 0 #071459;
-  text-transform: uppercase;
-}
-
-.admin-editor-head p {
-  margin: 6px 0 0;
-  color: rgba(255,255,255,.62);
-  overflow-wrap: anywhere;
-}
-
-.admin-card-preview .card {
-  width: 190px;
-  transform: none;
-  box-shadow:
-    0 0 0 3px rgba(255,255,255,.62) inset,
-    0 8px 0 rgba(0,0,0,.26);
-}
-
-.admin-card-preview .card-stats {
-  display: none;
-}
-
-.admin-player-form,
-.admin-portrait-tool {
-  display: grid;
-  gap: 12px;
-  padding-top: 12px;
-  border-top: 3px solid rgba(37,230,255,.36);
-}
-
-.admin-form-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.admin-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.admin-stat-field input {
-  font-family: var(--font-pixel);
-  color: #071459;
-}
-
-.admin-form-actions,
-.admin-portrait-actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.admin-form-actions button,
-.admin-portrait-actions button {
-  border-radius: 0;
-  font-family: var(--font-pixel);
-  text-transform: uppercase;
-}
-
-.admin-tool-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: end;
-}
-
-.admin-portrait-state,
-#adminPortraitStatus {
-  color: rgba(255,255,255,.68);
-  font-size: var(--t-caption-1);
-}
-
-.admin-portrait-grid {
-  display: grid;
-  grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr);
-  gap: 12px;
-}
-
-.portrait-drop,
-.portrait-result {
-  min-height: 260px;
-  border: 3px dashed rgba(37,230,255,.78);
-  background: rgba(7,20,89,.62);
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 8px;
-  text-align: center;
-  overflow: hidden;
-  position: relative;
-}
-
-.portrait-drop.is-dragging {
-  border-color: var(--arcade-yellow);
-  background: rgba(255,212,42,.14);
-}
-
-.portrait-drop input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.portrait-drop span,
-.portrait-result-label {
-  font-family: var(--font-pixel);
-  color: #fff;
-  text-transform: uppercase;
-  z-index: 1;
-}
-
-.portrait-drop small {
-  color: rgba(255,255,255,.65);
-  z-index: 1;
-}
-
-.portrait-drop img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  background: #071459;
-}
-
-.portrait-result {
-  border-style: solid;
-}
-
-.portrait-result-frame {
-  width: min(192px, 80%);
-  aspect-ratio: 1;
-  border: 4px solid var(--arcade-yellow);
-  background: #009ac6;
-  box-shadow: 0 0 0 4px #071459, 0 8px 0 rgba(0,0,0,.28);
-}
-
-.portrait-result-frame img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  image-rendering: pixelated;
-}
-
-@media (max-width: 920px) {
-  .admin-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-list-panel {
-    position: relative;
-    top: auto;
-  }
-
-  .admin-player-list {
-    max-height: 360px;
-  }
-
-  .admin-form-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .admin-stat-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 620px) {
-  .admin-nav {
-    align-items: start;
-    flex-direction: column;
-  }
-
-  .admin-editor-head,
-  .admin-portrait-grid,
-  .admin-list-tools {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-card-preview {
-    display: none;
-  }
-
-  .admin-form-grid,
-  .admin-stat-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-player-row {
-    grid-template-columns: 44px minmax(0, 1fr) auto;
-  }
-
-  .portrait-drop,
-  .portrait-result {
-    min-height: 220px;
-  }
-}
 
 /* Cards and packs */
 
@@ -2329,7 +1878,7 @@ select {
 .build-nav .large-title,
 .scouting-screen .large-title {
   color: #fff;
-  text-shadow: 3px 3px 0 #071459;
+  text-shadow: 3px 3px 0 var(--arcade-blue-900);
 }
 
 .pack-deal {
@@ -2370,7 +1919,7 @@ select {
   color: #fff;
   font-size: 18px;
   font-family: var(--font-pixel);
-  text-shadow: 2px 2px 0 #071459;
+  text-shadow: 2px 2px 0 var(--arcade-blue-900);
 }
 
 .card {
@@ -2419,14 +1968,14 @@ select {
 .card-ovr {
   color: var(--arcade-yellow);
   font-size: 34px;
-  text-shadow: 2px 2px 0 #071459;
+  text-shadow: 2px 2px 0 var(--arcade-blue-900);
 }
 
 .card-pos {
   align-self: center;
   border-radius: 0;
   background: var(--arcade-paper);
-  color: #071459;
+  color: var(--arcade-blue-900);
   border: 2px solid var(--arcade-cyan);
 }
 
@@ -2434,7 +1983,7 @@ select {
 .item-type {
   color: #fff;
   text-align: right;
-  text-shadow: 2px 2px 0 #071459;
+  text-shadow: 2px 2px 0 var(--arcade-blue-900);
   margin: 0;
   white-space: nowrap;
 }
@@ -2451,9 +2000,9 @@ select {
   border-radius: 0;
   border: 3px solid var(--arcade-cyan);
   background:
-    linear-gradient(180deg, #71d7ff 0 36%, #168b44 36%),
+    linear-gradient(180deg, #71d7ff 0 36%, var(--arcade-pitch) 36%),
     var(--arcade-blue-800);
-  box-shadow: 0 0 0 3px #071459;
+  box-shadow: 0 0 0 3px var(--arcade-blue-900);
 }
 
 .card-portrait img {
@@ -2464,7 +2013,7 @@ select {
 
 .card-portrait span {
   font-family: var(--font-pixel);
-  text-shadow: 2px 2px 0 #071459;
+  text-shadow: 2px 2px 0 var(--arcade-blue-900);
 }
 
 /* Carta no disponible (lesionado/sancionado) en el selector de hueco: atenuada,
@@ -2480,12 +2029,12 @@ select {
   position: absolute; top: 0; right: 0; z-index: 4;
   min-width: 16px; height: 17px; padding: 0 3px;
   display: flex; align-items: center; justify-content: center;
-  background: #140a0a; color: #fff; border-radius: 3px; border: 1px solid rgba(0,0,0,.5);
+  background: var(--injury-ink); color: #fff; border-radius: 3px; border: 1px solid rgba(0,0,0,.5);
   font-family: var(--font-pixel); font-size: 10px; line-height: 1; pointer-events: none;
 }
 .card-redcard {
   position: absolute; top: 6px; right: 6px; width: 18px; height: 24px;
-  border-radius: 2px; background: #d11a1a; border: 1px solid rgba(0,0,0,.5);
+  border-radius: 2px; background: var(--red-card); border: 1px solid rgba(0,0,0,.5);
   box-shadow: 0 1px 2px rgba(0,0,0,.4); rotate: 8deg; z-index: 3; pointer-events: none;
 }
 
@@ -2493,13 +2042,13 @@ select {
   min-height: 2.25em;
   font-weight: 900;
   line-height: 1.15;
-  text-shadow: 1px 1px 0 #071459;
+  text-shadow: 1px 1px 0 var(--arcade-blue-900);
   overflow-wrap: anywhere;
 }
 
 .chip {
   border-radius: 0;
-  background: #071459;
+  background: var(--arcade-blue-900);
   border: 1px solid rgba(37,230,255,.55);
   color: #EAFBFF;
 }
@@ -2543,8 +2092,8 @@ select {
 .stat-bar {
   height: 8px;
   border-radius: 0;
-  border: 1px solid #071459;
-  background: #071459;
+  border: 1px solid var(--arcade-blue-900);
+  background: var(--arcade-blue-900);
 }
 
 .stat-fill {
@@ -2578,7 +2127,7 @@ select {
   font-size: 13px;
   line-height: 1.1;
   text-align: left;
-  text-shadow: 2px 2px 0 #071459;
+  text-shadow: 2px 2px 0 var(--arcade-blue-900);
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -2625,7 +2174,7 @@ select {
    el alto de las cartas ocultas que reservan su hueco. Las cartas se reparten
    en 2 columnas (la última impar, centrada a lo ancho): más orden y cartas
    más grandes y legibles que el antiguo 3-en-raya. */
-@media (max-width: 760px) {
+@media (max-width: 767px) {
   .pack-screen .pack-stage {
     min-height: 0px;
     gap: 18px;
@@ -2700,7 +2249,6 @@ select {
 }
 
 /* Build and scouting */
-.build-screen,
 .scouting-screen,
 .result-screen,
 .gameover-screen {
@@ -2713,7 +2261,7 @@ select {
   background: var(--arcade-panel);
   border: var(--pixel-border) solid var(--arcade-cyan);
   border-radius: var(--pixel-radius);
-  box-shadow: 0 0 0 3px #071459, 0 10px 0 rgba(0,0,0,.28);
+  box-shadow: 0 0 0 3px var(--arcade-blue-900), 0 10px 0 rgba(0,0,0,.28);
 }
 
 .team-select-screen .ratings-glass {
@@ -2724,7 +2272,7 @@ select {
 /* Ratings en la columna lateral (solo desktop; en móvil la columna se disuelve
    y los ratings conservan su barra compacta propia): rejilla 2×2 de barras.
    El Estilo y la Química viven ahora junto al selector, en la cabecera del tablero. */
-@media (min-width: 761px) {
+@media (min-width: 768px) {
   .team-side .ratings-glass {
     flex-direction: column;
     align-items: stretch;
@@ -2782,8 +2330,8 @@ select {
   grid-row: 2;
   height: 8px;
   border-radius: 0;
-  border: 1px solid #071459;
-  background: #071459;
+  border: 1px solid var(--arcade-blue-900);
+  background: var(--arcade-blue-900);
 }
 
 .rt-fill {
@@ -2800,7 +2348,7 @@ select {
 
 .seg-control {
   border-radius: var(--pixel-radius);
-  background: #071459;
+  background: var(--arcade-blue-900);
   border: 3px solid var(--arcade-cyan);
 }
 
@@ -2813,7 +2361,7 @@ select {
 
 .seg.active {
   background: var(--arcade-yellow);
-  color: #071459;
+  color: var(--arcade-blue-900);
 }
 
 .opponent-brief,
@@ -2845,8 +2393,8 @@ select {
   border-radius: var(--pixel-radius);
   border: var(--pixel-border) solid var(--arcade-cyan);
   background:
-    repeating-linear-gradient(180deg, #168b44 0 28px, #1ea650 28px 56px);
-  box-shadow: 0 0 0 4px #071459, 0 16px 0 rgba(0,0,0,.28);
+    repeating-linear-gradient(180deg, var(--arcade-pitch) 0 28px, #1ea650 28px 56px);
+  box-shadow: 0 0 0 4px var(--arcade-blue-900), 0 16px 0 rgba(0,0,0,.28);
 }
 
 .field-bg .fl {
@@ -2862,7 +2410,7 @@ select {
 }
 
 .chem-link.boost {
-  stroke: #a06bff;
+  stroke: var(--chem-boost);
   stroke-width: 1.4;
   opacity: .8;
 }
@@ -2967,7 +2515,7 @@ select {
   font-family: var(--font-game);
   color: #fff;
   text-transform: uppercase;
-  text-shadow: 2px 2px 0 #071459;
+  text-shadow: 2px 2px 0 var(--arcade-blue-900);
 }
 
 .team-panel-head p {
@@ -3053,7 +2601,7 @@ select {
   line-height: 1.05;
 }
 
-@media (max-height: 780px) and (min-width: 761px) {
+@media (max-height: 780px) and (min-width: 768px) {
   .team-select-screen,
   .field.lineup-board {
     --lineup-card: clamp(62px, 7vh, 80px);
@@ -3161,7 +2709,7 @@ select {
   color: #fff;
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0h10L5 6z' fill='%2325e6ff'/%3E%3C/svg%3E") no-repeat right 9px center,
-    #071459;
+    var(--arcade-blue-900);
   border: 2px solid var(--arcade-cyan);
   border-radius: 0;
   font-family: var(--font-pixel);
@@ -3241,9 +2789,9 @@ select {
   border-radius: var(--pixel-radius);
   border: var(--pixel-border) solid var(--arcade-cyan);
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--team-primary) 46%, #071459), color-mix(in srgb, var(--team-secondary) 36%, #071459)),
+    linear-gradient(135deg, color-mix(in srgb, var(--team-primary) 46%, var(--arcade-blue-900)), color-mix(in srgb, var(--team-secondary) 36%, var(--arcade-blue-900))),
     var(--arcade-panel);
-  box-shadow: 0 0 0 4px #071459, 0 14px 0 rgba(0,0,0,.25);
+  box-shadow: 0 0 0 4px var(--arcade-blue-900), 0 14px 0 rgba(0,0,0,.25);
 }
 
 .scout-kicker {
@@ -3274,12 +2822,12 @@ select {
   width: 68px;
   height: 44px;
   border: 3px solid #fff;
-  box-shadow: 0 0 0 3px #071459;
+  box-shadow: 0 0 0 3px var(--arcade-blue-900);
 }
 
 .scout-strength {
   border-radius: 0;
-  background: #071459;
+  background: var(--arcade-blue-900);
   border: 3px solid var(--arcade-yellow);
 }
 
@@ -3306,8 +2854,8 @@ select {
   grid-column: 1 / -1;
   height: 8px;
   border-radius: 0;
-  background: #071459;
-  border: 1px solid #071459;
+  background: var(--arcade-blue-900);
+  border: 1px solid var(--arcade-blue-900);
 }
 
 .scout-rating i span {
@@ -3395,7 +2943,7 @@ select {
 .match-livebar b {
   padding: 4px 10px;
   background: var(--arcade-red);
-  border: 2px solid #071459;
+  border: 2px solid var(--arcade-blue-900);
   color: #fff;
   box-shadow: 0 0 0 2px rgba(255,212,42,.7) inset;
   white-space: nowrap;
@@ -3410,7 +2958,7 @@ select {
   background:
     linear-gradient(180deg, rgba(15,32,86,.92), rgba(7,20,89,.84));
   box-shadow:
-    0 0 0 3px #071459,
+    0 0 0 3px var(--arcade-blue-900),
     0 10px 0 rgba(0,0,0,.28),
     0 18px 42px rgba(0,0,0,.34);
   -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
@@ -3433,7 +2981,7 @@ select {
   font-family: var(--font-pixel);
   text-transform: uppercase;
   color: #fff;
-  text-shadow: 2px 2px 0 #071459;
+  text-shadow: 2px 2px 0 var(--arcade-blue-900);
   max-width: min(28vw, 260px);
 }
 
@@ -3441,7 +2989,7 @@ select {
   font-family: var(--font-pixel);
   font-size: clamp(2rem, 5vw, 3.4rem);
   color: var(--arcade-yellow);
-  text-shadow: 2px 2px 0 #071459;
+  text-shadow: 2px 2px 0 var(--arcade-blue-900);
 }
 
 .sb-clock {
@@ -3451,7 +2999,7 @@ select {
 
 .sb-momentum {
   height: 6px;
-  background: #071459;
+  background: var(--arcade-blue-900);
 }
 
 .sb-momentum-fill {
@@ -3465,9 +3013,9 @@ select {
   justify-self: center;
   border-radius: var(--pixel-radius);
   border: var(--pixel-border) solid var(--arcade-cyan);
-  background: #071459;
+  background: var(--arcade-blue-900);
   box-shadow:
-    0 0 0 4px #071459,
+    0 0 0 4px var(--arcade-blue-900),
     0 16px 0 rgba(0,0,0,.3),
     0 24px 62px rgba(0,0,0,.42);
 }
@@ -3500,7 +3048,7 @@ select {
 .scene-title {
   font-size: clamp(1.35rem, 4vw, 2.35rem);
   line-height: 1.08;
-  text-shadow: 3px 3px 0 #071459;
+  text-shadow: 3px 3px 0 var(--arcade-blue-900);
 }
 
 .scene-actor {
@@ -3616,8 +3164,8 @@ select {
 
 .ctl.primary-ctl {
   background: var(--arcade-yellow);
-  color: #071459;
-  border-color: #071459;
+  color: var(--arcade-blue-900);
+  border-color: var(--arcade-blue-900);
 }
 
 .ctl.primary-ctl:disabled {
@@ -3631,7 +3179,7 @@ select {
   min-width: 0;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 767px) {
   .match-screen {
     min-height: auto;
     padding: 8px 2px 14px;
@@ -3715,7 +3263,7 @@ select {
   background: var(--arcade-panel);
   border: var(--pixel-border) solid var(--arcade-cyan);
   border-radius: var(--pixel-radius);
-  box-shadow: 0 0 0 4px #071459, 0 14px 0 rgba(0,0,0,.28);
+  box-shadow: 0 0 0 4px var(--arcade-blue-900), 0 14px 0 rgba(0,0,0,.28);
   text-align: left;
 }
 
@@ -3735,7 +3283,7 @@ select {
 
 .final-score {
   color: var(--arcade-yellow);
-  text-shadow: 3px 3px 0 #071459;
+  text-shadow: 3px 3px 0 var(--arcade-blue-900);
 }
 
 .reward-box {
@@ -3745,7 +3293,7 @@ select {
   border-radius: var(--pixel-radius);
   border: var(--pixel-border) solid var(--arcade-yellow);
   background: var(--arcade-panel);
-  box-shadow: 0 0 0 4px #071459, 0 12px 0 rgba(0,0,0,.25);
+  box-shadow: 0 0 0 4px var(--arcade-blue-900), 0 12px 0 rgba(0,0,0,.25);
 }
 
 .reward-box > img {
@@ -3759,7 +3307,7 @@ select {
 
 .tier-tag {
   border-radius: 0;
-  border: 3px solid #071459;
+  border: 3px solid var(--arcade-blue-900);
   box-shadow: 0 0 0 2px rgba(255,255,255,.42) inset;
 }
 
@@ -3788,13 +3336,13 @@ select {
 .gameover-screen h1 {
   font-family: var(--font-pixel);
   color: #fff;
-  text-shadow: 3px 3px 0 #071459;
+  text-shadow: 3px 3px 0 var(--arcade-blue-900);
   text-transform: uppercase;
 }
 
 .big-num {
   color: var(--arcade-yellow);
-  text-shadow: 3px 3px 0 #071459;
+  text-shadow: 3px 3px 0 var(--arcade-blue-900);
 }
 
 .record {
@@ -3861,7 +3409,7 @@ select {
 .gameover-hero .record {
   margin: 6px 0 0;
   padding: 6px 14px;
-  background: #071459;
+  background: var(--arcade-blue-900);
   border: 3px solid var(--arcade-yellow);
   border-radius: 0;
   box-shadow: 0 0 0 2px rgba(255,255,255,.42) inset;
@@ -3952,7 +3500,7 @@ select {
   width: 14px;
   height: 19px;
   background: #e8362f;
-  border: 2px solid #071459;
+  border: 2px solid var(--arcade-blue-900);
   box-shadow: 0 2px 0 rgba(3,8,38,.5);
   transform: rotate(7deg);
 }
@@ -3994,7 +3542,7 @@ select {
 .result-reward-panel,
 .result-stat-card {
   border-radius: var(--pixel-radius);
-  box-shadow: 0 0 0 4px #071459, 0 14px 0 rgba(0,0,0,.28);
+  box-shadow: 0 0 0 4px var(--arcade-blue-900), 0 14px 0 rgba(0,0,0,.28);
 }
 
 .result-poster {
@@ -4005,7 +3553,7 @@ select {
   min-height: 260px;
   background:
     radial-gradient(circle at 50% 20%, rgba(255,212,42,.18), transparent 40%),
-    linear-gradient(180deg, #123ad1, #071459 76%);
+    linear-gradient(180deg, #123ad1, var(--arcade-blue-900) 76%);
 }
 
 .result-poster::after {
@@ -4013,7 +3561,7 @@ select {
   position: absolute;
   inset: auto 0 0;
   height: 42%;
-  background: repeating-linear-gradient(180deg, #168b44 0 14px, #1ea650 14px 28px);
+  background: repeating-linear-gradient(180deg, var(--arcade-pitch) 0 14px, #1ea650 14px 28px);
   opacity: .72;
 }
 
@@ -4046,7 +3594,7 @@ select {
   font-family: var(--font-pixel);
   text-align: center;
   text-transform: uppercase;
-  text-shadow: 2px 2px 0 #071459;
+  text-shadow: 2px 2px 0 var(--arcade-blue-900);
 }
 
 .result-score-card {
@@ -4109,7 +3657,7 @@ select {
 .result-red small { color: rgba(255,255,255,.62); }
 .result-red-card {
   width: 14px; height: 20px; border-radius: 2px; flex: 0 0 auto;
-  background: #d11a1a; border: 1px solid rgba(0,0,0,.5); box-shadow: 0 1px 2px rgba(0,0,0,.4);
+  background: var(--red-card); border: 1px solid rgba(0,0,0,.5); box-shadow: 0 1px 2px rgba(0,0,0,.4);
 }
 /* Fila de lesionados del resumen: cruz médica + nombre + minuto + tipo. */
 .result-injuries b { display: flex; flex-wrap: wrap; gap: 10px 16px; }
@@ -4126,7 +3674,7 @@ select {
   position: absolute; top: -3px; right: -5px; z-index: 2;
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 16px; height: 17px; padding: 0 3px;
-  background: #140a0a; color: #fff; border-radius: 3px;
+  background: var(--injury-ink); color: #fff; border-radius: 3px;
   border: 1px solid rgba(0,0,0,.5);
   font-family: var(--font-pixel); font-size: 10px; line-height: 1;
 }
@@ -4174,10 +3722,10 @@ select {
   flex: 0 0 auto;
   padding: 16px clamp(12px, 3vw, 22px);
   color: var(--arcade-yellow);
-  background: #071459;
+  background: var(--arcade-blue-900);
   border: var(--pixel-border) solid var(--arcade-cyan);
   border-radius: var(--pixel-radius);
-  box-shadow: 0 0 0 4px #071459, 0 14px 0 rgba(0,0,0,.28);
+  box-shadow: 0 0 0 4px var(--arcade-blue-900), 0 14px 0 rgba(0,0,0,.28);
   font-family: var(--font-pixel);
   text-transform: uppercase;
   text-align: center;
@@ -4232,7 +3780,7 @@ select {
   gap: 7px;
   padding: 12px;
   color: #fff;
-  background: #071459;
+  background: var(--arcade-blue-900);
   border: 3px solid var(--arcade-cyan);
   box-shadow: 0 6px 0 rgba(0,0,0,.28);
 }
@@ -4257,7 +3805,7 @@ select {
   right: 8px;
   min-width: 34px;
   padding: 2px 6px;
-  color: #071459;
+  color: var(--arcade-blue-900);
   background: var(--arcade-yellow);
   border: 2px solid #fff;
   font-family: var(--font-pixel);
@@ -4311,7 +3859,7 @@ select {
   line-height: 1.25;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 767px) {
   #app {
     padding: 8px;
   }
@@ -4362,25 +3910,28 @@ select {
   }
 
   .result-poster {
-    grid-column: 1;
+    grid-column: 1 / -1;
     grid-row: 2;
   }
 
+  /* La crónica de prensa sube tras el marcador/póster; el bloque de progreso
+     (torre + recompensa) baja al final, como en desktop. El grid móvil coloca
+     por grid-row, así que el orden hay que fijarlo aquí (el DOM no manda).
+     Abarca las dos columnas; sin esto quedaría encajada al 50% del ancho. */
+  .result-screen .press-article {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
   .tower-next {
-    grid-column: 2;
-    grid-row: 2;
+    grid-column: 1 / -1;
+    grid-row: 4;
     justify-content: center;
   }
 
   .result-reward-panel {
     grid-column: 1 / -1;
-    grid-row: 3;
-  }
-
-  /* La crónica de prensa abarca las dos columnas del grid móvil del
-     resultado; sin esto queda encajada en una sola (al 50% del ancho). */
-  .result-screen .press-article {
-    grid-column: 1 / -1;
+    grid-row: 5;
   }
 
   .ratings-glass,
@@ -4405,7 +3956,7 @@ select {
 
   /* Mismo diseño para el póster del resultado y el panel del piso: la imagen
      ocupa todo el ancho de su caja y el texto va debajo, como etiqueta. */
-  .result-poster,
+
   .tower-next {
     display: flex;
     flex-direction: column;
@@ -4416,12 +3967,13 @@ select {
     padding: 10px;
   }
 
-  .result-poster::after { display: none; }
-
   .result-poster .result-art,
   .tower-next .tower-next-img {
     width: 100%;
   }
+
+    /* En mobile el póster del resultado (.result-poster.arcade-panel) se oculta. */
+  .result-poster, .tower-next  { display: none; }
 
   .result-title-chip,
   .tower-next span {
@@ -4434,10 +3986,10 @@ select {
 
   .tower-next span {
     color: var(--arcade-yellow);
-    background: #071459;
+    background: var(--arcade-blue-900);
     border: 3px solid var(--arcade-cyan);
     text-align: center;
-    text-shadow: 2px 2px 0 #071459;
+    text-shadow: 2px 2px 0 var(--arcade-blue-900);
   }
 
   .result-reward-panel {
@@ -4559,9 +4111,9 @@ select {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #071459;
+  background: var(--arcade-blue-900);
   border: 2px solid #fff;
-  box-shadow: 0 0 0 2px #071459;
+  box-shadow: 0 0 0 2px var(--arcade-blue-900);
   align-self: center;
 }
 .ti-flag-wrap.is-empty {
@@ -4569,14 +4121,14 @@ select {
   border-color: rgba(255,255,255,.68);
   background:
     linear-gradient(135deg, rgba(37,230,255,.18), rgba(255,212,42,.12)),
-    #071459;
+    var(--arcade-blue-900);
 }
 .ti-flag { width: 100%; height: 100%; object-fit: cover; }
 .ti-flag-empty {
   font-family: var(--font-pixel, monospace);
   font-size: 22px;
   font-weight: 900;
-  color: var(--arcade-yellow, #ffd42a);
+  color: var(--arcade-yellow, var(--arcade-yellow));
   text-shadow: 2px 2px 0 rgba(0,0,0,.55);
 }
 .ti-name-field {
@@ -4638,7 +4190,7 @@ select {
   scrollbar-width: thin;
 }
 .flag-picker[aria-invalid="true"] {
-  outline: 3px solid var(--arcade-red, #ff3154);
+  outline: 3px solid var(--arcade-red, var(--arcade-red));
   outline-offset: 3px;
 }
 .flag-opt {
@@ -4665,7 +4217,7 @@ select {
 }
 .ti-error {
   margin: -4px 0 0;
-  color: var(--arcade-yellow, #ffd42a);
+  color: var(--arcade-yellow, var(--arcade-yellow));
   font-family: var(--font-pixel, monospace);
   font-size: 10px;
   text-transform: uppercase;
@@ -4805,15 +4357,13 @@ select {
 .pack-screen,
 .scouting-screen,
 .result-screen,
-.gameover-screen,
-.admin-screen { position: relative; z-index: 0; }
+.gameover-screen { position: relative; z-index: 0; }
 
 .build-screen::before,
 .pack-screen::before,
 .scouting-screen::before,
 .result-screen::before,
-.gameover-screen::before,
-.admin-screen::before {
+.gameover-screen::before {
   content: "";
   position: fixed;
   inset: 0;
@@ -4832,14 +4382,6 @@ select {
   background-image:
     radial-gradient(125% 85% at 50% 42%, rgba(5,12,44,.34), rgba(5,12,44,.84) 92%),
     url('assets/ui/background.jpg');
-}
-
-.admin-screen::before {
-  background-image:
-    linear-gradient(180deg, rgba(5,12,44,.72), rgba(3,6,22,.92)),
-    radial-gradient(80% 54% at 50% 12%, rgba(255,212,42,.16), transparent 62%),
-    url('assets/ui/background.jpg');
-  filter: saturate(.82) brightness(.86);
 }
 
 /* Celebración (copa) al ganar: scrim más suave para que se vea la escena. */
@@ -4864,8 +4406,7 @@ select {
   .pack-screen::before,
   .scouting-screen::before,
   .result-screen::before,
-  .gameover-screen::before,
-  .admin-screen::before { background-attachment: scroll; }
+  .gameover-screen::before { background-attachment: scroll; }
 }
 
 .pixel-screen:not(.pixel-title-screen)::after {
@@ -4900,7 +4441,6 @@ select {
 
 .screen-enter .card,
 .screen-enter .bench-item,
-.screen-enter .admin-player-row,
 .screen-enter .result-pack,
 .screen-enter .result-stat-card,
 .screen-enter .scout-rating {
@@ -4923,7 +4463,6 @@ select {
 .seg,
 .ctl,
 .opponent-brief,
-.admin-player-row,
 .result-pack,
 .result-next,
 .player-modal-close {
@@ -4973,7 +4512,6 @@ select {
 
 .flag-opt.is-active,
 .seg.active,
-.admin-player-row.is-selected,
 .deal-card.selected {
   filter: saturate(1.12) brightness(1.04);
 }
@@ -4981,7 +4519,6 @@ select {
 .screen-refresh .ratings-glass,
 .screen-refresh .field,
 .screen-refresh .team-roster,
-.screen-refresh .admin-editor-panel,
 .screen-refresh .leaderboard-panel {
   animation: panel-refresh 180ms var(--ease-standard) both;
 }
@@ -5009,7 +4546,6 @@ select {
   .screen-enter .match-pitch,
   .screen-enter .card,
   .screen-enter .bench-item,
-  .screen-enter .admin-player-row,
   .screen-enter .result-pack,
   .screen-enter .result-stat-card,
   .screen-enter .scout-rating,
@@ -5020,7 +4556,6 @@ select {
   .screen-refresh .ratings-glass,
   .screen-refresh .field,
   .screen-refresh .team-roster,
-  .screen-refresh .admin-editor-panel,
   .screen-refresh .leaderboard-panel {
     animation: none;
   }
@@ -5044,7 +4579,7 @@ select {
   justify-content: center;
   border-radius: 50%;
   background: rgba(7,20,89,.86);
-  border: 1.5px solid var(--arcade-cyan, #25e6ff);
+  border: 1.5px solid var(--arcade-cyan, var(--arcade-cyan));
   color: #fff;
   font-family: var(--font-pixel, monospace);
   font-size: 11px;
@@ -5055,7 +4590,7 @@ select {
   touch-action: manipulation;
   box-shadow: 0 1px 3px rgba(0,0,0,.5);
 }
-.chip-info:hover { background: var(--arcade-cyan, #25e6ff); color: #071459; transform: scale(1.12); }
+.chip-info:hover { background: var(--arcade-cyan, var(--arcade-cyan)); color: var(--arcade-blue-900); transform: scale(1.12); }
 .bench-info { top: 6px; right: 6px; }
 
 /* Modal de estadísticas */
@@ -5109,10 +4644,10 @@ select {
   place-items: center;
   padding: 0;
   border-radius: 0;
-  background: var(--arcade-red, #ff3154);
+  background: var(--arcade-red, var(--arcade-red));
   color: #fff;
   border: 3px solid #fff;
-  box-shadow: 0 0 0 3px #071459, 0 4px 0 rgba(0,0,0,.35);
+  box-shadow: 0 0 0 3px var(--arcade-blue-900), 0 4px 0 rgba(0,0,0,.35);
   cursor: pointer;
 }
 .player-modal-close svg {
@@ -5152,7 +4687,7 @@ select {
   font-family: var(--font-pixel);
   color: #fff;
   text-transform: uppercase;
-  text-shadow: 2px 2px 0 #071459;
+  text-shadow: 2px 2px 0 var(--arcade-blue-900);
   font-size: var(--t-headline);
 }
 
@@ -5237,14 +4772,6 @@ select {
   filter: saturate(1.02) brightness(.94);
 }
 
-#app[data-route="admin"]::before {
-  background-image:
-    linear-gradient(180deg, rgba(5,12,44,.72), rgba(3,6,22,.92)),
-    radial-gradient(80% 54% at 50% 12%, rgba(255,212,42,.16), transparent 62%),
-    url('assets/ui/background.jpg');
-  filter: saturate(.82) brightness(.86);
-}
-
 #app[data-route="result"][data-result="win"]::before {
   background-image:
     linear-gradient(180deg, rgba(5,12,44,.42), rgba(5,12,44,.80)),
@@ -5274,7 +4801,6 @@ select {
 .scouting-screen::before,
 .result-screen::before,
 .gameover-screen::before,
-.admin-screen::before,
 .match-screen::before,
 .match-screen::after,
 .pixel-screen:not(.pixel-title-screen)::after,
@@ -5292,8 +4818,7 @@ button.primary:active:not(:disabled),
 .ctl.primary-ctl:hover:not(:disabled),
 .ctl.primary-ctl:active:not(:disabled),
 .deal-card.is-pressing,
-.card.clickable.is-pressing,
-.admin-player-row.is-pressing {
+.card.clickable.is-pressing {
   transform: none !important;
 }
 
@@ -5303,6 +4828,7 @@ button.primary:active:not(:disabled),
 .team-select-screen {
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 /* Columna lateral del armado: título, ratings, rival y suplentes acompañan
@@ -5321,9 +4847,9 @@ button.primary:active:not(:disabled),
   background:
     radial-gradient(ellipse at 50% 48%, rgba(255,255,255,.12), transparent 58%),
     repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, transparent 1px 32px),
-    repeating-linear-gradient(180deg, #168b44 0 28px, #1b9b49 28px 56px);
+    repeating-linear-gradient(180deg, var(--arcade-pitch) 0 28px, #1b9b49 28px 56px);
   box-shadow:
-    0 0 0 4px #071459,
+    0 0 0 4px var(--arcade-blue-900),
     0 0 0 7px rgba(255,255,255,.18),
     0 18px 0 rgba(0,0,0,.28),
     0 28px 54px rgba(0,0,0,.34);
@@ -5375,9 +4901,9 @@ button.primary:active:not(:disabled),
   z-index: 3;
   min-width: 24px;
   padding: 3px 4px;
-  color: #071459;
+  color: var(--arcade-blue-900);
   background: var(--arcade-yellow);
-  border: 2px solid #071459;
+  border: 2px solid var(--arcade-blue-900);
   line-height: 1;
   text-align: center;
 }
@@ -5390,7 +4916,7 @@ button.primary:active:not(:disabled),
   background: rgba(3,8,38,.62);
   font-weight: 900;
   text-align: center;
-  text-shadow: 1px 1px 0 #071459;
+  text-shadow: 1px 1px 0 var(--arcade-blue-900);
   /* Apellido en una sola línea (sin cortar a mitad de palabra): el chip más
      grande y la tipografía más marcada hacen que el nombre destaque, y si no
      entra se recorta limpio con puntos suspensivos. */
@@ -5418,9 +4944,9 @@ button.primary:active:not(:disabled),
   place-items: center;
   width: 24px;
   height: 24px;
-  color: #071459;
+  color: var(--arcade-blue-900);
   background: var(--arcade-yellow);
-  border: 2px solid #071459;
+  border: 2px solid var(--arcade-blue-900);
   font-family: var(--font-pixel);
   font-size: 15px;
   line-height: 1;
@@ -5443,7 +4969,7 @@ button.primary:active:not(:disabled),
   min-height: 112px;
   padding: 9px 6px;
   color: #fff;
-  background: #071459;
+  background: var(--arcade-blue-900);
   border: 3px solid var(--arcade-cyan);
   font-family: var(--font-pixel);
   font-size: 9px;
@@ -5517,7 +5043,7 @@ button.primary:active:not(:disabled),
   padding-bottom: calc(108px + env(safe-area-inset-bottom));
 }
 
-@media (max-width: 760px) {
+@media (max-width: 767px) {
   .team-select-screen .build-nav {
     flex-direction: row;
     align-items: center;
@@ -5851,10 +5377,10 @@ button.primary:active:not(:disabled),
 .press-article {
   background:
     radial-gradient(rgba(31, 22, 8, .05) 1px, transparent 1.4px),
-    #F6EDD5;
+    var(--press-paper);
   background-size: 7px 7px;
-  color: #1C1408;
-  border: var(--pixel-border, 4px) solid #1C1408;
+  color: var(--press-ink);
+  border: var(--pixel-border, 4px) solid var(--press-ink);
   border-radius: var(--pixel-radius, 6px);
   box-shadow: 0 6px 0 rgba(0, 0, 0, .42), 0 12px 18px rgba(0, 0, 0, .3);
   padding: 14px 18px 16px;
@@ -5863,7 +5389,7 @@ button.primary:active:not(:disabled),
 }
 
 .press-masthead {
-  border-bottom: 1px solid #1C1408;
+  border-bottom: 1px solid var(--press-ink);
   padding-bottom: 6px;
 }
 
@@ -5875,7 +5401,7 @@ button.primary:active:not(:disabled),
   letter-spacing: .05em;
   text-transform: uppercase;
   line-height: 1.05;
-  border-bottom: 3px double #1C1408;
+  border-bottom: 3px double var(--press-ink);
   padding-bottom: 6px;
 }
 
@@ -5894,7 +5420,7 @@ button.primary:active:not(:disabled),
 .press-article .press-name,
 .press-article .press-headline {
   font-family: Georgia, 'Times New Roman', Times, serif;
-  color: #1C1408;
+  color: var(--press-ink);
   text-transform: none;
   text-shadow: none;
 }
@@ -5934,7 +5460,7 @@ button.primary:active:not(:disabled),
   position: relative;
   display: block;
   aspect-ratio: 1;
-  border: 3px solid #1C1408;
+  border: 3px solid var(--press-ink);
   background: #2E86E8; /* fondo azul plano, como una foto de archivo 16 bits */
   overflow: hidden;
 }
@@ -5958,8 +5484,8 @@ button.primary:active:not(:disabled),
   font-family: var(--font-pixel, monospace);
   font-weight: 900;
   font-size: 1.6rem;
-  color: #F6EDD5;
-  text-shadow: 2px 2px 0 #1C1408;
+  color: var(--press-paper);
+  text-shadow: 2px 2px 0 var(--press-ink);
 }
 
 .press-photo figcaption {
@@ -5970,7 +5496,7 @@ button.primary:active:not(:disabled),
   color: #3A3022;
 }
 
-@media (max-width: 620px) {
+@media (max-width: 767px) {
   .press-article { padding: 12px 14px 14px; }
   .press-body p { font-size: .88rem; }
   .press-photo { width: min(132px, 42%); margin-right: 12px; }

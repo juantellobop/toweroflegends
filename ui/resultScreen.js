@@ -194,7 +194,7 @@ export function renderResult(root, state, reward, handlers) {
         ${rewardHTML}
       </div>
       <div class="result-cta action-bar">
-        <button id="next" class="primary big glass-cta">▶ ${nextLabel}</button>
+        <button id="next" class="primary big glass-cta">${nextLabel}</button>
       </div>
     </section>`;
 
