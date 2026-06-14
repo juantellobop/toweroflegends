@@ -274,38 +274,18 @@ function versionedCss(source) {
   );
 }
 
-// --- Minificación del CSS/JS servido ---------------------------------------
-// Se minifica al vuelo con css-tree (CSS) y terser (JS), cacheado por archivo
-// (BUILD_VERSION + mtime). Si la librería no está disponible o la minificación
-// falla, se cae al strip de comentarios: nunca se sirve algo roto.
-let cssMinifier = null;   // módulo css-tree (o null)
-let jsMinify = null;      // terser.minify (o null)
-try { cssMinifier = await import('css-tree'); } catch (_) { cssMinifier = null; }
-try { ({ minify: jsMinify } = await import('terser')); } catch (_) { jsMinify = null; }
-
+// --- CSS/JS servido SIN comentarios ----------------------------------------
+// Solo se eliminan comentarios (strip ligero, sin dependencias). NO se usan
+// minificadores pesados (terser/css-tree) en la ruta del servidor: cargarlos en
+// el arranque disparaba la memoria en el hosting compartido (OOM → 503).
+// El resultado se cachea por archivo (BUILD_VERSION + mtime).
 const minifiedCache = new Map(); // key -> string
 
 async function minifyCss(css) {
-  if (cssMinifier) {
-    try {
-      return cssMinifier.generate(cssMinifier.parse(css));
-    } catch (_) { /* fallback abajo */ }
-  }
   return stripCssComments(css);
 }
 
 async function minifyJs(code) {
-  if (jsMinify) {
-    try {
-      const result = await jsMinify(code, {
-        module: true,
-        compress: true,
-        mangle: true,
-        format: { comments: false },
-      });
-      if (result && typeof result.code === 'string') return result.code;
-    } catch (_) { /* fallback abajo */ }
-  }
   return stripJsComments(code);
 }
 
