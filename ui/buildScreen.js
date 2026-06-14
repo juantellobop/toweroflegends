@@ -57,10 +57,8 @@ function lineupPositions(state) {
 
 // Enlaces de química del campo = el web de cercanía de la formación (CHEM_LINKS):
 // cada arista [línea, slot] ↔ [línea, slot] se dibuja siempre que ambos huecos
-// estén ocupados. Cada enlace se etiqueta según den química sus dos jugadores
-// (nación / época) para resaltarlo; con el Duodécimo jugador (boost) todo el web
-// se pinta en violeta.
-function webLinks(positions, formation, boost = false) {
+// estén ocupados, etiquetada según den química sus dos jugadores (nación / época).
+function webLinks(positions, formation) {
   const at = (ref) => positions.find((p) => p.player && p.line === ref[0] && p.slotIndex === ref[1]);
   const links = [];
   for (const [refA, refB] of chemLinks(formation)) {
@@ -69,24 +67,27 @@ function webLinks(positions, formation, boost = false) {
     if (!a || !b) continue;
     const nation = chemNation(a.player.nation) === chemNation(b.player.nation);
     const era = a.player.era === b.player.era;
-    links.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, nation, era, boost });
+    links.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, nation, era });
   }
   return links;
 }
 
 function fieldSVG(positions, formation, boost = false) {
-  const links = webLinks(positions, formation, boost);
+  const links = webLinks(positions, formation);
   const lineEl = (l, cls) => `<line x1="${l.x1}" y1="${l.y1}" x2="${l.x2}" y2="${l.y2}" class="chem-link ${cls}" />`;
-  // Capa base: todo el web (violeta con boost; tenue sin él). Encima, sin boost,
-  // se resaltan los enlaces con química: primero la época (cian) y luego la nación
-  // (dorado), que se superpone gráficamente.
-  const base = links.map((l) => lineEl(l, boost ? 'boost' : 'web')).join('');
-  const era = boost ? '' : links.filter((l) => l.era && !l.nation).map((l) => lineEl(l, '')).join('');
-  const nation = boost ? '' : links.filter((l) => l.nation).map((l) => lineEl(l, 'strong')).join('');
+  // Orden de pintado = orden de apilado en SVG (el último va encima). De abajo a
+  // arriba: web tenue (todo) → época (celeste) → boost (violeta, solo los enlaces
+  // que activa el Duodécimo jugador) → nación (dorado), que queda SIEMPRE encima.
+  const web = links.map((l) => lineEl(l, 'web')).join('');
+  const era = links.filter((l) => l.era && !l.nation).map((l) => lineEl(l, '')).join('');
+  const boostLinks = boost
+    ? links.filter((l) => !l.nation && !l.era).map((l) => lineEl(l, 'boost')).join('')
+    : '';
+  const nation = links.filter((l) => l.nation).map((l) => lineEl(l, 'strong')).join('');
   return `
     <svg class="field-bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
       ${PITCH_MARKINGS}
-      <g class="chem-links">${base}${era}${nation}</g>
+      <g class="chem-links">${web}${era}${boostLinks}${nation}</g>
     </svg>`;
 }
 
