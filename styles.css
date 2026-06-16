@@ -308,8 +308,17 @@ select {
 .bench-grid { display: flex; gap: 10px; flex-wrap: wrap; }
 .bench-item { position: relative; }
 .bench-item .card { width: 140px; }
-.items-strip { display: flex; gap: 8px; flex-wrap: wrap; }
+.items-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .items-strip .item-card { width: 100%; }
+/* Objetos activos en 2 columnas dentro de la columna lateral estrecha:
+   tipografías reducidas para que la carta entre en media columna. */
+.items-strip .item-card .card-rarity,
+.items-strip .item-card .item-type { font-size: 10px; }
+.items-strip .item-card .card-name { font-size: 16px; }
+.items-strip .item-card .item-desc { font-size: 12px; }
+.items-strip .item-card .item-stack { font-size: 10px; }
+.items-strip .item-card .item-stack-note { font-size: 9px; }
+.items-strip .item-card .chip { font-size: 9px; }
 
 /* === Sobres === */
 .pack-head { text-align: center; }
@@ -2753,6 +2762,21 @@ select {
   --lineup-card: clamp(74px, 7.6vw, 94px);
 }
 
+/* Tablero del armado: la carta también se acota por ALTO de pantalla (vh). Las
+   líneas se reparten en % del alto del campo, y en el armado el campo queda
+   limitado por el viewport (a diferencia de scouting/plantilla/fin de run, que
+   hacen scroll). Sin este tope, en pantallas bajas el campo encoge pero las
+   cartas (medidas en px por su ancho) no, y las líneas se pisan. El min() deja
+   mandar al ancho en pantallas altas y al alto en las bajas. */
+.team-select-screen .field.lineup-board {
+  --lineup-card: min(clamp(82px, 8.4vw, 104px), calc(20vh - 64px));
+}
+.team-select-screen .field.lineup-board[data-formation="4-3-1-2"],
+.team-select-screen .field.lineup-board[data-formation="4-2-3-1"],
+.team-select-screen .field.lineup-board[data-formation="3-2-4-1"] {
+  --lineup-card: min(clamp(74px, 7.6vw, 94px), calc(17vh - 56px));
+}
+
 /* ...y en el armado, además, campo más alto. */
 .team-select-screen .field[data-formation="4-3-1-2"],
 .team-select-screen .field[data-formation="4-2-3-1"],
@@ -2763,36 +2787,45 @@ select {
 
 .lineup-board .field-chip {
   width: var(--lineup-card);
-  min-height: calc(var(--lineup-card) + 34px);
-  padding: 7px 4px 6px;
+  min-height: calc(var(--lineup-card) + 24px);
+  padding: 6px 3px 5px;
   gap: 2px;
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
 }
 
+/* El retrato baja su suelo a 32px: sin esto el min de 52px impedía que la carta
+   encogiera lo suficiente en pantallas bajas (la carta nunca medía menos de
+   ~96px de alto y las líneas se tocaban). Solo entra en juego por debajo de
+   ~580px de alto; a 600px+ manda el tamaño por ancho. */
 .lineup-board .chip-face {
   width: calc(var(--lineup-card) - 16px);
   height: calc(var(--lineup-card) - 16px);
-  min-width: 52px;
-  min-height: 52px;
-  margin-bottom: 3px;
+  min-width: 30px;
+  min-height: 30px;
+  margin-bottom: 2px;
   border: 2px solid rgba(255,255,255,.82);
 }
 
+/* OVR y apellido también topados por vh: en pantallas bajas reducen el alto fijo
+   de la carta (lo que no depende del retrato) y acompañan el encogido. A 600px+
+   manda el clamp por ancho, así que estos topes solo entran muy abajo. */
 .lineup-board .chip-ovr {
-  font-size: clamp(12px, 1.5vw, 17px);
+  font-size: min(clamp(11px, 1.4vw, 17px), 2.1vh);
   color: var(--arcade-yellow);
 }
 
 .lineup-board .chip-name {
   max-width: var(--lineup-card);
-  font-size: clamp(9px, 1.2vw, 13px);
+  font-size: min(clamp(8px, 1.1vw, 13px), 1.6vh);
   line-height: 1.05;
 }
 
 @media (max-height: 780px) and (min-width: 768px) {
-  .team-select-screen,
+  /* Scouting/plantilla/fin de run (campos con scroll) siguen topando la carta
+     por alto aquí; el armado usa su propio min() por vh, continuo, definido
+     arriba y con mayor especificidad. */
   .field.lineup-board {
     --lineup-card: clamp(62px, 7vh, 80px);
   }
@@ -2885,7 +2918,7 @@ select {
   gap: 10px;
   overflow-y: auto;
   /* La columna ahora también aloja título+ratings+rival: el banquillo cede alto. */
-  max-height: clamp(240px, calc(100vh - 500px), 520px);
+  max-height: 450px;
   padding: 2px 2px 12px;
 }
 
@@ -5042,6 +5075,18 @@ button.primary:active:not(:disabled),
   min-width: 0;
   position: sticky;
   top: calc(env(safe-area-inset-top) + 12px);
+}
+
+/* En desktop la columna lateral se reordena: nav, DT, plantilla, ratings y
+   rival. La fila de cabecera se vuelve transparente para que ratings y DT sean
+   hermanos directos del team-side y respeten su propio order. */
+@media (min-width: 768px) {
+  .team-select-screen .team-header-row { display: contents; }
+  .team-select-screen .build-nav { order: 1; }
+  .team-select-screen .manager-glass { order: 2; }
+  .team-select-screen .team-roster { order: 3; }
+  .team-select-screen .ratings-glass { order: 4; }
+  .team-select-screen .opponent-brief { order: 5; }
 }
 
 .field {
