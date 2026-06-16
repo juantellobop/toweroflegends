@@ -718,9 +718,10 @@ export function playMatch(state) {
     bench: state.squad.filter((p) => !isStarter(state, p) && !isUnavailable(p)),
   };
   const result = simularPartido(team, state.opponent, matchRng);
-  // Regla oculta: el primer partido de la torre es imposible de perder; como
-  // mínimo se empata. Del segundo en adelante se puede perder con normalidad.
-  if (state.level === 1) forceAtLeastDraw(result);
+  // Regla oculta: los primeros cuatro partidos de la torre son imposibles de
+  // perder; como mínimo se empata. Del quinto en adelante se puede perder con
+  // normalidad.
+  if (state.level <= 4) forceAtLeastDraw(result);
   // Once tal como saltó al campo (uids por línea, huecos incluidos), antes de
   // que applySuspensions vacíe los puestos de los expulsados. El resumen y la
   // táctica del gameover lo usan para mostrar al expulsado en su sitio.
@@ -815,7 +816,7 @@ export function applyResult(state) {
   let reward = rewardFor(golesA, golesB, meta.extraPlayerCard, meta.extraItemCard);
   let cls = classifyResult(golesA, golesB);
   // Cuatro rojas: el equipo pierde el partido pase lo que pase con el marcador.
-  // Anula incluso la protección de nivel 1.
+  // Anula incluso la protección de los niveles 1-4.
   if (forfeit === 'A') {
     cls = { result: 'loss', tier: 'derrota', diff: cls.diff };
     reward = { result: 'loss', tier: 'derrota', diff: cls.diff, playerPack: 0, itemPack: 0, rarityBias: null };

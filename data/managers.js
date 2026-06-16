@@ -166,13 +166,13 @@ export const MANAGERS = [
   },
   {
     "id": "manager_director_tecnico",
-    "name": "Milovan Rajevac",
-    "nation": "Ghana",
-    "year": 2010,
+    "name": "Sam Allardyce",
+    "nation": "Inglaterra",
+    "year": 2025,
     "rarity": "rare",
     "style": "contra",
     "mods": {
-      "attack": 0,
+      "attack": 1,
       "midfield": 0,
       "defense": 3
     }
@@ -474,6 +474,188 @@ export const MANAGERS = [
       "attack": 3,
       "midfield": 1,
       "defense": 2
+    }
+  },
+  {
+    "id": "manager_luis_aragones",
+    "name": "Luis Aragonés",
+    "nation": "España",
+    "year": 2006,
+    "rarity": "legend",
+    "style": "posesion",
+    "mods": {
+      "attack": 0,
+      "midfield": 6,
+      "defense": 0
+    }
+  },
+  {
+    "id": "manager_diego_simeone",
+    "name": "Diego Simeone",
+    "nation": "Argentina",
+    "year": 2023,
+    "rarity": "legend",
+    "style": "contra",
+    "mods": {
+      "attack": 0,
+      "midfield": 0,
+      "defense": 6
+    }
+  },
+  {
+    "id": "manager_jose_mourinho",
+    "name": "José Mourinho",
+    "nation": "Portugal",
+    "year": 2013,
+    "rarity": "legend",
+    "style": "contra",
+    "mods": {
+      "attack": 3,
+      "midfield": 0,
+      "defense": 4
+    }
+  },
+  {
+    "id": "manager_jose_bordalas",
+    "name": "José Bordalás",
+    "nation": "España",
+    "year": 2025,
+    "rarity": "rare",
+    "style": "contra",
+    "mods": {
+      "attack": 0,
+      "midfield": 0,
+      "defense": 4
+    }
+  },
+  {
+    "id": "manager_javier_clemente",
+    "name": "Javier Clemente",
+    "nation": "España",
+    "year": 1998,
+    "rarity": "epic",
+    "style": "presion",
+    "mods": {
+      "attack": 2,
+      "midfield": 2,
+      "defense": 1
+    }
+  },
+  {
+    "id": "manager_arsene_wenger",
+    "name": "Arsène Wenger",
+    "nation": "Francia",
+    "year": 2009,
+    "rarity": "legend",
+    "style": "posesion",
+    "mods": {
+      "attack": 2,
+      "midfield": 4,
+      "defense": 0
+    }
+  },
+  {
+    "id": "manager_carlos_bianchi",
+    "name": "Carlos Bianchi",
+    "nation": "Argentina",
+    "year": 2003,
+    "rarity": "epic",
+    "style": "contra",
+    "mods": {
+      "attack": 3,
+      "midfield": 2,
+      "defense": 1
+    }
+  },
+  {
+    "id": "manager_caruso_lombardi",
+    "name": "Caruso Lombardi",
+    "nation": "Argentina",
+    "year": 2009,
+    "rarity": "rare",
+    "style": "presion",
+    "mods": {
+      "attack": 1,
+      "midfield": 1,
+      "defense": 2
+    }
+  },
+  {
+    "id": "manager_tele_santana",
+    "name": "Telê Santana",
+    "nation": "Brasil",
+    "year": 1986,
+    "rarity": "legend",
+    "style": "posesion",
+    "mods": {
+      "attack": 4,
+      "midfield": 2,
+      "defense": 0
+    }
+  },
+  {
+    "id": "manager_carlo_ancelotti",
+    "name": "Carlo Ancelotti",
+    "nation": "Italia",
+    "year": 2001,
+    "rarity": "legend",
+    "style": "presion",
+    "mods": {
+      "attack": 3,
+      "midfield": 2,
+      "defense": 1
+    }
+  },
+  {
+    "id": "manager_massimiliano_allegri",
+    "name": "Massimiliano Allegri",
+    "nation": "Italia",
+    "year": 2016,
+    "rarity": "epic",
+    "style": "contra",
+    "mods": {
+      "attack": 1,
+      "midfield": 0,
+      "defense": 4
+    }
+  },
+  {
+    "id": "manager_rinus_michels",
+    "name": "Rinus Michels",
+    "nation": "Países Bajos",
+    "year": 1974,
+    "rarity": "legend",
+    "style": "posesion",
+    "mods": {
+      "attack": 3,
+      "midfield": 3,
+      "defense": 0
+    }
+  },
+  {
+    "id": "manager_louis_van_gaal",
+    "name": "Louis van Gaal",
+    "nation": "Países Bajos",
+    "year": 2022,
+    "rarity": "legend",
+    "style": "posesion",
+    "mods": {
+      "attack": 3,
+      "midfield": 1,
+      "defense": 2
+    }
+  },
+  {
+    "id": "manager_ernesto_valverde",
+    "name": "Ernesto Valverde",
+    "nation": "España",
+    "year": 2020,
+    "rarity": "epic",
+    "style": "posesion",
+    "mods": {
+      "attack": 3,
+      "midfield": 2,
+      "defense": 0
     }
   }
 ];

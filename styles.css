@@ -4966,6 +4966,14 @@ select {
   filter: saturate(1.02) brightness(.94);
 }
 
+/* Apertura del sobre de director técnico: fondo propio (background-4). */
+#app[data-route="managerPack"]::before {
+  background-image:
+    radial-gradient(125% 85% at 50% 42%, rgba(5,12,44,.34), rgba(5,12,44,.84) 92%),
+    url('assets/ui/background-4.jpg');
+  filter: saturate(1.02) brightness(.94);
+}
+
 #app[data-route="result"][data-result="win"]::before {
   background-image:
     linear-gradient(180deg, rgba(5,12,44,.42), rgba(5,12,44,.80)),

@@ -7,6 +7,7 @@ export const UI_ASSETS = {
     title: 'assets/ui/background-3.jpg',       // pantalla de inicio
     pitch: 'assets/ui/background.jpg',         // armar equipo / sobres / scouting
     celebration: 'assets/ui/background-2.jpg', // resultado al ganar
+    managerPack: 'assets/ui/background-4.jpg', // apertura del sobre de DT
   },
   // Sobres sellados (arte de cromos) para la pantalla de apertura.
   packs: {
