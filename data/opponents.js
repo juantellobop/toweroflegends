@@ -3,10 +3,33 @@
 // OVR y ratings son valores de juego, no valoraciones históricas oficiales.
 
 import { CONFIG, targetStrength } from './config.js';
+import { MANAGERS } from './managers.js';
 
 // Piso de 1 y redondeo; sin techo de 99: los rivales de niveles altos siguen
 // creciendo igual que el equipo del jugador (simetría de la dificultad).
 const clamp = (n) => Math.max(1, Math.round(n));
+
+// DT enlazados a una edición rival: si un DT comparte nación y año con una
+// selección (p. ej. Argentina 1986 → Bilardo), dirige a ese rival y sus mods
+// entran en los ratings del rival (engine/teamRatings.calcularRatings).
+const normNation = (s) => String(s || '')
+  .normalize('NFD').replace(/[̀-ͯ]/g, '')
+  .trim().toLowerCase();
+
+const MANAGER_BY_TEAM = new Map();
+for (const m of MANAGERS) {
+  if (m.year == null || m.year === '') continue;
+  MANAGER_BY_TEAM.set(`${normNation(m.nation)}|${Number(m.year)}`, m);
+}
+
+// Snapshot mínimo del DT que dirige a un rival (o null si la edición no tiene
+// DT asignado). Va dentro del rival y se persiste con el guardado sin arrastrar
+// datos pesados (retrato en data-URL, etc.).
+function managerForOpponent(opponent) {
+  const m = MANAGER_BY_TEAM.get(`${normNation(opponent.name)}|${Number(opponent.year)}`);
+  if (!m) return null;
+  return { id: m.id, name: m.name, nation: m.nation, year: m.year, rarity: m.rarity, style: m.style, mods: { ...m.mods } };
+}
 
 function names(text, position, ovr) {
   return text.split('|').map((name, i) => ({
@@ -151,6 +174,9 @@ function deepClone(opponent, level, boost = 0) {
     ratings: Object.fromEntries(Object.entries(opponent.ratings).map(([k, v]) => [k, clamp(v + boost)])),
     colors: { ...opponent.colors },
     lineup: opponent.lineup.map((p) => ({ ...p, ovr: clamp(p.ovr + boost) })),
+    // DT de esta edición (Argentina 1986 → Bilardo), o null. Lookup determinista
+    // (no consume RNG), así que no altera la reproducibilidad del sorteo.
+    manager: managerForOpponent(opponent),
   };
 }
 

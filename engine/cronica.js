@@ -350,6 +350,26 @@ export function buildCronica(match, ctx) {
     level: ctx.level,
   }, rng);
 
+  // Mención del director técnico (DT): una frase situacional añadida al cierre.
+  // Prioridad para que cada evento pedido pueda salir: remontada → derrota →
+  // debut de un jugador nuevo → cambios. Determinista (usa el mismo rng).
+  let closingFull = closing;
+  if (ctx.manager) {
+    const trailed = match.eventos.some((ev) => ev.scoreA < ev.scoreB);
+    const subs = (match.sustitucionesA || []).length > 0;
+    const debut = Array.isArray(ctx.debuts) && ctx.debuts.length > 0;
+    const vars = { manager: ctx.manager, team: ctx.teamName, level: ctx.level };
+    let key = null;
+    if (result === 'win' && trailed) key = 'comeback';
+    else if (result === 'loss') key = 'loss';
+    else if (debut) { key = 'debut'; vars.player = ctx.debuts[0]; }
+    else if (subs) key = 'subs';
+    if (key) {
+      const note = tVariant(`press.feat.manager.${key}`, vars, rng);
+      if (note) closingFull = `${closing} ${note}`;
+    }
+  }
+
   const headKey = result === 'win' ? (golesA - golesB >= 3 ? 'winBig' : 'win') : result;
   const headline = tVariant(`press.headline.${headKey}`, {
     team: ctx.teamName,
@@ -359,7 +379,7 @@ export function buildCronica(match, ctx) {
 
   return {
     headline,
-    paragraphs: [lead, firstHalf, secondHalf, closing],
+    paragraphs: [lead, firstHalf, secondHalf, closingFull],
     figure: { name: figure.name, side: figure.side, goals: figure.goals, assists: figure.assists, saves: figure.saves },
   };
 }

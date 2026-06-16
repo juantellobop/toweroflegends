@@ -256,7 +256,7 @@ select {
 .chip.trait { background: rgba(212,175,55,.18); color: var(--accent); }
 /* Sinergia ítem↔táctica: el ítem rinde más si el dibujo comparte su estilo. */
 .item-synergy { margin-top: 6px; }
-.chip.synergy { background: rgba(96,165,250,.16); color: var(--rare, #60a5fa); }
+.chip.synergy { background: rgba(96,165,250,.16); color: var(--rare, #60a5fa);}
 
 .card-stats { display: flex; flex-direction: column; gap: 3px; }
 .stat { display: flex; align-items: center; gap: 6px; font-size: 11px; }
@@ -1091,6 +1091,117 @@ select {
 .rt-delta.up { color: var(--success); }
 .rt-delta.down { color: var(--danger); }
 
+/* Director técnico: comparte fila con el ratings-glass. En móvil cada panel
+   ocupa todo el ancho (el grid se aplana con display:contents, más abajo); en
+   desktop se reparten en un grid dividido (ratings flexibles + DT estrecho). */
+.team-header-row {
+  display: flex;
+  flex-flow: column;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+.team-header-row .ratings-glass { margin-bottom: 0; min-width: 0; }
+
+/* Panel del DT: misma caja arcade (.arcade-panel) que el resto de contenedores
+   (team-roster, tablero) — borde celeste y radio pixelado. El radio/borde los
+   aporta .arcade-panel; aquí solo el layout interno. */
+.manager-glass {
+  display: flex; flex-direction: column; align-items: stretch; gap: var(--space-2);
+  padding: var(--space-3);
+}
+/* Agrupador nombre+nación+sinergia: transparente en las cartas verticales
+   (sobre/resultado), columna propia en el tablero (ver .manager-glass abajo). */
+.manager-id { display: contents; }
+.manager-empty {
+  display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center;
+  flex: 1; text-align: center; color: var(--label-secondary); font-size: var(--t-caption-2);
+}
+.manager-empty-badge {
+  font-family: var(--font-pixel); font-size: 11px; padding: 3px 8px;
+  background: var(--arcade-paper); color: var(--arcade-blue-900); border: 2px solid var(--arcade-cyan);
+}
+
+/* Carta de DT base (sobre y resultado): chasis de la carta de jugador, con la
+   insignia "DT", retrato cuadrado grande y la rareza. */
+.manager-card.card { min-height: 0; }
+.manager-card .card-head { grid-template-columns: auto 1fr; align-items: center; min-height: 0; }
+.manager-card .card-rarity { justify-self: end; align-self: center; }
+.manager-card .card-portrait {
+  width: 118px; height: 118px; aspect-ratio: 1; margin: 12px auto 8px;
+}
+
+/* En el tablero táctico la carta del DT se reparte en 2 columnas:
+   1) insignia "DT" + retrato, 2) bloque con nombre/nación/sinergia y, al final,
+   las 3 casillas de modificador en fila. Sin rótulo ni rareza. */
+.manager-glass .manager-card {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr);
+  grid-template-areas:
+    "head     id"
+    "portrait id";
+  align-items: start;
+  justify-items: start;
+  column-gap: 12px;
+  row-gap: 4px;
+  width: 100%;
+  padding: 10px;
+}
+.manager-glass .manager-card .card-head {
+  grid-area: head; width: 80px; gap: 6px; justify-content: center;
+}
+.manager-glass .manager-card .card-rarity { display: none; }
+.manager-glass .manager-card .card-portrait {
+  grid-area: portrait; align-self: start;
+  width: 80px; height: 80px; margin: 0; border-radius: 0px;
+}
+.manager-glass .manager-card .card-portrait span { font-size: 24px; }
+.manager-glass .manager-id {
+  grid-area: id; align-self: center; min-width: 0; width: 100%;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.manager-glass .manager-card .card-name {
+  margin: 0; text-align: left; font-size: 13px; line-height: 1.15;
+}
+.manager-glass .manager-card .card-meta { margin: 0; gap: 4px; }
+.manager-glass .manager-card .card-meta .chip { font-size: 11px; padding: 1px 5px; }
+.manager-glass .manager-card .chip.nation .flag-img { width: 14px; height: 9px; }
+.manager-glass .manager-card .manager-mods {
+  grid-template-columns: 1fr 1fr 1fr; gap: 3px; width: 100%; margin: 2px 0 0;
+}
+
+/* En móvil el retrato iguala el tamaño del banquillo (48px). */
+@media (max-width: 767px) {
+  .manager-glass .manager-card { grid-template-columns: 48px minmax(0, 1fr); }
+  .manager-glass .manager-card .card-head { width: 48px; }
+  .manager-glass .manager-card .card-portrait { width: 48px; height: 48px; }
+  .manager-glass .manager-card .card-portrait span { font-size: 18px; }
+}
+
+/* Casillas de modificador del DT (atk/medio/def) — estética arcade, en lugar de
+   las barras de stats del jugador. */
+.manager-mods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 100%; margin-top: 7px; }
+.mgr-mod {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 3px 1px; border: 1px solid var(--arcade-blue-900); background: var(--arcade-blue-900);
+}
+.mgr-mod b { font-family: var(--font-pixel); font-size: 12px; line-height: 1; }
+.mgr-mod span { font-family: var(--font-pixel); font-size: 10px; letter-spacing: .2px; text-transform: uppercase; color: var(--arcade-cyan); }
+.mgr-mod.up b { color: var(--arcade-green); }
+.mgr-mod.down b { color: var(--arcade-red); }
+.mgr-mod.flat b { color: #fff; }
+
+/* Solo en desktop, cuando ratings y DT comparten la columna lateral estrecha,
+   las celdas de rating se compactan. La carta del DT mantiene su disposición
+   horizontal en todos los anchos (definida arriba). */
+@media (min-width: 768px) {
+  .team-header-row .rt-grid { gap: 6px; }
+  .team-header-row .rating-row { gap: 2px; align-items: center; text-align: center; }
+  .team-header-row .rating-row img { width: 18px; height: 18px; }
+  .team-header-row .rt-label { font-size: 9px; letter-spacing: 0; }
+  .team-header-row .rt-bar { width: 100%; }
+  .team-header-row .rt-valwrap { gap: 2px; }
+}
+
 /* Leyenda de química bajo el campo */
 .chem-legend {
   display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2) var(--space-3);
@@ -1284,6 +1395,9 @@ select {
 }
 .scout-kicker { margin: var(--space-3) 0 0; color: var(--label-secondary); font-size: var(--t-caption-1); text-transform: uppercase; letter-spacing: .8px; }
 .scout-achievement { margin: var(--space-2) 0 0; color: var(--label-secondary); }
+.scout-manager { display: flex; align-items: center; gap: var(--space-2); margin: var(--space-3) 0 0; color: var(--label-secondary); }
+.scout-manager b { color: var(--label-primary); font-weight: 600; }
+.scout-dt-face { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; object-position: center top; border: 1px solid color-mix(in srgb, var(--team-primary) 55%, var(--separator)); background: rgba(0,0,0,.18); }
 .scout-strength { display: flex; flex-direction: column; align-items: center; padding: var(--space-3); min-width: 82px; border-radius: var(--radius-m); background: rgba(0,0,0,.22); color: #fff; }
 .scout-strength span { font-size: var(--t-caption-2); text-transform: uppercase; }
 .scout-strength b { font-family: var(--font-rounded); font-size: var(--t-title-1); }
@@ -1810,6 +1924,18 @@ select {
   font-size: 12px;
 }
 
+/* DT de la entrada del ranking, a la derecha de la cabecera del modal del once. */
+.lineup-modal-head .lineup-modal-manager {
+  display: flex; align-items: center; gap: 8px; margin-left: auto;
+}
+.lineup-modal-manager-face {
+  width: 34px; height: 34px; border-radius: 8px; object-fit: cover;
+  image-rendering: pixelated; border: 1px solid var(--separator);
+}
+.lineup-modal-manager span { display: grid; gap: 1px; }
+.lineup-modal-manager small { font-size: 10px; text-transform: uppercase; letter-spacing: .4px; color: rgba(255,255,255,.6); }
+.lineup-modal-manager b { font-size: 13px; }
+
 /* El tablero 3/4 no debe desbordar el alto del viewport: su ancho se limita
    también en función del alto disponible (ancho = alto * 0.75). */
 .lineup-modal-field {
@@ -2010,6 +2136,13 @@ select {
   border: 2px solid var(--arcade-cyan);
 }
 
+.team-layout .manager-card .card-pos{
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 1
+}
+
 .card-rarity,
 .item-type {
   color: #fff;
@@ -2070,11 +2203,11 @@ select {
 }
 
 .card-name {
-  min-height: 2.25em;
   font-weight: 900;
   line-height: 1.15;
   text-shadow: 1px 1px 0 var(--arcade-blue-900);
   overflow-wrap: anywhere;
+  padding-block: 3px;
 }
 
 .chip {
@@ -3524,6 +3657,14 @@ select {
   max-width: 560px;
   margin: 0 auto;
 }
+
+/* DT que dirigió el último partido, junto al once del gameover. */
+.gameover-manager { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.gameover-manager-label {
+  font-size: var(--t-caption-2); font-weight: 700; letter-spacing: .5px;
+  text-transform: uppercase; color: var(--label-secondary);
+}
+.gameover-manager .manager-card { width: min(100%, 230px); }
 
 /* Carta del expulsado en la táctica: atenuada y con una tarjeta roja arriba a la
    derecha (la franja inferior ::after ya marca la rareza, así que la roja va en
@@ -5103,10 +5244,14 @@ button.primary:active:not(:disabled),
   }
 
   /* La sección es flex en columna: el nav compacto va primero (order 0
-     implícito), tablero, suplentes, ratings y rival debajo. */
+     implícito), tablero, suplentes, ratings + DT y rival debajo. La fila de
+     cabecera se vuelve transparente para que ratings y DT se apilen y respeten
+     su propio order. */
+  .team-select-screen .team-header-row { display: contents; }
   .team-select-screen .team-field-panel { order: 1; }
   .team-select-screen .team-roster { order: 2; }
   .team-select-screen .ratings-glass { order: 3; }
+  .team-select-screen .manager-glass { order: 3; }
   .team-select-screen .opponent-brief { order: 4; }
 
   .team-field-panel .team-panel-head {

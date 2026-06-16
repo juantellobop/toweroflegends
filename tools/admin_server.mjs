@@ -449,6 +449,16 @@ function sanitizeRankingLineup(raw) {
   return players.length ? players : null;
 }
 
+// Director técnico de la run (opcional): nombre, id de retrato y nación saneados.
+function sanitizeRankingManager(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const name = clampText(raw.name, 60).replace(/[<>"'`=\\/()[\]{}]/g, '').trim();
+  if (!name) return null;
+  const id = clampText(raw.id, 80).replace(/[^a-zA-Z0-9_-]/g, '');
+  const nation = clampText(raw.nation, 48);
+  return { id, name, nation };
+}
+
 function sanitizeRankingEntry(raw) {
   const floor = Math.max(0, Math.floor(Number(raw?.floor) || 0));
   const teamName = sanitizeTeamName(raw?.teamName);
@@ -464,6 +474,8 @@ function sanitizeRankingEntry(raw) {
   if (FORMATIONS[raw?.formation]) entry.formation = raw.formation;
   const lineup = sanitizeRankingLineup(raw?.lineup);
   if (lineup) entry.lineup = lineup;
+  const manager = sanitizeRankingManager(raw?.manager);
+  if (manager) entry.manager = manager;
   return entry;
 }
 

@@ -5,12 +5,12 @@
 // una: se eleva, las demás se atenúan y retroceden; "Elegir" confirma y la carta
 // "vuela" a la plantilla. "Lectura total": cada carta muestra todo lo necesario.
 
-import { playerCardHTML, itemCardHTML } from './cards.js';
+import { playerCardHTML, itemCardHTML, managerCardHTML } from './cards.js';
 import { esc, prefersReducedMotion } from './dom.js';
 import { haptic } from '../match/feedback.js';
 import { UI_ASSETS, preloadImages } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
-import { portraitPathForPlayer } from '../data/playerAssets.js';
+import { portraitPathForManager, portraitPathForPlayer } from '../data/playerAssets.js';
 import { LINES } from '../data/config.js';
 import { playerOVR } from '../engine/ovr.js';
 import { localizeEra, localizeNation, t } from '../data/i18n.js';
@@ -31,14 +31,22 @@ const COPY = {
     hint: 'pack.nationHint',
     open: 'pack.nationOpen',
   },
+  manager: {
+    title: 'pack.managerTitle',
+    hint: 'pack.managerHint',
+    open: 'pack.managerOpen',
+  },
 };
 
 // Sobre sellado + dorso de carta por tipo (arte original de cromos).
 function packArt(kind) {
-  return kind === 'item' ? UI_ASSETS.packs.item : UI_ASSETS.packs.player;
+  if (kind === 'item') return UI_ASSETS.packs.item;
+  if (kind === 'manager') return UI_ASSETS.packs.manager;
+  return UI_ASSETS.packs.player;
 }
 function cardBack(kind) {
-  return kind === 'item' ? UI_ASSETS.cards.backItem : UI_ASSETS.cards.backPlayer;
+  // El DT comparte el dorso de objeto (reliquia/cromo); los jugadores el suyo.
+  return kind === 'item' || kind === 'manager' ? UI_ASSETS.cards.backItem : UI_ASSETS.cards.backPlayer;
 }
 
 function shell(state, kind, count, body) {
@@ -160,6 +168,33 @@ export function renderItemPack(root, state, choices, onPick) {
   wire(root, choices, onPick);
 }
 
+// Sobre de director técnico: 3 opciones; elegir reemplaza al DT activo. Si se
+// pasa onDiscard, tras abrirlo aparece "Descartar entrenadores" para no quedarse
+// con ninguno; sin onDiscard (nivel 1) la elección de DT es obligatoria.
+export function renderManagerPack(root, state, choices, onPick, onDiscard) {
+  preloadImages([
+    ...choices.map((c) => portraitPathForManager(c)),
+    ...choices.map((c) => flagSrcForNation(c.nation)),
+  ], { priority: 'high' });
+  const body = choices.map((c, i) =>
+    dealCard(managerCardHTML(c, { idValue: c.id }), c.id, i, 'manager')
+  ).join('');
+  root.innerHTML = shell(state, 'manager', choices.length, body);
+  // Barra de descartar: solo cuando se permite descartar, oculta hasta abrir el
+  // sobre (igual que la elección de carta).
+  let onReveal = null;
+  if (onDiscard) {
+    const discardBar = document.createElement('div');
+    discardBar.className = 'pack-actions action-bar pack-discard';
+    discardBar.hidden = true;
+    discardBar.innerHTML = `<button id="discardBtn" class="ghost big glass-cta">${esc(t('pack.managerDiscard'))}</button>`;
+    root.querySelector('#openBar')?.after(discardBar);
+    discardBar.querySelector('#discardBtn').addEventListener('click', () => onDiscard());
+    onReveal = () => { discardBar.hidden = false; };
+  }
+  wire(root, choices, onPick, onReveal);
+}
+
 // === Sobre especial de selecciones (cada 5 niveles) ===
 
 function nationLabel(team) {
@@ -225,7 +260,7 @@ function renderNationRoster(root, state, team, onPick) {
   wireSquadReview(root);
 }
 
-function wire(root, choices, onPick) {
+function wire(root, choices, onPick, onOpen = null) {
   const opener = root.querySelector('#opener');
   const openBar = root.querySelector('#openBar');
   const deal = root.querySelector('#deal');
@@ -240,6 +275,7 @@ function wire(root, choices, onPick) {
     openBar.hidden = true;
     deal.hidden = false;
     deal.classList.add('dealing');
+    if (onOpen) onOpen();
 
     // Háptica por carta a medida que se voltea (mejora progresiva).
     if (!reduce) {

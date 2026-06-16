@@ -6,7 +6,7 @@
 import { computeChemistry, computeTeamChem } from './chemistry.js';
 import { applyItemsToRatings, chemTeamBonus, matchBonuses } from './items.js';
 import { applyTraitToStats, gkDefenseLineBonus, gkTraitBonus, shooterWeightMultiplier } from './traits.js';
-import { CONFIG, LINES, formationLineSlots, FORMATION_MODIFIERS } from '../data/config.js';
+import { CONFIG, LINES, formationLineSlots, formationType, FORMATION_MODIFIERS } from '../data/config.js';
 import { t } from '../data/i18n.js';
 
 function avg(arr) {
@@ -189,8 +189,8 @@ function baseRatings(starting11, formation) {
 // táctica → ataque+medio; reliquias 'chem' → todas) se reparten encima.
 // CHEM_IMPACT escala cuánto pesa todo ese aporte en el desempeño sin tocar
 // los puntos que ve el jugador.
-function applyChemistry(ratings, starting11, formation, items = []) {
-  const chem = computeChemistry(starting11, formation);
+function applyChemistry(ratings, starting11, formation, items = [], manager = null) {
+  const chem = computeChemistry(starting11, formation, manager);
   const team = computeTeamChem(starting11, formation);
   const itemChem = chemTeamBonus(items);
   const impact = CONFIG.CHEM_IMPACT;
@@ -215,19 +215,41 @@ function applyFormationModifiers(ratings, formation) {
   };
 }
 
+// Director técnico: aplica sus modificadores porcentuales a ataque/medio/defensa
+// (el portero no se toca). Con sinergia —el estilo del DT coincide con el tipo del
+// dibujo— sus modificadores positivos se amplifican (MANAGER_SYNERGY_MULT) y sus
+// costes (negativos) se anulan, igual que la sinergia táctica de los objetos.
+function applyManagerModifiers(ratings, manager, formation) {
+  if (!manager || !manager.mods) return ratings;
+  const synergy = Boolean(formationType(formation) && manager.style === formationType(formation));
+  const out = { ...ratings };
+  for (const stat of ['attack', 'midfield', 'defense']) {
+    let pct = Number(manager.mods[stat]) || 0;
+    if (synergy && pct > 0) pct *= CONFIG.MANAGER_SYNERGY_MULT;
+    else if (synergy && pct < 0) pct = 0;
+    out[stat] = ratings[stat] * (1 + pct / 100);
+  }
+  return out;
+}
+
 // Calcula los ratings finales de un equipo del jugador (con química, objetos y
 // modificador de formación). Si el equipo trae ratings precomputados (rival
 // histórico), aplica solo el modificador de su formación (simetría con el jugador).
 export function calcularRatings(team) {
   if (team.ratings && !team.starting11) {
-    const r = applyFormationModifiers({ ...team.ratings }, team.formation);
+    let r = applyFormationModifiers({ ...team.ratings }, team.formation);
+    // DT del rival (Argentina 1986 → Bilardo): sus mods entran igual que los del
+    // DT del jugador. El rival no recibe la química nacional del DT (ratings
+    // planos, sin once), así que el DT propio sigue siendo algo más ventajoso.
+    r = applyManagerModifiers(r, team.manager || null, team.formation);
     for (const k in r) r[k] = Math.max(1, Math.round(r[k] * 10) / 10);
     return r;
   }
   let r = baseRatings(team.starting11, team.formation);
-  r = applyChemistry(r, team.starting11, team.formation, team.items || []);
+  r = applyChemistry(r, team.starting11, team.formation, team.items || [], team.manager || null);
   r = applyItemsToRatings(r, team.items || [], team.formation);
   r = applyFormationModifiers(r, team.formation);
+  r = applyManagerModifiers(r, team.manager || null, team.formation);
   // Sin techo de 99: todo lo que suman jugadores, química, objetos y táctica
   // llega entero a la simulación (solo piso de 1 y redondeo a décimas).
   for (const k in r) r[k] = Math.max(1, Math.round(r[k] * 10) / 10);

@@ -4,12 +4,13 @@
 import {
   createRun, rollPlayerPack, rollItemPack, choosePlayerCard, chooseItemCard,
   isNationPackLevel, rollNationPack,
+  rollManagerPack, chooseManagerCard, discardManagerPack,
   playMatch, applyResult, advanceLevel, prepareOpponent, retryLevel,
   togglePlayerInLineup, placePlayerInLineup, setFormation, assignLineToSlots,
   serializeRun, rehydrateRun,
 } from './state/run.js';
 import { acquireRunLock, releaseRunLock } from './state/sesion.js';
-import { renderPlayerPack, renderItemPack, renderNationPack } from './ui/packScreen.js';
+import { renderPlayerPack, renderItemPack, renderNationPack, renderManagerPack } from './ui/packScreen.js';
 import { renderSquadIntro } from './ui/squadIntroScreen.js';
 import { renderBuild } from './ui/buildScreen.js';
 import { renderScouting } from './ui/scoutingScreen.js';
@@ -53,12 +54,13 @@ const ROUTE_ORDER = {
   admin: 1,
   squadIntro: 2,
   playerPack: 3,
-  itemPack: 4,
-  scouting: 5,
-  build: 6,
-  match: 7,
-  result: 8,
-  gameover: 9,
+  managerPack: 4,
+  itemPack: 5,
+  scouting: 6,
+  build: 7,
+  match: 8,
+  result: 9,
+  gameover: 10,
 };
 
 function getBest() {
@@ -377,6 +379,12 @@ function lineupSnapshot(run) {
   );
 }
 
+// DT del último partido (snapshot) para guardarlo junto a la entrada del ranking.
+function managerSnapshot(run) {
+  const m = run.lastMatch?.manager || run.manager;
+  return m ? { id: m.id, name: m.name, nation: m.nation || '' } : null;
+}
+
 function submitGameOverRanking() {
   if (!state.leaderboardPromise && !state.leaderboardResult) {
     const run = state;
@@ -387,6 +395,7 @@ function submitGameOverRanking() {
       floor: run.level,
       formation: run.formation,
       lineup: lineupSnapshot(run),
+      manager: managerSnapshot(run),
     }).then((data) => {
       run.leaderboardResult = { ...data, submitted: true };
       leaderboardCache = { ...data, loaded: true };
@@ -418,6 +427,7 @@ function submitGameOverWeeklyRanking() {
       floor: run.level,
       formation: run.formation,
       lineup: lineupSnapshot(run),
+      manager: managerSnapshot(run),
     }).then((data) => {
       run.weeklyLeaderboardResult = { ...data, submitted: true };
       weeklyLeaderboardCache = { ...data, loaded: true };
@@ -460,7 +470,8 @@ function render(navHint = 'auto') {
       renderRoute('playerPack', () => {
         const onPick = (tpl) => {
           choosePlayerCard(state, tpl);
-          state.phase = 'itemPack';
+          // El sobre de DT (nivel 1 y cada 7) va justo después del de jugadores.
+          state.phase = state.pendingManagerPack ? 'managerPack' : 'itemPack';
           render('forward');
         };
         // Cada 5 niveles el sobre normal se reemplaza por el de selecciones:
@@ -471,6 +482,22 @@ function render(navHint = 'auto') {
         } else {
           renderPlayerPack(root, state, rollPlayerPack(state), onPick);
         }
+      }, navHint);
+      break;
+
+    case 'managerPack':
+      renderRoute('managerPack', () => {
+        renderManagerPack(root, state, rollManagerPack(state), (tpl) => {
+          chooseManagerCard(state, tpl);
+          state.phase = 'itemPack';
+          render('forward');
+        }, state.level === 1 ? null : () => {
+          // Descartar entrenadores: no se elige ninguno y se continúa. En el
+          // nivel 1 no se ofrece: elegir DT es obligatorio (no hay DT previo).
+          discardManagerPack(state);
+          state.phase = 'itemPack';
+          render('forward');
+        });
       }, navHint);
       break;
 

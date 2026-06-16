@@ -4,7 +4,7 @@
 
 import { esc } from './dom.js';
 import { playerOVR } from '../engine/ovr.js';
-import { playerInitials, portraitPathForPlayer } from '../data/playerAssets.js';
+import { playerInitials, portraitPathForManager, portraitPathForPlayer } from '../data/playerAssets.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { localizeEra, localizeItem, localizeNation, localizeTrait, t } from '../data/i18n.js';
@@ -103,5 +103,51 @@ export function itemCardHTML(item, opts = {}) {
     <div class="item-desc">${esc(localizeItem(item, 'desc'))}</div>
     ${synergy}
     ${opts.stack > 1 ? `<div class="item-stack-note">${esc(t('card.itemStackNote'))}</div>` : ''}
+  </div>`;
+}
+
+// Una casilla de modificador del DT: +N% / −N% / 0% con clase up/down/flat.
+function managerModChip(label, pct) {
+  const up = pct > 0;
+  const down = pct < 0;
+  const cls = up ? 'up' : down ? 'down' : 'flat';
+  const sign = up ? '+' : down ? '−' : '';
+  return `<span class="mgr-mod ${cls}"><b>${sign}${Math.abs(pct)}%</b><span>${esc(label)}</span></span>`;
+}
+
+// Carta de director técnico (DT). Comparte el chasis de la carta de jugador
+// (.card + marco por rareza, cabecera, retrato, nombre, meta), cambiando el OVR
+// por la insignia "DT" y las barras de stats por las 3 casillas de modificador
+// (ataque / mediocampo / defensa). `opts.idValue` la hace clicable en el sobre.
+export function managerCardHTML(manager, opts = {}) {
+  if (!manager) return '';
+  const idAttr = opts.idValue ? `data-id="${esc(opts.idValue)}"` : '';
+  const cls = ['card', 'manager-card', `rarity-${manager.rarity}`];
+  if (opts.clickable) cls.push('clickable');
+  const imgLoading = opts.lazy ? 'lazy' : 'eager';
+  const mods = manager.mods || {};
+  return `
+  <div class="${cls.join(' ')}" ${idAttr} style="--card-frame:url('${esc(cardFrame(manager.rarity))}')">
+    <div class="card-head">
+      <div class="card-pos">${t('card.manager.badge')}</div>
+      <div class="card-rarity">${RARITY_LABEL[manager.rarity]}</div>
+    </div>
+    <div class="card-portrait" aria-hidden="true">
+      <img src="${esc(portraitPathForManager(manager))}" alt="" loading="${imgLoading}" decoding="async" data-hide-on-error="true" />
+      <span>${esc(playerInitials(manager.name))}</span>
+    </div>
+    <div class="manager-id">
+      <div class="card-name">${esc(manager.name)}</div>
+      <div class="card-meta">
+        <span class="chip nation"><img class="flag-img" src="${esc(flagSrcForNation(manager.nation))}" alt="" loading="${imgLoading}" decoding="async" />${esc(localizeNation(manager.nation))}</span>
+        ${manager.year ? `<span class="chip era">${esc(manager.year)}</span>` : ''}
+        ${manager.style ? `<span class="chip synergy">${esc(t('card.synergy', { type: t(`admin.tactical.${manager.style}`) }))}</span>` : ''}
+      </div>
+      <div class="manager-mods">
+        ${managerModChip(t('ratings.attack'), Number(mods.attack) || 0)}
+        ${managerModChip(t('ratings.midfield'), Number(mods.midfield) || 0)}
+        ${managerModChip(t('ratings.defense'), Number(mods.defense) || 0)}
+      </div>
+    </div>
   </div>`;
 }

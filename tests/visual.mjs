@@ -55,6 +55,12 @@ async function playToBuild(page) {
   await assertInsideCards(page, '.player-card', ['.card-head', '.card-portrait', '.card-name', '.card-meta', '.card-stats'], 'player cards');
   // Selección directa: tocar la carta confirma sin botón aparte.
   await page.click('.deal-card:not(.disabled-deal)');
+  // Sobre de director técnico (nivel 1, justo tras el de jugadores).
+  await page.waitForSelector('.pack-screen[data-kind="manager"]');
+  await page.click('#openBtn');
+  await page.waitForSelector('.pack-screen .manager-card', { state: 'visible' });
+  await page.waitForTimeout(700);
+  await page.click('.deal-card:not(.disabled-deal)');
   await page.waitForSelector('.pack-screen[data-kind="item"]');
   await page.click('#openBtn');
   await page.waitForSelector('.pack-screen .item-card', { state: 'visible' });

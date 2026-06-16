@@ -3,7 +3,7 @@
 import { esc } from './dom.js';
 import { LINES } from '../data/config.js';
 import { calcularRatings } from '../engine/teamRatings.js';
-import { portraitPathForName, portraitPathForPlayer } from '../data/playerAssets.js';
+import { portraitPathForName, portraitPathForPlayer, portraitPathForManager } from '../data/playerAssets.js';
 import { UI_ASSETS, preloadImages } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { localizeAchievement, localizeOpponentName, t } from '../data/i18n.js';
@@ -71,6 +71,17 @@ function ratings(opponent) {
   </div>`;
 }
 
+// DT del rival, si esta edición tiene uno enlazado (nation + año). Sus mods ya
+// están aplicados en los ratings de arriba; aquí solo se muestra su identidad.
+function managerLine(opponent) {
+  const m = opponent.manager;
+  if (!m) return '';
+  return `<p class="scout-manager">
+    <img class="scout-dt-face" src="${esc(portraitPathForManager(m))}" alt="" loading="eager" decoding="async" data-hide-on-error="true" />
+    <span>${t('scouting.manager')}: <b>${esc(m.name)}</b></span>
+  </p>`;
+}
+
 export function renderScouting(root, state, handlers) {
   const opponent = state.opponent;
   warmUpcomingMatch(state);
@@ -82,6 +93,7 @@ export function renderScouting(root, state, handlers) {
           <p class="scout-kicker">${t('scouting.report')}</p>
           <h1 class="large-title">${esc(localizeOpponentName(opponent))}</h1>
           <p class="scout-achievement">${esc(localizeAchievement(opponent.achievement))} · ${t('scouting.formation', { formation: opponent.formation })}</p>
+          ${managerLine(opponent)}
         </div>
         <div class="scout-team-meta">
           <div class="scout-team-card" aria-hidden="true">

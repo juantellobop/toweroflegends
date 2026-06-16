@@ -12,7 +12,7 @@ import { CONFIG, FORMATIONS, LINES } from '../data/config.js';
 import { assignLineToSlots } from '../state/run.js';
 import { portraitPathForPlayer } from '../data/playerAssets.js';
 import { lineupFieldHTML, positionSlots, staticChipHTML } from './lineupBoard.js';
-import { POSITION_LABEL } from './cards.js';
+import { POSITION_LABEL, managerCardHTML } from './cards.js';
 
 function localizeHistoryOpponent(value) {
   const text = String(value || '');
@@ -67,10 +67,19 @@ function lastTacticHTML(state) {
       chipClass: chipClassFor(slot.player.uid),
     }),
   });
+  // DT que dirigió este partido (snapshot del lastMatch), junto al once.
+  const manager = m?.manager || state.manager;
+  const managerHTML = manager
+    ? `<div class="gameover-manager">
+        <span class="gameover-manager-label">${t('result.manager')}</span>
+        ${managerCardHTML(manager)}
+      </div>`
+    : '';
   return `
     <div class="gameover-tactic arcade-panel">
       <span class="gameover-match-label">${t('result.lastTactic')} · ${t('scouting.formation', { formation: state.formation })}</span>
       ${field}
+      ${managerHTML}
     </div>`;
 }
 

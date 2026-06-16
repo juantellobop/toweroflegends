@@ -5,7 +5,7 @@
 // tocar hueco → selector; tocar ficha → la quita. Enlaces de química sutiles.
 // Suplentes en una tira inferior. Botón "Jugar" flotante (cristal).
 
-import { playerCardHTML, itemCardHTML, POSITION_LABEL, LINE_LABEL } from './cards.js';
+import { playerCardHTML, itemCardHTML, managerCardHTML, POSITION_LABEL, LINE_LABEL } from './cards.js';
 import { esc } from './dom.js';
 import {
   liveRatings, liveChemistry, liveItemDelta, isLineupComplete, isStarter, isSuspended, isInjured, formationSlots,
@@ -207,6 +207,22 @@ function ratingsHeader(state) {
     </div>`;
 }
 
+// Bloque del director técnico, en la misma fila que ratingsHeader. Con DT activo
+// muestra su carta compacta (sus modificadores ya están reflejados en los
+// ratings de al lado); sin DT, un hueco a la espera del próximo sobre.
+function managerHeader(state) {
+  const inner = state.manager
+    ? managerCardHTML(state.manager)
+    : `<div class="manager-empty">
+        <span class="manager-empty-badge">${t('card.manager.badge')}</span>
+        <p>${t('build.noManager')}</p>
+      </div>`;
+  return `
+    <div class="manager-glass arcade-panel" id="managerHeader">
+      ${inner}
+    </div>`;
+}
+
 function bench(state) {
   const subs = state.squad.filter((p) => !isStarter(state, p)).sort((a, b) => playerOVR(b) - playerOVR(a));
   if (!subs.length) return `<p class="empty-note">${t('build.noSubs')}</p>`;
@@ -290,7 +306,10 @@ export function renderBuild(root, state, handlers) {
             <h1 class="large-title">${t('build.title')}</h1>
           </header>
 
-          ${ratingsHeader(state)}
+          <div class="team-header-row">
+            ${ratingsHeader(state)}
+            ${managerHeader(state)}
+          </div>
           ${opponentHTML}
 
           <div class="team-roster arcade-panel">

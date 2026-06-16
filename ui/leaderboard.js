@@ -4,7 +4,7 @@ import { flagSrcForNation } from '../data/flags.js';
 import { sanitizeTeamName } from '../data/teamName.js';
 import { t } from '../data/i18n.js';
 import { FORMATIONS, LINES } from '../data/config.js';
-import { playerInitials, playerSurname, portraitPathForName } from '../data/playerAssets.js';
+import { playerInitials, playerSurname, portraitPathForName, portraitPathForManager } from '../data/playerAssets.js';
 import { POSITION_LABEL } from './cards.js';
 import { LINE_TOP, lineSpreadX, PITCH_MARKINGS } from './pitchArt.js';
 import { assignLineToSlots } from '../state/run.js';
@@ -32,6 +32,17 @@ function normalizeLineup(raw) {
   return players.length ? players : null;
 }
 
+function normalizeManager(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const name = String(raw.name || '').trim().slice(0, 60);
+  if (!name) return null;
+  return {
+    id: String(raw.id || '').trim().slice(0, 80),
+    name,
+    nation: String(raw.nation || '').trim().slice(0, 48),
+  };
+}
+
 function normalizeEntry(entry) {
   const floor = Math.max(0, Math.floor(Number(entry?.floor) || 0));
   const teamName = sanitizeTeamName(entry?.teamName);
@@ -40,7 +51,8 @@ function normalizeEntry(entry) {
   const createdAt = Number.isFinite(Date.parse(entry?.createdAt)) ? new Date(entry.createdAt).toISOString() : '';
   const formation = FORMATIONS[entry?.formation] ? entry.formation : '';
   const lineup = normalizeLineup(entry?.lineup);
-  return { id, teamName, nation, floor, createdAt, formation, lineup };
+  const manager = normalizeManager(entry?.manager);
+  return { id, teamName, nation, floor, createdAt, formation, lineup, manager };
 }
 
 function normalizePayload(payload) {
@@ -77,6 +89,7 @@ export async function submitLeaderboardEntry(entry) {
       floor: entry.floor,
       formation: entry.formation,
       lineup: entry.lineup,
+      manager: entry.manager,
     }),
   });
   if (payload) return normalizePayload(payload);
@@ -103,6 +116,7 @@ export async function submitWeeklyLeaderboardEntry(entry) {
       floor: entry.floor,
       formation: entry.formation,
       lineup: entry.lineup,
+      manager: entry.manager,
     }),
   });
   if (payload) return normalizePayload(payload);
@@ -237,6 +251,10 @@ export function openLeaderboardLineup(entryId) {
             <b>${esc(entry.teamName)}</b>
             <span>${esc(meta)} · ${esc(t('leaderboard.lineup'))}</span>
           </div>
+          ${entry.manager ? `<div class="lineup-modal-manager">
+            <img class="lineup-modal-manager-face" src="${esc(portraitPathForManager(entry.manager))}" alt="" decoding="async" data-hide-on-error="true" />
+            <span><small>${esc(t('result.manager'))}</small><b>${esc(entry.manager.name)}</b></span>
+          </div>` : ''}
         </header>
         ${lineupField(entry.lineup, entry.formation)}
       </section>

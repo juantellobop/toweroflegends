@@ -98,9 +98,21 @@ export const CONFIG = {
   CHEM_ERA_ADJACENT: 0.5, // bonus por par de décadas contiguas (1960↔1970)
   CHEM_CORE: 1, // bonus global por escalón de núcleo nacional (ver computeTeamChem)
   CHEM_TACTIC: 1, // bonus a ataque+medio si tu plantilla encaja con el tipo del dibujo
+  CHEM_MANAGER_NATION: 1, // química que aporta cada titular de la nación del DT a su línea
   // Cuánto pesa la química en los ratings que usa la simulación. Los puntos de
   // química que ve el jugador no cambian; solo su efecto sobre el desempeño.
   CHEM_IMPACT: 1.4,
+
+  // --- Director técnico (DT / manager) ---
+  // Sobre propio: en el nivel 1 (tras el de jugadores) y luego cada
+  // MANAGER_PACK_EVERY niveles (7, 14, 21…). Cada sobre ofrece MANAGER_PACK_SIZE
+  // opciones con sesgo por rareza (MANAGER_RARITY_BIAS). El DT aplica modificadores
+  // porcentuales a ataque/medio/defensa (sin tocar el portero); si su estilo
+  // coincide con el tipo del dibujo, sus modificadores positivos se amplifican
+  // (MANAGER_SYNERGY_MULT) y sus costes se anulan, igual que la sinergia de objetos.
+  MANAGER_PACK_EVERY: 7,
+  MANAGER_PACK_SIZE: 3,
+  MANAGER_SYNERGY_MULT: 1.5,
 
   // --- Recompensas (tamaño de sobre por resultado) ---
   PACK_GOLEADA: 5, // dif >= 5
@@ -128,6 +140,19 @@ export function targetStrength(level) {
 
 // Alias conservado para consumidores anteriores del motor.
 export const targetOVR = targetStrength;
+
+// Sesgo de rareza del sobre de DT según cuántos sobres se han abierto (índice
+// 1-based: 1 = primer sobre del nivel 1, 2 = nivel 7, 3 = nivel 14…). El PRIMER
+// sobre nunca da leyenda; a partir del segundo, las rarezas altas (épica y, sobre
+// todo, leyenda) crecen con cada sobre. Pesos relativos [common, rare, epic, legend].
+export function managerRarityBias(packIndex) {
+  const n = Math.max(1, Math.floor(packIndex) || 1);
+  const common = Math.max(10, 60 - n * 8);
+  const rare = 35;
+  const epic = 10 + n * 4;
+  const legend = n <= 1 ? 0 : (n - 1) * 5;
+  return [common, rare, epic, legend];
+}
 
 // Sesgo de rareza en los sobres según el resultado del partido.
 // Pesos relativos [common, rare, epic, legend].
@@ -188,6 +213,8 @@ export function formationType(formation) {
 
 export const LINES = ['GK', 'DEF', 'MID', 'FWD'];
 export const RARITIES = ['common', 'rare', 'epic', 'legend'];
+// Estilos de juego de un DT (coinciden con los valores de FORMATION_TYPE).
+export const MANAGER_STYLES = ['posesion', 'presion', 'contra'];
 
 // Perfil táctico de cada hueco (por formación → línea → slotIndex). No cambia
 // qué posiciones acepta el hueco (eso es FORMATION_SLOT_RULES), solo cómo

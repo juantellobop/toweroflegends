@@ -81,3 +81,12 @@ export function portraitPathForName(name) {
   if (known) return portraitPathForPlayer(known);
   return `${PORTRAIT_DIR}/by-name/${slugifyName(name)}.png${PORTRAIT_SUFFIX}`;
 }
+
+// Retrato del DT: formato distinto al de jugadores (JPG, prefijo manager_),
+// guardado en el mismo directorio. {id}.jpg, con id = manager_<nombre>_<apellido>.
+export function portraitPathForManager(manager) {
+  if (!manager) return null;
+  if (manager.portraitDataUrl) return manager.portraitDataUrl;
+  if (manager.id) return `${PORTRAIT_DIR}/${manager.id}.jpg${PORTRAIT_SUFFIX}`;
+  return null;
+}

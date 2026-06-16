@@ -48,6 +48,13 @@ try {
 
   click(root.querySelector('#openBtn')); // abrir el sobre sellado de jugadores
   click(root.querySelector('.deal-card:not(.disabled-deal)')); await wait(420); // selección directa
+
+  // Sobre de director técnico (nivel 1, justo tras el de jugadores)
+  console.log('3b. Sobre DT:', show(), '| cartas:', root.querySelectorAll('.manager-card').length);
+  if (!root.querySelector('.manager-card')) errors.push('sobre de DT sin cartas');
+  click(root.querySelector('#openBtn')); // abrir el sobre sellado de DT
+  click(root.querySelector('.deal-card:not(.disabled-deal)')); await wait(420); // elegir DT
+
   console.log('4. Sobre objeto:', show(), '| objetos:', root.querySelectorAll('.item-card').length);
 
   click(root.querySelector('#openBtn')); // abrir el sobre sellado de objetos

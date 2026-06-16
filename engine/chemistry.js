@@ -50,8 +50,10 @@ function lineSlotOccupants(starting11, formation, line) {
 // de cercanía de la formación (CHEM_LINKS): por cada arista cuyos dos huecos están
 // ocupados, suma pairChem mitad a la línea de cada extremo (una arista dentro de
 // una línea suma su valor completo a esa línea; una entre líneas, mitad a cada una).
-// Un Capitán alineado suma +1 a la química de su línea.
-export function computeChemistry(starting11, formation = null) {
+// Un Capitán alineado suma +1 a la química de su línea. El director técnico
+// (manager), si comparte nacionalidad, suma CHEM_MANAGER_NATION por cada titular
+// connacional a la química de SU línea (modelo "por jugador, a su línea").
+export function computeChemistry(starting11, formation = null, manager = null) {
   const chem = { GK: 0, DEF: 0, MID: 0, FWD: 0 };
   if (formation) {
     const occupants = {};
@@ -65,9 +67,14 @@ export function computeChemistry(starting11, formation = null) {
       chem[b[0]] += half;
     }
   }
+  const managerNation = manager && manager.nation ? chemNation(manager.nation) : null;
   for (const line of LINES) {
     const players = (starting11[line] || []).filter(Boolean);
     if (players.some((p) => p.trait === 'Capitán')) chem[line] += 1;
+    if (managerNation) {
+      const connationals = players.filter((p) => p.nation && chemNation(p.nation) === managerNation).length;
+      chem[line] += connationals * CONFIG.CHEM_MANAGER_NATION;
+    }
   }
   return chem;
 }
@@ -107,8 +114,8 @@ export function computeTeamChem(starting11, formation) {
 }
 
 // Química total (suma de líneas + bonus globales), útil para un indicador global.
-export function totalChemistry(starting11, formation) {
-  const chem = computeChemistry(starting11, formation);
+export function totalChemistry(starting11, formation, manager = null) {
+  const chem = computeChemistry(starting11, formation, manager);
   const team = computeTeamChem(starting11, formation);
   return LINES.reduce((s, l) => s + chem[l], 0) + team.all + team.attackMid;
 }

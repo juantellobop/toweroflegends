@@ -12,11 +12,12 @@ export const UI_ASSETS = {
   packs: {
     player: 'assets/ui/cromos-jugadores.png',
     item: 'assets/ui/cromos-items.png',
+    manager: 'assets/ui/cromos-managers.png',
   },
   cards: {
     packBack: 'assets/ui/pixel/pack-back.svg',
     backPlayer: 'assets/ui/item-player.jpg', // dorso de carta de jugador
-    backItem: 'assets/ui/item-back.jpg',     // dorso de carta de objeto
+    backItem: 'assets/ui/item-back.jpg',     // dorso de carta de objeto (y de DT)
     frames: {
       common: 'assets/ui/pixel/card-frame-common.svg',
       rare: 'assets/ui/pixel/card-frame-rare.svg',

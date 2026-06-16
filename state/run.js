@@ -3,11 +3,12 @@
 // simula el partido y avanza o termina la run según el resultado.
 
 import {
-  CONFIG, FORMATIONS, LINES, RARITY_BIAS,
+  CONFIG, FORMATIONS, LINES, RARITIES, RARITY_BIAS, managerRarityBias,
   formationLineSlots, slotAcceptsPosition,
 } from '../data/config.js';
 import { getPlayableRoster } from '../data/playableRoster.js';
 import { ITEMS } from '../data/items.js';
+import { MANAGERS } from '../data/managers.js';
 import { RNG, randomSeed } from '../engine/rng.js';
 import { generateOpponent } from '../data/opponents.js';
 import { simularPartido } from '../engine/simulate.js';
@@ -527,13 +528,13 @@ export function setFormation(state, formation) {
 // === Ratings y química en vivo (para la pantalla de armar equipo) ===
 
 export function liveRatings(state) {
-  return calcularRatings({ formation: state.formation, starting11: state.starting11, items: state.items });
+  return calcularRatings({ formation: state.formation, starting11: state.starting11, items: state.items, manager: state.manager });
 }
 export function liveChemistry(state) {
   // El total incluye la química de equipo aportada por reliquias (p. ej. el
   // Duodécimo jugador), redondeada por el decaimiento de copias repetidas.
-  const total = totalChemistry(state.starting11, state.formation) + chemTeamBonus(state.items || []);
-  return { byLine: computeChemistry(state.starting11, state.formation), total: Math.round(total) };
+  const total = totalChemistry(state.starting11, state.formation, state.manager) + chemTeamBonus(state.items || []);
+  return { byLine: computeChemistry(state.starting11, state.formation, state.manager), total: Math.round(total) };
 }
 
 // Aporte neto de los objetos a cada rating de equipo (con objetos − sin objetos),
@@ -541,7 +542,8 @@ export function liveChemistry(state) {
 // modificador de formación sobre el boost (es la mejora real en el número final).
 export function liveItemDelta(state) {
   const withItems = liveRatings(state);
-  const noItems = calcularRatings({ formation: state.formation, starting11: state.starting11, items: [] });
+  // El DT entra en ambas ramas → su efecto se cancela y el delta aísla los objetos.
+  const noItems = calcularRatings({ formation: state.formation, starting11: state.starting11, items: [], manager: state.manager });
   const round = (n) => Math.round(n * 10) / 10;
   return {
     attack: round(withItems.attack - noItems.attack),
@@ -643,6 +645,51 @@ export function chooseItemCard(state, template) {
   return item;
 }
 
+// === Director técnico (DT) ===
+
+// ¿Toca sobre de DT en este nivel? Nivel 1 (tras el sobre de jugadores) y luego
+// cada MANAGER_PACK_EVERY niveles (7, 14, 21…).
+export function isManagerPackLevel(level) {
+  const every = CONFIG.MANAGER_PACK_EVERY;
+  return level === 1 || (every > 0 && level % every === 0);
+}
+
+// Índice 1-based del sobre de DT por nivel: nivel 1 → 1, 7 → 2, 14 → 3… Marca
+// cuántos sobres se han abierto, para subir el sesgo de rareza con cada sobre.
+export function managerPackIndex(level) {
+  return 1 + Math.floor(level / CONFIG.MANAGER_PACK_EVERY);
+}
+
+// Genera el sobre de DT: MANAGER_PACK_SIZE opciones por rareza. El sesgo sube con
+// cada sobre abierto (managerRarityBias) y el primer sobre no puede dar leyenda:
+// el pool se filtra a las rarezas con peso > 0 para no colarlas por el respaldo
+// de drawCards. Excluye el DT activo para que la elección renueve siempre.
+export function rollManagerPack(state) {
+  const bias = managerRarityBias(managerPackIndex(state.level));
+  const allowed = new Set(RARITIES.filter((_, i) => bias[i] > 0));
+  let pool = MANAGERS.filter((m) => m.id !== state.manager?.id && allowed.has(m.rarity));
+  if (!pool.length) pool = MANAGERS.filter((m) => allowed.has(m.rarity));
+  const chosen = drawCards(pool, CONFIG.MANAGER_PACK_SIZE, bias, state.rng);
+  state.managerChoices = chosen.map(instantiate);
+  return state.managerChoices;
+}
+
+// El jugador elige un DT del sobre: reemplaza al anterior (un solo DT activo).
+export function chooseManagerCard(state, template) {
+  if (!template) return null;
+  state.manager = { ...template, uid: template.uid || freshId(template.id) };
+  state.managerChoices = null;
+  state.pendingManagerPack = false;
+  return state.manager;
+}
+
+// Descarta el sobre de DT sin elegir ninguno: conserva el DT actual (o ninguno)
+// y cierra el sobre para continuar el bucle.
+export function discardManagerPack(state) {
+  state.managerChoices = null;
+  state.pendingManagerPack = false;
+}
+
 // === Partido ===
 
 export function prepareOpponent(state) {
@@ -662,6 +709,9 @@ export function playMatch(state) {
     formation: state.formation,
     starting11: state.starting11,
     items: state.items,
+    // Director técnico activo: sus modificadores entran en calcularRatings y, con
+    // ello, en la simulación; también aporta química a sus connacionales.
+    manager: state.manager,
     // Banquillo disponible para sustituir tras una expulsión o lesión (suplentes
     // que no están en el once y están disponibles).
     bench: state.squad.filter((p) => !isStarter(state, p) && !isUnavailable(p)),
@@ -674,6 +724,16 @@ export function playMatch(state) {
   // que applySuspensions vacíe los puestos de los expulsados. El resumen y la
   // táctica del gameover lo usan para mostrar al expulsado en su sitio.
   result.kickoff11 = serializeStarting11(state.starting11);
+  // DT que dirigió este partido (snapshot para gameover, ranking y la Gaceta).
+  result.manager = state.manager
+    ? { id: state.manager.id, name: state.manager.name, nation: state.manager.nation, year: state.manager.year ?? null, rarity: state.manager.rarity, style: state.manager.style, mods: state.manager.mods }
+    : null;
+  // Debuts: titulares que no habían jugado ningún partido previo. Los nombres
+  // alimentan la mención del DT en la Gaceta; sus uids quedan registrados.
+  const starters = LINES.flatMap((line) => (state.starting11[line] || []).filter(Boolean));
+  const played = new Set(state.playedUids || []);
+  result.debuts = starters.filter((p) => !played.has(p.uid)).map((p) => p.name);
+  state.playedUids = [...played, ...starters.map((p) => p.uid)];
   state.lastMatch = result;
   return result;
 }
@@ -794,6 +854,8 @@ export function advanceLevel(state) {
   state.pendingPlayerPack = reward && reward.playerPack ? reward.playerPack : CONFIG.PACK_EMPATE;
   state.pendingItemPack = reward && reward.itemPack ? reward.itemPack : CONFIG.ITEM_PACK_BASE;
   state.pendingBias = (reward && reward.rarityBias) || RARITY_BIAS.empate;
+  // Sobre de DT en los niveles que toca (7, 14, 21…); el de nivel 1 se siembra en createRun.
+  state.pendingManagerPack = isManagerPackLevel(state.level);
   state.lastMatch = null;
   state.opponent = null;
   state.phase = 'playerPack';
@@ -837,17 +899,24 @@ export function createRun(opts = {}) {
     roster,
     starting11: emptyStarting11(),
     items: [],
+    // Director técnico activo (uno solo; se reemplaza al elegir otro en el sobre).
+    manager: null,
     history: [],
     usedOpponentIds: [],
+    // Titulares que ya han disputado un partido (para detectar debuts en la Gaceta).
+    playedUids: [],
     // La run arranca presentando la plantilla generada; de ahí, a los sobres.
     phase: 'squadIntro',
     // Sobres del primer nivel: neutros.
     pendingPlayerPack: CONFIG.PACK_AJUSTADA,
     pendingItemPack: CONFIG.ITEM_PACK_BASE,
+    // En el nivel 1 se entrega el primer sobre de DT (tras el de jugadores).
+    pendingManagerPack: isManagerPackLevel(1),
     pendingBias: RARITY_BIAS.inicial,
     playerChoices: null,
     nationChoices: null,
     itemChoices: null,
+    managerChoices: null,
     lastMatch: null,
     lastReward: null,
     opponent: null,
@@ -893,12 +962,15 @@ export function serializeRun(state) {
     formation: state.formation,
     squad: state.squad,
     items: state.items,
+    manager: state.manager ?? null,
     history: state.history,
     usedOpponentIds: state.usedOpponentIds,
+    playedUids: state.playedUids ?? [],
     starting11: serializeStarting11(state.starting11),
     phase: state.phase,
     pendingPlayerPack: state.pendingPlayerPack,
     pendingItemPack: state.pendingItemPack,
+    pendingManagerPack: state.pendingManagerPack ?? false,
     pendingBias: state.pendingBias,
     pendingReward: state.pendingReward ?? null,
     // Rival y partido en curso: necesarios para retomar en scouting, partido,
@@ -941,16 +1013,20 @@ export function rehydrateRun(data) {
       roster: getPlayableRoster(),
       starting11,
       items: Array.isArray(data.items) ? data.items : [],
+      manager: data.manager ?? null,
       history: Array.isArray(data.history) ? data.history : [],
       usedOpponentIds: Array.isArray(data.usedOpponentIds) ? data.usedOpponentIds : [],
+      playedUids: Array.isArray(data.playedUids) ? data.playedUids : [],
       phase: data.phase,
       pendingPlayerPack: data.pendingPlayerPack,
       pendingItemPack: data.pendingItemPack,
+      pendingManagerPack: data.pendingManagerPack ?? false,
       pendingBias: data.pendingBias,
       pendingReward: data.pendingReward ?? null,
       playerChoices: null,
       nationChoices: null,
       itemChoices: null,
+      managerChoices: null,
       opponent: data.opponent ?? null,
       lastMatch: data.lastMatch ?? null,
       lastReward: data.lastReward ?? null,
