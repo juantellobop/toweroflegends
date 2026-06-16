@@ -97,10 +97,11 @@ export function renderSquadIntro(root, state, handlers) {
     <section class="screen scouting-screen pixel-screen squad-intro-screen">
       <header class="scout-hero" style="--team-primary:${esc(state.team.color)};--team-secondary:${esc(state.team.color)}">
         <div>
-          <div class="level-badge">${t('generic.level', { level: state.level })}</div>
-          <p class="scout-kicker">${t('squadIntro.kicker')}</p>
+          <div class="scout-eyebrow">
+            <div class="level-badge">${t('generic.level', { level: state.level })}</div>
+            <p class="scout-kicker">${t('squadIntro.kicker')}</p>
+          </div>
           <h1 class="large-title">${esc(state.team.name)}</h1>
-          <p class="scout-achievement">${t('scouting.formation', { formation: state.formation })} · ${t('squadIntro.cards', { count: state.squad.length })}</p>
         </div>
         ${flagHTML}
       </header>

@@ -22,7 +22,7 @@ function effectKey(item, effect) {
 // Con `formation`, los ítems cuya sinergia coincide con el tipo del dibujo
 // aplican su efecto positivo multiplicado por ITEM_SYNERGY_MULT y anulan sus
 // efectos negativos: la táctica absorbe el trade-off del ítem.
-export function effectiveItemEffects(items = [], { scalePower = true, formation = null } = {}) {
+export function effectiveItemEffects(items = [], { scalePower = true, formation = null, applyDecay = true } = {}) {
   const tacticType = formation ? formationType(formation) : null;
   const seenItems = new Map();
   const seenStats = new Map();
@@ -35,7 +35,7 @@ export function effectiveItemEffects(items = [], { scalePower = true, formation 
       const key = effectKey(item, effect);
       const copyIndex = CONFIG.DR_BY_STAT ? (seenStats.get(key) || 0) : itemCopyIndex;
       if (CONFIG.DR_BY_STAT) seenStats.set(key, copyIndex + 1);
-      const decay = Math.pow(CONFIG.DR_RATE, copyIndex);
+      const decay = applyDecay ? Math.pow(CONFIG.DR_RATE, copyIndex) : 1;
       const scale = scalePower ? CONFIG.ITEM_POWER_SCALE : 1;
       const base = effect.op === 'mult' ? effect.value - 1 : effect.value;
       if (synergyActive && base < 0) continue;
@@ -100,9 +100,9 @@ export function chemTeamBonus(items = []) {
 export function metaBonuses(items = []) {
   let extraPlayerCard = 0;
   let extraItemCard = 0;
-  // Los bonus meta son discretos: conservan el valor de la primera copia,
-  // pero sí reciben decaimiento para evitar sobres de tamaño ilimitado.
-  for (const effect of effectiveItemEffects(items, { scalePower: false })) {
+  // Los bonus meta apilan completos: cada copia suma su valor entero sin
+  // decaimiento (3 objetos de +1 carta dan +3 cartas en cada sobre).
+  for (const effect of effectiveItemEffects(items, { scalePower: false, applyDecay: false })) {
     if (effect.target !== 'meta' || effect.op !== 'add') continue;
     if (effect.stat === 'extraPlayerCard') extraPlayerCard += effect.value;
     if (effect.stat === 'extraItemCard') extraItemCard += effect.value;

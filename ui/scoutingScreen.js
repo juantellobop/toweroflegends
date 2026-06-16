@@ -1,12 +1,13 @@
 // Torre de Leyendas — Scouting previo: identidad, ratings y once del rival.
 
 import { esc } from './dom.js';
+import { managerCardHTML } from './cards.js';
 import { LINES } from '../data/config.js';
 import { calcularRatings } from '../engine/teamRatings.js';
-import { portraitPathForName, portraitPathForPlayer, portraitPathForManager } from '../data/playerAssets.js';
+import { portraitPathForName, portraitPathForPlayer } from '../data/playerAssets.js';
 import { UI_ASSETS, preloadImages } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
-import { localizeAchievement, localizeOpponentName, t } from '../data/i18n.js';
+import { localizeOpponentName, t } from '../data/i18n.js';
 import { lineupFieldHTML, positionSlots, staticChipHTML } from './lineupBoard.js';
 import { sceneSources } from '../match/scenes.js';
 
@@ -72,14 +73,15 @@ function ratings(opponent) {
 }
 
 // DT del rival, si esta edición tiene uno enlazado (nation + año). Sus mods ya
-// están aplicados en los ratings de arriba; aquí solo se muestra su identidad.
-function managerLine(opponent) {
-  const m = opponent.manager;
-  if (!m) return '';
-  return `<p class="scout-manager">
-    <img class="scout-dt-face" src="${esc(portraitPathForManager(m))}" alt="" loading="eager" decoding="async" data-hide-on-error="true" />
-    <span>${t('scouting.manager')}: <b>${esc(m.name)}</b></span>
-  </p>`;
+// están aplicados en los ratings de al lado; aquí muestra su carta —el mismo
+// chasis horizontal del tablero táctico (managerCardHTML en .manager-glass)—
+// repartiendo la fila con los ratings. Sin DT, los ratings ocupan todo el ancho.
+function ratingsRow(opponent) {
+  if (!opponent.manager) return ratings(opponent);
+  return `<div class="scout-header-row">
+    ${ratings(opponent)}
+    <div class="manager-glass arcade-panel">${managerCardHTML(opponent.manager)}</div>
+  </div>`;
 }
 
 export function renderScouting(root, state, handlers) {
@@ -89,11 +91,11 @@ export function renderScouting(root, state, handlers) {
     <section class="screen scouting-screen pixel-screen">
       <header class="scout-hero" style="--team-primary:${opponent.colors.primary};--team-secondary:${opponent.colors.secondary}">
         <div>
-          <div class="level-badge">${t('generic.level', { level: state.level })}</div>
-          <p class="scout-kicker">${t('scouting.report')}</p>
+          <div class="scout-eyebrow">
+            <div class="level-badge">${t('generic.level', { level: state.level })}</div>
+            <p class="scout-kicker">${t('scouting.report')}</p>
+          </div>
           <h1 class="large-title">${esc(localizeOpponentName(opponent))}</h1>
-          <p class="scout-achievement">${esc(localizeAchievement(opponent.achievement))} · ${t('scouting.formation', { formation: opponent.formation })}</p>
-          ${managerLine(opponent)}
         </div>
         <div class="scout-team-meta">
           <div class="scout-team-card" aria-hidden="true">
@@ -102,10 +104,9 @@ export function renderScouting(root, state, handlers) {
           <div class="scout-strength"><span>${t('scouting.strength')}</span><b>${opponent.strength}</b></div>
         </div>
       </header>
-      ${ratings(opponent)}
+      ${ratingsRow(opponent)}
       <h2 class="section-title">${t('scouting.opponentEleven')}</h2>
       ${field(opponent)}
-      <p class="scout-note">${t('scouting.note')}</p>
       <div class="play-bar action-bar">
         <button id="scout-continue" class="primary big glass-cta">${t('scouting.continue')}</button>
       </div>

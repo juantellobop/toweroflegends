@@ -1387,20 +1387,29 @@ select {
 
 /* --- Scouting del rival --- */
 .scouting-screen { max-width: 720px; margin: 0 auto; }
+/* Cabecera del rival en grid de 3 columnas (texto flexible · bandera · fuerza),
+   más compacta que el flex anterior. .scout-team-meta se vuelve transparente
+   para que sus dos hijos sean columnas del hero (en móvil vuelve a ser grid). */
 .scout-hero {
-  display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4);
-  margin-bottom: var(--space-4); padding: var(--space-5); border-radius: var(--radius-l);
+  display: grid; grid-template-columns: 1fr auto auto; align-items: center;
+  gap: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4); padding: var(--space-4); border-radius: var(--radius-l);
   background: linear-gradient(135deg, color-mix(in srgb, var(--team-primary) 35%, var(--bg-tertiary)), color-mix(in srgb, var(--team-secondary) 24%, var(--bg-secondary)));
   border: 1px solid color-mix(in srgb, var(--team-primary) 55%, var(--separator));
 }
+.scout-hero > div:first-child { min-width: 0; }
+.scout-team-meta { display: contents; }
+/* Antetítulo: nivel + kicker en la misma fila, uno al lado del otro. */
+.scout-eyebrow { display: flex; align-items: center; gap: var(--space-2); }
+.scout-eyebrow .scout-kicker { margin: 0; }
 .scout-kicker { margin: var(--space-3) 0 0; color: var(--label-secondary); font-size: var(--t-caption-1); text-transform: uppercase; letter-spacing: .8px; }
-.scout-achievement { margin: var(--space-2) 0 0; color: var(--label-secondary); }
-.scout-manager { display: flex; align-items: center; gap: var(--space-2); margin: var(--space-3) 0 0; color: var(--label-secondary); }
-.scout-manager b { color: var(--label-primary); font-weight: 600; }
-.scout-dt-face { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; object-position: center top; border: 1px solid color-mix(in srgb, var(--team-primary) 55%, var(--separator)); background: rgba(0,0,0,.18); }
+.scouting-screen .section-title { text-align: center; }
 .scout-strength { display: flex; flex-direction: column; align-items: center; padding: var(--space-3); min-width: 82px; border-radius: var(--radius-m); background: rgba(0,0,0,.22); color: #fff; }
 .scout-strength span { font-size: var(--t-caption-2); text-transform: uppercase; }
 .scout-strength b { font-family: var(--font-rounded); font-size: var(--t-title-1); }
+/* Con DT del rival, ratings y carta del DT comparten fila (igual que el tablero):
+   apilados en móvil; en desktop ratings flexible + carta estrecha (ver media query). */
+.scout-header-row { display: grid; grid-template-columns: 1fr; gap: var(--space-3); margin-bottom: var(--space-4); }
 .scout-ratings { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3); padding: var(--space-3); border-radius: var(--radius-l); }
 .scout-rating { display: grid; grid-template-columns: auto auto; gap: 3px var(--space-2); align-items: center; }
 .scout-rating span { color: var(--label-secondary); font-size: var(--t-caption-2); font-weight: 700; }
@@ -1410,6 +1419,13 @@ select {
 .field-chip.scout-chip { cursor: default; border-color: rgba(255,255,255,.8); }
 .field-chip.scout-chip:hover { transform: none; box-shadow: none; }
 .scout-note { color: var(--label-secondary); font-size: var(--t-caption-1); text-align: center; }
+
+/* Desktop: ratings flexibles a la izquierda + carta del DT estrecha a la derecha.
+   Como los ratings pierden la mitad del ancho, sus 4 celdas pasan a un 2×2. */
+@media (min-width: 768px) {
+  .scout-header-row { grid-template-columns: minmax(0, 1fr) minmax(280px, 320px); align-items: stretch; }
+  .scout-header-row .scout-ratings { grid-template-columns: repeat(2, 1fr); }
+}
 
 /* --- §4.5 Resultado: marcador redondeado + confeti --- */
 .result-screen { position: relative; overflow: hidden; }
@@ -2970,10 +2986,6 @@ select {
 
 .scout-kicker {
   color: var(--arcade-yellow);
-}
-
-.scout-achievement {
-  color: rgba(255,255,255,.78);
 }
 
 .scout-team-card {

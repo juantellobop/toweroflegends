@@ -133,7 +133,7 @@ export const MANAGERS = [
     "rarity": "epic",
     "style": "posesion",
     "mods": {
-      "attack": 3,
+      "attack": 2,
       "midfield": 2,
       "defense": 1
     }
@@ -448,6 +448,32 @@ export const MANAGERS = [
       "attack": 2,
       "midfield": 1,
       "defense": 0
+    }
+  },
+  {
+    "id": "manager_luis_de_la_fuente",
+    "name": "Luis de la Fuente",
+    "nation": "España",
+    "year": 2026,
+    "rarity": "rare",
+    "style": "posesion",
+    "mods": {
+      "attack": -3,
+      "midfield": 4,
+      "defense": 0
+    }
+  },
+  {
+    "id": "manager_marcelo_bielsa",
+    "name": "Marcelo Bielsa",
+    "nation": "Argentina",
+    "year": 2002,
+    "rarity": "legend",
+    "style": "presion",
+    "mods": {
+      "attack": 3,
+      "midfield": 1,
+      "defense": 2
     }
   }
 ];

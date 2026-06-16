@@ -630,8 +630,9 @@ export function choosePlayerCard(state, template) {
   if (!CONFIG.ALLOW_DUPLICATE_PLAYERS && state.squad.some((p) => dupKey(p) === dupKey(template))) return null;
   const card = instantiate(template);
   state.squad.push(card);
-  // Si hay hueco compatible, colócalo automáticamente.
-  togglePlayerInLineup(state, card);
+  // La carta nueva entra siempre al banquillo: nunca se auto-titulariza (ni
+  // siquiera para cubrir el hueco que dejó un expulsado o lesionado). Si se
+  // quiere alinear, se arrastra a mano en el tablero táctico.
   state.playerChoices = null;
   state.nationChoices = null;
   return card;

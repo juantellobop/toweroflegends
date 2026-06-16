@@ -72,13 +72,15 @@ assert.equal(item('ojeador'), undefined);
 assert.ok(ITEMS.length >= 28, `catálogo de ítems pequeño: ${ITEMS.length}`);
 assert.equal(new Set(ITEMS.map((x) => x.id)).size, ITEMS.length, 'ids de ítems duplicados');
 
-// Reliquias meta: cartas extra en sobres, con decaimiento por copia.
+// Reliquias meta: cartas extra en sobres, apilan completas (sin decaimiento).
 assert.deepEqual(metaBonuses([item('ojeador_estrella'), item('director_deportivo')]),
   { extraPlayerCard: 1, extraItemCard: 1 });
 assert.deepEqual(metaBonuses([item('banquillo_lujo')]), { extraPlayerCard: 1, extraItemCard: 1 });
-// 2ª copia decae (1 + 0.5 = 1.5 → floor 1): los sobres no crecen sin límite.
-assert.deepEqual(metaBonuses([item('ojeador_estrella'), item('ojeador_estrella')]),
-  { extraPlayerCard: 1, extraItemCard: 0 });
+// Cada copia suma su valor entero: 3 objetos de +1 carta dan +3 cartas en el sobre.
+assert.deepEqual(metaBonuses([item('ojeador_estrella'), item('ojeador_estrella'), item('ojeador_estrella')]),
+  { extraPlayerCard: 3, extraItemCard: 0 });
+assert.deepEqual(metaBonuses([item('banquillo_lujo'), item('banquillo_lujo'), item('banquillo_lujo')]),
+  { extraPlayerCard: 3, extraItemCard: 3 });
 
 // Efectos de partido: nerfeados a la mitad y topados por MATCH_BONUS_CAPS.
 const counterItem = item('contragolpe_ensayado');
