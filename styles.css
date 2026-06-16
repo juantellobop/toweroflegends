@@ -2303,6 +2303,12 @@ select {
   gap: 18px;
 }
 
+.team-roster .item-card{
+  min-height: 0px;
+  padding: 10px;
+  border-width: 1px;
+}
+
 .item-card .card-head {
   display: flex;
   min-height: auto;
@@ -4234,6 +4240,9 @@ select {
 
   .item-card.card {
     width: min(286px, 78vw);
+  }
+  .team-roster .item-card.card{
+    width: 100%;
   }
 
   .card-ovr {
