@@ -100,12 +100,18 @@ export function chemTeamBonus(items = []) {
 export function metaBonuses(items = []) {
   let extraPlayerCard = 0;
   let extraItemCard = 0;
+  let extraManagerCard = 0;
   // Los bonus meta apilan completos: cada copia suma su valor entero sin
   // decaimiento (3 objetos de +1 carta dan +3 cartas en cada sobre).
   for (const effect of effectiveItemEffects(items, { scalePower: false, applyDecay: false })) {
     if (effect.target !== 'meta' || effect.op !== 'add') continue;
     if (effect.stat === 'extraPlayerCard') extraPlayerCard += effect.value;
     if (effect.stat === 'extraItemCard') extraItemCard += effect.value;
+    if (effect.stat === 'extraManagerCard') extraManagerCard += effect.value;
   }
-  return { extraPlayerCard: Math.floor(extraPlayerCard), extraItemCard: Math.floor(extraItemCard) };
+  return {
+    extraPlayerCard: Math.floor(extraPlayerCard),
+    extraItemCard: Math.floor(extraItemCard),
+    extraManagerCard: Math.floor(extraManagerCard),
+  };
 }

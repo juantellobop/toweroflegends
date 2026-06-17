@@ -253,11 +253,17 @@ export const ITEMS = [
   },
   {
     id: 'banquillo_lujo', name: 'Banquillo de lujo', type: 'reliquia', rarity: 'legend',
-    desc: '+1 carta a elegir en los sobres de jugadores y de objetos.',
+    desc: '+1 carta a elegir en los sobres de jugadores, objetos y directores técnicos.',
     effects: [
       { target: 'meta', stat: 'extraPlayerCard', op: 'add', value: 1 },
       { target: 'meta', stat: 'extraItemCard', op: 'add', value: 1 },
+      { target: 'meta', stat: 'extraManagerCard', op: 'add', value: 1 },
     ],
+  },
+  {
+    id: 'carrusel_banquillos', name: 'Carrusel de banquillos', type: 'reliquia', rarity: 'epic',
+    desc: '+1 director técnico a elegir en cada sobre de entrenadores.',
+    effects: [{ target: 'meta', stat: 'extraManagerCard', op: 'add', value: 1 }],
   },
   {
     id: 'duodecimo_jugador', name: 'Duodécimo jugador', type: 'reliquia', rarity: 'legend',

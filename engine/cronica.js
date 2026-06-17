@@ -351,18 +351,30 @@ export function buildCronica(match, ctx) {
   }, rng);
 
   // Mención del director técnico (DT): una frase situacional añadida al cierre.
-  // Prioridad para que cada evento pedido pueda salir: remontada → derrota →
-  // debut de un jugador nuevo → cambios. Determinista (usa el mismo rng).
+  // Cuando hay DT rival (ctx.oppManager) entran las variantes "duelo de
+  // banquillos" que citan a ambos; si no, se cae a la versión que solo nombra al
+  // DT propio. Prioridad: remontada → derrota → debut de un jugador nuevo →
+  // empate (pulso de banquillos) → victoria (pulso de banquillos) → cambios.
+  // Determinista (usa el mismo rng).
   let closingFull = closing;
   if (ctx.manager) {
     const trailed = match.eventos.some((ev) => ev.scoreA < ev.scoreB);
     const subs = (match.sustitucionesA || []).length > 0;
     const debut = Array.isArray(ctx.debuts) && ctx.debuts.length > 0;
-    const vars = { manager: ctx.manager, team: ctx.teamName, level: ctx.level };
+    const hasOpp = Boolean(ctx.oppManager);
+    const vars = {
+      manager: ctx.manager,
+      opp: ctx.oppManager,
+      team: ctx.teamName,
+      oppTeam: ctx.oppName,
+      level: ctx.level,
+    };
     let key = null;
     if (result === 'win' && trailed) key = 'comeback';
-    else if (result === 'loss') key = 'loss';
+    else if (result === 'loss') key = hasOpp ? 'lossRival' : 'loss';
     else if (debut) { key = 'debut'; vars.player = ctx.debuts[0]; }
+    else if (result === 'draw' && hasOpp) key = 'drawRival';
+    else if (result === 'win' && hasOpp) key = 'winRival';
     else if (subs) key = 'subs';
     if (key) {
       const note = tVariant(`press.feat.manager.${key}`, vars, rng);

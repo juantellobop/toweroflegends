@@ -22,11 +22,13 @@ export function pressArticleHTML(state) {
   const match = state.lastMatch;
   if (!match || !state.opponent) return '';
   const manager = match.manager || state.manager;
+  const oppManager = match.oppManager || state.opponent.manager;
   const cronica = buildCronica(match, {
     teamName: state.team?.name || 'Leyendas',
     oppName: localizeNation(state.opponent.name),
     level: state.level,
     manager: manager ? manager.name : null,
+    oppManager: oppManager ? oppManager.name : null,
     debuts: Array.isArray(match.debuts) ? match.debuts : [],
   });
   if (!cronica) return '';

@@ -670,7 +670,9 @@ export function rollManagerPack(state) {
   const allowed = new Set(RARITIES.filter((_, i) => bias[i] > 0));
   let pool = MANAGERS.filter((m) => m.id !== state.manager?.id && allowed.has(m.rarity));
   if (!pool.length) pool = MANAGERS.filter((m) => allowed.has(m.rarity));
-  const chosen = drawCards(pool, CONFIG.MANAGER_PACK_SIZE, bias, state.rng);
+  const { extraManagerCard } = metaBonuses(state.items);
+  const size = CONFIG.MANAGER_PACK_SIZE + extraManagerCard;
+  const chosen = drawCards(pool, size, bias, state.rng);
   state.managerChoices = chosen.map(instantiate);
   return state.managerChoices;
 }
