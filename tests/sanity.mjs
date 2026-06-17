@@ -12,8 +12,8 @@ function byId(id) {
 }
 
 // Once titular fuerte contra el rival inicial: debe dominar sin convertir
-// cada highlight en goleada automática. Con la rampa de arranque
-// (OPP_EARLY_EASE) el rival de nivel 1 es de tutorial (debilitado a fuerza
+// cada highlight en goleada automática. Con la dificultad plana de arranque
+// (OPP_FLAT_LEVELS) el rival de nivel 1 es de tutorial (debilitado a fuerza
 // ~60), así que la banda de goles admite más que contra el viejo rival de 70.
 const strong = {
   name: 'Leyendas',

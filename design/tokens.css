@@ -140,6 +140,7 @@
   --red-card:    #d11a1a;   /* tarjeta roja (banco, carta, resumen) */
   --injury-ink:  #140a0a;   /* fondo del contador de partidos de baja */
   --chem-boost:  #a06bff;   /* enlace de química del "Duodécimo jugador" */
+  --mgr-boost:   var(--arcade-green);   /* +stats del DT a sus connacionales (carta/OVR) */
   --press-paper: #F6EDD5;   /* crónica de prensa: papel envejecido */
   --press-ink:   #1C1408;   /* crónica de prensa: tinta serifa */
 }

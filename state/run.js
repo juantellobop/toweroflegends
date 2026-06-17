@@ -280,6 +280,16 @@ export function isUnavailable(player) {
   return isSuspended(player) || isInjured(player);
 }
 
+// Cuenta los jugadores DISPONIBLES (no sancionados ni lesionados) por posición
+// natural en toda la plantilla. Lo usa la inmunidad por línea de la simulación.
+export function countAvailableByPosition(squad) {
+  const counts = { GK: 0, DEF: 0, MID: 0, FWD: 0 };
+  for (const p of squad || []) {
+    if (p && counts[p.position] != null && !isUnavailable(p)) counts[p.position] += 1;
+  }
+  return counts;
+}
+
 function hasAlignedDuplicate(state, player) {
   return LINES.some((line) =>
     (state.starting11[line] || []).some((p) => p && p.id === player.id && p.uid !== player.uid)
@@ -638,12 +648,24 @@ export function choosePlayerCard(state, template) {
   return card;
 }
 
+// Descarta el sobre de jugador (normal o de selecciones) sin llevarse ninguna
+// carta: cierra el sobre y continúa el bucle.
+export function discardPlayerPack(state) {
+  state.playerChoices = null;
+  state.nationChoices = null;
+}
+
 // El jugador elige un objeto del sobre.
 export function chooseItemCard(state, template) {
   const item = { ...template, uid: freshId(template.id) };
   state.items.push(item);
   state.itemChoices = null;
   return item;
+}
+
+// Descarta el sobre de objeto sin llevarse ninguno: cierra el sobre y continúa.
+export function discardItemPack(state) {
+  state.itemChoices = null;
 }
 
 // === Director técnico (DT) ===
@@ -718,12 +740,15 @@ export function playMatch(state) {
     // Banquillo disponible para sustituir tras una expulsión o lesión (suplentes
     // que no están en el once y están disponibles).
     bench: state.squad.filter((p) => !isStarter(state, p) && !isUnavailable(p)),
+    // Disponibles por posición en toda la plantilla: base de la inmunidad por
+    // línea (GK/DEF/MID/FWD) frente a lesiones y expulsiones durante el partido.
+    squadAvail: countAvailableByPosition(state.squad),
   };
   const result = simularPartido(team, state.opponent, matchRng);
-  // Regla oculta: los primeros cuatro partidos de la torre son imposibles de
-  // perder; como mínimo se empata. Del quinto en adelante se puede perder con
+  // Regla oculta: los primeros cinco partidos de la torre son imposibles de
+  // perder; como mínimo se empata. Del sexto en adelante se puede perder con
   // normalidad.
-  if (state.level <= 4) forceAtLeastDraw(result);
+  if (state.level <= 5) forceAtLeastDraw(result);
   // Once tal como saltó al campo (uids por línea, huecos incluidos), antes de
   // que applySuspensions vacíe los puestos de los expulsados. El resumen y la
   // táctica del gameover lo usan para mostrar al expulsado en su sitio.

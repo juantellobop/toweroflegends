@@ -30,7 +30,7 @@ export const MANAGERS = [
     "style": "posesion",
     "mods": {
       "attack": 2,
-      "midfield": 2,
+      "midfield": 3,
       "defense": 2
     }
   },
@@ -42,7 +42,7 @@ export const MANAGERS = [
     "rarity": "legend",
     "style": "contra",
     "mods": {
-      "attack": 1,
+      "attack": 2,
       "midfield": 1,
       "defense": 4
     }
@@ -56,7 +56,7 @@ export const MANAGERS = [
     "style": "posesion",
     "mods": {
       "attack": 4,
-      "midfield": 1,
+      "midfield": 2,
       "defense": 1
     }
   },
@@ -70,7 +70,7 @@ export const MANAGERS = [
     "mods": {
       "attack": 3,
       "midfield": 3,
-      "defense": 0
+      "defense": 1
     }
   },
   {
@@ -94,8 +94,8 @@ export const MANAGERS = [
     "rarity": "legend",
     "style": "posesion",
     "mods": {
-      "attack": 0,
-      "midfield": 7,
+      "attack": 2,
+      "midfield": 6,
       "defense": 0
     }
   },
@@ -107,7 +107,7 @@ export const MANAGERS = [
     "rarity": "legend",
     "style": "posesion",
     "mods": {
-      "attack": 2,
+      "attack": 3,
       "midfield": 4,
       "defense": 0
     }
@@ -121,7 +121,7 @@ export const MANAGERS = [
     "style": "contra",
     "mods": {
       "attack": 3,
-      "midfield": 0,
+      "midfield": 1,
       "defense": 3
     }
   },
@@ -147,7 +147,7 @@ export const MANAGERS = [
     "style": "posesion",
     "mods": {
       "attack": 1,
-      "midfield": 4,
+      "midfield": 5,
       "defense": 1
     }
   },
@@ -159,7 +159,7 @@ export const MANAGERS = [
     "rarity": "legend",
     "style": "contra",
     "mods": {
-      "attack": 0,
+      "attack": 1,
       "midfield": 2,
       "defense": 4
     }
@@ -225,7 +225,7 @@ export const MANAGERS = [
     "style": "posesion",
     "mods": {
       "attack": 4,
-      "midfield": 2,
+      "midfield": 3,
       "defense": 0
     }
   },
@@ -251,7 +251,7 @@ export const MANAGERS = [
     "style": "presion",
     "mods": {
       "attack": 3,
-      "midfield": 0,
+      "midfield": 1,
       "defense": 3
     }
   },
@@ -263,7 +263,7 @@ export const MANAGERS = [
     "rarity": "legend",
     "style": "contra",
     "mods": {
-      "attack": 0,
+      "attack": 1,
       "midfield": 2,
       "defense": 4
     }
@@ -284,7 +284,7 @@ export const MANAGERS = [
   {
     "id": "manager_valeri_nepomnyashchy",
     "name": "Valeri Nepomnyashchy",
-    "nation": "Camerún",
+    "nation": "URSS",
     "year": 1990,
     "rarity": "rare",
     "style": "contra",
@@ -303,7 +303,7 @@ export const MANAGERS = [
     "style": "presion",
     "mods": {
       "attack": 3,
-      "midfield": 2,
+      "midfield": 3,
       "defense": 2
     }
   },
@@ -472,7 +472,7 @@ export const MANAGERS = [
     "style": "presion",
     "mods": {
       "attack": 3,
-      "midfield": 1,
+      "midfield": 2,
       "defense": 2
     }
   },
@@ -484,7 +484,7 @@ export const MANAGERS = [
     "rarity": "legend",
     "style": "posesion",
     "mods": {
-      "attack": 0,
+      "attack": 1,
       "midfield": 6,
       "defense": 0
     }
@@ -497,9 +497,9 @@ export const MANAGERS = [
     "rarity": "legend",
     "style": "contra",
     "mods": {
-      "attack": 0,
-      "midfield": 0,
-      "defense": 6
+      "attack": 1,
+      "midfield": 1,
+      "defense": 5
     }
   },
   {
@@ -511,7 +511,7 @@ export const MANAGERS = [
     "style": "contra",
     "mods": {
       "attack": 3,
-      "midfield": 0,
+      "midfield": 1,
       "defense": 4
     }
   },
@@ -549,7 +549,7 @@ export const MANAGERS = [
     "rarity": "legend",
     "style": "posesion",
     "mods": {
-      "attack": 2,
+      "attack": 3,
       "midfield": 4,
       "defense": 0
     }
@@ -588,7 +588,7 @@ export const MANAGERS = [
     "rarity": "legend",
     "style": "posesion",
     "mods": {
-      "attack": 4,
+      "attack": 5,
       "midfield": 2,
       "defense": 0
     }
@@ -603,7 +603,7 @@ export const MANAGERS = [
     "mods": {
       "attack": 3,
       "midfield": 2,
-      "defense": 1
+      "defense": 2
     }
   },
   {
@@ -629,7 +629,7 @@ export const MANAGERS = [
     "mods": {
       "attack": 3,
       "midfield": 3,
-      "defense": 0
+      "defense": 1
     }
   },
   {
@@ -642,7 +642,7 @@ export const MANAGERS = [
     "mods": {
       "attack": 3,
       "midfield": 1,
-      "defense": 2
+      "defense": 3
     }
   },
   {
@@ -797,7 +797,7 @@ export const MANAGERS = [
     "style": "posesion",
     "mods": {
       "attack": 3,
-      "midfield": 2,
+      "midfield": 3,
       "defense": 0
     }
   },
@@ -836,7 +836,7 @@ export const MANAGERS = [
     "style": "posesion",
     "mods": {
       "attack": 2,
-      "midfield": 2,
+      "midfield": 3,
       "defense": 2
     }
   },
@@ -850,7 +850,7 @@ export const MANAGERS = [
     "mods": {
       "attack": 4,
       "midfield": 2,
-      "defense": 0
+      "defense": 1
     }
   },
   {
@@ -926,7 +926,7 @@ export const MANAGERS = [
     "rarity": "legend",
     "style": "posesion",
     "mods": {
-      "attack": 3,
+      "attack": 4,
       "midfield": 2,
       "defense": 1
     }
@@ -1005,7 +1005,7 @@ export const MANAGERS = [
     "style": "presion",
     "mods": {
       "attack": 3,
-      "midfield": 0,
+      "midfield": 1,
       "defense": 3
     }
   },

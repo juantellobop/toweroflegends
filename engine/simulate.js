@@ -126,6 +126,18 @@ function removeActorFromPools(team, name) {
 
 const inferiorityFactor = (reds) => Math.pow(1 - CONFIG.RED_CARD_PENALTY, reds);
 
+// Inmunidad por línea del equipo del jugador (lado A): un jugador de la posición
+// `pos` es inmune a lesiones/expulsiones cuando los disponibles de su línea (en
+// toda la plantilla, descontando las bajas ya sufridas este partido) han caído a
+// su mínimo (CONFIG.IMMUNITY_MIN). Así nunca te quedas sin cubrir el dibujo.
+function immuneForA(A, pos) {
+  if (!A.squadAvail || !pos) return false;
+  const min = CONFIG.IMMUNITY_MIN[pos];
+  if (min == null) return false;
+  const avail = (A.squadAvail[pos] || 0) - (A.immunityRemoved?.[pos] || 0);
+  return avail <= min;
+}
+
 // Rehace pools de actores, ratings naturales y ratings de juego del equipo desde
 // su alineación actual (refleja sustituciones, huecos y la química resultante).
 // Las jugadas se procesan en orden cronológico, así que mutar el equipo afecta
@@ -233,18 +245,30 @@ function recordEvent(event, A, B, score, events, tracker, rng) {
   applyScore(event, score);
   if (event.type === 'falta') {
     const foulSide = event.side === 'A' ? 'B' : 'A'; // defiende = comete la falta
+    // Posición natural del infractor (para la inmunidad por línea del jugador).
+    const offenderPos = event.offender
+      ? (event.offender.naturalPosition || event.offender.position)
+      : null;
+    // El equipo del jugador (lado A) no recibe rojas que lo dejen por debajo del
+    // mínimo de su línea: esas faltas se quedan en amarilla.
+    const immune = foulSide === 'A' && immuneForA(A, offenderPos);
     const { card, secondYellow } = resolveFoul({
       side: foulSide,
       offender: event.offender,
       phase: event.phase,
       rng,
       tracker,
+      immune,
     });
     event.card = card;
     event.secondYellow = secondYellow;
     if (card === 'red') {
       event.pattern = 'red_foul';
       const team = foulSide === 'A' ? A : B;
+      // Registra la baja para la inmunidad por línea (solo el equipo del jugador).
+      if (foulSide === 'A' && offenderPos && A.immunityRemoved) {
+        A.immunityRemoved[offenderPos] = (A.immunityRemoved[offenderPos] || 0) + 1;
+      }
       const sub = expelFromLineup(team, event.offender);
       applyRedCard(team);
       // El rival sintético no se reorganiza desde un once: se le quita el
@@ -290,6 +314,11 @@ export function simularPartido(teamA, teamB, rng) {
   const A = buildBattleTeam(teamA);
   const B = buildBattleTeam(teamB);
 
+  // Inmunidad por línea (solo el equipo del jugador): disponibles por posición en
+  // la plantilla y bajas acumuladas durante este partido (lesiones + rojas).
+  A.squadAvail = teamA.squadAvail || null;
+  A.immunityRemoved = { GK: 0, DEF: 0, MID: 0, FWD: 0 };
+
   // Ratings de salida: lo que se devuelve al final. Una tarjeta roja muta
   // team.ratings durante el partido, pero el informe refleja el once inicial.
   const startRatingsA = A.ratings;
@@ -321,9 +350,18 @@ export function simularPartido(teamA, teamB, rng) {
   const injury = rollInjury(rng);
   const applyInjury = () => {
     if (!injury) return;
-    const onField = LINES.flatMap((line) => A.starting11?.[line] || []);
+    // La víctima sale solo de los titulares en pie cuya línea NO es inmune (no
+    // ha caído al mínimo de disponibles). Si todos los que están en el campo son
+    // inmunes, el partido se salda sin lesión.
+    const onField = LINES.flatMap((line) => A.starting11?.[line] || [])
+      .filter((p) => !immuneForA(A, p.position));
     const victim = onField.length ? onField[Math.floor(rng.next() * onField.length)] : null;
     if (victim) {
+      // Solo cuenta para la inmunidad si la lesión deja baja para los próximos
+      // partidos (las simples no: el jugador sigue disponible al siguiente).
+      if (A.immunityRemoved && (CONFIG.INJURY_BAN[injury.severity] || 0) > 0) {
+        A.immunityRemoved[victim.position] = (A.immunityRemoved[victim.position] || 0) + 1;
+      }
       const sub = substituteInjured(A, victim);
       applyInjurySwap(A);
       (A.lesionados || (A.lesionados = [])).push({

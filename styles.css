@@ -1180,9 +1180,9 @@ select {
 
 /* En móvil el retrato iguala el tamaño del banquillo (48px). */
 @media (max-width: 767px) {
-  .manager-glass .manager-card { grid-template-columns: 48px minmax(0, 1fr); }
+  .manager-glass .manager-card { grid-template-columns: 72px minmax(0, 1fr); }
   .manager-glass .manager-card .card-head { width: 48px; }
-  .manager-glass .manager-card .card-portrait { width: 48px; height: 48px; }
+  .manager-glass .manager-card .card-portrait { width: 66px; height: 66px; }
   .manager-glass .manager-card .card-portrait span { font-size: 18px; }
 }
 
@@ -2294,6 +2294,18 @@ select {
   justify-self: end;
 }
 
+/* Bonus del DT connacional (+stats): se pinta en verde (--mgr-boost) para
+   diferenciarlo de la química (oro = nación, cian = época, violeta = boost). El
+   número de la stat/OVR puede pasar de 99; la barra se topa al 100% en su ancho. */
+.stat--mgr .stat-label,
+.stat--mgr .stat-val { color: var(--mgr-boost); }
+.stat--mgr .stat-fill { background: var(--mgr-boost); }
+/* Especificidad suficiente para ganar a las reglas de color base del OVR de la
+   ficha (.lineup-board/.field-chip .chip-ovr, ambas con dos clases). */
+.card-ovr.card-ovr--mgr,
+.field-chip .chip-ovr.chip-ovr--mgr,
+.team-roster .bench-ovr.bench-ovr--mgr { background-color: var(--mgr-boost); color: var(--press-ink); padding:4px; }
+
 .item-card {
   width: 260px;
   min-height: 320px;
@@ -2613,6 +2625,12 @@ select {
   opacity: .3;
 }
 
+.chem-link.era {
+  stroke: var(--arcade-cyan);
+  stroke-width: 2;
+  opacity: .95;
+}
+
 .chem-link.boost {
   stroke: var(--chem-boost);
   stroke-width: 2.5;
@@ -2624,6 +2642,14 @@ select {
   stroke-width: 3;
   opacity: 1;
 }
+
+/* Halo del glow (sustituye al filtro SVG, que fallaba en WebKit/iOS): copia
+   ancha y translúcida bajo el trazo sólido. Hereda el color de su categoría
+   (.era/.boost/.strong); aquí solo se ensancha y atenúa. La mayor especificidad
+   (dos clases) gana al ancho/opacidad de la categoría sin tocar el color. */
+.chem-link.halo.era { stroke-width: 5; opacity: .3; }
+.chem-link.halo.boost { stroke-width: 6; opacity: .34; }
+.chem-link.halo.strong { stroke-width: 7; opacity: .42; }
 
 .field-chip {
   width: 68px;
@@ -2950,6 +2976,20 @@ select {
 .bench-filter:focus-visible {
   outline: 3px solid var(--arcade-yellow);
   outline-offset: 2px;
+}
+
+/* Fila de filtros del banquillo: posición + país, lado a lado. */
+.bench-filters {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.bench-filters .bench-filter {
+  min-width: 0;
+  flex: 0 1 auto;
 }
 
 /* Carta de suplente: retrato arriba a la izquierda con OVR + posición a su

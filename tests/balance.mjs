@@ -74,13 +74,13 @@ assert.equal(new Set(ITEMS.map((x) => x.id)).size, ITEMS.length, 'ids de ítems 
 
 // Reliquias meta: cartas extra en sobres, apilan completas (sin decaimiento).
 assert.deepEqual(metaBonuses([item('ojeador_estrella'), item('director_deportivo')]),
-  { extraPlayerCard: 1, extraItemCard: 1 });
-assert.deepEqual(metaBonuses([item('banquillo_lujo')]), { extraPlayerCard: 1, extraItemCard: 1 });
+  { extraPlayerCard: 1, extraItemCard: 1, extraManagerCard: 0 });
+assert.deepEqual(metaBonuses([item('banquillo_lujo')]), { extraPlayerCard: 1, extraItemCard: 1, extraManagerCard: 1 });
 // Cada copia suma su valor entero: 3 objetos de +1 carta dan +3 cartas en el sobre.
 assert.deepEqual(metaBonuses([item('ojeador_estrella'), item('ojeador_estrella'), item('ojeador_estrella')]),
-  { extraPlayerCard: 3, extraItemCard: 0 });
+  { extraPlayerCard: 3, extraItemCard: 0, extraManagerCard: 0 });
 assert.deepEqual(metaBonuses([item('banquillo_lujo'), item('banquillo_lujo'), item('banquillo_lujo')]),
-  { extraPlayerCard: 3, extraItemCard: 3 });
+  { extraPlayerCard: 3, extraItemCard: 3, extraManagerCard: 3 });
 
 // Efectos de partido: nerfeados a la mitad y topados por MATCH_BONUS_CAPS.
 const counterItem = item('contragolpe_ensayado');

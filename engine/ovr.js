@@ -2,6 +2,8 @@
 // El OVR se calcula desde atributos y posición. El `ovr` explícito solo queda
 // como fallback para datos históricos que no tengan atributos desglosados.
 
+import { managerNationStatBonus } from './chemistry.js';
+
 export const FIELD_OVR_WEIGHTS = {
   DEF: { defending: 0.42, physical: 0.22, pace: 0.16, passing: 0.12, dribbling: 0.05, shooting: 0.03 },
   MID: { passing: 0.3, dribbling: 0.22, defending: 0.16, physical: 0.14, shooting: 0.1, pace: 0.08 },
@@ -21,14 +23,18 @@ function weightedRating(values, weights) {
   return clampOVR(score);
 }
 
-export function playerOVR(player) {
+// Con `manager` connacional, suma MANAGER_NATION_STAT_BONUS al OVR (sin tope: +3
+// a cada stat sube la media ponderada exactamente +3, así que puede pasar de 99).
+// Sin `manager` el resultado es idéntico al de siempre (ordenaciones/autofill).
+export function playerOVR(player, manager = null) {
   if (!player) return 1;
+  const bonus = manager ? managerNationStatBonus(player, manager) : 0;
   if (player.position === 'GK' && player.gk) {
-    return weightedRating(player.gk, GK_OVR_WEIGHTS);
+    return weightedRating(player.gk, GK_OVR_WEIGHTS) + bonus;
   }
   const statsRating = weightedRating(player.stats, FIELD_OVR_WEIGHTS[player.position] || FIELD_OVR_WEIGHTS.MID);
-  if (statsRating !== null) return statsRating;
-  if (typeof player.ovr === 'number') return clampOVR(player.ovr);
+  if (statsRating !== null) return statsRating + bonus;
+  if (typeof player.ovr === 'number') return clampOVR(player.ovr) + bonus;
   return 1;
 }
 

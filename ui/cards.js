@@ -4,6 +4,7 @@
 
 import { esc } from './dom.js';
 import { playerOVR } from '../engine/ovr.js';
+import { managerNationStatBonus } from '../engine/chemistry.js';
 import { playerInitials, portraitPathForManager, portraitPathForPlayer } from '../data/playerAssets.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
@@ -19,16 +20,22 @@ const FIELD_STATS = [
 ];
 const GK_STATS = [['reflexes'], ['handling'], ['positioning']];
 
-function statBars(player) {
+// `bonus` (DT connacional): se suma a cada stat —puede pasar de 99— y pinta la
+// fila de otro color (.stat--mgr). La barra se topa visualmente al 100%, pero el
+// número mostrado conserva el valor real.
+function statBars(player, bonus = 0) {
   const rows = player.position === 'GK'
     ? GK_STATS.map(([k]) => [t(`card.stat.${k}`), player.gk ? player.gk[k] : 0])
     : FIELD_STATS.map(([k]) => [t(`card.stat.${k}`), player.stats ? player.stats[k] : 0]);
-  return rows.map(([label, val]) => `
-    <div class="stat">
+  return rows.map(([label, base]) => {
+    const val = base + bonus;
+    return `
+    <div class="stat${bonus > 0 ? ' stat--mgr' : ''}">
       <span class="stat-label">${label}</span>
-      <span class="stat-bar"><span class="stat-fill" style="width:${val}%"></span></span>
+      <span class="stat-bar"><span class="stat-fill" style="width:${Math.min(100, val)}%"></span></span>
       <span class="stat-val">${val}</span>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function cardFrame(rarity) {
@@ -37,7 +44,10 @@ function cardFrame(rarity) {
 
 // Carta de jugador. `opts.selectable` añade data-uid o data-id para click.
 export function playerCardHTML(player, opts = {}) {
-  const ovr = playerOVR(player);
+  // Bonus del DT connacional (opts.manager): sube el OVR (puede pasar de 99) y
+  // tiñe el OVR y las stats de otro color.
+  const mgrBonus = managerNationStatBonus(player, opts.manager);
+  const ovr = playerOVR(player, opts.manager);
   const idAttr = opts.idValue ? `data-id="${esc(opts.idValue)}"` : '';
   // Retrato y bandera son diminutos (KB) y casi siempre visibles al renderizar:
   // por defecto se cargan eager para que no haya pop-in al abrir el sobre. Solo
@@ -53,6 +63,7 @@ export function playerCardHTML(player, opts = {}) {
   if (opts.clickable && !unavailable) cls.push('clickable');
   if (opts.disabled) cls.push('disabled-card');
   if (unavailable) cls.push('card--unavailable');
+  if (mgrBonus > 0) cls.push('card--mgr-boost');
   const statusIcon = injured
     ? `<span class="card-injury" aria-hidden="true"></span><span class="card-injury-count" aria-hidden="true">${opts.injuryMatches ?? ''}</span>`
     : suspended
@@ -61,7 +72,7 @@ export function playerCardHTML(player, opts = {}) {
   return `
   <div class="${cls.join(' ')}" ${idAttr} style="--card-frame:url('${esc(cardFrame(player.rarity))}')" ${opts.disabled || unavailable ? 'aria-disabled="true"' : ''}>
     <div class="card-head">
-      <div class="card-ovr">${ovr}</div>
+      <div class="card-ovr${mgrBonus > 0 ? ' card-ovr--mgr' : ''}">${ovr}</div>
       <div class="card-pos">${POSITION_LABEL[player.position]}</div>
       <div class="card-rarity">${RARITY_LABEL[player.rarity]}</div>
     </div>
@@ -77,7 +88,7 @@ export function playerCardHTML(player, opts = {}) {
       ${player.trait ? `<span class="chip trait">${esc(localizeTrait(player.trait))}</span>` : ''}
     </div>
     ${opts.disabled ? `<div class="owned-label"><span aria-hidden="true">✓</span> ${esc(t('card.owned'))}</div>` : ''}
-    <div class="card-stats">${statBars(player)}</div>
+    <div class="card-stats">${statBars(player, mgrBonus)}</div>
   </div>`;
 }
 

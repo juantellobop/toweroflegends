@@ -35,6 +35,12 @@ export const CONFIG = {
   INJURY_BAN: { simple: 0, moderada: 1, grave: 3, muy_grave: 6 },
   INJURY_TYPE_COUNT: 4, // tipos de lesión por grado (rango del typeIndex guardado)
 
+  // Inmunidad por línea: número mínimo de jugadores DISPONIBLES por posición en
+  // toda la plantilla. Cuando una línea cae a su mínimo, sus jugadores quedan
+  // inmunes a lesiones y expulsiones hasta que vuelva a haber más (así nunca te
+  // quedas sin poder cubrir el dibujo). La partida arranca con 2 porteros.
+  IMMUNITY_MIN: { GK: 1, DEF: 3, MID: 4, FWD: 2 },
+
   // --- Vidas / fin de run ---
   LIVES: 1, // 1 = perder termina la run; 3 = sistema de vidas
 
@@ -76,19 +82,19 @@ export const CONFIG = {
   PACK_GUARANTEE_SELECTABLE: true,
 
   // --- Rivales históricos ---
-  // Recalibrado a 70 (antes 72) tras hacer fieles los ratings de equipo:
-  // ahora ataque/defensa reflejan a tus jugadores en vez de toparse en 99, lo
-  // que bajó ~10 pts el nivel del jugador; este ajuste mantiene la dificultad.
-  OPP_BASE_STRENGTH: 70,
+  // Dificultad plana de arranque: los niveles 1..OPP_FLAT_LEVELS comparten la
+  // fuerza objetivo del nivel 1 (OPP_BASE_STRENGTH) y, a partir de ahí, sube
+  // OPP_GROWTH por nivel. 60 es el equivalente al antiguo nivel 1 (70 − 10 de
+  // descuento de la rampa); ahora ataque/defensa reflejan a tus jugadores.
+  OPP_BASE_STRENGTH: 60,
   OPP_GROWTH: 1.0,
   OPP_MATCH_WINDOW: 4,
   NO_REPEAT_RIVALS: true,
-  // Rampa de arranque: descuento a la fuerza objetivo del rival en los
-  // primeros niveles (nivel → puntos). La torre empieza contra rivales más
-  // blandos y la dificultad sin capar arranca en el nivel 6. En estos niveles
-  // el rival elegido se debilita hasta el objetivo si el pool no tiene
+  // Niveles iniciales con la dificultad del nivel 1: 1..5 comparten la fuerza
+  // objetivo plana; desde el 6 la dificultad sube OPP_GROWTH por nivel. En estos
+  // niveles el rival elegido se debilita hasta el objetivo si el pool no tiene
   // equipos tan blandos (ver generateOpponent).
-  OPP_EARLY_EASE: { 1: 10, 2: 8, 3: 6, 4: 4, 5: 2 },
+  OPP_FLAT_LEVELS: 5,
 
   // --- Química ---
   // Sin topes: toda la química construida (pares de línea, enlaces de
@@ -99,6 +105,10 @@ export const CONFIG = {
   CHEM_CORE: 1, // bonus global por escalón de núcleo nacional (ver computeTeamChem)
   CHEM_TACTIC: 1, // bonus a ataque+medio si tu plantilla encaja con el tipo del dibujo
   CHEM_MANAGER_NATION: 1, // química que aporta cada titular de la nación del DT a su línea
+  // Bonus directo a TODAS las stats de cada jugador de la nacionalidad del DT
+  // activo (sin tope: puede pasar de 99). Entra en los ratings de la simulación,
+  // en el OVR y se pinta de otro color en la carta.
+  MANAGER_NATION_STAT_BONUS: 3,
   // Cuánto pesa la química en los ratings que usa la simulación. Los puntos de
   // química que ve el jugador no cambian; solo su efecto sobre el desempeño.
   CHEM_IMPACT: 1.4,
@@ -131,11 +141,12 @@ export const CONFIG = {
 
 };
 
-// Fuerza objetivo del rival histórico en un nivel dado. Los primeros niveles
-// llevan un descuento (OPP_EARLY_EASE) para que el arranque sea amable.
+// Fuerza objetivo del rival histórico en un nivel dado. La dificultad es plana
+// (la del nivel 1) hasta OPP_FLAT_LEVELS inclusive y sube OPP_GROWTH por nivel
+// a partir de ahí (nivel 6 → +1, nivel 7 → +2…).
 export function targetStrength(level) {
-  const ease = CONFIG.OPP_EARLY_EASE[level] || 0;
-  return CONFIG.OPP_BASE_STRENGTH + (level - 1) * CONFIG.OPP_GROWTH - ease;
+  const over = Math.max(0, level - CONFIG.OPP_FLAT_LEVELS);
+  return CONFIG.OPP_BASE_STRENGTH + over * CONFIG.OPP_GROWTH;
 }
 
 // Alias conservado para consumidores anteriores del motor.

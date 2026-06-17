@@ -3,6 +3,7 @@
 
 import {
   createRun, rollPlayerPack, rollItemPack, choosePlayerCard, chooseItemCard,
+  discardPlayerPack, discardItemPack,
   isNationPackLevel, rollNationPack,
   rollManagerPack, chooseManagerCard, discardManagerPack,
   playMatch, applyResult, advanceLevel, prepareOpponent, retryLevel,
@@ -468,19 +469,21 @@ function render(navHint = 'auto') {
 
     case 'playerPack':
       renderRoute('playerPack', () => {
-        const onPick = (tpl) => {
-          choosePlayerCard(state, tpl);
+        const advance = () => {
           // El sobre de DT (nivel 1 y cada 7) va justo después del de jugadores.
           state.phase = state.pendingManagerPack ? 'managerPack' : 'itemPack';
           render('forward');
         };
+        const onPick = (tpl) => { choosePlayerCard(state, tpl); advance(); };
+        // Descartar jugadores: cierra el sobre sin llevarse carta y continúa.
+        const onDiscard = () => { discardPlayerPack(state); advance(); };
         // Cada 5 niveles el sobre normal se reemplaza por el de selecciones:
         // se elige una selección (nación + año) y de ella cualquier jugador.
         const nationTeams = isNationPackLevel(state.level) ? rollNationPack(state) : null;
         if (nationTeams && nationTeams.length) {
-          renderNationPack(root, state, nationTeams, onPick);
+          renderNationPack(root, state, nationTeams, onPick, onDiscard);
         } else {
-          renderPlayerPack(root, state, rollPlayerPack(state), onPick);
+          renderPlayerPack(root, state, rollPlayerPack(state), onPick, onDiscard);
         }
       }, navHint);
       break;
@@ -503,11 +506,18 @@ function render(navHint = 'auto') {
 
     case 'itemPack':
       renderRoute('itemPack', () => {
-        renderItemPack(root, state, rollItemPack(state), (tpl) => {
-          chooseItemCard(state, tpl);
+        const toScouting = () => {
           prepareOpponent(state);
           state.phase = 'scouting';
           render('forward');
+        };
+        renderItemPack(root, state, rollItemPack(state), (tpl) => {
+          chooseItemCard(state, tpl);
+          toScouting();
+        }, () => {
+          // Descartar objetos: cierra el sobre sin llevarse ninguno y continúa.
+          discardItemPack(state);
+          toScouting();
         });
       }, navHint);
       break;

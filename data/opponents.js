@@ -6423,10 +6423,10 @@ export function generateOpponent(level, rng, usedIds = []) {
   const candidates = similarStrengthCandidates(progressionPool, target);
   const picked = weightedByTarget(candidates, target, rng);
   let boost = target > MAX_STRENGTH ? Math.max(0, Math.round(target - picked.strength)) : 0;
-  // Rampa de arranque: en los niveles con descuento (1-5), si el pool no tiene
-  // rivales tan blandos como el objetivo, el elegido se debilita hasta él. Así
-  // la dificultad temprana sigue la curva aunque el catálogo tenga un piso.
-  if ((CONFIG.OPP_EARLY_EASE[level] || 0) > 0 && picked.strength > target) {
+  // Niveles planos de arranque (1..OPP_FLAT_LEVELS): si el pool no tiene rivales
+  // tan blandos como el objetivo, el elegido se debilita hasta él. Así la
+  // dificultad temprana sigue la curva aunque el catálogo tenga un piso (~64).
+  if (level <= CONFIG.OPP_FLAT_LEVELS && picked.strength > target) {
     boost = Math.round(target - picked.strength);
   }
   return deepClone(picked, level, boost);

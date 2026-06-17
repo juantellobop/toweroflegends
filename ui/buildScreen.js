@@ -12,31 +12,46 @@ import {
   canPlacePlayerInSlot, assignLineToSlots,
 } from '../state/run.js';
 import { playerOVR } from '../engine/ovr.js';
-import { chemNation } from '../engine/chemistry.js';
+import { chemNation, managerNationStatBonus } from '../engine/chemistry.js';
 import { chemTeamBonus } from '../engine/items.js';
 import { FORMATIONS, LINES, chemLinks, formationLineSlots, formationType } from '../data/config.js';
 import { countTo } from '../match/feedback.js';
 import { playerInitials, playerSurname, portraitPathForPlayer } from '../data/playerAssets.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
-import { localizeOpponentName, t } from '../data/i18n.js';
+import { localizeNation, localizeOpponentName, t } from '../data/i18n.js';
 import { PITCH_MARKINGS } from './pitchArt.js';
 import { positionSlots } from './lineupBoard.js';
 
-// Filtro del banco de suplentes por línea ('ALL' | GK | DEF | MID | FWD).
-// Vive a nivel de módulo: el tablero se re-renderiza con cada cambio de
-// alineación y el filtro elegido debe sobrevivir a esos re-renders.
+// Filtros del banco de suplentes: por línea ('ALL' | GK | DEF | MID | FWD) y por
+// país ('ALL' | nación). Viven a nivel de módulo: el tablero se re-renderiza con
+// cada cambio de alineación y el filtro elegido debe sobrevivir a esos re-renders.
 let benchFilter = 'ALL';
+let benchCountryFilter = 'ALL';
 
 function applyBenchFilter(root) {
   let visible = 0;
   root.querySelectorAll('.bench-item').forEach((item) => {
-    const show = benchFilter === 'ALL' || item.dataset.line === benchFilter;
+    const posOk = benchFilter === 'ALL' || item.dataset.line === benchFilter;
+    const countryOk = benchCountryFilter === 'ALL' || item.dataset.nation === benchCountryFilter;
+    const show = posOk && countryOk;
     item.hidden = !show;
     if (show) visible += 1;
   });
   const note = root.querySelector('.bench-filter-empty');
   if (note) note.hidden = visible > 0;
+}
+
+// Opciones del filtro por país: las nacionalidades distintas presentes en el
+// banquillo, ordenadas por su nombre localizado. Si el filtro guardado ya no está
+// entre ellas (salió del banco el último connacional), se reinicia a 'ALL'.
+function benchCountryOptions(state) {
+  const nations = [...new Set(
+    state.squad.filter((p) => !isStarter(state, p)).map((p) => p.nation).filter(Boolean)
+  )].sort((a, b) => localizeNation(a).localeCompare(localizeNation(b)));
+  if (benchCountryFilter !== 'ALL' && !nations.includes(benchCountryFilter)) benchCountryFilter = 'ALL';
+  return [['ALL', t('build.benchCountryAll')], ...nations.map((n) => [n, localizeNation(n)])]
+    .map(([value, label]) => `<option value="${esc(value)}" ${value === benchCountryFilter ? 'selected' : ''}>${esc(label)}</option>`).join('');
 }
 
 function slotLabel(line, role) {
@@ -75,36 +90,30 @@ function webLinks(positions, formation) {
 function fieldSVG(positions, formation, boost = false) {
   const links = webLinks(positions, formation);
   const lineEl = (l, cls) => `<line x1="${l.x1}" y1="${l.y1}" x2="${l.x2}" y2="${l.y2}" class="chem-link ${cls}" />`;
-  // Orden de pintado = orden de apilado en SVG (el último va encima). De abajo a
-  // arriba: web tenue (todo) → época (celeste) → boost (violeta, solo los enlaces
-  // que activa el Duodécimo jugador) → nación (dorado), que queda SIEMPRE encima.
+  // Glow neón SIN filtro SVG: el `feGaussianBlur`/`userSpaceOnUse` fallaba de
+  // forma intermitente en WebKit/iOS y dejaba los enlaces de color sin pintar
+  // (el dorado "no aparecía" en móvil). En su lugar, cada enlace con química se
+  // pinta como un HALO ancho translúcido + un trazo sólido encima (puro stroke,
+  // robusto en todo navegador). Orden de apilado de abajo a arriba: web tenue →
+  // época (celeste) → boost (violeta, solo los que activa el Duodécimo) → nación
+  // (dorado, SIEMPRE arriba). Dentro de cada capa, primero los halos y luego los
+  // trazos para que ningún halo tape un trazo de su misma capa.
+  const layer = (sel, cls) =>
+    sel.map((l) => lineEl(l, `halo ${cls}`)).join('') + sel.map((l) => lineEl(l, cls)).join('');
   const web = links.map((l) => lineEl(l, 'web')).join('');
-  const era = links.filter((l) => l.era && !l.nation).map((l) => lineEl(l, '')).join('');
-  const boostLinks = boost
-    ? links.filter((l) => !l.nation && !l.era).map((l) => lineEl(l, 'boost')).join('')
-    : '';
-  const nation = links.filter((l) => l.nation).map((l) => lineEl(l, 'strong')).join('');
-  // Glow neón con FILTRO SVG (no CSS `filter`, que no se renderiza sobre líneas
-  // horizontales por su bbox de altura 0). feGaussianBlur preserva el color de
-  // cada trazo, así dorado/violeta/celeste brillan en su tono; la región fija
-  // userSpaceOnUse evita que se recorte el halo. El web tenue queda fuera del
-  // grupo (sin glow). Los enlaces con química se apilan encima: época → boost →
-  // nación (dorado siempre arriba).
+  const era = layer(links.filter((l) => l.era && !l.nation), 'era');
+  const boostLinks = boost ? layer(links.filter((l) => !l.nation && !l.era), 'boost') : '';
+  const nation = layer(links.filter((l) => l.nation), 'strong');
   return `
     <svg class="field-bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <filter id="chemGlow" filterUnits="userSpaceOnUse" x="-5" y="-5" width="110" height="110">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="0.85" result="b" />
-          <feMerge><feMergeNode in="b" /><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-        </filter>
-      </defs>
       ${PITCH_MARKINGS}
-      <g class="chem-links">${web}<g filter="url(#chemGlow)">${era}${boostLinks}${nation}</g></g>
+      <g class="chem-links">${web}${era}${boostLinks}${nation}</g>
     </svg>`;
 }
 
-function chipHTML(p, line, slotIndex) {
-  const ovr = playerOVR(p);
+function chipHTML(p, line, slotIndex, manager) {
+  const ovr = playerOVR(p, manager);
+  const boosted = managerNationStatBonus(p, manager) > 0;
   return `
     <button class="field-chip filled lineup-draggable rarity-${p.rarity}" data-uid="${p.uid}"
             data-line="${line}" data-slot="${slotIndex}" draggable="true"
@@ -114,7 +123,7 @@ function chipHTML(p, line, slotIndex) {
         <span>${esc(playerInitials(p.name))}</span>
         <img class="chip-flag" src="${esc(flagSrcForNation(p.nation))}" alt="" draggable="false" loading="eager" decoding="async" />
       </span>
-      <span class="chip-ovr">${ovr}</span>
+      <span class="chip-ovr${boosted ? ' chip-ovr--mgr' : ''}">${ovr}</span>
       <span class="chip-name" title="${esc(p.name)}">${esc(playerSurname(p.name))}</span>
       <span class="chip-info" role="button" tabindex="0" data-info-uid="${p.uid}" aria-label="${esc(t('build.viewStatsAria', { name: p.name }))}">i</span>
     </button>`;
@@ -128,9 +137,9 @@ function emptyHTML(line, slotIndex, role) {
     </button>`;
 }
 
-function fieldNodes(positions) {
+function fieldNodes(positions, manager) {
   return positions.map((p) => {
-    const html = p.player ? chipHTML(p.player, p.line, p.slotIndex) : emptyHTML(p.line, p.slotIndex, p.role);
+    const html = p.player ? chipHTML(p.player, p.line, p.slotIndex, manager) : emptyHTML(p.line, p.slotIndex, p.role);
     const uidAttr = p.player ? `data-uid="${p.player.uid}"` : '';
     return `<div class="chip-anchor" data-line="${p.line}" data-slot="${p.slotIndex}" ${uidAttr} style="left:${p.x}%;top:${p.y}%">${html}</div>`;
   }).join('');
@@ -238,7 +247,7 @@ function bench(state) {
         ? t('build.benchSuspendedAria', { name: p.name })
         : t('build.benchAria', { name: p.name });
     return `
-      <button class="bench-item${blocked ? '' : ' lineup-draggable'} rarity-${p.rarity}${stateClass}" data-uid="${p.uid}" data-line="${p.position}"${blocked ? ' data-suspended="1"' : ' draggable="true"'}
+      <button class="bench-item${blocked ? '' : ' lineup-draggable'} rarity-${p.rarity}${stateClass}" data-uid="${p.uid}" data-line="${p.position}" data-nation="${esc(p.nation)}"${blocked ? ' data-suspended="1"' : ' draggable="true"'}
               aria-label="${esc(ariaLabel)}">
         <span class="bench-face" aria-hidden="true">
           <img src="${esc(portraitPathForPlayer(p))}" alt="" draggable="false" loading="eager" decoding="async" data-hide-on-error="true" />
@@ -248,7 +257,7 @@ function bench(state) {
           ${suspended ? `<span class="bench-red-card" title="${esc(t('build.suspended'))}" aria-hidden="true"></span>` : ''}
         </span>
         <span class="bench-topline" aria-hidden="true">
-          <span class="bench-ovr">${playerOVR(p)}</span>
+          <span class="bench-ovr${managerNationStatBonus(p, state.manager) > 0 ? ' bench-ovr--mgr' : ''}">${playerOVR(p, state.manager)}</span>
           <span class="bench-pos">${POSITION_LABEL[p.position]}</span>
         </span>
         <span class="bench-name">${esc(p.name)}</span>
@@ -293,7 +302,7 @@ export function renderBuild(root, state, handlers) {
 
           <div class="field lineup-board" id="field" data-formation="${esc(state.formation)}">
             ${fieldSVG(positions, state.formation, chemTeamBonus(state.items) > 0)}
-            ${fieldNodes(positions)}
+            ${fieldNodes(positions, state.manager)}
           </div>
           ${chemLegend(state)}
 
@@ -317,10 +326,15 @@ export function renderBuild(root, state, handlers) {
               <div>
                 <h2>${t('build.roster')}</h2>
               </div>
-              <select id="benchFilter" class="bench-filter" aria-label="${esc(t('build.benchFilterAria'))}">
-                ${[['ALL', t('build.benchAll')], ...LINES.map((line) => [line, LINE_LABEL[line]])]
-                  .map(([value, label]) => `<option value="${value}" ${value === benchFilter ? 'selected' : ''}>${esc(label)}</option>`).join('')}
-              </select>
+              <div class="bench-filters">
+                <select id="benchFilter" class="bench-filter" aria-label="${esc(t('build.benchFilterAria'))}">
+                  ${[['ALL', t('build.benchAll')], ...LINES.map((line) => [line, LINE_LABEL[line]])]
+                    .map(([value, label]) => `<option value="${value}" ${value === benchFilter ? 'selected' : ''}>${esc(label)}</option>`).join('')}
+                </select>
+                <select id="benchCountryFilter" class="bench-filter" aria-label="${esc(t('build.benchCountryAria'))}">
+                  ${benchCountryOptions(state)}
+                </select>
+              </div>
             </div>
             ${bench(state)}
 
@@ -390,12 +404,19 @@ export function renderBuild(root, state, handlers) {
     });
   });
 
-  // === Filtro del banco por línea ===
+  // === Filtros del banco (línea + país) ===
   const benchFilterSelect = root.querySelector('#benchFilter');
+  const benchCountrySelect = root.querySelector('#benchCountryFilter');
   if (benchFilterSelect) {
     applyBenchFilter(root);
     benchFilterSelect.addEventListener('change', () => {
       benchFilter = benchFilterSelect.value;
+      applyBenchFilter(root);
+    });
+  }
+  if (benchCountrySelect) {
+    benchCountrySelect.addEventListener('change', () => {
+      benchCountryFilter = benchCountrySelect.value;
       applyBenchFilter(root);
     });
   }
@@ -418,7 +439,7 @@ function wirePlayerStats(root, state) {
   const open = (uid) => {
     const player = state.squad.find((p) => p.uid === uid);
     if (!player) return;
-    body.innerHTML = playerCardHTML(player);
+    body.innerHTML = playerCardHTML(player, { manager: state.manager });
     modal.hidden = false;
   };
   const close = () => { modal.hidden = true; body.innerHTML = ''; };
@@ -864,6 +885,7 @@ function openPicker(root, state, line, slotIndex, handlers) {
             injured,
             suspended,
             injuryMatches: p.injuryMatches,
+            manager: state.manager,
           });
         }).join('')}
       </div>

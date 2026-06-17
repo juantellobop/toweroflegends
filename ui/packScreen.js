@@ -100,7 +100,7 @@ function squadReviewModal(state) {
   const subs = state.squad
     .filter((p) => !starterUids.has(p.uid))
     .sort((a, b) => playerOVR(b) - playerOVR(a));
-  const grid = (players) => `<div class="squad-review-grid">${players.map((p) => playerCardHTML(p)).join('')}</div>`;
+  const grid = (players) => `<div class="squad-review-grid">${players.map((p) => playerCardHTML(p, { manager: state.manager })).join('')}</div>`;
   return `
     <div class="player-modal squad-review-modal" id="squadReview" hidden>
       <div class="player-modal-backdrop" data-close></div>
@@ -130,6 +130,20 @@ function wireSquadReview(root) {
   });
 }
 
+// Barra de descarte: botón para cerrar el sobre sin quedarse con nada (igual que
+// "Descartar entrenadores" del DT). Oculta hasta abrir el sobre; devuelve el
+// callback onReveal que la muestra. Sin onDiscard no monta nada (devuelve null).
+function attachDiscardBar(root, label, onDiscard) {
+  if (!onDiscard) return null;
+  const discardBar = document.createElement('div');
+  discardBar.className = 'pack-actions action-bar pack-discard';
+  discardBar.hidden = true;
+  discardBar.innerHTML = `<button id="discardBtn" class="ghost big glass-cta">${esc(label)}</button>`;
+  root.querySelector('#openBar')?.after(discardBar);
+  discardBar.querySelector('#discardBtn').addEventListener('click', () => onDiscard());
+  return () => { discardBar.hidden = false; };
+}
+
 // Una carta "repartida": contenedor 3D con dorso (arte por tipo) y cara real.
 function dealCard(innerHTML, idValue, i, kind, selectable = true) {
   return `
@@ -144,7 +158,7 @@ function dealCard(innerHTML, idValue, i, kind, selectable = true) {
     </div>`;
 }
 
-export function renderPlayerPack(root, state, choices, onPick) {
+export function renderPlayerPack(root, state, choices, onPick, onDiscard) {
   // Calienta los retratos y banderas de las cartas que se van a revelar para que
   // el flip muestre la cara al instante (las cartas viven en un contenedor hidden).
   preloadImages([
@@ -155,17 +169,19 @@ export function renderPlayerPack(root, state, choices, onPick) {
     dealCard(playerCardHTML(c, { idValue: c.id, disabled: c.selectable === false }), c.id, i, 'player', c.selectable !== false)
   ).join('');
   root.innerHTML = shell(state, 'player', choices.length, body);
-  wire(root, choices, onPick);
+  const onReveal = attachDiscardBar(root, t('pack.playerDiscard'), onDiscard);
+  wire(root, choices, onPick, onReveal);
 }
 
-export function renderItemPack(root, state, choices, onPick) {
+export function renderItemPack(root, state, choices, onPick, onDiscard) {
   const ownedCount = (id) => (state.items || []).filter((it) => it.id === id).length;
   const body = choices.map((c, i) =>
     // stack = copias que tendrías al elegirlo (las que ya tienes + 1).
     dealCard(itemCardHTML(c, { idValue: c.id, stack: ownedCount(c.id) + 1 }), c.id, i, 'item')
   ).join('');
   root.innerHTML = shell(state, 'item', choices.length, body);
-  wire(root, choices, onPick);
+  const onReveal = attachDiscardBar(root, t('pack.itemDiscard'), onDiscard);
+  wire(root, choices, onPick, onReveal);
 }
 
 // Sobre de director técnico: 3 opciones; elegir reemplaza al DT activo. Si se
@@ -180,18 +196,9 @@ export function renderManagerPack(root, state, choices, onPick, onDiscard) {
     dealCard(managerCardHTML(c, { idValue: c.id }), c.id, i, 'manager')
   ).join('');
   root.innerHTML = shell(state, 'manager', choices.length, body);
-  // Barra de descartar: solo cuando se permite descartar, oculta hasta abrir el
-  // sobre (igual que la elección de carta).
-  let onReveal = null;
-  if (onDiscard) {
-    const discardBar = document.createElement('div');
-    discardBar.className = 'pack-actions action-bar pack-discard';
-    discardBar.hidden = true;
-    discardBar.innerHTML = `<button id="discardBtn" class="ghost big glass-cta">${esc(t('pack.managerDiscard'))}</button>`;
-    root.querySelector('#openBar')?.after(discardBar);
-    discardBar.querySelector('#discardBtn').addEventListener('click', () => onDiscard());
-    onReveal = () => { discardBar.hidden = false; };
-  }
+  // Barra de descartar: solo cuando se permite descartar (en el nivel 1 elegir DT
+  // es obligatorio), oculta hasta abrir el sobre.
+  const onReveal = attachDiscardBar(root, t('pack.managerDiscard'), onDiscard);
   wire(root, choices, onPick, onReveal);
 }
 
@@ -223,13 +230,14 @@ function nationTeamCardHTML(team) {
 
 // Sobre de selecciones: primero se elige una selección (cartas con bandera) y
 // después, de su plantel completo, el jugador que se quiera llevar.
-export function renderNationPack(root, state, teams, onPick) {
+export function renderNationPack(root, state, teams, onPick, onDiscard) {
   preloadImages(teams.map((team) => flagSrcForNation(team.nation)), { priority: 'high' });
   const body = teams.map((team, i) =>
     dealCard(nationTeamCardHTML(team), team.id, i, 'nation')
   ).join('');
   root.innerHTML = shell(state, 'nation', teams.length, body);
-  wire(root, teams, (team) => renderNationRoster(root, state, team, onPick));
+  const onReveal = attachDiscardBar(root, t('pack.playerDiscard'), onDiscard);
+  wire(root, teams, (team) => renderNationRoster(root, state, team, onPick), onReveal);
 }
 
 // Segunda etapa: plantel completo de la selección elegida. Las cartas brotan

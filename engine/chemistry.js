@@ -18,6 +18,13 @@ export function chemNation(nation) {
   return NATION_ALIASES[nation] || nation;
 }
 
+// Bonus a todas las stats que aporta el DT a sus connacionales (0 si no comparten
+// nacionalidad o no hay DT). Lo consumen los ratings, el OVR y la carta.
+export function managerNationStatBonus(player, manager) {
+  if (!player || !player.nation || !manager || !manager.nation) return 0;
+  return chemNation(player.nation) === chemNation(manager.nation) ? CONFIG.MANAGER_NATION_STAT_BONUS : 0;
+}
+
 // Química de un par de jugadores: nación compartida (+CHEM_NATION) y época
 // (década exacta vale CHEM_ERA; contiguas, 1960↔1970, la mitad).
 function pairChem(a, b) {

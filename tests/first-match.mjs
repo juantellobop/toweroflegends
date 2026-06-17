@@ -1,5 +1,6 @@
-// Regla oculta: el primer partido de la torre (nivel 1) es imposible de perder
-// (como mínimo se empata). Del segundo nivel en adelante, se puede perder.
+// Regla oculta: los primeros cinco partidos de la torre (niveles 1-5) son
+// imposibles de perder (como mínimo se empata). Del sexto nivel en adelante, se
+// puede perder con normalidad.
 
 import assert from 'node:assert/strict';
 import { createRun, playMatch } from '../state/run.js';
@@ -26,31 +27,34 @@ function assertConsistent(result) {
 
 const N = 250;
 
-// Nivel 1: nunca pierde.
+// Niveles 1-5: nunca se pierde (la regla rescata al menos el empate). Se mide en
+// el nivel 1 cuántos empates se rescatan, prueba de que la regla actúa.
 let level1Draws = 0;
-for (let i = 0; i < N; i++) {
-  const state = createRun({ seed: 1000 + i });
-  weaken(state);
-  state.level = 1;
-  const result = playMatch(state);
-  assert.ok(result.golesA >= result.golesB,
-    `Nivel 1 no debe perder (seed ${1000 + i}): ${result.golesA}-${result.golesB}`);
-  assertConsistent(result);
-  if (result.golesA === result.golesB) level1Draws += 1;
+for (const level of [1, 3, 5]) {
+  for (let i = 0; i < N; i++) {
+    const state = createRun({ seed: 1000 + i });
+    weaken(state);
+    state.level = level;
+    const result = playMatch(state);
+    assert.ok(result.golesA >= result.golesB,
+      `Nivel ${level} no debe perder (seed ${1000 + i}): ${result.golesA}-${result.golesB}`);
+    assertConsistent(result);
+    if (level === 1 && result.golesA === result.golesB) level1Draws += 1;
+  }
 }
 
-// Nivel 2 (mismo equipo flojo): se permite perder con normalidad.
-let level2Losses = 0;
+// Nivel 6 (mismo equipo flojo): se permite perder con normalidad.
+let level6Losses = 0;
 for (let i = 0; i < N; i++) {
   const state = createRun({ seed: 1000 + i });
   weaken(state);
-  state.level = 2;
+  state.level = 6;
   const result = playMatch(state);
   assertConsistent(result);
-  if (result.golesB > result.golesA) level2Losses += 1;
+  if (result.golesB > result.golesA) level6Losses += 1;
 }
 
 assert.ok(level1Draws > 0, 'Con un equipo flojo, el nivel 1 debería rescatar empates (prueba que la regla actúa)');
-assert.ok(level2Losses > 0, 'En nivel 2 deben poder darse derrotas (la regla solo aplica al primer partido)');
+assert.ok(level6Losses > 0, 'En nivel 6 deben poder darse derrotas (la regla solo cubre los niveles 1-5)');
 
-console.log(`Regla del primer partido: OK (nivel1 empates rescatados=${level1Draws}/${N}, nivel2 derrotas=${level2Losses}/${N})`);
+console.log(`Regla de los primeros cinco partidos: OK (nivel1 empates rescatados=${level1Draws}/${N}, nivel6 derrotas=${level6Losses}/${N})`);

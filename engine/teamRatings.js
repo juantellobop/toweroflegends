@@ -3,7 +3,7 @@
 // También construye el "battle team" que necesita la simulación: ratings +
 // listas de rematadores/asistentes para resolver las jugadas.
 
-import { computeChemistry, computeTeamChem } from './chemistry.js';
+import { computeChemistry, computeTeamChem, managerNationStatBonus } from './chemistry.js';
 import { applyItemsToRatings, chemTeamBonus, matchBonuses } from './items.js';
 import { applyTraitToStats, gkDefenseLineBonus, gkTraitBonus, shooterWeightMultiplier } from './traits.js';
 import { CONFIG, LINES, formationLineSlots, formationType, FORMATION_MODIFIERS } from '../data/config.js';
@@ -14,6 +14,27 @@ function avg(arr) {
   return arr.reduce((a, b) => a + b, 0) / arr.length;
 }
 
+// Stats efectivas para los ratings: rasgo + bonus del DT connacional (+N a todas
+// las stats, sin tope). Sin bonus devuelve la referencia de siempre (los
+// llamadores no la mutan); con bonus, una copia con cada stat aumentada.
+function effectiveStats(player, manager) {
+  const s = applyTraitToStats(player);
+  const bonus = manager ? managerNationStatBonus(player, manager) : 0;
+  if (!s || !bonus) return s;
+  const out = { ...s };
+  for (const k in out) out[k] += bonus;
+  return out;
+}
+
+// Atributos de portero con el bonus del DT connacional aplicado (o los originales).
+function effectiveGk(player, manager) {
+  const gk = player && player.gk;
+  if (!gk) return null;
+  const bonus = manager ? managerNationStatBonus(player, manager) : 0;
+  if (!bonus) return gk;
+  return { reflexes: gk.reflexes + bonus, handling: gk.handling + bonus, positioning: gk.positioning + bonus };
+}
+
 function weightedAvg(items) {
   const usable = items.filter((item) => item && item.weight > 0);
   const totalWeight = usable.reduce((sum, item) => sum + item.weight, 0);
@@ -21,11 +42,13 @@ function weightedAvg(items) {
   return usable.reduce((sum, item) => sum + item.value * item.weight, 0) / totalWeight;
 }
 
-// Rating de portero: media de sus tres atributos + bonus de rasgo.
-function gkRatingOf(gkPlayers) {
+// Rating de portero: media de sus tres atributos (con bonus del DT connacional
+// si lo hay) + bonus de rasgo.
+function gkRatingOf(gkPlayers, manager) {
   const gk = gkPlayers && gkPlayers[0];
   if (!gk || !gk.gk) return 45; // sin portero, valor pobre
-  const base = (gk.gk.reflexes + gk.gk.handling + gk.gk.positioning) / 3;
+  const g = effectiveGk(gk, manager);
+  const base = (g.reflexes + g.handling + g.positioning) / 3;
   return base + gkTraitBonus(gk);
 }
 
@@ -133,21 +156,21 @@ function forwardScore(s, profile) {
   return 0.47 * s.shooting + 0.19 * s.pace + 0.19 * s.dribbling + 0.1 * s.physical + 0.05 * s.defending;
 }
 
-// Stats con rasgo aplicado + perfil del hueco, para puntuar cada grupo.
-function statsWithProfile(entries) {
-  return entries.map(({ player, profile }) => ({ s: applyTraitToStats(player), profile }));
+// Stats con rasgo + bonus del DT + perfil del hueco, para puntuar cada grupo.
+function statsWithProfile(entries, manager) {
+  return entries.map(({ player, profile }) => ({ s: effectiveStats(player, manager), profile }));
 }
 
 // Calcula los cuatro ratings base a partir del once titular por líneas.
-function baseRatings(starting11, formation) {
+function baseRatings(starting11, formation, manager) {
   const groups = tacticalGroups(starting11, formation);
-  const def = statsWithProfile(groups.DEF);
-  const mid = statsWithProfile(groups.MID);
-  const eng = statsWithProfile(groups.ENG);
-  const fwd = statsWithProfile(groups.FWD);
+  const def = statsWithProfile(groups.DEF, manager);
+  const mid = statsWithProfile(groups.MID, manager);
+  const eng = statsWithProfile(groups.ENG, manager);
+  const fwd = statsWithProfile(groups.FWD, manager);
   const laterals = def.filter(({ profile }) => profile === 'lateral');
 
-  const gkRating = gkRatingOf(starting11.GK);
+  const gkRating = gkRatingOf(starting11.GK, manager);
 
   // Defensa = nivel de la línea defensiva con el portero como un integrante
   // más (mezcla ponderada, no un bonus sumado aparte). Así el número refleja a
@@ -245,7 +268,7 @@ export function calcularRatings(team) {
     for (const k in r) r[k] = Math.max(1, Math.round(r[k] * 10) / 10);
     return r;
   }
-  let r = baseRatings(team.starting11, team.formation);
+  let r = baseRatings(team.starting11, team.formation, team.manager || null);
   r = applyChemistry(r, team.starting11, team.formation, team.items || [], team.manager || null);
   r = applyItemsToRatings(r, team.items || [], team.formation);
   r = applyFormationModifiers(r, team.formation);
@@ -268,7 +291,7 @@ function buildShooters(team, ratings) {
     ];
     const fallback = pool.length ? pool : groups.MID.map((entry) => ({ ...entry, roleWeight: 1 }));
     return fallback.map(({ player: p, profile, roleWeight, enganche }) => {
-      const s = applyTraitToStats(p) || {};
+      const s = effectiveStats(p, team.manager) || {};
       const shooterRoleWeight = enganche
         ? engancheAttackScore(s, profile)
         : profile === 'extremo'
@@ -310,7 +333,7 @@ function buildAssisters(team) {
       ...laterals.map((entry) => ({ ...entry, roleWeight: 0.5 })),
     ];
     return pool.map(({ player: p, roleWeight }) => {
-      const s = applyTraitToStats(p) || {};
+      const s = effectiveStats(p, team.manager) || {};
       // passing/dribbling se exponen para los duelos de construcción/creación.
       return { name: p.name, passing: s.passing, dribbling: s.dribbling, weight: (s.passing * 0.7 + s.dribbling * 0.3) * roleWeight, trait: p.trait || null };
     });
@@ -336,12 +359,13 @@ function fallbackRatingForLine(line, ratings) {
   return ratings[line === 'DEF' ? 'defense' : line === 'MID' ? 'midfield' : line === 'FWD' ? 'attack' : 'gk'];
 }
 
-function playerRatingForLine(player, line, ratings, role = line, profile) {
+function playerRatingForLine(player, line, ratings, role = line, profile, manager = null) {
   if (!player) return fallbackRatingForLine(line, ratings);
   if (player.position === 'GK' && player.gk) {
-    return (player.gk.reflexes + player.gk.handling + player.gk.positioning) / 3;
+    const g = effectiveGk(player, manager);
+    return (g.reflexes + g.handling + g.positioning) / 3;
   }
-  const s = player.stats ? applyTraitToStats(player) : null;
+  const s = player.stats ? effectiveStats(player, manager) : null;
   if (s && role === 'ENG' && line === 'MID') return engancheMidScore(s, profile);
   if (s && role === 'ENG' && line === 'FWD') return engancheAttackScore(s, profile);
   if (s && line === 'DEF') return defScore(s, profile);
@@ -352,9 +376,9 @@ function playerRatingForLine(player, line, ratings, role = line, profile) {
 }
 
 function normalizeLinePlayer(player, line, ratings, opts = {}) {
-  const rating = playerRatingForLine(player, line, ratings, opts.role, opts.profile);
-  const s = player && player.stats ? applyTraitToStats(player) : null;
-  const gk = player && player.gk ? player.gk : null;
+  const rating = playerRatingForLine(player, line, ratings, opts.role, opts.profile, opts.manager);
+  const s = player && player.stats ? effectiveStats(player, opts.manager) : null;
+  const gk = player && player.gk ? effectiveGk(player, opts.manager) : null;
   return {
     name: player?.name || `${line} ${Math.round(rating)}`,
     // Identidad del jugador real (equipo del jugador): permite mapear al
@@ -386,7 +410,7 @@ function linePlayers(team, ratings, line) {
   if (team.starting11) {
     const groups = tacticalGroups(team.starting11, team.formation);
     return (groups[line] || []).map(({ player, profile }) =>
-      normalizeLinePlayer(player, line, ratings, { profile }));
+      normalizeLinePlayer(player, line, ratings, { profile, manager: team.manager }));
   }
   if (team.lineup) {
     return team.lineup
@@ -412,11 +436,11 @@ export function buildBattleTeam(team) {
   const defenders = linePlayers(team, ratings, 'DEF');
   const midfielders = [
     ...linePlayers(team, ratings, 'MID'),
-    ...enganches.map(({ player, profile }) => normalizeLinePlayer(player, 'MID', ratings, { role: 'ENG', profile, weightScale: 0.75 })),
+    ...enganches.map(({ player, profile }) => normalizeLinePlayer(player, 'MID', ratings, { role: 'ENG', profile, weightScale: 0.75, manager: team.manager })),
   ];
   const attackers = [
     ...linePlayers(team, ratings, 'FWD'),
-    ...enganches.map(({ player, profile }) => normalizeLinePlayer(player, 'FWD', ratings, { role: 'ENG', profile, weightScale: 0.65 })),
+    ...enganches.map(({ player, profile }) => normalizeLinePlayer(player, 'FWD', ratings, { role: 'ENG', profile, weightScale: 0.65, manager: team.manager })),
   ];
   return {
     name: team.name,
