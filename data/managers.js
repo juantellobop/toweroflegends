@@ -206,7 +206,7 @@ export const MANAGERS = [
   {
     "id": "manager_jack_charlton",
     "name": "Jack Charlton",
-    "nation": "Irlanda",
+    "nation": "Inglaterra",
     "year": 1990,
     "rarity": "rare",
     "style": "contra",
@@ -362,7 +362,7 @@ export const MANAGERS = [
   {
     "id": "manager_sven_goran_eriksson",
     "name": "Sven-Göran Eriksson",
-    "nation": "Inglaterra",
+    "nation": "Suecia",
     "year": 2002,
     "rarity": "epic",
     "style": "contra",
@@ -375,7 +375,7 @@ export const MANAGERS = [
   {
     "id": "manager_gerardo_tata_martino",
     "name": "Gerardo \"Tata\" Martino",
-    "nation": "Paraguay",
+    "nation": "Argentina",
     "year": 2010,
     "rarity": "epic",
     "style": "presion",
@@ -414,7 +414,7 @@ export const MANAGERS = [
   {
     "id": "manager_bora_milutinovic",
     "name": "Bora Milutinović",
-    "nation": "México",
+    "nation": "Yugoslavia",
     "year": 1986,
     "rarity": "epic",
     "style": "posesion",
@@ -656,6 +656,422 @@ export const MANAGERS = [
       "attack": 3,
       "midfield": 2,
       "defense": 0
+    }
+  },
+  {
+    "id": "manager_zlatko_dalic",
+    "name": "Zlatko Dalić",
+    "nation": "Yugoslavia",
+    "year": 2018,
+    "rarity": "epic",
+    "style": "presion",
+    "mods": {
+      "attack": 2,
+      "midfield": 2,
+      "defense": 1
+    }
+  },
+  {
+    "id": "manager_tite",
+    "name": "Tite",
+    "nation": "Brasil",
+    "year": 2022,
+    "rarity": "epic",
+    "style": "presion",
+    "mods": {
+      "attack": 2,
+      "midfield": 2,
+      "defense": 0
+    }
+  },
+  {
+    "id": "manager_fernando_santos",
+    "name": "Fernando Santos",
+    "nation": "Portugal",
+    "year": 2022,
+    "rarity": "epic",
+    "style": "contra",
+    "mods": {
+      "attack": 2,
+      "midfield": 0,
+      "defense": 3
+    }
+  },
+  {
+    "id": "manager_roberto_martinez",
+    "name": "Roberto Martínez",
+    "nation": "España",
+    "year": 2018,
+    "rarity": "epic",
+    "style": "contra",
+    "mods": {
+      "attack": 0,
+      "midfield": 0,
+      "defense": 5
+    }
+  },
+  {
+    "id": "manager_oscar_tabarez",
+    "name": "Óscar Tabárez",
+    "nation": "Uruguay",
+    "year": 2018,
+    "rarity": "epic",
+    "style": "presion",
+    "mods": {
+      "attack": 2,
+      "midfield": 1,
+      "defense": 2
+    }
+  },
+  {
+    "id": "manager_alejandro_sabella",
+    "name": "Alejandro Sabella",
+    "nation": "Argentina",
+    "year": 2014,
+    "rarity": "epic",
+    "style": "presion",
+    "mods": {
+      "attack": 1,
+      "midfield": 2,
+      "defense": 3
+    }
+  },
+  {
+    "id": "manager_marc_wilmots",
+    "name": "Marc Wilmots",
+    "nation": "Bélgica",
+    "year": 2014,
+    "rarity": "rare",
+    "style": "posesion",
+    "mods": {
+      "attack": 3,
+      "midfield": 0,
+      "defense": 0
+    }
+  },
+  {
+    "id": "manager_jose_pekerman",
+    "name": "José Pekerman",
+    "nation": "Argentina",
+    "year": 2006,
+    "rarity": "epic",
+    "style": "posesion",
+    "mods": {
+      "attack": 4,
+      "midfield": 1,
+      "defense": 0
+    }
+  },
+  {
+    "id": "manager_jorge_luis_pinto",
+    "name": "Jorge Luis Pinto",
+    "nation": "Colombia",
+    "year": 2014,
+    "rarity": "rare",
+    "style": "posesion",
+    "mods": {
+      "attack": 1,
+      "midfield": 2,
+      "defense": 0
+    }
+  },
+  {
+    "id": "manager_bert_van_marwijk",
+    "name": "Bert van Marwijk",
+    "nation": "Países Bajos",
+    "year": 2010,
+    "rarity": "epic",
+    "style": "contra",
+    "mods": {
+      "attack": 0,
+      "midfield": 1,
+      "defense": 4
+    }
+  },
+  {
+    "id": "manager_maradona",
+    "name": "Maradona",
+    "nation": "Argentina",
+    "year": 2010,
+    "rarity": "legend",
+    "style": "posesion",
+    "mods": {
+      "attack": 3,
+      "midfield": 2,
+      "defense": 0
+    }
+  },
+  {
+    "id": "manager_dunga",
+    "name": "Dunga",
+    "nation": "Brasil",
+    "year": 2010,
+    "rarity": "rare",
+    "style": "presion",
+    "mods": {
+      "attack": 2,
+      "midfield": 1,
+      "defense": 0
+    }
+  },
+  {
+    "id": "manager_milovan_rajevac",
+    "name": "Milovan Rajevac",
+    "nation": "Yugoslavia",
+    "year": 2010,
+    "rarity": "rare",
+    "style": "contra",
+    "mods": {
+      "attack": 1,
+      "midfield": 0,
+      "defense": 3
+    }
+  },
+  {
+    "id": "manager_raymond_domenech",
+    "name": "Raymond Domenech",
+    "nation": "Francia",
+    "year": 2006,
+    "rarity": "legend",
+    "style": "posesion",
+    "mods": {
+      "attack": 2,
+      "midfield": 2,
+      "defense": 2
+    }
+  },
+  {
+    "id": "manager_jurgen_klinsmann",
+    "name": "Jürgen Klinsmann",
+    "nation": "Alemania",
+    "year": 2006,
+    "rarity": "legend",
+    "style": "posesion",
+    "mods": {
+      "attack": 4,
+      "midfield": 2,
+      "defense": 0
+    }
+  },
+  {
+    "id": "manager_oleh_blojin",
+    "name": "Oleh Blojín",
+    "nation": "URSS",
+    "year": 2006,
+    "rarity": "rare",
+    "style": "contra",
+    "mods": {
+      "attack": 2,
+      "midfield": 0,
+      "defense": 2
+    }
+  },
+  {
+    "id": "manager_rudi_voller",
+    "name": "Rudi Völler",
+    "nation": "Alemania",
+    "year": 2002,
+    "rarity": "epic",
+    "style": "presion",
+    "mods": {
+      "attack": 2,
+      "midfield": 1,
+      "defense": 2
+    }
+  },
+  {
+    "id": "manager_senol_gunes",
+    "name": "Şenol Güneş",
+    "nation": "Turquía",
+    "year": 2002,
+    "rarity": "rare",
+    "style": "posesion",
+    "mods": {
+      "attack": 3,
+      "midfield": 0,
+      "defense": 0
+    }
+  },
+  {
+    "id": "manager_guus_hiddink",
+    "name": "Guus Hiddink",
+    "nation": "Países Bajos",
+    "year": 2002,
+    "rarity": "epic",
+    "style": "posesion",
+    "mods": {
+      "attack": 2,
+      "midfield": 2,
+      "defense": 1
+    }
+  },
+  {
+    "id": "manager_jose_camacho",
+    "name": "José Antonio Camacho",
+    "nation": "España",
+    "year": 2002,
+    "rarity": "epic",
+    "style": "presion",
+    "mods": {
+      "attack": 2,
+      "midfield": 2,
+      "defense": 1
+    }
+  },
+  {
+    "id": "manager_mario_zagallo",
+    "name": "Mario Zagallo",
+    "nation": "Brasil",
+    "year": 1998,
+    "rarity": "legend",
+    "style": "posesion",
+    "mods": {
+      "attack": 3,
+      "midfield": 2,
+      "defense": 1
+    }
+  },
+  {
+    "id": "manager_miroslav_blazevic",
+    "name": "Miroslav Blažević",
+    "nation": "Yugoslavia",
+    "year": 1998,
+    "rarity": "rare",
+    "style": "contra",
+    "mods": {
+      "attack": 2,
+      "midfield": 0,
+      "defense": 2
+    }
+  },
+  {
+    "id": "manager_cesare_maldini",
+    "name": "Cesare Maldini",
+    "nation": "Italia",
+    "year": 1998,
+    "rarity": "epic",
+    "style": "contra",
+    "mods": {
+      "attack": 0,
+      "midfield": 2,
+      "defense": 3
+    }
+  },
+  {
+    "id": "manager_daniel_passarella",
+    "name": "Daniel Passarella",
+    "nation": "Argentina",
+    "year": 1998,
+    "rarity": "epic",
+    "style": "presion",
+    "mods": {
+      "attack": 3,
+      "midfield": 0,
+      "defense": 2
+    }
+  },
+  {
+    "id": "manager_berti_vogts",
+    "name": "Berti Vogts",
+    "nation": "Alemania",
+    "year": 1998,
+    "rarity": "rare",
+    "style": "presion",
+    "mods": {
+      "attack": 2,
+      "midfield": 0,
+      "defense": 2
+    }
+  },
+  {
+    "id": "manager_bo_johansson",
+    "name": "Bo Johansson",
+    "nation": "Suecia",
+    "year": 1998,
+    "rarity": "rare",
+    "style": "contra",
+    "mods": {
+      "attack": 1,
+      "midfield": 1,
+      "defense": 2
+    }
+  },
+  {
+    "id": "manager_arrigo_sacchi",
+    "name": "Arrigo Sacchi",
+    "nation": "Italia",
+    "year": 1994,
+    "rarity": "legend",
+    "style": "presion",
+    "mods": {
+      "attack": 3,
+      "midfield": 0,
+      "defense": 3
+    }
+  },
+  {
+    "id": "manager_dick_advocaat",
+    "name": "Dick Advocaat",
+    "nation": "Países Bajos",
+    "year": 1994,
+    "rarity": "epic",
+    "style": "contra",
+    "mods": {
+      "attack": 2,
+      "midfield": 1,
+      "defense": 2
+    }
+  },
+  {
+    "id": "manager_azeglio_vicini",
+    "name": "Azeglio Vicini",
+    "nation": "Italia",
+    "year": 1990,
+    "rarity": "epic",
+    "style": "contra",
+    "mods": {
+      "attack": 0,
+      "midfield": 2,
+      "defense": 3
+    }
+  },
+  {
+    "id": "manager_bobby_robson",
+    "name": "Bobby Robson",
+    "nation": "Inglaterra",
+    "year": 1990,
+    "rarity": "rare",
+    "style": "contra",
+    "mods": {
+      "attack": 1,
+      "midfield": 0,
+      "defense": 3
+    }
+  },
+  {
+    "id": "manager_henri_michel",
+    "name": "Henri Michel",
+    "nation": "Francia",
+    "year": 1986,
+    "rarity": "epic",
+    "style": "presion",
+    "mods": {
+      "attack": 2,
+      "midfield": 1,
+      "defense": 2
+    }
+  },
+  {
+    "id": "manager_miguel_munoz",
+    "name": "Miguel Muñoz",
+    "nation": "España",
+    "year": 1986,
+    "rarity": "epic",
+    "style": "posesion",
+    "mods": {
+      "attack": 2,
+      "midfield": 2,
+      "defense": 1
     }
   }
 ];

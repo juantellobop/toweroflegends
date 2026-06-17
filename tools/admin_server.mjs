@@ -757,7 +757,7 @@ let adminApi = null;
 const adminReady = ADMIN_ENABLED
   ? import(pathToFileURL(ADMIN_API_PATH).href)
       .then(({ createAdminApi }) => {
-        adminApi = createAdminApi({ ROOT, json, readBody, methodNotAllowed, POSITIONS, RARITY_SET, playerOVR });
+        adminApi = createAdminApi({ ROOT, json, readBody, methodNotAllowed, POSITIONS, RARITY_SET, playerOVR, FORMATIONS });
       })
       .catch(() => { adminApi = null; })
   : Promise.resolve();

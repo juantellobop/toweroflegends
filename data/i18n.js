@@ -619,6 +619,7 @@ const DICTIONARIES = {
       title: 'Panel de jugadores',
       tabPlayers: 'Jugadores',
       tabManagers: 'Directores técnicos',
+      tabOpponents: 'Rivales',
       logout: 'Cerrar sesión',
       search: 'Buscar',
       searchPlaceholder: 'Nombre, país, época...',
