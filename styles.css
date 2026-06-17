@@ -2734,7 +2734,7 @@ select {
 
 .team-panel-head {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 1fr 3fr;
   justify-content: space-between;
   gap: 12px;
   align-items: center;
@@ -2744,6 +2744,7 @@ select {
 .team-panel-head h2 {
   margin: 0;
   font-family: var(--font-game);
+  font-size: 16px;
   color: #fff;
   text-transform: uppercase;
   text-shadow: 2px 2px 0 var(--arcade-blue-900);
@@ -2980,7 +2981,8 @@ select {
 
 /* Fila de filtros del banquillo: posición + país, lado a lado. */
 .bench-filters {
-  display: flex;
+  display: grid;
+  grid-template-columns: 2fr 1.5fr;
   gap: 8px;
   align-items: center;
   justify-content: flex-end;
@@ -5372,7 +5374,7 @@ button.primary:active:not(:disabled),
     gap: 8px;
     margin-bottom: 8px;
     display: grid !important;
-    grid-template-columns: 1fr 2fr;
+    grid-template-columns: 1fr 3fr;
   }
 
   .team-field-panel .team-panel-head p {
