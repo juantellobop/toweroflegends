@@ -3,7 +3,7 @@
 // Reutiliza el sistema de idioma de data/i18n.js (sincronizado vía
 // localStorage 'tdl_language') y compone la tabla de rasgos a partir de la lista
 // canónica de engine/traits.js + localizeTrait (nombres siempre en sync).
-import { getLanguage, setLanguage, initLanguage, LANGUAGES, localizeTrait } from './data/i18n.js';
+import { getLanguage, setLanguage, initLanguage, LANGUAGES, localizeTrait, t } from './data/i18n.js';
 import { TRAITS } from './engine/traits.js';
 import { WIKI_CONTENT } from './data/wikiContent.js';
 
@@ -47,7 +47,7 @@ function traitsTableHTML(data) {
     const effect = esc(data.traitEffects[key] || '');
     return `<tr><td><b>${name}</b></td><td>${type}</td><td>${effect}</td></tr>`;
   }).join('');
-  return `<div class="wiki-table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  return `<div class="wiki-table-wrap"><table class="traits-table"><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 function tableHTML(table) {
@@ -71,9 +71,12 @@ function render() {
   const lang = activeLang();
   const data = WIKI_CONTENT[lang];
 
+  // El nombre del juego se traduce por idioma (meta.title): "Torre de Leyendas",
+  // "Tower of Legends", etc. La wiki lo reutiliza para no duplicarlo.
+  const wikiTitle = `${t('meta.title')} — Wiki`;
   document.documentElement.lang = lang;
-  document.title = data.title;
-  title.textContent = data.title;
+  document.title = wikiTitle;
+  title.textContent = wikiTitle;
   subtitle.textContent = data.subtitle;
   backLink.textContent = data.backToGame;
   langSelect.setAttribute('aria-label', data.langLabel);

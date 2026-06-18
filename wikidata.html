@@ -104,8 +104,12 @@
     th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
     thead th { color: var(--accent); border-bottom: 2px solid var(--line); white-space: nowrap; }
     tbody tr:hover { background: rgba(255, 255, 255, .04); }
+    /* Tabla de rasgos: "Rasgo" y "Tipo" se ajustan a su contenido para que la
+       columna larga ("Efecto") se quede con el ancho restante. */
+    .traits-table th:nth-child(1), .traits-table td:nth-child(1),
+    .traits-table th:nth-child(2), .traits-table td:nth-child(2) { width: 1%; white-space: nowrap; }
 
-    @media (max-width: 760px) {
+    @media (max-width: 768px) {
       .wiki-layout { grid-template-columns: 1fr; gap: 16px; }
       .wiki-nav {
         position: static;
@@ -116,8 +120,14 @@
         padding-bottom: 14px;
         border-bottom: 1px solid var(--line);
       }
+      .wiki-header{padding: 12px}
       .wiki-nav-title { width: 100%; }
       .wiki-nav a { border-left: none; border: 1px solid var(--line); }
+      /* En móvil: texto de tablas más pequeño y menos relleno para dar aire a
+         "Efecto". El nombre del rasgo puede partir en dos líneas si hace falta. */
+      table { font-size: var(--t-caption-1); }
+      th, td { padding: 6px 7px; }
+      .traits-table th:nth-child(1), .traits-table td:nth-child(1) { white-space: normal; }
     }
   </style>
 </head>

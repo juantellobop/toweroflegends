@@ -11,7 +11,6 @@
 export const WIKI_CONTENT = {
   // ===================================================================== ES
   es: {
-    title: 'Torre de Leyendas — Wiki',
     subtitle: 'Guía de mecánicas del juego',
     backToGame: '← Volver al juego',
     langLabel: 'Idioma',
@@ -110,7 +109,6 @@ export const WIKI_CONTENT = {
 
   // ===================================================================== EN
   en: {
-    title: 'Torre de Leyendas — Wiki',
     subtitle: 'Game mechanics guide',
     backToGame: '← Back to the game',
     langLabel: 'Language',
@@ -209,7 +207,6 @@ export const WIKI_CONTENT = {
 
   // ===================================================================== FR
   fr: {
-    title: 'Torre de Leyendas — Wiki',
     subtitle: 'Guide des mécaniques du jeu',
     backToGame: '← Retour au jeu',
     langLabel: 'Langue',
@@ -308,7 +305,6 @@ export const WIKI_CONTENT = {
 
   // ===================================================================== PT
   pt: {
-    title: 'Torre de Leyendas — Wiki',
     subtitle: 'Guia das mecânicas do jogo',
     backToGame: '← Voltar ao jogo',
     langLabel: 'Idioma',
@@ -407,7 +403,6 @@ export const WIKI_CONTENT = {
 
   // ===================================================================== IT
   it: {
-    title: 'Torre de Leyendas — Wiki',
     subtitle: 'Guida alle meccaniche del gioco',
     backToGame: '← Torna al gioco',
     langLabel: 'Lingua',
