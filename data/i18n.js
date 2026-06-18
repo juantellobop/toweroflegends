@@ -469,6 +469,10 @@ const DICTIONARIES = {
       itemDiscard: 'Descartar objetos',
       review: 'Revisar mi equipo',
       reviewTitle: ({ count }) => `Tu plantilla (${count} cartas)`,
+      reviewManager: 'Ver mi DT',
+      reviewManagerTitle: 'Tu director técnico',
+      reviewItems: 'Ver mis objetos',
+      reviewItemsTitle: ({ count }) => `Tus objetos (${count})`,
     },
     card: {
       owned: 'Ya en tu plantilla',
@@ -1127,6 +1131,10 @@ const DICTIONARIES = {
       itemDiscard: 'Discard items',
       review: 'Review my team',
       reviewTitle: ({ count }) => `Your squad (${count} cards)`,
+      reviewManager: 'View my coach',
+      reviewManagerTitle: 'Your coach',
+      reviewItems: 'View my items',
+      reviewItemsTitle: ({ count }) => `Your items (${count})`,
     },
     card: {
       owned: 'Already in your squad',

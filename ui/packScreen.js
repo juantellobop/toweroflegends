@@ -60,7 +60,7 @@ function shell(state, kind, count, body) {
         <div class="level-badge">${t('generic.level', { level: state.level })}</div>
         <h1 class="large-title">${title}</h1>
         <p class="hint">${t('pack.chooseOne', { count, hint })}</p>
-        ${squadReviewButton(state)}
+        ${reviewButtons(state, kind)}
       </header>
 
       <div class="pack-stage" id="stage">
@@ -80,21 +80,49 @@ function shell(state, kind, count, body) {
       <div class="pack-actions action-bar" id="openBar">
         <button id="openBtn" class="primary big glass-cta">${open}</button>
       </div>
-      ${squadReviewModal(state)}
+      ${reviewModals(state, kind)}
     </section>`;
 }
 
-// === Popup "Revisar mi equipo" ===
-// La plantilla completa en cartas (titulares y suplentes) para comparar lo que
-// ya tienes antes de decidir qué sacar del sobre. Solo aparece con plantilla.
+// === Popups de revisión (apertura de sobres) ===
+// "Revisar mi equipo": la plantilla completa en cartas (titulares y suplentes)
+// para comparar lo que ya tienes antes de decidir. Además, el sobre de DT añade
+// "Ver mi DT" (el técnico actual) y el de objetos "Ver mis objetos" (lo que ya
+// acumulas). Cada botón abre su propio modal; solo aparecen si hay algo que ver.
 
-function squadReviewButton(state) {
-  if (!state.squad?.length) return '';
-  return `<button id="reviewSquad" class="ctl review-squad-btn">${t('pack.review')}</button>`;
+function reviewButtons(state, kind) {
+  const btns = [];
+  if (state.squad?.length) {
+    btns.push(`<button class="ctl review-btn" data-review="reviewSquad">${t('pack.review')}</button>`);
+  }
+  if (kind === 'manager' && state.manager) {
+    btns.push(`<button class="ctl review-btn" data-review="reviewManager">${t('pack.reviewManager')}</button>`);
+  }
+  if (kind === 'item' && state.items?.length) {
+    btns.push(`<button class="ctl review-btn" data-review="reviewItems">${t('pack.reviewItems')}</button>`);
+  }
+  return btns.length ? `<div class="pack-reviews">${btns.join('')}</div>` : '';
 }
 
-function squadReviewModal(state) {
-  if (!state.squad?.length) return '';
+// Estructura común de un modal de revisión: backdrop + panel con scroll interno
+// + botón de cerrar fijo en la esquina (igual que "Revisar mi equipo").
+function reviewModalShell(id, title, body) {
+  return `
+    <div class="player-modal squad-review-modal review-modal" id="${id}" hidden>
+      <div class="player-modal-backdrop" data-close></div>
+      <div class="squad-review-shell" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+        <button class="player-modal-close" data-close aria-label="${esc(t('generic.close'))}">
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.4 2.4 L9.6 9.6 M9.6 2.4 L2.4 9.6" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" fill="none" /></svg>
+        </button>
+        <div class="squad-review-panel arcade-panel">
+          <h2 class="squad-review-title">${esc(title)}</h2>
+          ${body}
+        </div>
+      </div>
+    </div>`;
+}
+
+function squadReviewBody(state) {
   const starters = LINES.flatMap((line) => (state.starting11?.[line] || []).filter(Boolean));
   const starterUids = new Set(starters.map((p) => p.uid));
   const subs = state.squad
@@ -102,31 +130,47 @@ function squadReviewModal(state) {
     .sort((a, b) => playerOVR(b) - playerOVR(a));
   const grid = (players) => `<div class="squad-review-grid">${players.map((p) => playerCardHTML(p, { manager: state.manager })).join('')}</div>`;
   return `
-    <div class="player-modal squad-review-modal" id="squadReview" hidden>
-      <div class="player-modal-backdrop" data-close></div>
-      <div class="squad-review-shell" role="dialog" aria-modal="true" aria-label="${esc(t('pack.reviewTitle', { count: state.squad.length }))}">
-        <button class="player-modal-close" data-close aria-label="${esc(t('generic.close'))}">
-          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.4 2.4 L9.6 9.6 M9.6 2.4 L2.4 9.6" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" fill="none" /></svg>
-        </button>
-        <div class="squad-review-panel arcade-panel">
-          <h2 class="squad-review-title">${t('pack.reviewTitle', { count: state.squad.length })}</h2>
-          ${starters.length ? `<h3 class="squad-review-sub">${t('squadIntro.eleven')}</h3>${grid(starters)}` : ''}
-          ${subs.length ? `<h3 class="squad-review-sub">${t('squadIntro.bench')}</h3>${grid(subs)}` : ''}
-        </div>
-      </div>
-    </div>`;
+    ${starters.length ? `<h3 class="squad-review-sub">${t('squadIntro.eleven')}</h3>${grid(starters)}` : ''}
+    ${subs.length ? `<h3 class="squad-review-sub">${t('squadIntro.bench')}</h3>${grid(subs)}` : ''}`;
 }
 
-function wireSquadReview(root) {
-  const btn = root.querySelector('#reviewSquad');
-  const modal = root.querySelector('#squadReview');
-  if (!btn || !modal) return;
-  const close = () => { modal.hidden = true; };
-  btn.addEventListener('click', () => { modal.hidden = false; });
-  modal.querySelectorAll('[data-close]').forEach((node) => node.addEventListener('click', close));
+// Objetos que ya tienes, agrupados con ×N (igual que el panel de plantilla).
+function itemsReviewBody(state) {
+  const grouped = [];
+  const byId = new Map();
+  for (const it of state.items) {
+    if (byId.has(it.id)) byId.get(it.id).count += 1;
+    else { const g = { item: it, count: 1 }; byId.set(it.id, g); grouped.push(g); }
+  }
+  return `<div class="squad-review-grid">${grouped.map((g) => itemCardHTML(g.item, { stack: g.count })).join('')}</div>`;
+}
+
+function reviewModals(state, kind) {
+  let html = '';
+  if (state.squad?.length) {
+    html += reviewModalShell('reviewSquad', t('pack.reviewTitle', { count: state.squad.length }), squadReviewBody(state));
+  }
+  if (kind === 'manager' && state.manager) {
+    html += reviewModalShell('reviewManager', t('pack.reviewManagerTitle'),
+      `<div class="squad-review-grid review-grid--single">${managerCardHTML(state.manager)}</div>`);
+  }
+  if (kind === 'item' && state.items?.length) {
+    html += reviewModalShell('reviewItems', t('pack.reviewItemsTitle', { count: state.items.length }), itemsReviewBody(state));
+  }
+  return html;
+}
+
+function wireReviews(root) {
+  const close = (modal) => { if (modal) modal.hidden = true; };
+  root.querySelectorAll('.review-btn[data-review]').forEach((btn) => {
+    const modal = root.querySelector(`#${btn.dataset.review}`);
+    if (!modal) return;
+    btn.addEventListener('click', () => { modal.hidden = false; });
+    modal.querySelectorAll('[data-close]').forEach((node) => node.addEventListener('click', () => close(modal)));
+  });
   document.addEventListener('keydown', function onEsc(e) {
-    if (e.key === 'Escape' && !modal.hidden) close();
-    if (modal.hidden) document.removeEventListener('keydown', onEsc);
+    if (!root.querySelector('.review-modal')) { document.removeEventListener('keydown', onEsc); return; }
+    if (e.key === 'Escape') close(root.querySelector('.review-modal:not([hidden])'));
   });
 }
 
@@ -256,16 +300,16 @@ function renderNationRoster(root, state, team, onPick) {
         <div class="level-badge">${t('generic.level', { level: state.level })}</div>
         <h1 class="large-title">${esc(nationLabel(team))}</h1>
         <p class="hint">${t('pack.nationPickHint')}</p>
-        ${squadReviewButton(state)}
+        ${reviewButtons(state, 'nation')}
       </header>
       <div class="pack-stage nation-roster-stage">
         <div class="pack-deal nation-roster ${prefersReducedMotion() ? '' : 'dealing'} no-flip" id="deal">${body}</div>
       </div>
-      ${squadReviewModal(state)}
+      ${reviewModals(state, 'nation')}
     </section>`;
   window.scrollTo(0, 0);
   wireChoice(root, team.players, onPick);
-  wireSquadReview(root);
+  wireReviews(root);
 }
 
 function wire(root, choices, onPick, onOpen = null) {
@@ -315,7 +359,7 @@ function wire(root, choices, onPick, onOpen = null) {
   root.querySelector('#openBtn').addEventListener('click', openPack);
 
   wireChoice(root, choices, onPick, () => opened);
-  wireSquadReview(root);
+  wireReviews(root);
 }
 
 // --- Elección de carta (solo tras abrir el sobre) ---

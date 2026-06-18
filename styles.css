@@ -4953,9 +4953,20 @@ select {
   .player-modal-backdrop, .player-modal-card { animation: none; }
 }
 
-/* --- Popup "Revisar mi equipo" (apertura de sobres) --- */
-.review-squad-btn {
+/* --- Popups de revisión (apertura de sobres) --- */
+/* Botones de revisión bajo la cabecera: plantilla, DT y/u objetos según el sobre. */
+.pack-reviews {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
   margin-top: 10px;
+}
+
+/* Revisión de una sola carta (DT actual): no estirar a todo el ancho. */
+.review-grid--single {
+  grid-template-columns: minmax(0, 240px);
+  justify-content: center;
 }
 
 .squad-review-shell {

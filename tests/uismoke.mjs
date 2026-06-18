@@ -40,11 +40,11 @@ try {
   if (!root.querySelector('.card-portrait')) errors.push('cartas sin bloque de retrato');
 
   // Popup "Revisar mi equipo" antes de abrir el sobre
-  click(root.querySelector('#reviewSquad'));
-  if (root.querySelector('#squadReview')?.hidden !== false) errors.push('Revisar mi equipo no abre el popup');
-  if (root.querySelectorAll('#squadReview .player-card').length !== 16) errors.push('el popup de plantilla no muestra las 16 cartas');
-  click(root.querySelector('#squadReview [data-close]'));
-  if (root.querySelector('#squadReview')?.hidden !== true) errors.push('el popup de plantilla no cierra');
+  click(root.querySelector('.review-btn[data-review="reviewSquad"]'));
+  if (root.querySelector('#reviewSquad')?.hidden !== false) errors.push('Revisar mi equipo no abre el popup');
+  if (root.querySelectorAll('#reviewSquad .player-card').length !== 16) errors.push('el popup de plantilla no muestra las 16 cartas');
+  click(root.querySelector('#reviewSquad [data-close]'));
+  if (root.querySelector('#reviewSquad')?.hidden !== true) errors.push('el popup de plantilla no cierra');
 
   click(root.querySelector('#openBtn')); // abrir el sobre sellado de jugadores
   click(root.querySelector('.deal-card:not(.disabled-deal)')); await wait(420); // selección directa
