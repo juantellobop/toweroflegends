@@ -1,5 +1,5 @@
 // Torre de Leyendas — Cálculo de química / sinergias (§4.7).
-// Modelo "estilo FIFA": cada formación define un web de cercanía (CHEM_LINKS),
+// Modelo de cercanía: cada formación define un web de cercanía (CHEM_LINKS),
 // un grafo de aristas entre huecos vecinos. Dos titulares hacen química SOLO si
 // hay arista entre sus huecos (no hay clique de línea). Cada arista vale el
 // pairChem del par —nación compartida (+CHEM_NATION) y época (década exacta
@@ -87,23 +87,28 @@ export function computeChemistry(starting11, formation = null, manager = null) {
 }
 
 // Bonus globales de equipo (no por línea):
-//  - all: "núcleo nacional" — si el XI se construye en torno a una nación, sube
-//    todos los ratings (escalones: 5 connacionales → +1, 7 → +2, 9 → +3, 11 → +4).
+//  - all: "núcleo nacional" — cada nación con grupo suficiente en el XI sube todos
+//    los ratings (escalón por país, sumado: 5-6 → +1, 7-8 → +2, 9-10 → +3, 11 → +4).
+//    Cuenta por nación, así que un XI repartido puede tener doble núcleo (5+5 → +2).
 //  - attackMid: "cohesión táctica" — si la mayoría de tus jugadores de campo con
 //    tacticalType definido coincide con el tipo del dibujo, sube ataque y medio.
 export function computeTeamChem(starting11, formation) {
   const all = [];
   for (const line of LINES) for (const p of starting11[line] || []) all.push(p);
 
-  // Núcleo nacional: tamaño del grupo de nación más numeroso del XI.
+  // Núcleo nacional: cuenta los jugadores de cada nación del XI.
   const byNation = {};
   for (const p of all) {
     if (!p || !p.nation) continue;
     const nation = chemNation(p.nation);
     byNation[nation] = (byNation[nation] || 0) + 1;
   }
-  const coreSize = Math.max(0, ...Object.values(byNation));
-  const core = Math.max(0, Math.floor((coreSize - 3) / 2)) * CONFIG.CHEM_CORE;
+  // Cada nación aporta su escalón floor((tamaño-3)/2) y se suman: grupos <5 dan 0,
+  // mono-nacional queda igual (11 → +4) y 5+5 de dos países habilita el doble núcleo.
+  let core = 0;
+  for (const size of Object.values(byNation)) {
+    core += Math.max(0, Math.floor((size - 3) / 2)) * CONFIG.CHEM_CORE;
+  }
 
   // Cohesión táctica: requiere que el dibujo tenga tipo y que la mayoría de los
   // jugadores de campo tipados lo compartan.

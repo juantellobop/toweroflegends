@@ -52,6 +52,9 @@ export const CONFIG = {
   // Sorteo por banda de OVR (cualquier jugador del roster completo).
   // Pesos relativos por banda: < 70 / 70-90 / > 90.
   STARTER_BAND_WEIGHTS: { low: 80, mid: 15, high: 5 },
+  // Regla no escrita: la plantilla de arranque trae como mucho 2 leyendas (un
+  // jugador arrastrado de la run anterior cuenta para este tope).
+  STARTER_MAX_LEGENDS: 2,
   PACK_BAND_WEIGHTS: { low: 60, mid: 30, high: 10 },
 
   // --- Objetos ---
@@ -344,7 +347,7 @@ export const FORMATION_SLOT_RULES = {
   },
 };
 
-// Web de química "estilo FIFA": el grafo de cercanía de cada formación. Cada
+// Web de química de cercanía: el grafo de cercanía de cada formación. Cada
 // arista une dos huecos [línea, slotIndex] (los slotIndex van de izquierda a
 // derecha tal como pinta la UI) y declara que esos dos jugadores hacen química
 // entre sí — y SOLO entre sí: no hay clique de línea, solo estas vecindades.

@@ -1,0 +1,506 @@
+// Torre de Leyendas — Contenido de la wiki (wikidata.html).
+// Prosa de referencia en los 5 idiomas del juego. Solo lo consume wikidata.js;
+// no forma parte del motor. Los nombres de los rasgos NO se duplican aquí: la
+// tabla de rasgos los toma de engine/traits.js + localizeTrait (data/i18n.js).
+// Cada idioma define: title, subtitle, backToGame, langLabel (rótulo del
+// selector), traitsHead, traitType (etiquetas de tipo) y traitEffects (efecto
+// por clave de rasgo), más `sections` (array de { id, nav, title, blocks }).
+// Tipos de bloque: { p }, { h }, { ul:[...] }, { table:{ head, rows } },
+// { traits: true } (la tabla de rasgos se compone en el renderer).
+
+export const WIKI_CONTENT = {
+  // ===================================================================== ES
+  es: {
+    title: 'Torre de Leyendas — Wiki',
+    subtitle: 'Guía de mecánicas del juego',
+    backToGame: '← Volver al juego',
+    langLabel: 'Idioma',
+    indexTitle: 'Índice',
+    traitsHead: ['Rasgo', 'Tipo', 'Efecto'],
+    traitType: { atk: 'Ataque', mid: 'Medio', def: 'Defensa', gk: 'Portero', lead: 'Liderazgo' },
+    traitEffects: {
+      Francotirador: '+4 tiro · ×1,35 al peso para ser el rematador.',
+      Cañón: '+3 tiro, +2 físico · ×1,2 al peso de rematador.',
+      Muro: 'Jugador de campo: +5 defensa. Portero: +3 al rating.',
+      Motor: '+4 físico, +3 pase.',
+      Maestro: '+4 pase, +4 regate.',
+      Líbero: '+4 pase, +2 defensa.',
+      Paradón: '+4 al rating del portero.',
+      Mariscal: '+1 al rating del portero y +1,5 al rating de la línea defensiva.',
+      Killer: '+5 en el duelo de remate cuando el equipo empata o pierde.',
+      Velocista: '+5 en el duelo de remate en los contraataques.',
+      Especialista: '×1,6 al peso de rematador y +4 en el duelo a balón parado (córner o falta).',
+      Penalero: '×2,5 al peso de rematador en penaltis y +5 % de conversión.',
+      Capitán: '+1 a la química de su línea.',
+      Garra: '+4 en el duelo defensivo a partir del minuto 75.',
+    },
+    sections: [
+      { id: 'reglamento', nav: 'Reglamento', title: 'Reglamento', blocks: [
+        { p: 'Torre de Leyendas es un roguelike de fútbol: armas una selección abriendo sobres de cartas y escalas una torre infinita en la que cada nivel te enfrenta a un rival más fuerte.' },
+        { p: 'En cada nivel eliges una carta de jugador y un objeto, montas tu once en una formación y el motor simula el partido. El resultado decide la recompensa: cuanto mejor ganes, mejor será el siguiente sobre. Una derrota termina la run y tu puntuación es el nivel alcanzado.' },
+        { h: 'Recompensa por resultado' },
+        { table: { head: ['Resultado', 'Sobre de jugador'], rows: [
+          ['Goleada (dif. ≥ 5)', '5 cartas'],
+          ['Victoria amplia (dif. 3-4)', '4 cartas'],
+          ['Victoria ajustada (dif. 1-2)', '3 cartas'],
+          ['Empate', '2 cartas'],
+          ['Derrota', 'Fin de la run'],
+        ] } },
+        { p: 'El sobre de objetos ofrece 3 a elegir (4 si ganas por goleada).' },
+        { h: 'La simulación' },
+        { p: 'Cada partido reparte 24 jugadas de ataque según la posesión. Cada jugada pasa por construcción, generación de la ocasión y definición.' },
+        { p: 'Durante el partido pueden aparecer tarjetas y expulsiones, lesiones, penaltis, córners, faltas y contraataques.' },
+        { p: 'Cada 5 niveles aparece un sobre especial de selección nacional; cada 7 niveles, un sobre de director técnico.' },
+      ] },
+      { id: 'quimica', nav: 'Química', title: 'Química', blocks: [
+        { p: 'La química son enlaces entre tus jugadores: cuando encajan, suman puntos a las cuatro líneas del equipo (portería, defensa, medio y ataque).' },
+        { p: 'Solo hacen química los jugadores colocados en huecos vecinos según la formación (una telaraña de cercanía), no todos los de la misma línea.' },
+        { h: 'Qué suma química' },
+        { ul: [
+          'Misma nación: +2 a la línea.',
+          'Misma década: +1 (décadas contiguas, +0,5).',
+          'Núcleo nacional: cada país con 5 o más jugadores en el once suma a todo el equipo (5-6 → +1, 7-8 → +2, 9-10 → +3, 11 → +4). Cuenta por país, así que puedes tener doble núcleo (p. ej. 5 y 5 de dos países → +2).',
+          'Cohesión táctica: si la mayoría de tus jugadores encaja con el estilo del dibujo.',
+          'Capitán: +1 a su línea. Cada jugador del país del DT: +1 a su línea.',
+        ] },      ] },
+      { id: 'sinergia', nav: 'Sinergia', title: 'Sinergia', blocks: [
+        { p: 'La sinergia mide el encaje entre tus objetos (o tu director técnico) y el estilo de la formación. No la confundas con la química, que es entre jugadores.' },
+        { p: 'Si el estilo de un objeto táctico o del DT (posesión, presión o contraataque) coincide con el tipo de tu formación, sus efectos positivos se amplifican (×1,5) y se anulan sus penalizaciones.' },
+        { p: 'Es la recompensa por construir un equipo coherente con una idea de juego.' },
+      ] },
+      { id: 'tactica', nav: 'Táctica', title: 'Táctica y formaciones', blocks: [
+        { p: 'Hay 9 formaciones. Cada una aplica pequeños multiplicadores a tus ratings (ataque, medio y defensa) con su contrapartida: el 5-3-2 es defensivo, el 3-4-3 vuelca el equipo al ataque y el 4-4-2 es equilibrio puro.' },
+        { p: 'Además, cada hueco tiene un perfil: un mismo jugador rinde distinto según el puesto (un extremo no puntúa igual de “9” que de banda).' },
+        { h: 'Tipos de formación' },
+        { table: { head: ['Tipo', 'Formaciones'], rows: [
+          ['Posesión', '3-5-2 · 4-3-1-2 · 4-2-3-1'],
+          ['Presión', '4-3-3 · 3-4-3 · 3-2-4-1'],
+          ['Contraataque', '5-3-2 · 4-4-2 · 4-2-4'],
+        ] } },      ] },
+      { id: 'rasgos', nav: 'Rasgos', title: 'Rasgos de los jugadores', blocks: [
+        { p: 'Cada jugador puede tener un rasgo: un efecto pasivo especial. Estos son los 14 disponibles.' },
+        { traits: true },
+      ] },
+      { id: 'objetos', nav: 'Objetos y sobres', title: 'Objetos y sobres', blocks: [
+        { p: 'En cada nivel eliges un objeto. Hay tres tipos:' },
+        { ul: [
+          'Equipamiento: mejoras directas (botas, guantes, brazaletes…).',
+          'Táctica: efectos de estilo de juego, con sinergia según la formación.',
+          'Reliquia: efectos potentes y singulares.',
+        ] },
+        { p: 'Los objetos tácticos llevan un estilo (posesión, presión o contraataque). Úsalos con una formación de ese tipo para activar la sinergia: sus efectos se amplifican (×1,5) y desaparecen sus penalizaciones.' },
+        { p: 'El sobre de objetos ofrece 3 a elegir (4 si ganas por goleada).' },
+      ] },
+      { id: 'dt', nav: 'Director técnico', title: 'Director técnico (DT)', blocks: [
+        { p: 'Cada 7 niveles eliges un director técnico. El DT tiene un estilo de juego (posesión, presión o contraataque) y una nacionalidad.' },
+        { ul: [
+          'Sinergia: si su estilo coincide con el tipo de tu formación, sus modificadores positivos se amplifican (×1,5) y se anulan los negativos.',
+          'Nacionalidad: cada jugador de su mismo país recibe un bonus a sus stats y +1 a la química de su línea.',
+        ] },
+        { p: 'Un DT bien elegido refuerza el plan de juego que ya estás construyendo.' },
+      ] },
+      { id: 'cartas', nav: 'Cartas y rarezas', title: 'Cartas y rarezas', blocks: [
+        { p: 'Cada carta de jugador tiene una posición y una rareza. La rareza orienta lo fuerte que tiende a ser la carta, de menor a mayor:' },
+        { ul: ['Común', 'Rara', 'Épica', 'Leyenda'] },
+        { p: 'Posiciones: Portero (GK), Defensa (DEF), Medio (MID) y Delantero (FWD). Cada jugador rinde mejor en su línea natural y según el perfil del hueco que ocupe (ver Táctica).' },
+        { p: 'Las stats de campo son ritmo, tiro, pase, regate, defensa y físico; los porteros usan reflejos, blocaje y posicionamiento.' },
+      ] },
+    ],
+  },
+
+  // ===================================================================== EN
+  en: {
+    title: 'Torre de Leyendas — Wiki',
+    subtitle: 'Game mechanics guide',
+    backToGame: '← Back to the game',
+    langLabel: 'Language',
+    indexTitle: 'Index',
+    traitsHead: ['Trait', 'Type', 'Effect'],
+    traitType: { atk: 'Attack', mid: 'Midfield', def: 'Defence', gk: 'Goalkeeper', lead: 'Leadership' },
+    traitEffects: {
+      Francotirador: '+4 shooting · ×1.35 weight to be the finisher.',
+      Cañón: '+3 shooting, +2 physical · ×1.2 finisher weight.',
+      Muro: 'Outfield player: +5 defending. Goalkeeper: +3 rating.',
+      Motor: '+4 physical, +3 passing.',
+      Maestro: '+4 passing, +4 dribbling.',
+      Líbero: '+4 passing, +2 defending.',
+      Paradón: '+4 to the goalkeeper rating.',
+      Mariscal: '+1 to the goalkeeper rating and +1.5 to the defensive line rating.',
+      Killer: '+5 in the finishing duel when the team is level or behind.',
+      Velocista: '+5 in the finishing duel on counter-attacks.',
+      Especialista: '×1.6 finisher weight and +4 in the duel from set pieces (corner or free kick).',
+      Penalero: '×2.5 finisher weight on penalties and +5% conversion.',
+      Capitán: '+1 to the chemistry of its line.',
+      Garra: '+4 in the defensive duel from minute 75 onwards.',
+    },
+    sections: [
+      { id: 'reglamento', nav: 'Rules', title: 'Rules', blocks: [
+        { p: 'Torre de Leyendas is a football roguelike: you build a national-style squad by opening card packs and climb an endless tower where every floor pits you against a stronger rival.' },
+        { p: 'On each floor you pick one player card and one item, set your eleven in a formation and the engine simulates the match. The result decides your reward: the better you win, the better the next pack. A defeat ends the run and your score is the floor you reached.' },
+        { h: 'Reward by result' },
+        { table: { head: ['Result', 'Player pack'], rows: [
+          ['Thrashing (diff. ≥ 5)', '5 cards'],
+          ['Big win (diff. 3-4)', '4 cards'],
+          ['Narrow win (diff. 1-2)', '3 cards'],
+          ['Draw', '2 cards'],
+          ['Defeat', 'Run over'],
+        ] } },
+        { p: 'The item pack offers 3 to choose from (4 if you win by a thrashing).' },
+        { h: 'The simulation' },
+        { p: 'Each match spreads 24 attacking plays according to possession. Every play goes through build-up, chance creation and finishing.' },
+        { p: 'During the match you may see cards and sendings-off, injuries, penalties, corners, free kicks and counter-attacks.' },
+        { p: 'Every 5 floors a special national-team pack appears; every 7 floors, a manager pack.' },
+      ] },
+      { id: 'quimica', nav: 'Chemistry', title: 'Chemistry', blocks: [
+        { p: 'Chemistry is a web of links between your players: when they fit together they add points to the four team lines (goalkeeping, defence, midfield and attack).' },
+        { p: 'Only players placed in neighbouring slots according to the formation build chemistry (a proximity web), not everyone in the same line.' },
+        { h: 'What builds chemistry' },
+        { ul: [
+          'Same nation: +2 to the line.',
+          'Same decade: +1 (adjacent decades, +0.5).',
+          'National core: each country with 5 or more players in the eleven adds to the whole team (5-6 → +1, 7-8 → +2, 9-10 → +3, 11 → +4). It counts per country, so you can have a double core (e.g. 5 and 5 from two countries → +2).',
+          'Tactical cohesion: if most of your players match the formation style.',
+          'Captain: +1 to its line. Each player from the manager\'s country: +1 to its line.',
+        ] },      ] },
+      { id: 'sinergia', nav: 'Synergy', title: 'Synergy', blocks: [
+        { p: 'Synergy measures the fit between your items (or your manager) and the formation style. Don\'t confuse it with chemistry, which is between players.' },
+        { p: 'If the style of a tactical item or of the manager (possession, pressing or counter-attack) matches your formation type, its positive effects are amplified (×1.5) and its penalties are cancelled.' },
+        { p: 'It rewards building a team that is consistent with one idea of play.' },
+      ] },
+      { id: 'tactica', nav: 'Tactics', title: 'Tactics and formations', blocks: [
+        { p: 'There are 9 formations. Each applies small multipliers to your ratings (attack, midfield and defence) with a trade-off: 5-3-2 is defensive, 3-4-3 throws the team forward and 4-4-2 is pure balance.' },
+        { p: 'On top of that, each slot has a profile: the same player performs differently depending on the role (a winger does not score the same as a “9” or out wide).' },
+        { h: 'Formation types' },
+        { table: { head: ['Type', 'Formations'], rows: [
+          ['Possession', '3-5-2 · 4-3-1-2 · 4-2-3-1'],
+          ['Pressing', '4-3-3 · 3-4-3 · 3-2-4-1'],
+          ['Counter-attack', '5-3-2 · 4-4-2 · 4-2-4'],
+        ] } },      ] },
+      { id: 'rasgos', nav: 'Traits', title: 'Player traits', blocks: [
+        { p: 'Each player can have one trait: a special passive effect. These are the 14 available.' },
+        { traits: true },
+      ] },
+      { id: 'objetos', nav: 'Items and packs', title: 'Items and packs', blocks: [
+        { p: 'On each floor you choose one item. There are three types:' },
+        { ul: [
+          'Equipment: direct boosts (boots, gloves, armbands…).',
+          'Tactic: playing-style effects, with synergy depending on the formation.',
+          'Relic: powerful, one-off effects.',
+        ] },
+        { p: 'Tactical items carry a style (possession, pressing or counter-attack). Use them with a formation of that type to trigger synergy: their effects are amplified (×1.5) and their penalties disappear.' },
+        { p: 'The item pack offers 3 to choose from (4 if you win by a thrashing).' },
+      ] },
+      { id: 'dt', nav: 'Manager', title: 'Manager', blocks: [
+        { p: 'Every 7 floors you pick a manager. The manager has a playing style (possession, pressing or counter-attack) and a nationality.' },
+        { ul: [
+          'Synergy: if their style matches your formation type, their positive modifiers are amplified (×1.5) and the negative ones are cancelled.',
+          'Nationality: every player from the same country gets a stat bonus and +1 to the chemistry of its line.',
+        ] },
+        { p: 'A well-chosen manager reinforces the game plan you are already building.' },
+      ] },
+      { id: 'cartas', nav: 'Cards and rarities', title: 'Cards and rarities', blocks: [
+        { p: 'Every player card has a position and a rarity. Rarity hints at how strong the card tends to be, from lowest to highest:' },
+        { ul: ['Common', 'Rare', 'Epic', 'Legend'] },
+        { p: 'Positions: Goalkeeper (GK), Defender (DEF), Midfielder (MID) and Forward (FWD). Each player performs best in their natural line and according to the profile of the slot they occupy (see Tactics).' },
+        { p: 'Outfield stats are pace, shooting, passing, dribbling, defending and physical; goalkeepers use reflexes, handling and positioning.' },
+      ] },
+    ],
+  },
+
+  // ===================================================================== FR
+  fr: {
+    title: 'Torre de Leyendas — Wiki',
+    subtitle: 'Guide des mécaniques du jeu',
+    backToGame: '← Retour au jeu',
+    langLabel: 'Langue',
+    indexTitle: 'Sommaire',
+    traitsHead: ['Trait', 'Type', 'Effet'],
+    traitType: { atk: 'Attaque', mid: 'Milieu', def: 'Défense', gk: 'Gardien', lead: 'Leadership' },
+    traitEffects: {
+      Francotirador: '+4 tir · ×1,35 au poids pour être le finisseur.',
+      Cañón: '+3 tir, +2 physique · ×1,2 au poids de finisseur.',
+      Muro: 'Joueur de champ : +5 défense. Gardien : +3 à la note.',
+      Motor: '+4 physique, +3 passe.',
+      Maestro: '+4 passe, +4 dribble.',
+      Líbero: '+4 passe, +2 défense.',
+      Paradón: '+4 à la note du gardien.',
+      Mariscal: '+1 à la note du gardien et +1,5 à la note de la ligne défensive.',
+      Killer: '+5 dans le duel de finition quand l\'équipe est à égalité ou menée.',
+      Velocista: '+5 dans le duel de finition sur les contre-attaques.',
+      Especialista: '×1,6 au poids de finisseur et +4 dans le duel sur coup de pied arrêté (corner ou coup franc).',
+      Penalero: '×2,5 au poids de finisseur sur les penaltys et +5 % de conversion.',
+      Capitán: '+1 à l\'alchimie de sa ligne.',
+      Garra: '+4 dans le duel défensif à partir de la 75e minute.',
+    },
+    sections: [
+      { id: 'reglamento', nav: 'Règles', title: 'Règles', blocks: [
+        { p: 'Torre de Leyendas est un roguelike de football : tu constitues une sélection en ouvrant des paquets de cartes et tu gravis une tour infinie où chaque étage t\'oppose à un rival plus fort.' },
+        { p: 'À chaque étage tu choisis une carte de joueur et un objet, tu places ton onze dans une formation et le moteur simule le match. Le résultat décide de la récompense : mieux tu gagnes, meilleur est le paquet suivant. Une défaite met fin à la partie et ton score est l\'étage atteint.' },
+        { h: 'Récompense selon le résultat' },
+        { table: { head: ['Résultat', 'Paquet de joueur'], rows: [
+          ['Raclée (écart ≥ 5)', '5 cartes'],
+          ['Large victoire (écart 3-4)', '4 cartes'],
+          ['Victoire serrée (écart 1-2)', '3 cartes'],
+          ['Match nul', '2 cartes'],
+          ['Défaite', 'Fin de la partie'],
+        ] } },
+        { p: 'Le paquet d\'objets en propose 3 au choix (4 en cas de raclée).' },
+        { h: 'La simulation' },
+        { p: 'Chaque match répartit 24 actions offensives selon la possession. Chaque action passe par la construction, la création d\'occasion et la finition.' },
+        { p: 'Pendant le match peuvent survenir cartons et expulsions, blessures, penaltys, corners, coups francs et contre-attaques.' },
+        { p: 'Tous les 5 étages apparaît un paquet spécial de sélection nationale ; tous les 7 étages, un paquet d\'entraîneur.' },
+      ] },
+      { id: 'quimica', nav: 'Alchimie', title: 'Alchimie', blocks: [
+        { p: 'L\'alchimie, ce sont des liens entre tes joueurs : quand ils s\'accordent, ils ajoutent des points aux quatre lignes de l\'équipe (gardien, défense, milieu et attaque).' },
+        { p: 'Seuls les joueurs placés dans des emplacements voisins selon la formation font de l\'alchimie (une toile de proximité), pas tous ceux d\'une même ligne.' },
+        { h: 'Ce qui apporte de l\'alchimie' },
+        { ul: [
+          'Même nation : +2 à la ligne.',
+          'Même décennie : +1 (décennies contiguës, +0,5).',
+          'Noyau national : chaque pays avec 5 joueurs ou plus dans le onze profite à toute l\'équipe (5-6 → +1, 7-8 → +2, 9-10 → +3, 11 → +4). Le calcul se fait par pays, tu peux donc avoir un double noyau (par ex. 5 et 5 de deux pays → +2).',
+          'Cohésion tactique : si la majorité de tes joueurs colle au style du schéma.',
+          'Capitaine : +1 à sa ligne. Chaque joueur du pays de l\'entraîneur : +1 à sa ligne.',
+        ] },      ] },
+      { id: 'sinergia', nav: 'Synergie', title: 'Synergie', blocks: [
+        { p: 'La synergie mesure l\'accord entre tes objets (ou ton entraîneur) et le style de la formation. À ne pas confondre avec l\'alchimie, qui est entre joueurs.' },
+        { p: 'Si le style d\'un objet tactique ou de l\'entraîneur (possession, pressing ou contre-attaque) correspond au type de ta formation, ses effets positifs sont amplifiés (×1,5) et ses pénalités annulées.' },
+        { p: 'C\'est la récompense d\'une équipe cohérente avec une seule idée de jeu.' },
+      ] },
+      { id: 'tactica', nav: 'Tactique', title: 'Tactique et formations', blocks: [
+        { p: 'Il y a 9 formations. Chacune applique de petits multiplicateurs à tes notes (attaque, milieu et défense) avec une contrepartie : le 5-3-2 est défensif, le 3-4-3 projette l\'équipe vers l\'avant et le 4-4-2 est l\'équilibre pur.' },
+        { p: 'De plus, chaque emplacement a un profil : un même joueur rend différemment selon le poste (un ailier ne note pas pareil en « 9 » ou sur le côté).' },
+        { h: 'Types de formation' },
+        { table: { head: ['Type', 'Formations'], rows: [
+          ['Possession', '3-5-2 · 4-3-1-2 · 4-2-3-1'],
+          ['Pressing', '4-3-3 · 3-4-3 · 3-2-4-1'],
+          ['Contre-attaque', '5-3-2 · 4-4-2 · 4-2-4'],
+        ] } },      ] },
+      { id: 'rasgos', nav: 'Traits', title: 'Traits des joueurs', blocks: [
+        { p: 'Chaque joueur peut avoir un trait : un effet passif spécial. Voici les 14 disponibles.' },
+        { traits: true },
+      ] },
+      { id: 'objetos', nav: 'Objets et paquets', title: 'Objets et paquets', blocks: [
+        { p: 'À chaque étage tu choisis un objet. Il y a trois types :' },
+        { ul: [
+          'Équipement : améliorations directes (crampons, gants, brassards…).',
+          'Tactique : effets de style de jeu, avec synergie selon la formation.',
+          'Relique : effets puissants et singuliers.',
+        ] },
+        { p: 'Les objets tactiques portent un style (possession, pressing ou contre-attaque). Utilise-les avec une formation de ce type pour déclencher la synergie : leurs effets sont amplifiés (×1,5) et leurs pénalités disparaissent.' },
+        { p: 'Le paquet d\'objets en propose 3 au choix (4 en cas de raclée).' },
+      ] },
+      { id: 'dt', nav: 'Entraîneur', title: 'Entraîneur', blocks: [
+        { p: 'Tous les 7 étages tu choisis un entraîneur. Il a un style de jeu (possession, pressing ou contre-attaque) et une nationalité.' },
+        { ul: [
+          'Synergie : si son style correspond au type de ta formation, ses modificateurs positifs sont amplifiés (×1,5) et les négatifs annulés.',
+          'Nationalité : chaque joueur du même pays reçoit un bonus de stats et +1 à l\'alchimie de sa ligne.',
+        ] },
+        { p: 'Un entraîneur bien choisi renforce le plan de jeu que tu construis déjà.' },
+      ] },
+      { id: 'cartas', nav: 'Cartes et raretés', title: 'Cartes et raretés', blocks: [
+        { p: 'Chaque carte de joueur a une position et une rareté. La rareté indique à quel point la carte tend à être forte, de la plus faible à la plus forte :' },
+        { ul: ['Commune', 'Rare', 'Épique', 'Légende'] },
+        { p: 'Positions : Gardien (GK), Défenseur (DEF), Milieu (MID) et Attaquant (FWD). Chaque joueur rend le mieux dans sa ligne naturelle et selon le profil de l\'emplacement occupé (voir Tactique).' },
+        { p: 'Les stats de champ sont vitesse, tir, passe, dribble, défense et physique ; les gardiens utilisent réflexes, prise et placement.' },
+      ] },
+    ],
+  },
+
+  // ===================================================================== PT
+  pt: {
+    title: 'Torre de Leyendas — Wiki',
+    subtitle: 'Guia das mecânicas do jogo',
+    backToGame: '← Voltar ao jogo',
+    langLabel: 'Idioma',
+    indexTitle: 'Índice',
+    traitsHead: ['Traço', 'Tipo', 'Efeito'],
+    traitType: { atk: 'Ataque', mid: 'Meio-campo', def: 'Defesa', gk: 'Goleiro', lead: 'Liderança' },
+    traitEffects: {
+      Francotirador: '+4 finalização · ×1,35 no peso para ser o finalizador.',
+      Cañón: '+3 finalização, +2 físico · ×1,2 no peso de finalizador.',
+      Muro: 'Jogador de linha: +5 defesa. Goleiro: +3 no rating.',
+      Motor: '+4 físico, +3 passe.',
+      Maestro: '+4 passe, +4 drible.',
+      Líbero: '+4 passe, +2 defesa.',
+      Paradón: '+4 no rating do goleiro.',
+      Mariscal: '+1 no rating do goleiro e +1,5 no rating da linha defensiva.',
+      Killer: '+5 no duelo de finalização quando o time empata ou perde.',
+      Velocista: '+5 no duelo de finalização nos contra-ataques.',
+      Especialista: '×1,6 no peso de finalizador e +4 no duelo em bola parada (escanteio ou falta).',
+      Penalero: '×2,5 no peso de finalizador em pênaltis e +5% de conversão.',
+      Capitán: '+1 na química da sua linha.',
+      Garra: '+4 no duelo defensivo a partir do minuto 75.',
+    },
+    sections: [
+      { id: 'reglamento', nav: 'Regras', title: 'Regras', blocks: [
+        { p: 'Torre de Leyendas é um roguelike de futebol: você monta uma seleção abrindo pacotes de cartas e sobe uma torre infinita em que cada andar coloca um rival mais forte pela frente.' },
+        { p: 'Em cada andar você escolhe uma carta de jogador e um objeto, monta o seu onze numa formação e o motor simula a partida. O resultado decide a recompensa: quanto melhor a vitória, melhor o próximo pacote. Uma derrota encerra a run e a sua pontuação é o andar alcançado.' },
+        { h: 'Recompensa por resultado' },
+        { table: { head: ['Resultado', 'Pacote de jogador'], rows: [
+          ['Goleada (dif. ≥ 5)', '5 cartas'],
+          ['Vitória ampla (dif. 3-4)', '4 cartas'],
+          ['Vitória apertada (dif. 1-2)', '3 cartas'],
+          ['Empate', '2 cartas'],
+          ['Derrota', 'Fim da run'],
+        ] } },
+        { p: 'O pacote de objetos oferece 3 à escolha (4 em caso de goleada).' },
+        { h: 'A simulação' },
+        { p: 'Cada partida distribui 24 jogadas de ataque conforme a posse. Cada jogada passa por construção, criação da chance e finalização.' },
+        { p: 'Durante a partida podem surgir cartões e expulsões, lesões, pênaltis, escanteios, faltas e contra-ataques.' },
+        { p: 'A cada 5 andares surge um pacote especial de seleção nacional; a cada 7 andares, um pacote de treinador.' },
+      ] },
+      { id: 'quimica', nav: 'Química', title: 'Química', blocks: [
+        { p: 'A química são ligações entre os seus jogadores: quando combinam, somam pontos às quatro linhas do time (goleiro, defesa, meio-campo e ataque).' },
+        { p: 'Só fazem química os jogadores colocados em vagas vizinhas conforme a formação (uma teia de proximidade), não todos os de uma mesma linha.' },
+        { h: 'O que gera química' },
+        { ul: [
+          'Mesma nação: +2 à linha.',
+          'Mesma década: +1 (décadas contíguas, +0,5).',
+          'Núcleo nacional: cada país com 5 ou mais jogadores no onze soma ao time inteiro (5-6 → +1, 7-8 → +2, 9-10 → +3, 11 → +4). Conta por país, então você pode ter núcleo duplo (por ex. 5 e 5 de dois países → +2).',
+          'Coesão tática: se a maioria dos seus jogadores combina com o estilo do desenho.',
+          'Capitão: +1 à sua linha. Cada jogador do país do treinador: +1 à sua linha.',
+        ] },      ] },
+      { id: 'sinergia', nav: 'Sinergia', title: 'Sinergia', blocks: [
+        { p: 'A sinergia mede o encaixe entre os seus objetos (ou o seu treinador) e o estilo da formação. Não confunda com a química, que é entre jogadores.' },
+        { p: 'Se o estilo de um objeto tático ou do treinador (posse, pressão ou contra-ataque) coincide com o tipo da sua formação, os efeitos positivos são amplificados (×1,5) e as penalidades anuladas.' },
+        { p: 'É a recompensa por montar um time coerente com uma ideia de jogo.' },
+      ] },
+      { id: 'tactica', nav: 'Tática', title: 'Tática e formações', blocks: [
+        { p: 'Há 9 formações. Cada uma aplica pequenos multiplicadores aos seus ratings (ataque, meio e defesa) com uma contrapartida: o 5-3-2 é defensivo, o 3-4-3 joga o time ao ataque e o 4-4-2 é equilíbrio puro.' },
+        { p: 'Além disso, cada vaga tem um perfil: o mesmo jogador rende diferente conforme a posição (um ponta não pontua igual de “9” ou pela beirada).' },
+        { h: 'Tipos de formação' },
+        { table: { head: ['Tipo', 'Formações'], rows: [
+          ['Posse', '3-5-2 · 4-3-1-2 · 4-2-3-1'],
+          ['Pressão', '4-3-3 · 3-4-3 · 3-2-4-1'],
+          ['Contra-ataque', '5-3-2 · 4-4-2 · 4-2-4'],
+        ] } },      ] },
+      { id: 'rasgos', nav: 'Traços', title: 'Traços dos jogadores', blocks: [
+        { p: 'Cada jogador pode ter um traço: um efeito passivo especial. Estes são os 14 disponíveis.' },
+        { traits: true },
+      ] },
+      { id: 'objetos', nav: 'Objetos e pacotes', title: 'Objetos e pacotes', blocks: [
+        { p: 'Em cada andar você escolhe um objeto. Há três tipos:' },
+        { ul: [
+          'Equipamento: melhorias diretas (chuteiras, luvas, braçadeiras…).',
+          'Tática: efeitos de estilo de jogo, com sinergia conforme a formação.',
+          'Relíquia: efeitos potentes e singulares.',
+        ] },
+        { p: 'Os objetos táticos têm um estilo (posse, pressão ou contra-ataque). Use-os com uma formação desse tipo para ativar a sinergia: os efeitos são amplificados (×1,5) e as penalidades desaparecem.' },
+        { p: 'O pacote de objetos oferece 3 à escolha (4 em caso de goleada).' },
+      ] },
+      { id: 'dt', nav: 'Treinador', title: 'Treinador', blocks: [
+        { p: 'A cada 7 andares você escolhe um treinador. Ele tem um estilo de jogo (posse, pressão ou contra-ataque) e uma nacionalidade.' },
+        { ul: [
+          'Sinergia: se o estilo dele coincide com o tipo da sua formação, os modificadores positivos são amplificados (×1,5) e os negativos anulados.',
+          'Nacionalidade: cada jogador do mesmo país recebe um bônus de stats e +1 na química da sua linha.',
+        ] },
+        { p: 'Um treinador bem escolhido reforça o plano de jogo que você já está montando.' },
+      ] },
+      { id: 'cartas', nav: 'Cartas e raridades', title: 'Cartas e raridades', blocks: [
+        { p: 'Cada carta de jogador tem uma posição e uma raridade. A raridade indica o quão forte a carta tende a ser, da menor para a maior:' },
+        { ul: ['Comum', 'Rara', 'Épica', 'Lenda'] },
+        { p: 'Posições: Goleiro (GK), Defensor (DEF), Meio-campista (MID) e Atacante (FWD). Cada jogador rende melhor na sua linha natural e conforme o perfil da vaga que ocupa (ver Tática).' },
+        { p: 'As stats de linha são ritmo, finalização, passe, drible, defesa e físico; os goleiros usam reflexos, bloqueio e posicionamento.' },
+      ] },
+    ],
+  },
+
+  // ===================================================================== IT
+  it: {
+    title: 'Torre de Leyendas — Wiki',
+    subtitle: 'Guida alle meccaniche del gioco',
+    backToGame: '← Torna al gioco',
+    langLabel: 'Lingua',
+    indexTitle: 'Indice',
+    traitsHead: ['Tratto', 'Tipo', 'Effetto'],
+    traitType: { atk: 'Attacco', mid: 'Centrocampo', def: 'Difesa', gk: 'Portiere', lead: 'Leadership' },
+    traitEffects: {
+      Francotirador: '+4 tiro · ×1,35 al peso per essere il finalizzatore.',
+      Cañón: '+3 tiro, +2 fisico · ×1,2 al peso di finalizzatore.',
+      Muro: 'Giocatore di movimento: +5 difesa. Portiere: +3 alla valutazione.',
+      Motor: '+4 fisico, +3 passaggio.',
+      Maestro: '+4 passaggio, +4 dribbling.',
+      Líbero: '+4 passaggio, +2 difesa.',
+      Paradón: '+4 alla valutazione del portiere.',
+      Mariscal: '+1 alla valutazione del portiere e +1,5 alla valutazione della linea difensiva.',
+      Killer: '+5 nel duello di finalizzazione quando la squadra pareggia o perde.',
+      Velocista: '+5 nel duello di finalizzazione nei contropiedi.',
+      Especialista: '×1,6 al peso di finalizzatore e +4 nel duello su palla inattiva (corner o punizione).',
+      Penalero: '×2,5 al peso di finalizzatore sui rigori e +5% di conversione.',
+      Capitán: '+1 all\'intesa della sua linea.',
+      Garra: '+4 nel duello difensivo dal minuto 75 in poi.',
+    },
+    sections: [
+      { id: 'reglamento', nav: 'Regole', title: 'Regole', blocks: [
+        { p: 'Torre de Leyendas è un roguelike calcistico: costruisci una nazionale aprendo pacchetti di carte e scali una torre infinita in cui ogni piano ti mette contro un avversario più forte.' },
+        { p: 'A ogni piano scegli una carta giocatore e un oggetto, schieri il tuo undici in una formazione e il motore simula la partita. Il risultato decide la ricompensa: meglio vinci, migliore è il pacchetto successivo. Una sconfitta termina la run e il tuo punteggio è il piano raggiunto.' },
+        { h: 'Ricompensa per risultato' },
+        { table: { head: ['Risultato', 'Pacchetto giocatore'], rows: [
+          ['Goleada (diff. ≥ 5)', '5 carte'],
+          ['Ampia vittoria (diff. 3-4)', '4 carte'],
+          ['Vittoria di misura (diff. 1-2)', '3 carte'],
+          ['Pareggio', '2 carte'],
+          ['Sconfitta', 'Fine della run'],
+        ] } },
+        { p: 'Il pacchetto di oggetti ne propone 3 a scelta (4 in caso di goleada).' },
+        { h: 'La simulazione' },
+        { p: 'Ogni partita distribuisce 24 azioni offensive in base al possesso. Ogni azione passa da costruzione, creazione dell\'occasione e finalizzazione.' },
+        { p: 'Durante la partita possono comparire cartellini ed espulsioni, infortuni, rigori, calci d\'angolo, punizioni e contropiedi.' },
+        { p: 'Ogni 5 piani compare un pacchetto speciale di nazionale; ogni 7 piani, un pacchetto allenatore.' },
+      ] },
+      { id: 'quimica', nav: 'Intesa', title: 'Intesa', blocks: [
+        { p: 'L\'intesa è una rete di collegamenti tra i tuoi giocatori: quando si incastrano, aggiungono punti alle quattro linee della squadra (portiere, difesa, centrocampo e attacco).' },
+        { p: 'Fanno intesa solo i giocatori posti in caselle vicine secondo la formazione (una rete di prossimità), non tutti quelli di una stessa linea.' },
+        { h: 'Cosa crea intesa' },
+        { ul: [
+          'Stessa nazione: +2 alla linea.',
+          'Stesso decennio: +1 (decenni contigui, +0,5).',
+          'Nucleo nazionale: ogni paese con 5 o più giocatori nell\'undici giova a tutta la squadra (5-6 → +1, 7-8 → +2, 9-10 → +3, 11 → +4). Conta per paese, quindi puoi avere un doppio nucleo (per es. 5 e 5 di due paesi → +2).',
+          'Coesione tattica: se la maggioranza dei tuoi giocatori si adatta allo stile del modulo.',
+          'Capitano: +1 alla sua linea. Ogni giocatore del paese dell\'allenatore: +1 alla sua linea.',
+        ] },      ] },
+      { id: 'sinergia', nav: 'Sinergia', title: 'Sinergia', blocks: [
+        { p: 'La sinergia misura l\'incastro tra i tuoi oggetti (o il tuo allenatore) e lo stile della formazione. Da non confondere con l\'intesa, che è tra giocatori.' },
+        { p: 'Se lo stile di un oggetto tattico o dell\'allenatore (possesso, pressing o contropiede) coincide con il tipo della tua formazione, gli effetti positivi vengono amplificati (×1,5) e le penalità annullate.' },
+        { p: 'È la ricompensa per una squadra coerente con un\'unica idea di gioco.' },
+      ] },
+      { id: 'tactica', nav: 'Tattica', title: 'Tattica e formazioni', blocks: [
+        { p: 'Ci sono 9 formazioni. Ognuna applica piccoli moltiplicatori alle tue valutazioni (attacco, centrocampo e difesa) con un compromesso: il 5-3-2 è difensivo, il 3-4-3 sbilancia la squadra in avanti e il 4-4-2 è puro equilibrio.' },
+        { p: 'Inoltre ogni casella ha un profilo: lo stesso giocatore rende diversamente a seconda del ruolo (un\'ala non rende uguale da “9” o sull\'esterno).' },
+        { h: 'Tipi di formazione' },
+        { table: { head: ['Tipo', 'Formazioni'], rows: [
+          ['Possesso', '3-5-2 · 4-3-1-2 · 4-2-3-1'],
+          ['Pressing', '4-3-3 · 3-4-3 · 3-2-4-1'],
+          ['Contropiede', '5-3-2 · 4-4-2 · 4-2-4'],
+        ] } },      ] },
+      { id: 'rasgos', nav: 'Tratti', title: 'Tratti dei giocatori', blocks: [
+        { p: 'Ogni giocatore può avere un tratto: un effetto passivo speciale. Questi sono i 14 disponibili.' },
+        { traits: true },
+      ] },
+      { id: 'objetos', nav: 'Oggetti e pacchetti', title: 'Oggetti e pacchetti', blocks: [
+        { p: 'A ogni piano scegli un oggetto. Ci sono tre tipi:' },
+        { ul: [
+          'Equipaggiamento: bonus diretti (scarpini, guanti, fasce…).',
+          'Tattica: effetti di stile di gioco, con sinergia in base alla formazione.',
+          'Reliquia: effetti potenti e unici.',
+        ] },
+        { p: 'Gli oggetti tattici hanno uno stile (possesso, pressing o contropiede). Usali con una formazione di quel tipo per attivare la sinergia: gli effetti vengono amplificati (×1,5) e le penalità spariscono.' },
+        { p: 'Il pacchetto di oggetti ne propone 3 a scelta (4 in caso di goleada).' },
+      ] },
+      { id: 'dt', nav: 'Allenatore', title: 'Allenatore', blocks: [
+        { p: 'Ogni 7 piani scegli un allenatore. Ha uno stile di gioco (possesso, pressing o contropiede) e una nazionalità.' },
+        { ul: [
+          'Sinergia: se il suo stile coincide con il tipo della tua formazione, i modificatori positivi vengono amplificati (×1,5) e quelli negativi annullati.',
+          'Nazionalità: ogni giocatore dello stesso paese riceve un bonus alle stats e +1 all\'intesa della sua linea.',
+        ] },
+        { p: 'Un allenatore ben scelto rafforza il piano di gioco che stai già costruendo.' },
+      ] },
+      { id: 'cartas', nav: 'Carte e rarità', title: 'Carte e rarità', blocks: [
+        { p: 'Ogni carta giocatore ha un ruolo e una rarità. La rarità indica quanto la carta tende a essere forte, dalla più bassa alla più alta:' },
+        { ul: ['Comune', 'Rara', 'Epica', 'Leggenda'] },
+        { p: 'Ruoli: Portiere (GK), Difensore (DEF), Centrocampista (MID) e Attaccante (FWD). Ogni giocatore rende meglio nella sua linea naturale e secondo il profilo della casella che occupa (vedi Tattica).' },
+        { p: 'Le stats di movimento sono velocità, tiro, passaggio, dribbling, difesa e fisico; i portieri usano riflessi, presa e posizionamento.' },
+      ] },
+    ],
+  },
+};

@@ -88,10 +88,14 @@ function rollBand(weights, rng) {
 
 // Elige una carta distinta de `byBand` para la banda sorteada, cayendo a las
 // bandas contiguas si la pedida ya está agotada. Devuelve null si no queda nada.
-function pickFromBand(byBand, weights, used, rng) {
+// `exclude` (opcional) descarta cartas tras el sorteo de banda sin alterar el
+// consumo de RNG (siempre un rollBand + un rng.pick), para no romper la
+// reproducibilidad: lo usa el tope de leyendas del arranque.
+function pickFromBand(byBand, weights, used, rng, exclude = null) {
   const band = rollBand(weights, rng);
   for (const b of BAND_FALLBACK[band]) {
-    const available = byBand[b].filter((c) => !used.has(c.id));
+    let available = byBand[b].filter((c) => !used.has(c.id));
+    if (exclude) available = available.filter((c) => !exclude(c));
     if (available.length) return rng.pick(available);
   }
   return null;
@@ -148,19 +152,23 @@ export function drawPlayerPack(catalog, squad, size, weights, rng) {
 // (STARTER_BENCH), tomando de TODO el roster. La banda de cada hueco se decide
 // por pesos (≈80% < 70, 15% 70-90, 5% > 90), cayendo a bandas contiguas si la
 // pedida se agota en esa posición.
-export function generateStarterSquad(catalog, formation, config, rng) {
+export function generateStarterSquad(catalog, formation, config, rng, maxLegends = config.STARTER_MAX_LEGENDS ?? 2) {
   const slots = formationSlots(formation);
   const bench = config.STARTER_BENCH || {};
   const weights = config.STARTER_BAND_WEIGHTS;
   const occupied = new Set();
   const squad = [];
+  let legendCount = 0;
+  const noMoreLegends = (c) => c.rarity === 'legend';
 
   for (const line of LINES) {
     const byBand = groupByBand(catalog.filter((p) => p.position === line));
     for (let i = 0; i < slots[line] + (bench[line] || 0); i++) {
-      const picked = pickFromBand(byBand, weights, occupied, rng);
+      const exclude = legendCount >= maxLegends ? noMoreLegends : null;
+      const picked = pickFromBand(byBand, weights, occupied, rng, exclude);
       if (!picked) throw new Error(`No hay jugadores suficientes para cubrir ${line}`);
       occupied.add(picked.id);
+      if (picked.rarity === 'legend') legendCount++;
       squad.push(picked);
     }
   }
@@ -951,7 +959,20 @@ export function createRun(opts = {}) {
     opponent: null,
   };
 
-  state.squad = generateStarterSquad(roster, formation, CONFIG, rng).map(instantiate);
+  // Carry-over ("Volver a jugar"): un jugador de la run anterior entra en la nueva
+  // plantilla. Si es leyenda, recorta el cupo del sorteo para no pasar de 2 en total.
+  const carriedLegend = opts.carryoverPlayer?.rarity === 'legend' ? 1 : 0;
+  const legendCap = Math.max(0, (CONFIG.STARTER_MAX_LEGENDS ?? 2) - carriedLegend);
+  state.squad = generateStarterSquad(roster, formation, CONFIG, rng, legendCap).map(instantiate);
+
+  if (opts.carryoverPlayer) {
+    const base = roster.find((p) => p.id === opts.carryoverPlayer.id) || opts.carryoverPlayer;
+    const key = dupKey(base);
+    // Quita cualquier carta del mismo grupo que haya salido en el sorteo (evita
+    // duplicar a la misma persona) y añade el arrastrado con stats base limpias.
+    state.squad = state.squad.filter((p) => dupKey(p) !== key);
+    state.squad.push(instantiate(base));
+  }
 
   autoFillStarting11(state);
 

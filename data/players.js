@@ -311,7 +311,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": "Velocista",
+    "trait": "Líbero",
     "tacticalType": "posesion"
   },
   {
@@ -1883,7 +1883,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": "Penalero",
+    "trait": "Velocista",
     "tacticalType": null
   },
   {
@@ -1903,7 +1903,7 @@ export const PLAYERS = [
       "physical": 82
     },
     "gk": null,
-    "trait": "Penalero",
+    "trait": "Velocista",
     "tacticalType": null
   },
   {
@@ -3125,7 +3125,7 @@ export const PLAYERS = [
       "physical": 85
     },
     "gk": null,
-    "trait": "Capitán",
+    "trait": "Velocista",
     "tacticalType": null
   },
   {
@@ -3242,7 +3242,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": null,
+    "trait": "Muro",
     "tacticalType": null
   },
   {
@@ -4887,7 +4887,7 @@ export const PLAYERS = [
       "physical": 92
     },
     "gk": null,
-    "trait": "Penalero",
+    "trait": "Velocista",
     "tacticalType": null
   },
   {
@@ -4907,7 +4907,7 @@ export const PLAYERS = [
       "physical": 93
     },
     "gk": null,
-    "trait": "Penalero",
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
@@ -7840,7 +7840,6 @@ export const PLAYERS = [
   {
     "id": "gen_fwd_ronaldo",
     "name": "Ronaldo",
-    "dupGroup": "ronaldo",
     "nation": "Brasil",
     "era": "1998",
     "position": "FWD",
@@ -7855,7 +7854,7 @@ export const PLAYERS = [
       "physical": 95
     },
     "gk": null,
-    "trait": "Penalero",
+    "trait": "Velocista",
     "tacticalType": null
   },
   {
@@ -8386,7 +8385,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": null,
+    "trait": "Killer",
     "tacticalType": null
   },
   {
@@ -9274,7 +9273,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": "Velocista",
+    "trait": "Muro",
     "tacticalType": null
   },
   {
@@ -10362,7 +10361,7 @@ export const PLAYERS = [
       "physical": 99
     },
     "gk": null,
-    "trait": "Maestro",
+    "trait": "Motor",
     "tacticalType": null
   },
   {
@@ -10599,7 +10598,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": null,
+    "trait": "Francotirador",
     "tacticalType": null
   },
   {
@@ -12552,7 +12551,7 @@ export const PLAYERS = [
       "physical": 97
     },
     "gk": null,
-    "trait": "Velocista",
+    "trait": "Muro",
     "tacticalType": null
   },
   {

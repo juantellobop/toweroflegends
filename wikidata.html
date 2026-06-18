@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Torre de Leyendas — Wiki</title>
+  <meta name="description" content="Wiki de Torre de Leyendas: reglamento, química, sinergia, táctica y rasgos." />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="stylesheet" href="design/tokens.css" />
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-game);
+      line-height: 1.55;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    .wiki-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      padding: 14px 60px;
+      padding-top: max(14px, env(safe-area-inset-top));
+      background: var(--panel);
+      border-bottom: 2px solid var(--line);
+    }
+    .wiki-header h1 { margin: 0; font-size: var(--t-title-2); color: var(--accent); }
+    .wiki-header p { margin: 2px 0 0; font-size: var(--t-footnote); color: var(--muted); }
+    .wiki-header-tools { display: flex; align-items: center; gap: 12px; }
+
+    #wiki-lang {
+      font: inherit;
+      background: var(--panel2);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-s);
+      padding: 6px 10px;
+    }
+    #wiki-back { color: var(--accent2); text-decoration: none; font-size: var(--t-subhead); white-space: nowrap; }
+    #wiki-back:hover { text-decoration: underline; }
+
+    .wiki-layout {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 28px;
+      padding: 24px 20px 80px;
+    }
+
+    .wiki-nav {
+      position: sticky;
+      top: 88px;
+      align-self: start;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: calc(100vh - 110px);
+      overflow: auto;
+      padding-block: 16px;
+    }
+    .wiki-nav-title {
+      margin: 0 0 6px;
+      font-size: var(--t-caption-1);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--muted);
+    }
+    .wiki-nav a {
+      color: var(--text);
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: var(--radius-s);
+      border-left: 2px solid transparent;
+      font-size: var(--t-subhead);
+    }
+    .wiki-nav a:hover { background: var(--bg2); color: var(--accent); border-left-color: var(--accent); }
+
+    .wiki-content { min-width: 0; }
+    .wiki-section { margin: 0 0 36px; scroll-margin-top: 96px; }
+    .wiki-section h2 {
+      font-size: var(--t-title-3);
+      color: var(--accent);
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 6px;
+      margin: 0 0 12px;
+    }
+    .wiki-section h3 { font-size: var(--t-headline); margin: 18px 0 6px; }
+    .wiki-section p { margin: 0 0 12px; }
+    .wiki-section ul { margin: 0 0 12px; padding-left: 20px; }
+    .wiki-section li { margin: 0 0 6px; }
+
+    .wiki-table-wrap { overflow-x: auto; margin: 0 0 16px; }
+    table { border-collapse: collapse; width: 100%; font-size: var(--t-subhead); }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    thead th { color: var(--accent); border-bottom: 2px solid var(--line); white-space: nowrap; }
+    tbody tr:hover { background: rgba(255, 255, 255, .04); }
+
+    @media (max-width: 760px) {
+      .wiki-layout { grid-template-columns: 1fr; gap: 16px; }
+      .wiki-nav {
+        position: static;
+        max-height: none;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--line);
+      }
+      .wiki-nav-title { width: 100%; }
+      .wiki-nav a { border-left: none; border: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <header class="wiki-header">
+    <div class="wiki-header-text">
+      <h1 id="wiki-title">Torre de Leyendas — Wiki</h1>
+      <p id="wiki-subtitle"></p>
+    </div>
+    <div class="wiki-header-tools">
+      <select id="wiki-lang"></select>
+      <a id="wiki-back" href="index.html">← Volver al juego</a>
+    </div>
+  </header>
+  <div class="wiki-layout">
+    <nav id="wiki-nav" class="wiki-nav" aria-label="Índice"></nav>
+    <main id="wiki-content" class="wiki-content"></main>
+  </div>
+  <script type="module" src="wikidata.js"></script>
+</body>
+</html>

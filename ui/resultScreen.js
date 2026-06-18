@@ -300,9 +300,11 @@ export function renderGameOver(root, state, best, handlers) {
       <h3>${t('result.finalSquad')}</h3>
       <div class="squad-final">${squad}</div>
       <div class="go-actions action-bar">
-        <button id="again" class="primary big glass-cta">${t('result.playAgain')}</button>
+        <button id="replay" class="primary big glass-cta">${t('result.replay')}</button>
+        <button id="end" class="ghost big glass-cta">${t('result.endRun')}</button>
       </div>
     </section>`;
 
-  root.querySelector('#again').addEventListener('click', () => handlers.onRestart());
+  root.querySelector('#replay').addEventListener('click', () => handlers.onReplay());
+  root.querySelector('#end').addEventListener('click', () => handlers.onEnd());
 }

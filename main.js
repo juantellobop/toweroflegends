@@ -17,6 +17,7 @@ import { renderBuild } from './ui/buildScreen.js';
 import { renderScouting } from './ui/scoutingScreen.js';
 import { renderMatch } from './ui/matchScreen.js';
 import { renderResult, renderGameOver } from './ui/resultScreen.js';
+import { renderCarryover } from './ui/carryoverScreen.js';
 import { fetchLeaderboard, fetchWeeklyLeaderboard, openLeaderboardLineup, renderLeaderboard, submitLeaderboardEntry, submitWeeklyLeaderboardEntry } from './ui/leaderboard.js';
 import { CONFIG, LINES } from './data/config.js';
 import { playerOVR } from './engine/ovr.js';
@@ -597,12 +598,13 @@ function render(navHint = 'auto') {
         renderGameOver(root, state, getBest(), {
           leaderboard: submitGameOverRanking(),
           weeklyLeaderboard: submitGameOverWeeklyRanking(),
-          onRestart: () => {
+          onEnd: () => {
             clearSavedRun();
             releaseRunLock();
             state = null;
             renderMenu('back');
           },
+          onReplay: () => renderCarryoverScreen('forward'),
         });
       }, navHint);
       break;
@@ -610,6 +612,28 @@ function render(navHint = 'auto') {
     default:
       renderMenu(navHint);
   }
+}
+
+// Pantalla "Volver a jugar": elegir un jugador de la run terminada para
+// arrastrarlo a una run nueva que arranca al instante (resto de plantilla nuevo,
+// rival aleatorio). Conserva la identidad del equipo y el cerrojo de la pestaña;
+// el autosave de render() sobrescribe el slot de la run anterior.
+function renderCarryoverScreen(navHint = 'forward') {
+  renderRoute('carryover', () => {
+    renderCarryover(root, state, {
+      onPick: (player) => {
+        state = createRun({
+          formation: CONFIG.STARTING_FORMATION,
+          lives: CONFIG.LIVES,
+          teamName: state.team?.name,
+          teamNation: state.team?.nation,
+          carryoverPlayer: player,
+        });
+        render('forward');
+      },
+      onBack: () => render('back'),
+    });
+  }, navHint);
 }
 
 // === Menú de inicio (§8.1) ===
@@ -667,6 +691,7 @@ function renderMenu(navHint = 'auto') {
           <div id="menu-ranking-weekly" class="menu-ranking"></div>
         </div>
         <div id="menu-stats" class="menu-live" aria-live="polite" hidden></div>
+        <p class="menu-wiki"><a href="wikidata.html">${t('menu.wiki')}</a></p>
         <p class="disclaimer menu-legal">${t('menu.disclaimer')}</p>
         <p class="menu-version">v${GAME_VERSION}</p>
       </div>

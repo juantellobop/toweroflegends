@@ -1082,6 +1082,99 @@
       ]
     },
     {
+      "id": "0997db43-54a2-490c-9375-69a4b495000f",
+      "teamName": "Leyendas",
+      "nation": "River Plate",
+      "floor": 6,
+      "createdAt": "2026-06-18T14:13:28.667Z",
+      "runId": "ddd5c754-eab5-400f-91a0-9f1732800bd7",
+      "formation": "4-3-3",
+      "lineup": [
+        {
+          "name": "Ed de Goey",
+          "position": "GK",
+          "line": "GK",
+          "ovr": 84,
+          "rarity": "epic"
+        },
+        {
+          "name": "Gregg Berhalter",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 69,
+          "rarity": "common"
+        },
+        {
+          "name": "Marco Rossi",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 60,
+          "rarity": "common"
+        },
+        {
+          "name": "Omar Daf",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 68,
+          "rarity": "common"
+        },
+        {
+          "name": "Ferdinand Coly",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 68,
+          "rarity": "common"
+        },
+        {
+          "name": "Albin Ekdal",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 69,
+          "rarity": "common"
+        },
+        {
+          "name": "Daler Kuzyaev",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 67,
+          "rarity": "common"
+        },
+        {
+          "name": "Anthony Annan",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 67,
+          "rarity": "common"
+        },
+        {
+          "name": "Asamoah Gyan",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 67,
+          "rarity": "common"
+        },
+        {
+          "name": "Cristiano Ronaldo",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 97,
+          "rarity": "legend"
+        },
+        {
+          "name": "Aleksandr Samedov",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 67,
+          "rarity": "common"
+        }
+      ],
+      "manager": {
+        "id": "manager_daniel_passarella",
+        "name": "Daniel Passarella",
+        "nation": "Argentina"
+      }
+    },
+    {
       "id": "f0a9c4c2-c8b1-4617-9348-5f910e9e52b0",
       "teamName": "Leyendas",
       "nation": "River Plate",
@@ -1705,100 +1798,6 @@
           "rarity": "common"
         }
       ]
-    },
-    {
-      "id": "a3e5de90-51cc-4f40-bfc1-3b01ff60754d",
-      "teamName": "Leyendas",
-      "nation": "River Plate",
-      "floor": 4,
-      "createdAt": "2026-06-16T12:01:25.075Z",
-      "runId": "c5fa87ea-bec1-4259-9300-42950bfe5557",
-      "formation": "4-4-2",
-      "lineup": [
-        {
-          "name": "Andries Noppert",
-          "position": "GK",
-          "line": "GK",
-          "ovr": 81,
-          "rarity": "rare"
-        },
-        {
-          "name": "Lucas Hernández",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 90,
-          "rarity": "epic"
-        },
-        {
-          "name": "Kyle Walker",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 85,
-          "rarity": "epic"
-        },
-        {
-          "name": "Sergei Ignashevich",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Darío Verón",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 67,
-          "rarity": "common"
-        },
-        {
-          "name": "Zlatko Yankov",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 81,
-          "rarity": "rare"
-        },
-        {
-          "name": "Aleksandr Golovin",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Daler Kuzyaev",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 67,
-          "rarity": "common",
-          "expelled": true
-        },
-        {
-          "name": "Claudio Reyna",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 69,
-          "rarity": "common"
-        },
-        {
-          "name": "Edinson Cavani",
-          "position": "FWD",
-          "line": "FWD",
-          "ovr": 85,
-          "rarity": "epic"
-        },
-        {
-          "name": "Marco Ureña",
-          "position": "FWD",
-          "line": "FWD",
-          "ovr": 68,
-          "rarity": "common"
-        }
-      ],
-      "manager": {
-        "id": "manager_enzo_bearzot",
-        "name": "Enzo Bearzot",
-        "nation": "Italia"
-      }
     }
   ]
 }

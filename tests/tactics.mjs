@@ -127,14 +127,26 @@ const bt3241 = buildBattleTeam(m3241team);
 assert.ok(bt3241.attackers.some((p) => p.name === byId('fwd_pele_1970').name), 'el 9 está en ataque');
 assert.ok(bt3241.midfielders.length >= 6, 'los 6 del medio nutren el mediocampo');
 
-// === 6. Química: bonus globales de equipo (computeTeamChem, sin cambios) ===
+// === 6. Química: bonus globales de equipo (computeTeamChem) ===
+// Núcleo nacional: escalón floor((tamaño-3)/2) por país, sumado.
 const core = (n) => {
   const players = Array.from({ length: 11 }, (_, i) => ({ nation: i < n ? 'Brasil' : `X${i}`, era: '2000', position: i === 0 ? 'GK' : 'DEF' }));
   return computeTeamChem({ GK: [players[0]], DEF: players.slice(1), MID: [], FWD: [] }, '4-4-2').all;
 };
 assert.equal(core(4), 0);
 assert.equal(core(5), 1);
+assert.equal(core(6), 1, 'escalón: 6 connacionales siguen siendo +1');
+assert.equal(core(7), 2, 'escalón: 7 connacionales → +2');
 assert.equal(core(11), 4, 'núcleo nacional sin tope: 11 connacionales → +4');
+
+// Doble núcleo: 5 de un país + 5 de otro (+1 GK de nación única) → +1 +1 = +2.
+const doubleCore = (() => {
+  const players = [{ nation: 'GK', era: '2000', position: 'GK' }];
+  for (let i = 0; i < 5; i++) players.push({ nation: 'Brasil', era: '2000', position: 'DEF' });
+  for (let i = 0; i < 5; i++) players.push({ nation: 'Italia', era: '2000', position: 'DEF' });
+  return computeTeamChem({ GK: [players[0]], DEF: players.slice(1), MID: [], FWD: [] }, '4-4-2').all;
+})();
+assert.equal(doubleCore, 2, 'doble núcleo: 5 Brasil + 5 Italia → +1 +1');
 
 // === 6b. Web de cercanía (CHEM_LINKS): solo los huecos vecinos hacen química ===
 // Once de control: naciones únicas y épocas espaciadas (ninguna pareja con diff 0
@@ -197,7 +209,7 @@ const xiNoVecinos = {
 };
 assert.equal(computeChemistry(xiNoVecinos, '4-4-2').MID, 0, 'medios de bandas opuestas no son vecinos');
 
-// === 6b-bis. Web del 3-2-4-1 (estilo FIFA): mide el aporte de cada par ===
+// === 6b-bis. Web del 3-2-4-1 (cercanía): mide el aporte de cada par ===
 // Once de control: naciones únicas y épocas espaciadas ≥30 años (sin química de
 // época incidental en aristas); se hermana un par y se mide su delta por línea.
 const mk3241 = (id, position, nation, era) => ({ id, name: id, position, nation, era, trait: null });

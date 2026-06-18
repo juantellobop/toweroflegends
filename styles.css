@@ -158,7 +158,7 @@ button.is-pressing:not(:disabled),
   filter: brightness(.96) saturate(1.08);
 }
 button.primary { background: linear-gradient(135deg, var(--accent), #b8941f); color: #1a1300; font-weight: 700; }
-button.ghost { background: transparent; border: 1px solid var(--line); }
+button.ghost { background: black; border: 1px solid var(--line); }
 button.big { padding: 14px 28px; font-size: 17px; }
 button.ready { animation: pulse 1.2s infinite; }
 @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(212,175,55,.5);} 50% { box-shadow: 0 0 0 8px rgba(212,175,55,0);} }
@@ -2045,6 +2045,20 @@ select {
   color: rgba(255,255,255,.45);
   text-transform: uppercase;
 }
+
+/* Enlace discreto a la wiki (wikidata.html) en el pie del menú. */
+.menu-wiki {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+.menu-wiki a {
+  color: var(--accent2);
+  text-decoration: none;
+  letter-spacing: .04em;
+}
+.menu-wiki a:hover { color: var(--accent); text-decoration: underline; }
 
 
 /* Cards and packs */

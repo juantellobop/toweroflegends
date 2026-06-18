@@ -2,6 +2,13 @@
 // Efectos pasivos ligeros aplicados a la contribución del jugador y a la
 // selección de rematador. Mantener modestos para no romper el balance.
 
+// Lista canónica de rasgos disponibles (orden de presentación en el editor).
+export const TRAITS = [
+  'Francotirador', 'Cañón', 'Muro', 'Motor', 'Maestro', 'Líbero',
+  'Paradón', 'Mariscal', 'Killer', 'Velocista', 'Especialista',
+  'Penalero', 'Capitán', 'Garra',
+];
+
 // Bonus aditivos a stats de campo según rasgo (antes de calcular líneas).
 const STAT_BONUS = {
   Francotirador: { shooting: 4 },
