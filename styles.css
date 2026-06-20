@@ -1348,13 +1348,13 @@ select {
 .field-chip.empty { background: rgba(0,0,0,0.18); border-style: dashed; border-color: rgba(255,255,255,0.55); }
 .chip-plus { font-size: 22px; font-weight: 300; line-height: 1; }
 
-.slot-picker { border-radius: var(--radius-l); padding: var(--space-4); margin-top: var(--space-4); }
-.picker-head { font-size: var(--t-headline); font-weight: 600; margin-bottom: var(--space-3); }
+.slot-picker { border-radius: var(--radius-l); padding: 10px; margin-top: var(--space-4); }
+.picker-head { font-size: var(--t-headline); font-weight: 600; margin-bottom: var(--space-3); text-align: center }
 /* El selector del tablero muestra las cartas escaparate completas (.tdl-card),
    seleccionables. Rejilla fluida: tantas columnas como quepan a ≥160px. */
 .picker-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: var(--space-3);
   margin-bottom: var(--space-3);
 }
@@ -2598,7 +2598,6 @@ select {
 .items-fold,
 .slot-picker {
   background: var(--arcade-panel);
-  border: var(--pixel-border) solid var(--arcade-cyan);
   border-radius: var(--pixel-radius);
   color: #fff;
 }
@@ -2624,7 +2623,6 @@ select {
   border: var(--pixel-border) solid var(--arcade-cyan);
   background:
     repeating-linear-gradient(180deg, var(--arcade-pitch) 0 28px, #1ea650 28px 56px);
-  box-shadow: 0 0 0 4px var(--arcade-blue-900), 0 16px 0 rgba(0,0,0,.28);
 }
 
 .field-bg .fl {
@@ -5177,11 +5175,6 @@ button.primary:active:not(:disabled),
     radial-gradient(ellipse at 50% 48%, rgba(255,255,255,.12), transparent 58%),
     repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, transparent 1px 32px),
     repeating-linear-gradient(180deg, var(--arcade-pitch) 0 28px, #1b9b49 28px 56px);
-  box-shadow:
-    0 0 0 4px var(--arcade-blue-900),
-    0 0 0 7px rgba(255,255,255,.18),
-    0 18px 0 rgba(0,0,0,.28),
-    0 28px 54px rgba(0,0,0,.34);
 }
 
 .field::before {
