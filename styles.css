@@ -2812,6 +2812,10 @@ select {
   margin-bottom: 10px;
 }
 
+.scouting-screen .team-panel-head{
+  grid-template-columns: 1fr;
+}
+
 .team-panel-head h2 {
   margin: 0;
   font-family: var(--font-game);
