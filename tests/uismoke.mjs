@@ -42,7 +42,7 @@ try {
   // Popup "Revisar mi equipo" antes de abrir el sobre
   click(root.querySelector('.review-btn[data-review="reviewSquad"]'));
   if (root.querySelector('#reviewSquad')?.hidden !== false) errors.push('Revisar mi equipo no abre el popup');
-  if (root.querySelectorAll('#reviewSquad .player-card').length !== 16) errors.push('el popup de plantilla no muestra las 16 cartas');
+  if (root.querySelectorAll('#reviewSquad .tdl-card--player').length !== 16) errors.push('el popup de plantilla no muestra las 16 cartas');
   click(root.querySelector('#reviewSquad [data-close]'));
   if (root.querySelector('#reviewSquad')?.hidden !== true) errors.push('el popup de plantilla no cierra');
 

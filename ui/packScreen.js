@@ -5,7 +5,6 @@
 // una: se eleva, las demás se atenúan y retroceden; "Elegir" confirma y la carta
 // "vuela" a la plantilla. "Lectura total": cada carta muestra todo lo necesario.
 
-import { playerCardHTML, itemCardHTML, managerCardHTML } from './cards.js';
 import { playerShowcaseHTML, itemShowcaseHTML, managerShowcaseHTML } from './showcaseCard.js';
 import { esc, prefersReducedMotion } from './dom.js';
 import { haptic } from '../match/feedback.js';
@@ -129,7 +128,7 @@ function squadReviewBody(state) {
   const subs = state.squad
     .filter((p) => !starterUids.has(p.uid))
     .sort((a, b) => playerOVR(b) - playerOVR(a));
-  const grid = (players) => `<div class="squad-review-grid">${players.map((p) => playerCardHTML(p, { manager: state.manager })).join('')}</div>`;
+  const grid = (players) => `<div class="squad-review-grid">${players.map((p) => playerShowcaseHTML(p, { manager: state.manager })).join('')}</div>`;
   return `
     ${starters.length ? `<h3 class="squad-review-sub">${t('squadIntro.eleven')}</h3>${grid(starters)}` : ''}
     ${subs.length ? `<h3 class="squad-review-sub">${t('squadIntro.bench')}</h3>${grid(subs)}` : ''}`;
@@ -143,7 +142,7 @@ function itemsReviewBody(state) {
     if (byId.has(it.id)) byId.get(it.id).count += 1;
     else { const g = { item: it, count: 1 }; byId.set(it.id, g); grouped.push(g); }
   }
-  return `<div class="squad-review-grid">${grouped.map((g) => itemCardHTML(g.item, { stack: g.count })).join('')}</div>`;
+  return `<div class="squad-review-grid">${grouped.map((g) => itemShowcaseHTML(g.item, { stack: g.count })).join('')}</div>`;
 }
 
 function reviewModals(state, kind) {
@@ -153,7 +152,7 @@ function reviewModals(state, kind) {
   }
   if (kind === 'manager' && state.manager) {
     html += reviewModalShell('reviewManager', t('pack.reviewManagerTitle'),
-      `<div class="squad-review-grid review-grid--single">${managerCardHTML(state.manager)}</div>`);
+      `<div class="squad-review-grid review-grid--single">${managerShowcaseHTML(state.manager)}</div>`);
   }
   if (kind === 'item' && state.items?.length) {
     html += reviewModalShell('reviewItems', t('pack.reviewItemsTitle', { count: state.items.length }), itemsReviewBody(state));
