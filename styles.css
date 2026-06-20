@@ -5830,7 +5830,7 @@ button.primary:active:not(:disabled),
   --good: #6cf08a; --bad: #ff8080; --flat: #bcc8e4;
   position: relative; width: 100%; aspect-ratio: 1024 / 1536;
   background-size: 100% 100%; background-repeat: no-repeat;
-  border-radius: 12px; overflow: hidden;
+  overflow: hidden;
   image-rendering: pixelated;
   font-family: var(--font-game, ui-monospace, Menlo, monospace);
   font-size: clamp(7px, 4cqw, 13px);
