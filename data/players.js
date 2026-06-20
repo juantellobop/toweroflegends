@@ -935,27 +935,6 @@ export const PLAYERS = [
     "tacticalType": "posesion"
   },
   {
-    "id": "fwd_ronaldo_2002",
-    "name": "Ronaldo",
-    "dupGroup": "ronaldo",
-    "nation": "Brasil",
-    "era": "2002",
-    "position": "FWD",
-    "rarity": "legend",
-    "ovr": 95,
-    "stats": {
-      "pace": 90,
-      "shooting": 99,
-      "passing": 78,
-      "dribbling": 99,
-      "defending": 50,
-      "physical": 99
-    },
-    "gk": null,
-    "trait": "Francotirador",
-    "tacticalType": "contra"
-  },
-  {
     "id": "fwd_ronaldinho_2006",
     "name": "Ronaldinho",
     "nation": "Brasil",

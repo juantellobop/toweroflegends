@@ -2918,7 +2918,7 @@ export const OPPONENTS = [
         "ovr": 89
       },
       {
-        "name": "Cafú",
+        "name": "Roberto Carlos",
         "position": "DEF",
         "ovr": 90
       },
@@ -2933,7 +2933,7 @@ export const OPPONENTS = [
         "ovr": 92
       },
       {
-        "name": "Roberto Carlos",
+        "name": "Cafú",
         "position": "DEF",
         "ovr": 90
       },
@@ -3237,7 +3237,7 @@ export const OPPONENTS = [
       "defense": 97,
       "gk": 96
     },
-    "formation": "4-3-3",
+    "formation": "4-3-1-2",
     "lineup": [
       {
         "name": "Marcos",
@@ -3245,7 +3245,7 @@ export const OPPONENTS = [
         "ovr": 95
       },
       {
-        "name": "Cafú",
+        "name": "Roberto Carlos",
         "position": "DEF",
         "ovr": 96
       },
@@ -3260,7 +3260,7 @@ export const OPPONENTS = [
         "ovr": 98
       },
       {
-        "name": "Roberto Carlos",
+        "name": "Cafú",
         "position": "DEF",
         "ovr": 96
       },
@@ -3280,19 +3280,19 @@ export const OPPONENTS = [
         "ovr": 98
       },
       {
+        "name": "Rivaldo",
+        "position": "MID",
+        "ovr": 99
+      },
+      {
         "name": "Ronaldinho",
         "position": "FWD",
         "ovr": 99
       },
       {
-        "name": "Rivaldo",
-        "position": "FWD",
-        "ovr": 100
-      },
-      {
         "name": "Ronaldo",
         "position": "FWD",
-        "ovr": 101
+        "ovr": 97
       }
     ],
     "bench": [],
@@ -3993,7 +3993,7 @@ export const OPPONENTS = [
       {
         "name": "Ronaldo",
         "position": "FWD",
-        "ovr": 96
+        "ovr": 97
       },
       {
         "name": "Bebeto",
