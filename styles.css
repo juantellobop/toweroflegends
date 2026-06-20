@@ -721,7 +721,7 @@ select {
 
 /* --- §4.2 Apertura de sobre: reparto + volteo 3D --- */
 .pack-deal {
-  display: flex; flex-wrap: wrap; gap: var(--space-4); justify-content: center;
+  display: flex; flex-wrap: wrap; gap: var(--space-4); justify-content: center; margin:auto;
   perspective: 1200px;
 }
 .deal-card {
