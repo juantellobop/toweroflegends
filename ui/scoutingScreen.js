@@ -8,7 +8,7 @@ import { portraitPathForName, portraitPathForPlayer } from '../data/playerAssets
 import { UI_ASSETS, preloadImages } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { localizeOpponentName, t } from '../data/i18n.js';
-import { lineupFieldHTML, positionSlots, staticChipHTML } from './lineupBoard.js';
+import { lineupFieldHTML, layoutInformative, staticChipHTML } from './lineupBoard.js';
 import { sceneSources } from '../match/scenes.js';
 
 // Al conocer al rival, el partido es inminente: calienta en segundo plano lo que
@@ -30,11 +30,13 @@ function warmUpcomingMatch(state) {
 // Mismo esquema que el tablero táctico propio: huecos por línea posicionados
 // con la misma lógica (alturas, reparto y matices del dibujo rival).
 function positions(opponent) {
-  return LINES.flatMap((line) => {
-    const players = opponent.lineup.filter((p) => p.position === line);
-    const slots = players.map((player, slotIndex) => ({ player, line, slotIndex, role: line }));
-    return positionSlots(opponent.formation, line, slots);
-  });
+  // Reparto informativo equilibrado por fila (4 defensas equidistantes; el medio
+  // de 3 sin enganche se adelanta hacia la mitad del campo).
+  const slots = LINES.flatMap((line) =>
+    opponent.lineup
+      .filter((p) => p.position === line)
+      .map((player, slotIndex) => ({ player, line, slotIndex, role: line })));
+  return layoutInformative(slots);
 }
 
 function field(opponent) {

@@ -40,8 +40,10 @@ const flexState = createRun({ seed: 303, formation: '4-3-1-2' });
 const extraForward = ROSTER.find((p) => p.position === 'FWD' && !flexState.squad.some((owned) => owned.id === p.id));
 const extraForwardCard = choosePlayerCard(flexState, extraForward);
 assert.ok(extraForwardCard, '4-3-1-2 flex test needs an extra forward');
-assert.ok(placePlayerInLineup(flexState, extraForwardCard, 'MID', 3).placed, 'forward must fit the enganche slot');
-assert.ok(flexState.starting11.MID.some((p) => p.uid === extraForwardCard.uid), 'forward must be placed in MID line');
+// En el grid, la fila ENG son los slots 5-9 de la línea MID (la plantilla 4-3-1-2
+// rellena el enganche en el slot 7). Un delantero encaja ahí (ENG admite FWD).
+assert.ok(placePlayerInLineup(flexState, extraForwardCard, 'MID', 7).placed, 'forward must fit the enganche slot');
+assert.ok(flexState.starting11.MID.some((p) => p && p.uid === extraForwardCard.uid), 'forward must be placed in MID line');
 assert.ok(isLineupComplete(flexState), '4-3-1-2 must remain complete with a forward as enganche');
 const flexBattle = buildBattleTeam({
   name: 'Flex',
@@ -92,14 +94,14 @@ const penalty = matchBonuses([item('pena_maxima')]);
 assert.equal(penalty.penaltyChance, 0.4);
 assert.equal(penalty.penaltyConvert, 0.03);
 
-// Sinergia ítem↔táctica: ×1.5 solo si el dibujo comparte el tipo del ítem.
-assert.equal(matchBonuses([counterItem], '4-4-2').counterBoost, 4.5); // 4-4-2 = contra
-assert.equal(matchBonuses([counterItem], '4-3-3').counterBoost, 3); // presión ≠ contra
+// Sinergia ítem↔estilo: ×1.5 solo si el ESTILO elegido comparte el tipo del ítem.
+assert.equal(matchBonuses([counterItem], 'contra').counterBoost, 4.5); // contra = contra
+assert.equal(matchBonuses([counterItem], 'presion').counterBoost, 3); // presión ≠ contra
 const tikitaka = item('tiki_taka');
 const base = { attack: 50, midfield: 50, defense: 50, gk: 50 };
-assert.ok(near(applyItemsToRatings(base, [tikitaka]).midfield, 52), 'sin formación, sin sinergia');
-assert.ok(near(applyItemsToRatings(base, [tikitaka], '4-2-3-1').midfield, 53), 'posesión activa la sinergia');
-assert.ok(near(applyItemsToRatings(base, [tikitaka], '4-4-2').midfield, 52), 'contra no la activa');
+assert.ok(near(applyItemsToRatings(base, [tikitaka]).midfield, 52), 'sin estilo, sin sinergia');
+assert.ok(near(applyItemsToRatings(base, [tikitaka], 'posesion').midfield, 53), 'posesión activa la sinergia');
+assert.ok(near(applyItemsToRatings(base, [tikitaka], 'contra').midfield, 52), 'contra no la activa');
 
 // Reliquia de química: +2 de equipo, con decaimiento en copias.
 assert.equal(chemTeamBonus([item('duodecimo_jugador')]), 2);

@@ -3,12 +3,11 @@ import { requestJson } from '../data/api.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { sanitizeTeamName } from '../data/teamName.js';
 import { t } from '../data/i18n.js';
-import { FORMATIONS, LINES } from '../data/config.js';
+import { FORMATIONS, LINES, FORMATION_TEMPLATES, formationLineSlots, CUSTOM_FORMATION } from '../data/config.js';
 import { playerInitials, playerSurname, portraitPathForName, portraitPathForManager } from '../data/playerAssets.js';
 import { POSITION_LABEL } from './cards.js';
 import { LINE_TOP, lineSpreadX, PITCH_MARKINGS } from './pitchArt.js';
-import { assignLineToSlots } from '../state/run.js';
-import { lineupFieldHTML, positionSlots } from './lineupBoard.js';
+import { lineupFieldHTML, layoutInformative } from './lineupBoard.js';
 
 export const LEADERBOARD_LIMIT = 20;
 
@@ -27,7 +26,8 @@ function normalizeLineup(raw) {
     const ovr = Math.max(0, Math.min(199, Math.round(Number(player?.ovr) || 0)));
     const rarity = String(player?.rarity || '').trim().slice(0, 12);
     const expelled = Boolean(player?.expelled);
-    return { name, position: player.position, line, ovr, rarity, ...(expelled ? { expelled } : {}) };
+    const slot = Number.isInteger(player?.slot) ? player.slot : null;
+    return { name, position: player.position, line, slot, ovr, rarity, ...(expelled ? { expelled } : {}) };
   }).filter(Boolean);
   return players.length ? players : null;
 }
@@ -49,7 +49,9 @@ function normalizeEntry(entry) {
   const nation = String(entry?.nation || '').trim().slice(0, 48);
   const id = String(entry?.id || `${teamName}-${nation}-${floor}`);
   const createdAt = Number.isFinite(Date.parse(entry?.createdAt)) ? new Date(entry.createdAt).toISOString() : '';
-  const formation = FORMATIONS[entry?.formation] ? entry.formation : '';
+  // Conserva las plantillas conocidas y el centinela "Personalizada" (dibujos
+  // deformados); descarta valores desconocidos.
+  const formation = (FORMATIONS[entry?.formation] || entry?.formation === CUSTOM_FORMATION) ? entry.formation : '';
   const lineup = normalizeLineup(entry?.lineup);
   const manager = normalizeManager(entry?.manager);
   return { id, teamName, nation, floor, createdAt, formation, lineup, manager };
@@ -187,21 +189,60 @@ function lineupChip(player) {
     </div>`;
 }
 
-// Pinta el once con el MISMO esquema del tablero táctico (lineupBoard): cada
-// jugador va a su hueco real del dibujo —pivotes y enganches del 4-2-3-1 en
-// líneas distintas, interiores del 4-3-3 escalonados, etc.— en vez del reparto
-// plano por línea. assignLineToSlots reconstruye el rol de cada hueco (el snap
-// del once guarda los jugadores en orden de slot por línea) y positionSlots les
-// da las coordenadas exactas. Sin dibujo válido (entradas antiguas) cae al
-// reparto plano de respaldo.
+// Etiqueta de formación a mostrar: "Personalizada" (localizada) si el once se
+// deformó —centinela guardado o, en entradas antiguas, conteo por línea que no
+// encaja con su plantilla—; si no, el nombre de la plantilla.
+function displayFormationLabel(entry) {
+  if (!entry.formation) return '';
+  if (entry.formation === CUSTOM_FORMATION) return t('tactics.custom');
+  const tmplCounts = FORMATIONS[entry.formation];
+  if (tmplCounts && Array.isArray(entry.lineup)) {
+    const counts = { GK: 0, DEF: 0, MID: 0, FWD: 0 };
+    for (const p of entry.lineup) {
+      const l = LINES.includes(p.line) ? p.line : p.position;
+      if (counts[l] != null) counts[l] += 1;
+    }
+    if (!LINES.every((l) => (counts[l] || 0) === (tmplCounts[l] || 0))) return t('tactics.custom');
+  }
+  return entry.formation;
+}
+
+// Construye los huecos posicionados de un once guardado. Si el snapshot trae el
+// `slot` del grid (saves nuevos), cada jugador va a su hueco EXACTO (soporta
+// tácticas personalizadas y líneas de 5). Sin `slot` (saves antiguos) se reubica
+// por línea mostrando a TODOS: DEF→fila DEF, FWD→fila DEL, y el medio se parte en
+// MED/ENG según la plantilla (o por la mitad). layoutInformative reparte cada fila.
+function lineupSlots(lineup, formation) {
+  const hasSlots = lineup.some((p) => Number.isInteger(p.slot));
+  if (hasSlots) {
+    return lineup.map((p) => {
+      const line = LINES.includes(p.line) ? p.line : p.position;
+      const cells = formationLineSlots('', line);
+      const meta = cells[p.slot] || cells[0];
+      return { ...meta, player: p };
+    });
+  }
+  const byLine = { GK: [], DEF: [], MID: [], FWD: [] };
+  for (const p of lineup) {
+    const line = LINES.includes(p.line) ? p.line : p.position;
+    if (byLine[line]) byLine[line].push(p);
+  }
+  const tmpl = FORMATION_TEMPLATES[formation];
+  const medCount = tmpl ? tmpl.MED.length : Math.ceil(byLine.MID.length / 2);
+  const slots = [];
+  byLine.GK.forEach((p) => slots.push({ line: 'GK', slotIndex: 0, gridRow: 'POR', col: 2, player: p }));
+  byLine.DEF.forEach((p, i) => slots.push({ line: 'DEF', slotIndex: i, gridRow: 'DEF', col: i, player: p }));
+  byLine.FWD.forEach((p, i) => slots.push({ line: 'FWD', slotIndex: i, gridRow: 'DEL', col: i, player: p }));
+  byLine.MID.forEach((p, i) => slots.push({ line: 'MID', slotIndex: i, gridRow: i < medCount ? 'MED' : 'ENG', col: i, player: p }));
+  return slots;
+}
+
 function lineupField(lineup, formation) {
-  if (!formation || !FORMATIONS[formation]) return flatLineupField(lineup);
-  const slots = LINES.flatMap((line) => {
-    const players = lineup.filter((p) => (p.line || p.position) === line);
-    return positionSlots(formation, line, assignLineToSlots(formation, line, players));
-  }).filter((slot) => slot.player);
+  const slots = lineupSlots(lineup, formation);
+  if (!slots.length) return flatLineupField(lineup);
+  layoutInformative(slots);
   return lineupFieldHTML({
-    formation,
+    formation: formation || '',
     slots,
     fieldClass: 'lineup-modal-field',
     chip: (slot) => lineupChip(slot.player),
@@ -234,7 +275,7 @@ export function openLeaderboardLineup(entryId) {
   if (!entry?.lineup?.length) return;
   closeActiveLineupModal?.();
 
-  const meta = [t('leaderboard.floor', { floor: entry.floor }), entry.formation]
+  const meta = [t('leaderboard.floor', { floor: entry.floor }), displayFormationLabel(entry)]
     .filter(Boolean).join(' · ');
   const overlay = document.createElement('div');
   overlay.className = 'player-modal lineup-modal';

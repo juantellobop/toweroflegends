@@ -43,6 +43,7 @@ let starters = 0;
 let linked = true;
 for (const line of LINES) {
   for (const card of restored.starting11[line]) {
+    if (!card) continue; // el grid guarda null en los huecos vacíos
     starters += 1;
     if (!restored.squad.includes(card)) linked = false;
   }

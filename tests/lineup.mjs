@@ -37,15 +37,20 @@ function uids(line) { return line.map((p) => p.uid); }
   check('hueco intermedio intacto', state.starting11.MID[1].uid === m[1].uid);
 }
 
-// === B. Huecos incompatibles se rechazan (un DEF no entra en MID) ===
+// === B. Reglas de acceso por posición del grid ===
+// DEF: a los 5 DEF y a los 2 MED LATERALES (slots MID 0 y 4), no a los centrales.
+// MID: a MED y a ENG, NUNCA al ataque (DEL). FWD: a DEL y a ENG.
 {
   const d = P('DEF');
-  const state = { formation: '4-3-3', starting11: { ...emptyEleven(), DEF: [d] }, squad: [d] };
-  console.log('B) Hueco incompatible');
-  check('canPlace(DEF→MID) es false', canPlacePlayerInSlot(state, d, 'MID', 0) === false);
-  const r = placePlayerInLineup(state, d, 'MID', 0);
-  check('placePlayer lo rechaza', r.placed === false);
-  check('el DEF sigue en su línea', state.starting11.DEF[0].uid === d.uid && state.starting11.MID.length === 0);
+  const m = P('MID');
+  const state = { formation: '4-3-3', starting11: { ...emptyEleven(), DEF: [d], MID: [null, null, m] }, squad: [d, m] };
+  console.log('B) Reglas de acceso por posición');
+  check('canPlace(DEF→MED central #2) es false', canPlacePlayerInSlot(state, d, 'MID', 2) === false);
+  check('canPlace(DEF→MED lateral #0) es true', canPlacePlayerInSlot(state, d, 'MID', 0) === true);
+  check('canPlace(MID→DEL) es false', canPlacePlayerInSlot(state, m, 'FWD', 2) === false);
+  check('canPlace(MID→ENG #7) es true', canPlacePlayerInSlot(state, m, 'MID', 7) === true);
+  const r = placePlayerInLineup(state, m, 'FWD', 2);
+  check('placePlayer(MID→DEL) lo rechaza', r.placed === false);
 }
 
 // === C. Titular sobre titular sin swap posible → se rechaza (no expulsa) ===

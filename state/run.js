@@ -4,7 +4,8 @@
 
 import {
   CONFIG, FORMATIONS, LINES, RARITIES, RARITY_BIAS, managerRarityBias,
-  formationLineSlots, slotAcceptsPosition,
+  formationLineSlots, slotAcceptsPosition, LINE_CAPACITY, GRID_COLS, FORMATION_TYPE,
+  FORMATION_TEMPLATES, templateSlots, MANAGER_STYLES, detectFormation, CUSTOM_FORMATION,
 } from '../data/config.js';
 import { getPlayableRoster } from '../data/playableRoster.js';
 import { ITEMS } from '../data/items.js';
@@ -153,7 +154,9 @@ export function drawPlayerPack(catalog, squad, size, weights, rng) {
 // por pesos (≈80% < 70, 15% 70-90, 5% > 90), cayendo a bandas contiguas si la
 // pedida se agota en esa posición.
 export function generateStarterSquad(catalog, formation, config, rng, maxLegends = config.STARTER_MAX_LEGENDS ?? 2) {
-  const slots = formationSlots(formation);
+  // Conteos por posición natural de la plantilla (no la capacidad del grid): el
+  // once de arranque sortea exactamente los 11 de la formación + suplentes.
+  const slots = FORMATIONS[formation] || FORMATIONS[config.STARTING_FORMATION];
   const bench = config.STARTER_BENCH || {};
   const weights = config.STARTER_BAND_WEIGHTS;
   const occupied = new Set();
@@ -181,8 +184,12 @@ export function generateStarterSquad(catalog, formation, config, rng, maxLegends
 
 // === Construcción del once ===
 
-export function formationSlots(formation) {
-  return FORMATIONS[formation] || FORMATIONS['4-3-3'];
+// Capacidad de huecos por línea del motor en el grid fijo (1-5-5-5-5): GK 1,
+// DEF 5, MID 10 (MED 0-4 + ENG 5-9), FWD 5. No depende de la formación: la
+// "formación" es solo una plantilla de relleno. La usan la colocación (cap por
+// línea) y lineSlotArray.
+export function formationSlots() {
+  return LINE_CAPACITY;
 }
 
 function canAssignPlayersToLine(formation, line, players) {
@@ -392,7 +399,12 @@ function evaluatePlacement(state, player, line, slotIndex = 0) {
   }
 
   // --- Hueco vacío, reordenar misma línea o sustitución desde el banco ---
-  const wasFull = (state.starting11[line] || []).filter(Boolean).length >= cap;
+  // Un suplente solo entra a un hueco VACÍO si aún caben titulares (≤ 11). Con el
+  // grid hay 10 huecos vacíos visibles; sin este tope se podría pasar de 11.
+  if (!currentLine && !occupant) {
+    const total = LINES.reduce((n, l) => n + (state.starting11[l] || []).filter(Boolean).length, 0);
+    if (total >= 11) return null;
+  }
   const nextLine = targetLineAfterPlacement(state, player, line, targetIndex);
   if (!nextLine) return null;
   const changes = { [line]: nextLine };
@@ -405,7 +417,8 @@ function evaluatePlacement(state, player, line, slotIndex = 0) {
   }
   let kind = 'place';
   if (currentLine === line) kind = 'move';
-  else if (!currentLine && occupant && wasFull) kind = 'replace';
+  // Suplente sobre un hueco ocupado: el titular de ese hueco vuelve al banco.
+  else if (!currentLine && occupant) kind = 'replace';
   return { kind, changes };
 }
 
@@ -413,79 +426,55 @@ export function canPlacePlayerInSlot(state, player, line, slotIndex = 0) {
   return Boolean(evaluatePlacement(state, player, line, slotIndex));
 }
 
-// Crea un once vacío acorde a la formación.
+// Crea un once vacío con arrays de longitud fija del grid (GK 1, DEF 5, MID 10,
+// FWD 5), llenos de null: el índice de cada hueco (slotIndex) es estable.
 function emptyStarting11() {
-  return { GK: [], DEF: [], MID: [], FWD: [] };
+  return {
+    GK: new Array(LINE_CAPACITY.GK).fill(null),
+    DEF: new Array(LINE_CAPACITY.DEF).fill(null),
+    MID: new Array(LINE_CAPACITY.MID).fill(null),
+    FWD: new Array(LINE_CAPACITY.FWD).fill(null),
+  };
 }
 
-function statFor(player, key) {
-  if (player.position === 'GK') return playerOVR(player);
-  return player.stats?.[key] ?? playerOVR(player);
-}
-
-function orderLineForFormation(line, players, slots) {
-  if (line !== 'FWD' || players.length !== slots.FWD) return players;
-  const nineScore = (p) => statFor(p, 'shooting') * 0.8 + statFor(p, 'physical') * 0.2;
-  const wingScore = (p) => statFor(p, 'dribbling') + statFor(p, 'pace');
-  if (slots.FWD === 3) {
-    const picked = players.slice();
-    let centerIndex = 0;
-    for (let i = 1; i < picked.length; i++) {
-      if (nineScore(picked[i]) > nineScore(picked[centerIndex])) centerIndex = i;
-    }
-    const [center] = picked.splice(centerIndex, 1);
-    picked.sort((a, b) => wingScore(b) - wingScore(a));
-    return [picked[0], center, picked[1]];
-  }
-  if (slots.FWD === 4) {
-    // 4-2-4: la dupla de mejores rematadores al centro, regateadores a las puntas.
-    const picked = players.slice().sort((a, b) => nineScore(b) - nineScore(a));
-    const centers = picked.slice(0, 2);
-    const wings = picked.slice(2).sort((a, b) => wingScore(b) - wingScore(a));
-    return [wings[0], centers[0], centers[1], wings[1]];
-  }
-  return players;
-}
-
-// Rellena automáticamente el once con los mejores de la plantilla, hueco a
-// hueco. Los huecos de una sola posición eligen primero (para no quedarse sin
-// especialistas) y los híbridos (extremos, enganches) toman después al mejor
-// disponible entre las posiciones que aceptan; a igual OVR gana la natural.
+// Rellena el once desde la PLANTILLA de la formación elegida (qué celdas del grid
+// ocupa), hueco a hueco con los mejores de la plantilla. Las celdas más
+// restrictivas (una sola posición) eligen primero para no quedarse sin
+// especialistas; los híbridos (ENG/DEL) toman después al mejor compatible. A igual
+// OVR gana la posición natural de la fila. Deja el resto del grid vacío.
 export function autoFillStarting11(state) {
   const used = new Set();
   const eleven = emptyStarting11();
-  const allSlots = LINES.flatMap((line) => formationLineSlots(state.formation, line));
-  const bySlot = new Map();
-  for (const slot of allSlots.slice().sort((a, b) => a.accepts.length - b.accepts.length)) {
+  // Celdas de la plantilla, con su rol/accepts del grid (vía formationLineSlots).
+  const cells = templateSlots(state.formation).map((cell) => {
+    const slot = formationLineSlots(state.formation, cell.line)[cell.slotIndex];
+    return { line: cell.line, slotIndex: cell.slotIndex, accepts: slot.accepts, gridRow: slot.gridRow };
+  });
+  for (const cell of cells.slice().sort((a, b) => a.accepts.length - b.accepts.length)) {
     const player = state.squad
-      .filter((p) => slot.accepts.includes(p.position) && !used.has(p.id) && !isUnavailable(p))
+      .filter((p) => cell.accepts.includes(p.position) && !used.has(p.id) && !isUnavailable(p))
       .sort((a, b) =>
         (playerOVR(b) - playerOVR(a)) ||
-        ((b.position === slot.line ? 1 : 0) - (a.position === slot.line ? 1 : 0))
+        ((b.position === cell.line ? 1 : 0) - (a.position === cell.line ? 1 : 0))
       )[0];
     if (!player) continue;
     used.add(player.id);
-    bySlot.set(slot, player);
-  }
-  const shape = formationSlots(state.formation);
-  for (const line of LINES) {
-    const picked = allSlots
-      .filter((slot) => slot.line === line)
-      .map((slot) => bySlot.get(slot))
-      .filter(Boolean);
-    eleven[line] = orderLineForFormation(line, picked, shape);
+    eleven[cell.line][cell.slotIndex] = player;
   }
   state.starting11 = eleven;
 }
 
-// ¿Está el once completo para la formación actual?
+// ¿Es válida la alineación? Regla del grid libre: exactamente 1 portero y AL
+// MENOS 1 defensa, 11 jugadores en total, sin duplicados, y cada línea asignable
+// a sus huecos (respeta accepts). El resto del campo es libre (0-5 por fila).
 export function isLineupComplete(state) {
-  const slots = formationSlots(state.formation);
   const filled = (line) => (state.starting11[line] || []).filter(Boolean);
   const players = LINES.flatMap(filled);
-  return LINES.every((line) => filled(line).length === slots[line]) &&
-    LINES.every((line) => canAssignPlayersToLine(state.formation, line, state.starting11[line] || [])) &&
-    new Set(players.map((p) => p.id)).size === players.length;
+  return filled('GK').length === 1 &&
+    filled('DEF').length >= 1 &&
+    players.length === 11 &&
+    new Set(players.map((p) => p.id)).size === players.length &&
+    LINES.every((line) => canAssignPlayersToLine(state.formation, line, state.starting11[line] || []));
 }
 
 // Coloca/quita un jugador del once (toggle). Respeta la capacidad de la línea.
@@ -496,6 +485,7 @@ export function togglePlayerInLineup(state, player) {
     const idx = arr.findIndex((p) => p && p.uid === player.uid);
     // Hueco en su sitio: lo dejamos vacío (null) sin recolocar al resto.
     if (idx >= 0) arr[idx] = null;
+    state.formation = detectFormation(state.starting11);
     return { placed: false };
   }
 
@@ -524,6 +514,9 @@ export function placePlayerInLineup(state, player, line = player.position, slotI
     return { placed: false, invalidPosition: true };
   }
   for (const [ln, arr] of Object.entries(plan.changes)) state.starting11[ln] = arr;
+  // El dibujo puede haberse deformado: re-etiqueta (plantilla coincidente o
+  // "Personalizada" si ya no encaja con ninguna).
+  state.formation = detectFormation(state.starting11);
   return {
     placed: true,
     swapped: plan.kind === 'swap',
@@ -536,23 +529,33 @@ export function isStarter(state, player) {
   return Boolean(starterLineFor(state, player));
 }
 
-// Cambia de formación y reajusta el once (recolocando automáticamente).
+// Aplica una plantilla: rellena el grid con la formación elegida y fija su estilo
+// por defecto (que el usuario puede cambiar luego con setStyle). La "formación"
+// queda como etiqueta; el grid se puede deformar libremente después.
 export function setFormation(state, formation) {
   if (!FORMATIONS[formation]) return;
   state.formation = formation;
+  state.style = FORMATION_TYPE[formation] || state.style || 'posesion';
   autoFillStarting11(state);
+}
+
+// Cambia el estilo táctico (Posesión/Presión/Contra), elección libre del usuario
+// independiente de la formación. Alimenta las sinergias de química, objetos y DT.
+export function setStyle(state, style) {
+  if (!MANAGER_STYLES.includes(style)) return;
+  state.style = style;
 }
 
 // === Ratings y química en vivo (para la pantalla de armar equipo) ===
 
 export function liveRatings(state) {
-  return calcularRatings({ formation: state.formation, starting11: state.starting11, items: state.items, manager: state.manager });
+  return calcularRatings({ formation: state.formation, style: state.style, starting11: state.starting11, items: state.items, manager: state.manager });
 }
 export function liveChemistry(state) {
   // El total incluye la química de equipo aportada por reliquias (p. ej. el
   // Duodécimo jugador), redondeada por el decaimiento de copias repetidas.
-  const total = totalChemistry(state.starting11, state.formation, state.manager) + chemTeamBonus(state.items || []);
-  return { byLine: computeChemistry(state.starting11, state.formation, state.manager), total: Math.round(total) };
+  const total = totalChemistry(state.starting11, state.style, state.manager) + chemTeamBonus(state.items || []);
+  return { byLine: computeChemistry(state.starting11, null, state.manager), total: Math.round(total) };
 }
 
 // Aporte neto de los objetos a cada rating de equipo (con objetos − sin objetos),
@@ -561,7 +564,7 @@ export function liveChemistry(state) {
 export function liveItemDelta(state) {
   const withItems = liveRatings(state);
   // El DT entra en ambas ramas → su efecto se cancela y el delta aísla los objetos.
-  const noItems = calcularRatings({ formation: state.formation, starting11: state.starting11, items: [], manager: state.manager });
+  const noItems = calcularRatings({ formation: state.formation, style: state.style, starting11: state.starting11, items: [], manager: state.manager });
   const round = (n) => Math.round(n * 10) / 10;
   return {
     attack: round(withItems.attack - noItems.attack),
@@ -740,6 +743,7 @@ export function playMatch(state) {
     name: state.team.name,
     color: state.team.color,
     formation: state.formation,
+    style: state.style,
     starting11: state.starting11,
     items: state.items,
     // Director técnico activo: sus modificadores entran en calcularRatings y, con
@@ -932,6 +936,8 @@ export function createRun(opts = {}) {
     lives: livesMax,
     livesMax,
     formation,
+    // Estilo táctico inicial: el del dibujo de arranque; el usuario lo cambia libre.
+    style: FORMATION_TYPE[formation] || 'posesion',
     squad: [],
     roster,
     starting11: emptyStarting11(),
@@ -989,7 +995,8 @@ export function createRun(opts = {}) {
 // (regenerarlo lo duplicaría) y las pantallas de resultado/gaceta/partido leen
 // state.lastMatch/opponent directamente, no los recalculan.
 
-export const SAVE_VERSION = 2;
+// v3: grid fijo (1-5-5-5-5) — starting11 con arrays de longitud de grid + estilo.
+export const SAVE_VERSION = 3;
 
 // Once como uids por línea: al rehidratar se reenlazan a las instancias reales
 // de la plantilla, restaurando las referencias compartidas que JSON rompe.
@@ -997,6 +1004,26 @@ function serializeStarting11(starting11) {
   const out = {};
   for (const line of LINES) out[line] = (starting11[line] || []).map((p) => (p ? p.uid : null));
   return out;
+}
+
+// Migra el once de un save v2 (líneas de longitud variable, MED+ENG mezclados en
+// MID) al grid v3. Conserva el conjunto de titulares elegido, recolocándolo por
+// columnas de la plantilla: GK/DEF/DEL directos; el MID viejo se reparte primero a
+// las columnas MED y luego a las ENG. Si la disposición no es asignable (saves
+// raros), el llamador cae a autoFill.
+function migrateStarting11V2(rawStarting11, byUid, formation) {
+  const tmpl = FORMATION_TEMPLATES[formation] || FORMATION_TEMPLATES[CONFIG.STARTING_FORMATION];
+  const eleven = emptyStarting11();
+  const toPlayers = (line) => (rawStarting11?.[line] || [])
+    .map((uid) => (uid != null && byUid.get(uid)) || null)
+    .filter(Boolean);
+  const gk = toPlayers('GK');
+  if (gk[0]) eleven.GK[0] = gk[0];
+  toPlayers('DEF').forEach((p, i) => { if (tmpl.DEF[i] != null) eleven.DEF[tmpl.DEF[i]] = p; });
+  toPlayers('FWD').forEach((p, i) => { if (tmpl.DEL[i] != null) eleven.FWD[tmpl.DEL[i]] = p; });
+  const midTargets = [...tmpl.MED, ...tmpl.ENG.map((c) => c + GRID_COLS)];
+  toPlayers('MID').forEach((p, i) => { if (midTargets[i] != null) eleven.MID[midTargets[i]] = p; });
+  return eleven;
 }
 
 export function serializeRun(state) {
@@ -1010,6 +1037,7 @@ export function serializeRun(state) {
     lives: state.lives,
     livesMax: state.livesMax,
     formation: state.formation,
+    style: state.style ?? null,
     squad: state.squad,
     items: state.items,
     manager: state.manager ?? null,
@@ -1035,7 +1063,9 @@ export function serializeRun(state) {
 // el save es incompatible o está corrupto (el llamador lo descarta).
 export function rehydrateRun(data) {
   try {
-    if (!data || data.version !== SAVE_VERSION) return null;
+    // Acepta el formato actual (v3) y migra el anterior (v2) para no romper runs
+    // en curso al actualizar al grid fijo.
+    if (!data || (data.version !== 3 && data.version !== 2)) return null;
     if (!Array.isArray(data.squad) || typeof data.seed !== 'number') return null;
 
     const rng = new RNG(data.seed);
@@ -1043,12 +1073,30 @@ export function rehydrateRun(data) {
 
     const squad = data.squad;
     const byUid = new Map(squad.map((p) => [p.uid, p]));
-    const starting11 = emptyStarting11();
-    for (const line of LINES) {
-      // Posicional: conserva los huecos (null) en su slotIndex al rehidratar.
-      starting11[line] = (data.starting11?.[line] || [])
-        .map((cardUid) => (cardUid != null && byUid.get(cardUid)) || null);
+    // Formación de base para la migración/estilo (siempre una plantilla válida).
+    const baseFormation = FORMATIONS[data.formation] ? data.formation : CONFIG.STARTING_FORMATION;
+    let starting11;
+    if (data.version === 3) {
+      // Posicional: conserva los huecos (null) en su slotIndex del grid.
+      starting11 = emptyStarting11();
+      for (const line of LINES) {
+        (data.starting11?.[line] || []).forEach((cardUid, i) => {
+          if (i < starting11[line].length && cardUid != null) starting11[line][i] = byUid.get(cardUid) || null;
+        });
+      }
+    } else {
+      // v2 → grid: reubica el once viejo; si la disposición no es asignable, autoFill.
+      starting11 = migrateStarting11V2(data.starting11, byUid, baseFormation);
+      const assignable = LINES.every((line) => canAssignPlayersToLine(baseFormation, line, starting11[line]));
+      if (!assignable) {
+        const tmp = { formation: baseFormation, squad, starting11: emptyStarting11() };
+        autoFillStarting11(tmp);
+        starting11 = tmp.starting11;
+      }
     }
+    // La etiqueta real sale del dibujo: plantilla coincidente o "Personalizada".
+    const formation = detectFormation(starting11);
+    const style = data.style || FORMATION_TYPE[baseFormation] || 'posesion';
 
     return {
       runId: data.runId || freshRunId(),
@@ -1058,7 +1106,8 @@ export function rehydrateRun(data) {
       level: data.level,
       lives: data.lives,
       livesMax: data.livesMax,
-      formation: data.formation,
+      formation,
+      style,
       squad,
       roster: getPlayableRoster(),
       starting11,

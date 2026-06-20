@@ -363,6 +363,99 @@
       }
     },
     {
+      "id": "138f4c8b-e56b-4456-a6a2-57d59f59ffda",
+      "teamName": "River Plate",
+      "nation": "River Plate",
+      "floor": 10,
+      "createdAt": "2026-06-20T19:33:47.565Z",
+      "runId": "82d31943-f556-434a-8eac-6f7c26398b9f",
+      "formation": "4-3-3",
+      "lineup": [
+        {
+          "name": "Igor Akinfeev",
+          "position": "GK",
+          "line": "GK",
+          "ovr": 68,
+          "rarity": "common"
+        },
+        {
+          "name": "Ludwig Augustinsson",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 68,
+          "rarity": "common"
+        },
+        {
+          "name": "Thomas Meunier",
+          "position": "DEF",
+          "line": "MID",
+          "ovr": 87,
+          "rarity": "epic"
+        },
+        {
+          "name": "Simone Perrotta",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 89,
+          "rarity": "legend"
+        },
+        {
+          "name": "Dunga",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 94,
+          "rarity": "legend"
+        },
+        {
+          "name": "Casagrande",
+          "position": "FWD",
+          "line": "MID",
+          "ovr": 90,
+          "rarity": "legend"
+        },
+        {
+          "name": "Goran Vlaović",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 86,
+          "rarity": "epic"
+        },
+        {
+          "name": "Dejan Savićević",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 81,
+          "rarity": "rare"
+        },
+        {
+          "name": "Nelson Haedo Valdez",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 67,
+          "rarity": "common"
+        },
+        {
+          "name": "Ahn Jung-hwan",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 71,
+          "rarity": "common"
+        },
+        {
+          "name": "Denis Cheryshev",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 69,
+          "rarity": "common"
+        }
+      ],
+      "manager": {
+        "id": "manager_jose_bordalas",
+        "name": "José Bordalás",
+        "nation": "España"
+      }
+    },
+    {
       "id": "a7fd4c92-b510-450c-9336-e85dcbc0ce4a",
       "teamName": "Test",
       "nation": "River Plate",
@@ -1710,94 +1803,6 @@
         "name": "Jorge Sampaoli",
         "nation": "Argentina"
       }
-    },
-    {
-      "id": "e9c8cc15-97cd-44a9-a15d-4fcec4fca966",
-      "teamName": "Test",
-      "nation": "River Plate",
-      "floor": 4,
-      "createdAt": "2026-06-13T17:42:55.291Z",
-      "runId": "77667940-b3c3-499b-ae0f-245a5955f9bc",
-      "formation": "5-3-2",
-      "lineup": [
-        {
-          "name": "Dino Zoff",
-          "position": "GK",
-          "line": "GK",
-          "ovr": 89,
-          "rarity": "epic"
-        },
-        {
-          "name": "Marco Materazzi",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 91,
-          "rarity": "legend"
-        },
-        {
-          "name": "Paulo da Silva",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Tony Sanneh",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 67,
-          "rarity": "common"
-        },
-        {
-          "name": "Darío Verón",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 67,
-          "rarity": "common"
-        },
-        {
-          "name": "Lucas Martin",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 59,
-          "rarity": "common"
-        },
-        {
-          "name": "Frank Lampard",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 90,
-          "rarity": "legend"
-        },
-        {
-          "name": "Thomas Häßler",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 85,
-          "rarity": "epic"
-        },
-        {
-          "name": "Yeltsin Tejeda",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 69,
-          "rarity": "common"
-        },
-        {
-          "name": "Thierry Henry",
-          "position": "FWD",
-          "line": "FWD",
-          "ovr": 96,
-          "rarity": "legend"
-        },
-        {
-          "name": "Marcus Berg",
-          "position": "FWD",
-          "line": "FWD",
-          "ovr": 66,
-          "rarity": "common"
-        }
-      ]
     }
   ]
 }

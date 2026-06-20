@@ -17,9 +17,13 @@ const roundRating = (v) => Math.max(1, Math.round(v * 10) / 10);
 
 const LINES = ['GK', 'DEF', 'MID', 'FWD'];
 
+// Clona la alineación COMPACTANDO los huecos vacíos (el grid guarda nulls en los
+// slots libres): la lógica de expulsión/sustitución opera sobre jugadores reales
+// sin tropezar con null. Al rehacer el equipo (rebuildBattleTeam) se reasignan a
+// huecos del grid por orden, lo que basta para los ratings tras un cambio.
 function cloneLineup(s11) {
   const out = {};
-  for (const line of LINES) out[line] = (s11[line] || []).slice();
+  for (const line of LINES) out[line] = (s11[line] || []).filter(Boolean);
   return out;
 }
 
@@ -354,7 +358,7 @@ export function simularPartido(teamA, teamB, rng) {
     // ha caído al mínimo de disponibles). Si todos los que están en el campo son
     // inmunes, el partido se salda sin lesión.
     const onField = LINES.flatMap((line) => A.starting11?.[line] || [])
-      .filter((p) => !immuneForA(A, p.position));
+      .filter((p) => p && !immuneForA(A, p.position));
     const victim = onField.length ? onField[Math.floor(rng.next() * onField.length)] : null;
     if (victim) {
       // Solo cuenta para la inmunidad si la lesión deja baja para los próximos

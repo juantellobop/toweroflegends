@@ -7,7 +7,7 @@ import {
   isNationPackLevel, rollNationPack,
   rollManagerPack, chooseManagerCard, discardManagerPack,
   playMatch, applyResult, advanceLevel, prepareOpponent, retryLevel,
-  togglePlayerInLineup, placePlayerInLineup, setFormation, assignLineToSlots,
+  togglePlayerInLineup, placePlayerInLineup, setFormation, setStyle, assignLineToSlots,
   serializeRun, rehydrateRun,
 } from './state/run.js';
 import { acquireRunLock, releaseRunLock } from './state/sesion.js';
@@ -373,6 +373,9 @@ function lineupSnapshot(run) {
         name: slot.player.name,
         position: slot.player.position,
         line,
+        // Hueco del grid (line+slot) para reconstruir el dibujo exacto en el
+        // ranking, incluidas tácticas personalizadas y líneas de 5.
+        slot: slot.slotIndex,
         ovr: playerOVR(slot.player),
         rarity: slot.player.rarity || '',
         ...(expelled.has(slot.player.uid) ? { expelled: true } : {}),
@@ -541,6 +544,7 @@ function render(navHint = 'auto') {
           onToggle: (player) => { togglePlayerInLineup(state, player); render('refresh'); },
           onPlace: (player, line, slotIndex) => { placePlayerInLineup(state, player, line, slotIndex); render('refresh'); },
           onSetFormation: (f) => { setFormation(state, f); render('refresh'); },
+          onSetStyle: (s) => { setStyle(state, s); render('refresh'); },
           onScout: () => { state.phase = 'scouting'; render('back'); },
           onPlay: () => {
             // El partido se simula aquí (fija state.lastMatch y el rival) y se

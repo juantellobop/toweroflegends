@@ -8,7 +8,6 @@ import { Pitch } from '../match/pitch.js';
 import { ScenePitch } from '../match/scenePitch.js';
 import { MatchDirector, MODES } from '../match/director.js';
 import { confetti, haptic, countTo } from '../match/feedback.js';
-import { FORMATIONS } from '../data/config.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { localizeOpponentName, t } from '../data/i18n.js';
@@ -18,7 +17,11 @@ const SPEEDS = [1, 2, 4];
 export function renderMatch(root, state, result, handlers) {
   const opp = state.opponent;
   const reduce = prefersReducedMotion();
-  const homeShape = FORMATIONS[state.formation] || FORMATIONS['4-3-3'];
+  // Forma del equipo local para el mini-campo: recuento real de ocupados por línea
+  // del motor (MED+ENG caen en MID), no la plantilla. El mini-campo no distingue
+  // MED de ENG (vista 2D simplificada).
+  const filledLine = (line) => (state.starting11?.[line] || []).filter(Boolean).length;
+  const homeShape = { GK: filledLine('GK') || 1, DEF: filledLine('DEF'), MID: filledLine('MID'), FWD: filledLine('FWD') };
 
   // Identidad del equipo local (nombre + bandera elegidos en el menú).
   const HOME_NAME = state.team?.name || 'Leyendas';

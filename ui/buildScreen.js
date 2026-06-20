@@ -9,13 +9,13 @@ import { managerCardHTML, POSITION_LABEL, LINE_LABEL } from './cards.js';
 import { playerShowcaseHTML, itemShowcaseHTML } from './showcaseCard.js';
 import { esc } from './dom.js';
 import {
-  liveRatings, liveChemistry, liveItemDelta, isLineupComplete, isStarter, isSuspended, isInjured, formationSlots,
+  liveRatings, liveChemistry, liveItemDelta, isLineupComplete, isStarter, isSuspended, isInjured,
   canPlacePlayerInSlot, assignLineToSlots,
 } from '../state/run.js';
 import { playerOVR } from '../engine/ovr.js';
 import { chemNation, managerNationStatBonus } from '../engine/chemistry.js';
 import { chemTeamBonus } from '../engine/items.js';
-import { FORMATIONS, LINES, chemLinks, formationLineSlots, formationType } from '../data/config.js';
+import { FORMATIONS, LINES, geometricLinks, formationLineSlots, MANAGER_STYLES, CUSTOM_FORMATION } from '../data/config.js';
 import { countTo } from '../match/feedback.js';
 import { playerInitials, playerSurname, portraitPathForPlayer, artworkPathForItem } from '../data/playerAssets.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
@@ -71,13 +71,14 @@ function lineupPositions(state) {
   return pos;
 }
 
-// Enlaces de química del campo = el web de cercanía de la formación (CHEM_LINKS):
-// cada arista [línea, slot] ↔ [línea, slot] se dibuja siempre que ambos huecos
-// estén ocupados, etiquetada según den química sus dos jugadores (nación / época).
-function webLinks(positions, formation) {
+// Enlaces de química del campo = el web de cercanía geométrico (geometricLinks),
+// calculado desde los huecos OCUPADOS del grid — la MISMA fuente que el cálculo de
+// química, así dibujo y números siempre coinciden. Cada arista se etiqueta según
+// den química sus dos jugadores (nación / época).
+function webLinks(positions, starting11) {
   const at = (ref) => positions.find((p) => p.player && p.line === ref[0] && p.slotIndex === ref[1]);
   const links = [];
-  for (const [refA, refB] of chemLinks(formation)) {
+  for (const [refA, refB] of geometricLinks(starting11)) {
     const a = at(refA);
     const b = at(refB);
     if (!a || !b) continue;
@@ -88,8 +89,8 @@ function webLinks(positions, formation) {
   return links;
 }
 
-function fieldSVG(positions, formation, boost = false) {
-  const links = webLinks(positions, formation);
+function fieldSVG(positions, starting11, boost = false) {
+  const links = webLinks(positions, starting11);
   const lineEl = (l, cls) => `<line x1="${l.x1}" y1="${l.y1}" x2="${l.x2}" y2="${l.y2}" class="chem-link ${cls}" />`;
   // Glow neón SIN filtro SVG: el `feGaussianBlur`/`userSpaceOnUse` fallaba de
   // forma intermitente en WebKit/iOS y dejaba los enlaces de color sin pintar
@@ -146,22 +147,26 @@ function fieldNodes(positions, manager) {
   }).join('');
 }
 
-// Controles del tablero: selector de formación (dropdown que reutiliza el estilo
-// de .bench-filter), seguido del Estilo de la táctica (Posesión / Presión /
-// Contra, informativo) y de la Química total. Antes el estilo y la química vivían
-// en el ratings-glass; ahora acompañan al selector en la cabecera del tablero.
+// Controles del tablero: selector de PLANTILLA (formación que rellena el grid),
+// selector de ESTILO (Posesión / Presión / Contra — elección libre del usuario,
+// alimenta sinergias de química/objetos/DT) y la Química total. Ambos dropdowns
+// reutilizan el estilo de .bench-filter.
 function tacticControls(state) {
-  const myType = formationType(state.formation);
   const chemTotal = liveChemistry(state).total;
-  const options = Object.keys(FORMATIONS)
+  // Si el dibujo no coincide con ninguna plantilla, se muestra "Personalizada"
+  // (opción seleccionada); elegir una plantilla del desplegable la vuelve a aplicar.
+  const isCustom = !FORMATIONS[state.formation];
+  const customOption = isCustom
+    ? `<option value="${esc(CUSTOM_FORMATION)}" selected>${esc(t('tactics.custom'))}</option>`
+    : '';
+  const formationOptions = customOption + Object.keys(FORMATIONS)
     .map((f) => `<option value="${f}"${f === state.formation ? ' selected' : ''}>${f}</option>`).join('');
+  const styleOptions = MANAGER_STYLES
+    .map((s) => `<option value="${s}"${s === state.style ? ' selected' : ''}>${esc(t(`admin.tactical.${s}`))}</option>`).join('');
   return `
     <div class="tactic-controls">
-      <select id="formationSelect" class="bench-filter formation-select" aria-label="${esc(t('build.formationAria'))}">${options}</select>
-      ${myType ? `<div class="chem-pill tactic-pill">
-        <span>${t('tactics.style')}</span>
-        <b>${esc(t(`admin.tactical.${myType}`))}</b>
-      </div>` : ''}
+      <select id="formationSelect" class="bench-filter formation-select" aria-label="${esc(t('build.formationAria'))}">${formationOptions}</select>
+      <select id="styleSelect" class="bench-filter style-select" aria-label="${esc(t('tactics.style'))}">${styleOptions}</select>
       <div class="chem-pill">
         <span>${t('build.chemistry')}</span>
         <b class="tabular" id="chemTotal" data-val="${chemTotal}">0</b>
@@ -319,7 +324,7 @@ export function renderBuild(root, state, handlers) {
           </div>
 
           <div class="field lineup-board" id="field" data-formation="${esc(state.formation)}">
-            ${fieldSVG(positions, state.formation, chemTeamBonus(state.items) > 0)}
+            ${fieldSVG(positions, state.starting11, chemTeamBonus(state.items) > 0)}
             ${fieldNodes(positions, state.manager)}
           </div>
           ${chemLegend(state)}
@@ -392,9 +397,14 @@ export function renderBuild(root, state, handlers) {
     setTimeout(() => { suppressClick = false; }, 0);
   });
 
-  // === Formación (dropdown) ===
+  // === Plantilla (dropdown de formación) ===
   root.querySelector('#formationSelect')?.addEventListener('change', (e) => {
     handlers.onSetFormation(e.target.value);
+  });
+
+  // === Estilo táctico (dropdown libre) ===
+  root.querySelector('#styleSelect')?.addEventListener('change', (e) => {
+    handlers.onSetStyle(e.target.value);
   });
 
   // === Fichas del campo: filled → quitar; empty → abrir selector ===
@@ -857,9 +867,12 @@ function wireBuildDragDrop(root, state, handlers, markDragged) {
   }
 }
 
+// Cuántos jugadores faltan para una alineación válida (11 en total). Cuando el
+// total ya es 11 pero falta el portero o algún defensa, devuelve al menos 1 para
+// reflejar que el once aún no es válido (el botón Jugar sigue deshabilitado).
 function countMissing(state) {
-  const slots = formationSlots(state.formation);
-  return LINES.reduce((n, l) => n + Math.max(0, slots[l] - (state.starting11[l] || []).filter(Boolean).length), 0);
+  const total = LINES.reduce((n, l) => n + (state.starting11[l] || []).filter(Boolean).length, 0);
+  return Math.max(1, 11 - total);
 }
 
 function openTargetPicker(root, state, player, handlers) {

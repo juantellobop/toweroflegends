@@ -10,94 +10,88 @@ import { playerOVR } from '../engine/ovr.js';
 import { playerInitials, playerSurname } from '../data/playerAssets.js';
 import { PITCH_MARKINGS } from './pitchArt.js';
 
-// Posición vertical (top %) de cada línea en el campo, de abajo (POR) a arriba
-// (DEL). Reparto amplio: delantera y portero cerca de las áreas para que el
-// once aproveche casi todo el alto del tablero.
-export const LINE_TOP = { GK: 88, DEF: 66, MID: 42, ENG: 30, FWD: 14 };
-export const FORMATION_LINE_TOP = {
-  '4-3-1-2': { GK: 91, DEF: 72, MID: 51, ENG: 31, FWD: 9 },
-  // 4-2-3-1: pivotes (MID) por detrás de la línea de creación (ENG) y el delantero.
-  '4-2-3-1': { GK: 91, DEF: 72, MID: 52, ENG: 30, FWD: 9 },
-  // 3-2-4-1: zaga de 3, dos mediocentros (MID), la línea ofensiva de 4 (ENG) y el 9.
-  // Mismo reparto vertical que el 4-2-3-1 (5 filas equiespaciadas ~20%) para que
-  // las cartas no se pisen y el tablero quede consistente entre dibujos de 4 líneas.
-  '3-2-4-1': { GK: 91, DEF: 72, MID: 52, ENG: 30, FWD: 9 },
-};
+// Geometría fija del grid (1-5-5-5-5). El tablero SIEMPRE ocupa el mismo alto y
+// las mismas posiciones, sin variación por táctica:
+//  · Filas (top %): 5 filas equiespaciadas de abajo (POR) a arriba (DEL).
+//  · Columnas (left %): 5 columnas equiespaciadas; col 2 es el centro.
+export const ROW_TOP = { POR: 91, DEF: 72, MED: 52, ENG: 30, DEL: 9 };
+export const COL_LEFT = [10, 30, 50, 70, 90];
+// Mapeo línea del motor → fila del grid (las filas MED/ENG comparten línea MID).
+const LINE_TO_ROW = { GK: 'POR', DEF: 'DEF', MID: 'MED', FWD: 'DEL' };
 
-// Ajuste fino (dx/dy en % del campo) por hueco concreto, sobre la posición de su
-// línea. Dibuja el rol dentro del dibujo: el MC más defensivo se retrasa
-// (4-3-3, 3-5-2, 5-3-2, 4-3-1-2, doble pivote del 3-4-3), los extremos parten
-// algo más abajo (4-3-3, 4-2-4), los laterales del 5-3-2 se proyectan y los
-// carrileros del 3-5-2 adelantan. El escalonado de las líneas de 5 también
-// deja a la vista el enlace de química entre cartas vecinas en mobile.
-export const SLOT_NUDGES = {
-  '4-3-3': { 'MID:1': { dy: 2 }, 'FWD:0': { dy: 4 }, 'FWD:2': { dy: 4 } },
-  '3-5-2': { 'MID:0': { dy: -5 }, 'MID:2': { dy: 2 }, 'MID:4': { dy: -5 } },
-  '5-3-2': { 'MID:1': { dy: 2 }, 'DEF:0': { dy: -2 }, 'DEF:4': { dy: -2 } },
-  '4-3-1-2': { 'MID:1': { dy: 2 } },
-  '3-4-3': { 'MID:1': { dy: 2 }, 'MID:2': { dy: 2 } },
-  '4-2-4': { 'FWD:0': { dy: 4 }, 'FWD:3': { dy: 4 } },
-};
-
-// Separación mínima entre centros de fichas (unidades del viewBox 0-100).
-// Una ficha mide ~64px sobre un campo de ≤460px (≈14-18 unidades según la
-// pantalla): por debajo de este hueco las cartas se tocan y tapan el enlace
-// de química que se dibuja entre ellas.
-const MIN_CHIP_GAP = 20;
-
-// Garantiza el hueco mínimo re-extendiendo la línea centrada en 50. Mantiene
-// el orden de los huecos y el centrado; con n≤5 el span nunca pisa las bandas.
-function withMinGap(xs) {
-  if (xs.length < 2) return xs;
-  let gap = Infinity;
-  for (let i = 1; i < xs.length; i++) gap = Math.min(gap, xs[i] - xs[i - 1]);
-  if (gap >= MIN_CHIP_GAP) return xs;
-  const start = 50 - (MIN_CHIP_GAP * (xs.length - 1)) / 2;
-  return xs.map((_, i) => start + MIN_CHIP_GAP * i);
+function rowForSlot(slot) {
+  if (slot.gridRow) return slot.gridRow;
+  if (slot.line === 'MID' && slot.slotIndex >= COL_LEFT.length) return 'ENG';
+  return LINE_TO_ROW[slot.line] || 'MED';
 }
 
-function spreadLeft(n, line, formation) {
+// Asigna (x%, y%) a cada hueco. Si los huecos ya traen columna del grid (tablero
+// propio: formationLineSlots) se respeta; si no (once rival: lista plana por
+// posición), se centran por su número. Determinista, sin matices por dibujo.
+export function positionSlots(formation, line, slots) {
+  const needCols = slots.some((s) => s.col == null);
+  const cols = needCols ? centeredColsForCount(slots.length) : null;
+  slots.forEach((slot, i) => {
+    const row = rowForSlot(slot);
+    const col = slot.col != null ? slot.col : (cols ? cols[i] : 2);
+    slot.gridRow = row;
+    slot.col = col;
+    slot.x = row === 'POR' ? 50 : COL_LEFT[col];
+    slot.y = ROW_TOP[row];
+  });
+  return slots;
+}
+
+// Columnas centradas para N huecos en una fila de 5 (espejo de centeredCols del
+// config, replicado aquí para no acoplar la UI a los datos del motor).
+function centeredColsForCount(n) {
+  switch (n) {
+    case 0: return [];
+    case 1: return [2];
+    case 2: return [1, 3];
+    case 3: return [1, 2, 3];
+    case 4: return [0, 1, 3, 4];
+    default: return [0, 1, 2, 3, 4];
+  }
+}
+
+// Cuando NO hay ENG y el medio tiene 3, se adelanta la fila MED hacia la mitad
+// del campo (rellena el hueco que deja la línea de enganches vacía).
+const MED_ADVANCED_TOP = 44;
+
+// Reparto horizontal EQUILIBRADO: N huecos a distancias iguales (los 4 defensas
+// quedan con la misma separación entre laterales y centrales, no el centro abierto
+// del grid editable). Centrado en 50.
+function evenSpread(n) {
   if (n <= 0) return [];
   if (n === 1) return [50];
-  if (formation === '4-3-1-2' && line === 'FWD' && n === 2) return [28, 72];
-  // Trío de mediocampo compacto (interiores cerca del pivote): mismo esquema
-  // en 4-3-3, 5-3-2 y 4-3-1-2.
-  if (['4-3-3', '5-3-2', '4-3-1-2'].includes(formation) && line === 'MID' && n === 3) return [22, 50, 78];
-  if ((formation === '4-2-3-1' || formation === '4-2-4' || formation === '3-2-4-1') && line === 'MID' && n === 2) return [30, 70]; // pivotes / mediocentros
-  if (formation === '4-2-3-1' && line === 'ENG' && n === 3) return [18, 50, 82]; // creación
-  // 3-2-4-1: la línea de 4 (extremos abiertos, enganches por dentro) abre el ancho.
-  if (formation === '3-2-4-1' && line === 'ENG' && n === 4) return [12, 38, 62, 88];
-  if (line === 'FWD') {
-    // La dupla va abierta (4-4-2, 3-5-2, 5-3-2): con [42,58] las dos cartas
-    // se tocaban y el enlace de química entre ellas quedaba oculto.
-    if (n === 2) return [33, 67];
-    if (n === 3) return [16, 50, 84];
-  }
-  if (line === 'DEF' && n === 3) return [26, 50, 74];
-  // Margen 10: las líneas llenas (4-5 jugadores) abren casi todo el ancho del
-  // tablero, que en desktop ahora es más generoso.
-  const margin = line === 'GK' ? 42 : 10;
+  const margin = n >= 5 ? 10 : n === 4 ? 16 : n === 3 ? 24 : 33;
   return Array.from({ length: n }, (_, i) => margin + ((100 - margin * 2) * i) / (n - 1));
 }
 
-export function positionSlots(formation, line, slots) {
-  const byRole = new Map();
+// Posicionado para tableros INFORMATIVOS (scouting, plantilla inicial, modal del
+// ranking): agrupa los jugadores OCUPADOS por fila del grid y los reparte de forma
+// equilibrada (no en las columnas rígidas del tablero editable). Sin ENG y con 3
+// MED, adelanta la fila MED hacia la mitad del campo. Recibe TODOS los huecos de
+// una vez (no por línea) para poder repartir cada fila por su cuenta.
+export function layoutInformative(slots) {
+  const byRow = new Map();
   for (const slot of slots) {
-    const role = slot.role || line;
-    if (!byRole.has(role)) byRole.set(role, []);
-    byRole.get(role).push(slot);
+    const row = rowForSlot(slot);
+    slot.gridRow = row;
+    if (!byRow.has(row)) byRow.set(row, []);
+    byRow.get(row).push(slot);
   }
-
-  for (const [role, roleSlots] of byRole.entries()) {
-    const xs = withMinGap(spreadLeft(roleSlots.length, role, formation));
-    const top = FORMATION_LINE_TOP[formation]?.[role] ?? LINE_TOP[role] ?? LINE_TOP[line];
-    roleSlots.forEach((slot, i) => {
-      const nudge = SLOT_NUDGES[formation]?.[`${slot.line}:${slot.slotIndex}`];
-      slot.x = xs[i] + (nudge?.dx || 0);
-      slot.y = top + (nudge?.dy || 0);
+  const engEmpty = !(byRow.get('ENG') || []).length;
+  for (const [row, rowSlots] of byRow) {
+    rowSlots.sort((a, b) => (a.col ?? a.slotIndex ?? 0) - (b.col ?? b.slotIndex ?? 0));
+    const xs = evenSpread(rowSlots.length);
+    const top = (row === 'MED' && rowSlots.length === 3 && engEmpty) ? MED_ADVANCED_TOP : ROW_TOP[row];
+    rowSlots.forEach((slot, i) => {
+      slot.x = row === 'POR' ? 50 : xs[i];
+      slot.y = top;
     });
   }
-
   return slots;
 }
 

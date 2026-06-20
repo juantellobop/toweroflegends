@@ -4,10 +4,10 @@
 // del partido (ver MATCH_BONUS_CAPS); 'chem' suma química de equipo; 'meta'
 // afecta el bucle (extra cartas).
 // Sinergia: un ítem con synergyType ('posesion'|'presion'|'contra') aplica su
-// efecto positivo multiplicado por ITEM_SYNERGY_MULT si coincide con el tipo
-// del dibujo, y sus efectos negativos (el coste del ítem) se anulan.
+// efecto positivo multiplicado por ITEM_SYNERGY_MULT si coincide con el ESTILO
+// elegido del equipo (team.style), y sus efectos negativos (el coste) se anulan.
 
-import { CONFIG, formationType } from '../data/config.js';
+import { CONFIG } from '../data/config.js';
 
 const lineToStat = { FWD: 'attack', MID: 'midfield', DEF: 'defense', GK: 'gk' };
 
@@ -19,11 +19,11 @@ function effectKey(item, effect) {
 
 // Devuelve contribuciones ya nerfeadas y con decaimiento por copia.
 // Para `mult`, value es el bonus respecto de 1 (0.04 = +4%).
-// Con `formation`, los ítems cuya sinergia coincide con el tipo del dibujo
+// Con `style`, los ítems cuya sinergia coincide con el estilo elegido del equipo
 // aplican su efecto positivo multiplicado por ITEM_SYNERGY_MULT y anulan sus
 // efectos negativos: la táctica absorbe el trade-off del ítem.
-export function effectiveItemEffects(items = [], { scalePower = true, formation = null, applyDecay = true } = {}) {
-  const tacticType = formation ? formationType(formation) : null;
+export function effectiveItemEffects(items = [], { scalePower = true, style = null, applyDecay = true } = {}) {
+  const tacticType = style || null;
   const seenItems = new Map();
   const seenStats = new Map();
   const out = [];
@@ -48,12 +48,12 @@ export function effectiveItemEffects(items = [], { scalePower = true, formation 
 
 // Aplica primero add y después mult, sin topes: cada objeto suma entero (el
 // decaimiento por copia y el nerfeo de potencia ya moderan el apilamiento).
-export function applyItemsToRatings(ratings, items = [], formation = null) {
+export function applyItemsToRatings(ratings, items = [], style = null) {
   const r = { ...ratings };
   const add = {};
   const mult = {};
 
-  for (const effect of effectiveItemEffects(items, { formation })) {
+  for (const effect of effectiveItemEffects(items, { style })) {
     let stat = null;
     if (effect.target === 'team') stat = effect.stat;
     if (effect.target === 'line') stat = lineToStat[effect.line];
@@ -70,11 +70,11 @@ export function applyItemsToRatings(ratings, items = [], formation = null) {
 
 // Agrega todos los efectos de partido ('match') en un objeto de bonus, cada
 // uno topado según MATCH_BONUS_CAPS. La simulación los lee por equipo.
-export function matchBonuses(items = [], formation = null) {
+export function matchBonuses(items = [], style = null) {
   const caps = CONFIG.MATCH_BONUS_CAPS;
   const out = {};
   for (const stat in caps) out[stat] = 0;
-  for (const effect of effectiveItemEffects(items, { formation })) {
+  for (const effect of effectiveItemEffects(items, { style })) {
     if (effect.target !== 'match' || effect.op !== 'add') continue;
     if (!(effect.stat in caps)) continue;
     out[effect.stat] += effect.value;
@@ -84,8 +84,8 @@ export function matchBonuses(items = [], formation = null) {
 }
 
 // Suma la probabilidad de robo (stealChance) aportada por objetos 'match'.
-export function matchStealBonus(items = [], formation = null) {
-  return matchBonuses(items, formation).stealChance;
+export function matchStealBonus(items = [], style = null) {
+  return matchBonuses(items, style).stealChance;
 }
 
 // Química de equipo aportada por reliquias (target 'chem'). Sin nerfeo de

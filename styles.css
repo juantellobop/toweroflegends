@@ -2804,15 +2804,9 @@ select {
 /* === Tablero compartido (.lineup-board): armado, plantilla inicial y once
    rival pintan las mismas cartas con los mismos tamaños. La carta se define
    sobre el propio tablero para que cualquier pantalla la herede. === */
+/* Grid fijo (1-5-5-5-5): SIEMPRE 5 filas, así la carta es ÚNICA en todo tablero
+   (el tamaño del caso de 5 líneas) y no varía por táctica. */
 .lineup-board {
-  --lineup-card: clamp(82px, 8.4vw, 104px);
-}
-
-/* Dibujos de 5 líneas (enganche/creación entre medio y ataque): carta algo
-   menor en cualquier tablero para que las líneas extra no se pisen... */
-.field.lineup-board[data-formation="4-3-1-2"],
-.field.lineup-board[data-formation="4-2-3-1"],
-.field.lineup-board[data-formation="3-2-4-1"] {
   --lineup-card: clamp(74px, 7.6vw, 94px);
 }
 
@@ -2823,18 +2817,11 @@ select {
    cartas (medidas en px por su ancho) no, y las líneas se pisan. El min() deja
    mandar al ancho en pantallas altas y al alto en las bajas. */
 .team-select-screen .field.lineup-board {
-  --lineup-card: min(clamp(82px, 8.4vw, 104px), calc(20vh - 64px));
-}
-.team-select-screen .field.lineup-board[data-formation="4-3-1-2"],
-.team-select-screen .field.lineup-board[data-formation="4-2-3-1"],
-.team-select-screen .field.lineup-board[data-formation="3-2-4-1"] {
   --lineup-card: min(clamp(74px, 7.6vw, 94px), calc(17vh - 56px));
 }
 
-/* ...y en el armado, además, campo más alto. */
-.team-select-screen .field[data-formation="4-3-1-2"],
-.team-select-screen .field[data-formation="4-2-3-1"],
-.team-select-screen .field[data-formation="3-2-4-1"] {
+/* ...y en el armado, el campo SIEMPRE a la altura máxima (la de 5 líneas). */
+.team-select-screen .field.lineup-board {
   height: min(88vh, 900px, calc(100vh - 190px));
   min-height: 580px;
 }
@@ -5395,39 +5382,20 @@ button.primary:active:not(:disabled),
      reparten por todo el alto sin tapar a los suplentes/ratings de debajo.
      El tamaño de carta vive en .lineup-board: lo comparten armado, plantilla
      inicial y once rival. */
+  /* Grid fijo: carta ÚNICA (caso de 5 líneas) y campo SIEMPRE a la altura máxima,
+     sin variantes por táctica. El tamaño de carta vive en .lineup-board: lo
+     comparten armado, plantilla inicial y once rival. */
   .team-select-screen,
   .field.lineup-board[data-formation] {
-    --lineup-card: 70px;
+    --lineup-card: 62px;
   }
 
   .team-select-screen .field[data-formation] {
     width: calc(100% + 16px);
     margin-inline: -8px;
-    height: min(calc((100vw - 20px) * 1.22), calc(100svh - 245px), 470px);
-    min-height: 420px;
-    aspect-ratio: auto;
-  }
-
-  /* Líneas de 5 en ancho: carta una pizca menor para que el enlace de química
-     entre cartas vecinas conserve su hueco. */
-  .field.lineup-board[data-formation="3-5-2"],
-  .field.lineup-board[data-formation="5-3-2"] {
-    --lineup-card: 64px;
-  }
-
-  /* Dibujos de 5 líneas (enganche/creación): carta menor en cualquier tablero
-     y, en el armado, campo aún más alto para que las líneas no se pisen. */
-  .field.lineup-board[data-formation="4-3-1-2"],
-  .field.lineup-board[data-formation="4-2-3-1"],
-  .field.lineup-board[data-formation="3-2-4-1"] {
-    --lineup-card: 62px;
-  }
-
-  .team-select-screen .field[data-formation="4-3-1-2"],
-  .team-select-screen .field[data-formation="4-2-3-1"],
-  .team-select-screen .field[data-formation="3-2-4-1"] {
     height: min(calc((100vw - 20px) * 1.32), calc(100svh - 225px), 505px);
     min-height: 450px;
+    aspect-ratio: auto;
   }
 
   .lineup-board .field-chip {

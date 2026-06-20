@@ -546,6 +546,7 @@ const DICTIONARIES = {
     ratings: { attack: 'ATA', midfield: 'MED', defense: 'DEF', gk: 'POR' },
     tactics: {
       style: 'Estilo',
+      custom: 'Personalizada',
     },
     match: {
       plays: ({ count }) => `${count} jugadas`,
@@ -656,6 +657,8 @@ const DICTIONARIES = {
       tacticalType: 'Tipo táctico',
       noType: 'Sin tipo',
       saveStats: 'Guardar estadísticas',
+      deletePlayer: 'Eliminar jugador',
+      deleteConfirm: ({ name }) => `¿Eliminar a ${name || 'este jugador'}? No se puede deshacer.`,
       portraitAria: 'Editor de imagen de perfil',
       portrait: 'Imagen de perfil',
       toolEffect: 'Efecto tool',
@@ -1206,6 +1209,7 @@ const DICTIONARIES = {
     ratings: { attack: 'ATT', midfield: 'MID', defense: 'DEF', gk: 'GK' },
     tactics: {
       style: 'Style',
+      custom: 'Custom',
     },
     match: {
       plays: ({ count }) => `${count} plays`,
@@ -1310,6 +1314,8 @@ const DICTIONARIES = {
       tacticalType: 'Tactical type',
       noType: 'No type',
       saveStats: 'Save stats',
+      deletePlayer: 'Delete player',
+      deleteConfirm: ({ name }) => `Delete ${name || 'this player'}? This cannot be undone.`,
       portraitAria: 'Profile image editor',
       portrait: 'Profile image',
       toolEffect: 'Tool effect',

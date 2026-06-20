@@ -53,7 +53,7 @@ export const OPPONENTS = [
         "ovr": 95
       },
       {
-        "name": "Nahuel Molina",
+        "name": "Marcos Acuña",
         "position": "DEF",
         "ovr": 94
       },
@@ -68,7 +68,7 @@ export const OPPONENTS = [
         "ovr": 96
       },
       {
-        "name": "Marcos Acuña",
+        "name": "Nahuel Molina",
         "position": "DEF",
         "ovr": 94
       },
@@ -88,9 +88,9 @@ export const OPPONENTS = [
         "ovr": 97
       },
       {
-        "name": "Lionel Messi",
+        "name": "Ángel Di María",
         "position": "FWD",
-        "ovr": 96
+        "ovr": 98
       },
       {
         "name": "Julián Álvarez",
@@ -98,9 +98,9 @@ export const OPPONENTS = [
         "ovr": 97
       },
       {
-        "name": "Ángel Di María",
+        "name": "Lionel Messi",
         "position": "FWD",
-        "ovr": 98
+        "ovr": 96
       }
     ],
     "bench": [],
@@ -3047,7 +3047,18 @@ export const OPPONENTS = [
         "ovr": 92
       }
     ],
-    "bench": [],
+    "bench": [
+      {
+        "name": "Diego Milito",
+        "position": "FWD",
+        "ovr": 93
+      },
+      {
+        "name": "Gabriel Milito",
+        "position": "DEF",
+        "ovr": 93
+      }
+    ],
     "managerId": "manager_jose_pekerman",
     "stage": "quarterfinal-or-better"
   },

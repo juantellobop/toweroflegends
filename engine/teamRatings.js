@@ -6,7 +6,7 @@
 import { computeChemistry, computeTeamChem, managerNationStatBonus } from './chemistry.js';
 import { applyItemsToRatings, chemTeamBonus, matchBonuses } from './items.js';
 import { applyTraitToStats, gkDefenseLineBonus, gkTraitBonus, shooterWeightMultiplier } from './traits.js';
-import { CONFIG, LINES, formationLineSlots, formationType, FORMATION_MODIFIERS } from '../data/config.js';
+import { CONFIG, LINES, formationLineSlots, formationType } from '../data/config.js';
 import { t } from '../data/i18n.js';
 
 function avg(arr) {
@@ -93,67 +93,52 @@ function tacticalGroups(starting11, formation) {
   return groups;
 }
 
-// Pesos por perfil de hueco (suman 1.0). Cada perfil pondera su stat dominante,
-// pero reserva una fracción a stats secundarias para que ninguna quede muerta.
-// La implicancia táctica vive aquí: el mismo jugador puntúa distinto según el
-// hueco que ocupe (un creador rinde de interior, un destructor de pivote).
+// Pesos por perfil de hueco del grid (8 perfiles = 4 filas × {central, lateral}),
+// suman ~1.0. La prioridad de atributos por posición la fijó el diseño del grid:
+// el mismo jugador puntúa distinto según la fila y si es central o lateral.
+// NOTA DE BALANCE: estos pesos son el punto de partida; re-medir con los scripts
+// de .cache (early-levels-probe, cards-probe) y ajustar para recuperar las metas.
 function defScore(s, profile) {
-  if (profile === 'lateral') {
-    // Lateral: recorrido y salida — pace y pase pesan; el corte importa menos.
-    return 0.36 * s.defending + 0.15 * s.physical + 0.29 * s.pace + 0.2 * s.passing;
+  if (profile === 'def_lateral') {
+    // Lateral: defensa con salida y desborde — pase, regate y físico cuentan.
+    return 0.34 * s.defending + 0.24 * s.passing + 0.22 * s.dribbling + 0.20 * s.physical;
   }
-  if (profile === 'central') {
-    // Central: corte y físico mandan; el pase solo como salida limpia.
-    return 0.57 * s.defending + 0.26 * s.physical + 0.11 * s.pace + 0.06 * s.passing;
-  }
-  // Sin perfil (rivales con lineup plano): mezcla histórica de la línea.
-  return 0.47 * s.defending + 0.23 * s.physical + 0.22 * s.pace + 0.08 * s.passing;
+  // def_central (y fallback de rival sin perfil): corte y pase de salida; físico base.
+  return 0.50 * s.defending + 0.28 * s.passing + 0.22 * s.physical;
 }
 
 function midScore(s, profile) {
-  if (profile === 'pivote') {
-    // Pivote: corte, físico y salida de balón; sin premio por llegada.
-    return 0.28 * s.passing + 0.1 * s.dribbling + 0.32 * s.defending + 0.22 * s.physical + 0.08 * s.pace;
+  if (profile === 'med_lateral') {
+    // Volante lateral: regate y pase con recorrido; físico y ayuda en defensa.
+    return 0.32 * s.dribbling + 0.26 * s.passing + 0.22 * s.physical + 0.20 * s.defending;
   }
-  if (profile === 'interior') {
-    // Interior: pase y regate con llegada (remate); defiende poco.
-    return 0.34 * s.passing + 0.28 * s.dribbling + 0.1 * s.shooting + 0.1 * s.defending + 0.1 * s.physical + 0.08 * s.pace;
-  }
-  if (profile === 'banda') {
-    // Volante de banda: regate y pace para desbordar, centro al área.
-    return 0.24 * s.passing + 0.31 * s.dribbling + 0.08 * s.shooting + 0.06 * s.defending + 0.07 * s.physical + 0.24 * s.pace;
-  }
-  // Mixto (box-to-box) y fallback sin perfil.
-  return 0.33 * s.passing + 0.23 * s.dribbling + 0.19 * s.defending + 0.18 * s.physical + 0.07 * s.pace;
+  // med_central (y fallback): equilibrio — defensa, pase, regate, físico.
+  return 0.30 * s.defending + 0.28 * s.passing + 0.22 * s.dribbling + 0.20 * s.physical;
 }
 
 function engancheMidScore(s, profile) {
-  if (profile === 'extremo') {
-    // Extremo de la línea de creación: el regate desequilibra.
-    return 0.3 * s.passing + 0.4 * s.dribbling + 0.1 * s.shooting + 0.08 * s.physical + 0.12 * s.pace;
+  if (profile === 'eng_lateral') {
+    // Enganche de banda: pase y regate con ritmo, algo de remate.
+    return 0.32 * s.passing + 0.28 * s.dribbling + 0.22 * s.pace + 0.18 * s.shooting;
   }
-  // Mediapunta: último pase y llegada.
-  return 0.46 * s.passing + 0.22 * s.dribbling + 0.18 * s.shooting + 0.14 * s.physical;
+  // eng_central (mediapunta): pase, remate y regate.
+  return 0.45 * s.passing + 0.30 * s.shooting + 0.25 * s.dribbling;
 }
 
 function engancheAttackScore(s, profile) {
-  if (profile === 'extremo') {
-    return 0.22 * s.shooting + 0.24 * s.passing + 0.36 * s.dribbling + 0.18 * s.pace;
+  if (profile === 'eng_lateral') {
+    return 0.30 * s.passing + 0.28 * s.dribbling + 0.22 * s.pace + 0.20 * s.shooting;
   }
-  return 0.36 * s.shooting + 0.34 * s.passing + 0.22 * s.dribbling + 0.08 * s.pace;
+  return 0.36 * s.passing + 0.36 * s.shooting + 0.28 * s.dribbling;
 }
 
 function forwardScore(s, profile) {
-  if (profile === 'nueve') {
-    // Referencia del tridente: rematador puro.
-    return 0.52 * s.shooting + 0.18 * s.pace + 0.16 * s.dribbling + 0.09 * s.physical + 0.05 * s.defending;
+  if (profile === 'del_lateral') {
+    // Extremo: regate y ritmo para desbordar; remate y pase de apoyo.
+    return 0.34 * s.dribbling + 0.30 * s.pace + 0.24 * s.shooting + 0.12 * s.passing;
   }
-  if (profile === 'extremo') {
-    // Extremo: regate y pace para romper la banda; remata menos.
-    return 0.18 * s.shooting + 0.24 * s.pace + 0.39 * s.dribbling + 0.12 * s.passing + 0.04 * s.physical + 0.03 * s.defending;
-  }
-  // Punta genérico (duplas, 9 solitario, fallback sin perfil).
-  return 0.47 * s.shooting + 0.19 * s.pace + 0.19 * s.dribbling + 0.1 * s.physical + 0.05 * s.defending;
+  // del_central (referencia y fallback): remate y físico.
+  return 0.58 * s.shooting + 0.22 * s.physical + 0.10 * s.pace + 0.10 * s.dribbling;
 }
 
 // Stats con rasgo + bonus del DT + perfil del hueco, para puntuar cada grupo.
@@ -168,7 +153,7 @@ function baseRatings(starting11, formation, manager) {
   const mid = statsWithProfile(groups.MID, manager);
   const eng = statsWithProfile(groups.ENG, manager);
   const fwd = statsWithProfile(groups.FWD, manager);
-  const laterals = def.filter(({ profile }) => profile === 'lateral');
+  const laterals = def.filter(({ profile }) => profile === 'def_lateral');
 
   const gkRating = gkRatingOf(starting11.GK, manager);
 
@@ -212,9 +197,9 @@ function baseRatings(starting11, formation, manager) {
 // táctica → ataque+medio; reliquias 'chem' → todas) se reparten encima.
 // CHEM_IMPACT escala cuánto pesa todo ese aporte en el desempeño sin tocar
 // los puntos que ve el jugador.
-function applyChemistry(ratings, starting11, formation, items = [], manager = null) {
-  const chem = computeChemistry(starting11, formation, manager);
-  const team = computeTeamChem(starting11, formation);
+function applyChemistry(ratings, starting11, style, items = [], manager = null) {
+  const chem = computeChemistry(starting11, null, manager);
+  const team = computeTeamChem(starting11, style);
   const itemChem = chemTeamBonus(items);
   const impact = CONFIG.CHEM_IMPACT;
   return {
@@ -225,26 +210,13 @@ function applyChemistry(ratings, starting11, formation, items = [], manager = nu
   };
 }
 
-// Identidad de la formación: multiplica los ratings de campo por su modificador.
-// El portero no se toca. Sin modificador conocido → neutro.
-function applyFormationModifiers(ratings, formation) {
-  const mod = FORMATION_MODIFIERS[formation];
-  if (!mod) return ratings;
-  return {
-    attack: ratings.attack * (mod.attack ?? 1),
-    midfield: ratings.midfield * (mod.midfield ?? 1),
-    defense: ratings.defense * (mod.defense ?? 1),
-    gk: ratings.gk,
-  };
-}
-
 // Director técnico: aplica sus modificadores porcentuales a ataque/medio/defensa
-// (el portero no se toca). Con sinergia —el estilo del DT coincide con el tipo del
-// dibujo— sus modificadores positivos se amplifican (MANAGER_SYNERGY_MULT) y sus
-// costes (negativos) se anulan, igual que la sinergia táctica de los objetos.
-function applyManagerModifiers(ratings, manager, formation) {
+// (el portero no se toca). Con sinergia —el estilo del DT coincide con el ESTILO
+// elegido del equipo— sus modificadores positivos se amplifican (MANAGER_SYNERGY_MULT)
+// y sus costes (negativos) se anulan, igual que la sinergia táctica de los objetos.
+function applyManagerModifiers(ratings, manager, style) {
   if (!manager || !manager.mods) return ratings;
-  const synergy = Boolean(formationType(formation) && manager.style === formationType(formation));
+  const synergy = Boolean(style && manager.style === style);
   const out = { ...ratings };
   for (const stat of ['attack', 'midfield', 'defense']) {
     let pct = Number(manager.mods[stat]) || 0;
@@ -255,24 +227,30 @@ function applyManagerModifiers(ratings, manager, formation) {
   return out;
 }
 
-// Calcula los ratings finales de un equipo del jugador (con química, objetos y
-// modificador de formación). Si el equipo trae ratings precomputados (rival
-// histórico), aplica solo el modificador de su formación (simetría con el jugador).
+// Estilo táctico efectivo del equipo: el elegido por el usuario (team.style) o, en
+// su defecto, el del dibujo (rivales históricos: FORMATION_TYPE de su formación).
+// Alimenta las sinergias de química, objetos y DT. Sin modificadores de formación.
+function teamStyle(team) {
+  return team.style || formationType(team.formation) || null;
+}
+
+// Calcula los ratings finales de un equipo del jugador (con química y objetos).
+// Si el equipo trae ratings precomputados (rival histórico), aplica solo los mods
+// de su DT. Ya no hay modificadores de formación (el trade-off vive en el grid).
 export function calcularRatings(team) {
+  const style = teamStyle(team);
   if (team.ratings && !team.starting11) {
-    let r = applyFormationModifiers({ ...team.ratings }, team.formation);
     // DT del rival (Argentina 1986 → Bilardo): sus mods entran igual que los del
     // DT del jugador. El rival no recibe la química nacional del DT (ratings
     // planos, sin once), así que el DT propio sigue siendo algo más ventajoso.
-    r = applyManagerModifiers(r, team.manager || null, team.formation);
+    let r = applyManagerModifiers({ ...team.ratings }, team.manager || null, style);
     for (const k in r) r[k] = Math.max(1, Math.round(r[k] * 10) / 10);
     return r;
   }
   let r = baseRatings(team.starting11, team.formation, team.manager || null);
-  r = applyChemistry(r, team.starting11, team.formation, team.items || [], team.manager || null);
-  r = applyItemsToRatings(r, team.items || [], team.formation);
-  r = applyFormationModifiers(r, team.formation);
-  r = applyManagerModifiers(r, team.manager || null, team.formation);
+  r = applyChemistry(r, team.starting11, style, team.items || [], team.manager || null);
+  r = applyItemsToRatings(r, team.items || [], style);
+  r = applyManagerModifiers(r, team.manager || null, style);
   // Sin techo de 99: todo lo que suman jugadores, química, objetos y táctica
   // llega entero a la simulación (solo piso de 1 y redondeo a décimas).
   for (const k in r) r[k] = Math.max(1, Math.round(r[k] * 10) / 10);
@@ -294,7 +272,7 @@ function buildShooters(team, ratings) {
       const s = effectiveStats(p, team.manager) || {};
       const shooterRoleWeight = enganche
         ? engancheAttackScore(s, profile)
-        : profile === 'extremo'
+        : profile === 'del_lateral'
         ? s.shooting * 0.45 + s.pace * 0.2 + s.dribbling * 0.28 + s.passing * 0.07
         : s.shooting * 0.7 + s.pace * 0.15 + s.dribbling * 0.15;
       const weight = shooterRoleWeight * roleWeight * shooterWeightMultiplier(p);
@@ -313,19 +291,19 @@ function buildShooters(team, ratings) {
   }));
 }
 
-// Peso de asistente según el perfil del hueco: el mediapunta es el primer
-// creador, interiores y bandas generan más que un pivote, los extremos del
-// ataque asisten más que un 9 y los laterales aportan desde atrás.
+// Peso de asistente según el perfil del hueco: el enganche central es el primer
+// creador, los laterales de medio/ataque centran más que los centrales, y los
+// laterales de la zaga aportan desde atrás.
 const ASSIST_ROLE_WEIGHT = {
-  MID: { pivote: 0.85, interior: 1.1, banda: 1.05 },
-  ENG: { mediapunta: 1.25, extremo: 1.1 },
-  FWD: { extremo: 0.95, nueve: 0.7 },
+  MID: { med_central: 1.0, med_lateral: 1.05 },
+  ENG: { eng_central: 1.25, eng_lateral: 1.1 },
+  FWD: { del_central: 0.7, del_lateral: 0.95 },
 };
 
 function buildAssisters(team) {
   if (team.starting11) {
     const groups = tacticalGroups(team.starting11, team.formation);
-    const laterals = groups.DEF.filter(({ profile }) => profile === 'lateral');
+    const laterals = groups.DEF.filter(({ profile }) => profile === 'def_lateral');
     const pool = [
       ...groups.MID.map((entry) => ({ ...entry, roleWeight: ASSIST_ROLE_WEIGHT.MID[entry.profile] ?? 1 })),
       ...groups.ENG.map((entry) => ({ ...entry, roleWeight: ASSIST_ROLE_WEIGHT.ENG[entry.profile] ?? 1.15 })),
@@ -461,7 +439,7 @@ export function buildBattleTeam(team) {
     starting11: team.starting11 || null,
     bench: team.bench || [],
     // Bonos de partido de los objetos (presión, contras, balón parado, etc.),
-    // ya nerfeados, con decaimiento, sinergia táctica y topes aplicados.
-    matchBonuses: matchBonuses(team.items || [], team.formation),
+    // ya nerfeados, con decaimiento, sinergia táctica (por estilo) y topes aplicados.
+    matchBonuses: matchBonuses(team.items || [], teamStyle(team)),
   };
 }

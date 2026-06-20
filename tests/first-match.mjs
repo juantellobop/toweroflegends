@@ -9,6 +9,7 @@ function weaken(state) {
   // Deja al jugador muy flojo para forzar derrotas en la simulación cruda.
   for (const line of Object.keys(state.starting11)) {
     for (const p of state.starting11[line]) {
+      if (!p) continue; // el grid guarda null en los huecos vacíos
       if (p.stats) for (const k of Object.keys(p.stats)) p.stats[k] = 1;
       if (p.gk) for (const k of Object.keys(p.gk)) p.gk[k] = 1;
     }

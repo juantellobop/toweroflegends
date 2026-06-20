@@ -15337,5 +15337,142 @@ export const PLAYERS = [
     "gk": null,
     "trait": "Maestro",
     "tacticalType": "posesion"
+  },
+  {
+    "id": "mid_ivan_campo",
+    "name": "Iván Campo",
+    "nation": "España",
+    "era": "1998",
+    "position": "MID",
+    "rarity": "epic",
+    "ovr": 87,
+    "stats": {
+      "pace": 90,
+      "shooting": 70,
+      "passing": 90,
+      "dribbling": 85,
+      "defending": 90,
+      "physical": 90
+    },
+    "gk": null,
+    "trait": "Garra",
+    "tacticalType": "presion"
+  },
+  {
+    "id": "mid_movilla",
+    "name": "Movilla",
+    "nation": "España",
+    "era": "2004",
+    "position": "MID",
+    "rarity": "epic",
+    "ovr": 87,
+    "stats": {
+      "pace": 92,
+      "shooting": 75,
+      "passing": 88,
+      "dribbling": 80,
+      "defending": 87,
+      "physical": 99
+    },
+    "gk": null,
+    "trait": "Motor",
+    "tacticalType": "presion"
+  },
+  {
+    "id": "mid_jose_francisco_molina",
+    "name": "José Francisco Molina",
+    "nation": "España",
+    "era": "1996",
+    "position": "MID",
+    "rarity": "epic",
+    "ovr": 81,
+    "stats": {
+      "pace": 99,
+      "shooting": 60,
+      "passing": 75,
+      "dribbling": 75,
+      "defending": 90,
+      "physical": 99
+    },
+    "gk": null,
+    "trait": "Capitán",
+    "tacticalType": null
+  },
+  {
+    "id": "fwd_iago_aspas",
+    "name": "Iago Aspas",
+    "nation": "España",
+    "era": "2014",
+    "position": "FWD",
+    "rarity": "epic",
+    "ovr": 87,
+    "stats": {
+      "pace": 90,
+      "shooting": 90,
+      "passing": 90,
+      "dribbling": 80,
+      "defending": 60,
+      "physical": 90
+    },
+    "gk": null,
+    "trait": "Maestro",
+    "tacticalType": "posesion"
+  },
+  {
+    "id": "fwd_diego_milito",
+    "name": "Diego Milito",
+    "nation": "Argentina",
+    "era": "2006",
+    "position": "FWD",
+    "rarity": "legend",
+    "ovr": 93,
+    "stats": {
+      "pace": 90,
+      "shooting": 99,
+      "passing": 80,
+      "dribbling": 90,
+      "defending": 80,
+      "physical": 99
+    },
+    "gk": null,
+    "trait": "Killer",
+    "tacticalType": "presion"
+  },
+  {
+    "id": "def_gabriel_milito",
+    "name": "Gabriel Milito",
+    "nation": "Argentina",
+    "era": "2006",
+    "position": "DEF",
+    "rarity": "legend",
+    "ovr": 93,
+    "stats": {
+      "pace": 95,
+      "shooting": 60,
+      "passing": 80,
+      "dribbling": 75,
+      "defending": 99,
+      "physical": 95
+    },
+    "gk": null,
+    "trait": "Muro",
+    "tacticalType": "presion"
+  },
+  {
+    "id": "mid_santiago_canizares",
+    "name": "Santiago Cañizares",
+    "nation": "España",
+    "era": "1994",
+    "position": "GK",
+    "rarity": "epic",
+    "ovr": 87,
+    "stats": null,
+    "gk": {
+      "reflexes": 88,
+      "handling": 87,
+      "positioning": 86
+    },
+    "trait": "Paradón",
+    "tacticalType": null
   }
 ];

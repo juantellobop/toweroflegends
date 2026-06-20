@@ -166,7 +166,7 @@ async function assertBuildLayout(page, label) {
     const ratingsBox = await page.locator('.build-screen .ratings-glass').boundingBox();
     const rosterBox = await page.locator('.build-screen .team-roster').boundingBox();
     assert.ok(ratingsBox && rosterBox && fieldBox.y < rosterBox.y && rosterBox.y < ratingsBox.y, 'Mobile order must be tactical board, substitutes, then team strength');
-    assert.ok(fieldBox.height >= 420 && fieldBox.height <= 470, `Mobile tactical field must be slightly taller (420-470px), got ${fieldBox.height}px`);
+    assert.ok(fieldBox.height >= 420 && fieldBox.height <= 510, `Mobile tactical field must be taller (420-510px) for the fixed 5-row grid, got ${fieldBox.height}px`);
     assert.equal(await page.locator('.build-screen .roster-head h2').textContent(), 'Substitutes');
     assert.equal(await page.locator('.build-screen .roster-head p').count(), 0, 'Substitutes summary must be removed');
 
@@ -245,71 +245,34 @@ async function assertCenteredForwards(page) {
     assert.deepEqual(overlaps, [], `${label} field chips must not overlap:\n${overlaps.join('\n')}`);
   }
 
-  for (const formation of ['4-4-2', '3-5-2', '5-3-2']) {
+  // El grid es FIJO (1-5-5-5-5): CUALQUIER plantilla pinta las 21 anclas (1 POR +
+  // 4 filas × 5 columnas) en las MISMAS posiciones, con placeholders en los huecos
+  // vacíos. Verificamos el esquema, las columnas fijas y que nada se solape.
+  for (const formation of ['4-4-2', '3-5-2', '5-3-2', '4-3-3', '4-3-1-2', '3-4-3', '4-2-3-1', '3-2-4-1']) {
     await page.selectOption('#formationSelect', formation);
     await page.waitForTimeout(120);
-    const xs = await page.locator('.chip-anchor[data-line="FWD"]').evaluateAll((nodes) =>
-      nodes.map((node) => parseFloat(node.style.left)).sort((a, b) => a - b)
+    const anchors = await page.locator('.chip-anchor').evaluateAll((nodes) =>
+      nodes.map((node) => ({ line: node.dataset.line, slot: parseInt(node.dataset.slot, 10), left: parseFloat(node.style.left), top: parseFloat(node.style.top) }))
     );
-    assert.equal(xs.length, 2, `${formation} must have two forward slots`);
-    // La dupla va separada (se ve el enlace de química entre las dos cartas)
-    // pero sin abrirse a la banda como un tridente.
-    assert.ok(xs[1] - xs[0] >= 25, `${formation} forwards must be split apart, got ${xs.join(', ')}`);
-    assert.ok(xs.every((x) => x >= 28 && x <= 72), `${formation} forwards must stay inboard, got ${xs.join(', ')}`);
+    assert.equal(anchors.length, 21, `${formation}: el grid debe pintar 21 anclas`);
+    const byLine = (l) => anchors.filter((a) => a.line === l);
+    assert.equal(byLine('GK').length, 1, `${formation}: 1 portero`);
+    assert.equal(byLine('DEF').length, 5, `${formation}: 5 huecos DEF`);
+    assert.equal(byLine('MID').length, 10, `${formation}: 10 huecos MID (MED 0-4 + ENG 5-9)`);
+    assert.equal(byLine('FWD').length, 5, `${formation}: 5 huecos DEL`);
+    // 5 filas a alturas fijas distintas (POR/DEF/MED/ENG/DEL).
+    const rowTops = [...new Set(anchors.map((a) => Math.round(a.top)))].sort((a, b) => a - b);
+    assert.equal(rowTops.length, 5, `${formation}: 5 filas a alturas fijas, got ${rowTops.join(', ')}`);
+    // Columnas fijas (separación ≥19.5 → los enlaces de química no quedan tapados).
+    for (const line of ['DEF', 'FWD']) {
+      const cols = [...new Set(byLine(line).map((a) => a.left))].sort((a, b) => a - b);
+      assert.equal(cols.length, 5, `${formation}: ${line} en 5 columnas`);
+      for (let i = 1; i < cols.length; i++) {
+        assert.ok(cols[i] - cols[i - 1] >= 19.5, `${formation}: columnas ${line} muy juntas: ${cols.join(', ')}`);
+      }
+    }
+    await assertNoFieldChipOverlap(formation);
   }
-
-  // Hueco mínimo entre fichas de una misma línea: el enlace de química nunca
-  // queda tapado por dos cartas vecinas (líneas de 5 incluidas).
-  await page.selectOption('#formationSelect', '3-5-2');
-  await page.waitForTimeout(120);
-  const midXs = await page.locator('.chip-anchor[data-line="MID"]').evaluateAll((nodes) =>
-    nodes.map((node) => parseFloat(node.style.left)).sort((a, b) => a - b)
-  );
-  assert.equal(midXs.length, 5, '3-5-2 must have five midfield slots');
-  for (let i = 1; i < midXs.length; i++) {
-    assert.ok(midXs[i] - midXs[i - 1] >= 19.5, `3-5-2 midfield chips too close: ${midXs.join(', ')}`);
-  }
-  await page.selectOption('#formationSelect', '4-3-3');
-  await page.waitForTimeout(120);
-  const xs433 = await page.locator('.chip-anchor[data-line="FWD"]').evaluateAll((nodes) =>
-    nodes.map((node) => parseFloat(node.style.left)).sort((a, b) => a - b)
-  );
-  assert.equal(xs433.length, 3, '4-3-3 must have three attacking slots');
-  assert.ok(xs433[0] <= 25 && xs433[1] >= 45 && xs433[1] <= 55 && xs433[2] >= 75, `4-3-3 forwards must be wide-center-wide, got ${xs433.join(', ')}`);
-
-  await page.selectOption('#formationSelect', '4-3-1-2');
-  await page.waitForTimeout(120);
-  const slots4312 = await page.locator('.chip-anchor').evaluateAll((nodes) =>
-    nodes.map((node) => ({
-      line: node.dataset.line,
-      slot: node.dataset.slot,
-      left: parseFloat(node.style.left),
-      top: parseFloat(node.style.top),
-    }))
-  );
-  const mids4312 = slots4312.filter((slot) => slot.line === 'MID');
-  const fwds4312 = slots4312.filter((slot) => slot.line === 'FWD');
-  const enganche = mids4312.find((slot) => slot.slot === '3');
-  assert.equal(mids4312.length, 4, '4-3-1-2 must have four midfield-line slots including enganche');
-  assert.equal(fwds4312.length, 2, '4-3-1-2 must have two forward slots');
-  assert.ok(enganche && enganche.left >= 45 && enganche.left <= 55 && enganche.top > 24 && enganche.top < 36, `4-3-1-2 enganche must be centered between lines, got ${JSON.stringify(enganche)}`);
-  assert.ok(fwds4312.every((slot) => slot.top <= 10), `4-3-1-2 forwards must move higher, got ${JSON.stringify(fwds4312)}`);
-  assert.ok(fwds4312.some((slot) => slot.left <= 30) && fwds4312.some((slot) => slot.left >= 70), `4-3-1-2 forwards must be separated, got ${JSON.stringify(fwds4312)}`);
-  await assertNoFieldChipOverlap('4-3-1-2');
-
-  await page.selectOption('#formationSelect', '3-4-3');
-  await page.waitForTimeout(120);
-  const defs343 = await page.locator('.chip-anchor[data-line="DEF"]').evaluateAll((nodes) =>
-    nodes.map((node) => parseFloat(node.style.left)).sort((a, b) => a - b)
-  );
-  const fwds343 = await page.locator('.chip-anchor[data-line="FWD"]').evaluateAll((nodes) =>
-    nodes.map((node) => parseFloat(node.style.left)).sort((a, b) => a - b)
-  );
-  assert.equal(defs343.length, 3, '3-4-3 must have three defender slots');
-  assert.ok(defs343[0] >= 20 && defs343[2] <= 80, `3-4-3 defenders must be central, got ${defs343.join(', ')}`);
-  assert.equal(fwds343.length, 3, '3-4-3 must have three attacking slots');
-  assert.ok(fwds343[0] <= 25 && fwds343[1] >= 45 && fwds343[1] <= 55 && fwds343[2] >= 75, `3-4-3 forwards must be wide-center-wide, got ${fwds343.join(', ')}`);
-
   await page.selectOption('#formationSelect', '4-3-3');
   await page.waitForTimeout(120);
 }
@@ -320,8 +283,10 @@ async function assertDragAndDrop(page) {
   const uid = await bench.getAttribute('data-uid');
   const line = await bench.getAttribute('data-line');
   assert.ok(uid && line, 'Bench player needs uid and line');
-  const target = page.locator(`.chip-anchor[data-line="${line}"]`).first();
-  assert.ok(await target.count(), `No target slot for line ${line}`);
+  // Con 11 titulares solo se puede soltar sobre un hueco OCUPADO (sustitución):
+  // los vacíos están bloqueados para no pasar de 11. Apuntamos a uno ocupado.
+  const target = page.locator(`.chip-anchor[data-line="${line}"]:has(.field-chip.filled)`).first();
+  assert.ok(await target.count(), `No occupied target slot for line ${line}`);
   await bench.dragTo(target);
   await page.waitForFunction((draggedUid) =>
     !!document.querySelector(`.chip-anchor[data-uid="${draggedUid}"]`), uid
@@ -336,9 +301,10 @@ async function assertImmediateTouchDrag(page) {
   assert.ok(box, 'Expected a visible substitute portrait for touch drag test');
   const uid = await bench.getAttribute('data-uid');
   const line = await bench.getAttribute('data-line');
-  const target = page.locator(`.chip-anchor[data-line="${line}"]`).first();
+  // Con 11 titulares solo valen los huecos OCUPADOS (sustitución); apuntamos a uno.
+  const target = page.locator(`.chip-anchor[data-line="${line}"]:has(.field-chip.filled)`).first();
   const targetBox = await target.boundingBox();
-  assert.ok(uid && line && targetBox, 'Touch drag needs a compatible tactical slot');
+  assert.ok(uid && line && targetBox, 'Touch drag needs a compatible occupied tactical slot');
   assert.equal(
     await bench.evaluate((node) => getComputedStyle(node).touchAction),
     'none',

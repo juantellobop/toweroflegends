@@ -195,25 +195,86 @@ export const FORMATIONS = {
   '3-2-4-1': { GK: 1, DEF: 3, MID: 6, FWD: 1 },
 };
 
-// Identidad de cada formación: multiplicadores modestos (±2-6%) a los ratings de
-// equipo, con su contrapartida. Da trade-off táctico real (5-3-2 defensivo, 3-4-3
-// volcado) y hace que apilar una línea cueste/premie, no solo promedie.
-export const FORMATION_MODIFIERS = {
-  '4-4-2': { attack: 1.0, midfield: 1.0, defense: 1.0 }, // equilibrio puro
-  '4-3-3': { attack: 1.04, midfield: 1.0, defense: 0.98 }, // ofensivo
-  '3-4-3': { attack: 1.06, midfield: 1.01, defense: 0.94 }, // todo al ataque
-  '4-2-3-1': { attack: 1.02, midfield: 1.04, defense: 0.99 }, // posesión con pivotes
-  '3-5-2': { attack: 0.99, midfield: 1.05, defense: 0.98 }, // control de medio
-  '5-3-2': { attack: 0.95, midfield: 0.99, defense: 1.06 }, // defensivo
-  '4-3-1-2': { attack: 1.02, midfield: 1.04, defense: 0.97 }, // creativo (enganche)
-  '4-2-4': { attack: 1.08, midfield: 0.93, defense: 0.98 }, // ataque total, medio puenteado
-  '3-2-4-1': { attack: 1.04, midfield: 1.05, defense: 0.94 }, // presión: medio poblado, zaga de 3
+// === Grid táctico fijo (1-5-5-5-5) ===
+// El tablero es un grid fijo: portero + 4 filas de campo (DEF, MED, ENG, DEL),
+// cada una con 5 columnas. Las columnas 1,2,3 son "central" y 0,4 "lateral". Las
+// filas MED y ENG comparten la línea MID del motor (ENG con rol propio, alimenta
+// medio+ataque); DEL es la línea FWD. Capacidad por línea del motor: MID alberga
+// MED (slot 0-4) + ENG (slot 5-9).
+export const GRID_COLS = 5;
+export const LINE_CAPACITY = { GK: 1, DEF: 5, MID: 2 * GRID_COLS, FWD: 5 };
+// Filas del grid de abajo arriba (POR pegado a su área, DEL arriba).
+export const GRID_ROWS = ['POR', 'DEF', 'MED', 'ENG', 'DEL'];
+
+// Columnas ocupadas y centradas para N jugadores en una fila de 5 (1→centro,
+// 2→[1,3], 3→[1,2,3], 4→[0,1,3,4], 5→todas). Lo usan las plantillas y el reparto
+// del once rival (sin grid) para colocar simétricamente a sus jugadores.
+export function centeredCols(n) {
+  switch (n) {
+    case 0: return [];
+    case 1: return [2];
+    case 2: return [1, 3];
+    case 3: return [1, 2, 3];
+    case 4: return [0, 1, 3, 4];
+    default: return [0, 1, 2, 3, 4];
+  }
+}
+
+// Plantillas: para cada formación clásica, qué columnas ocupa cada fila del grid.
+// Rellenan el once de arranque; luego se mueve libremente. Conteos coherentes con
+// FORMATIONS (la línea MID del motor = MED + ENG).
+export const FORMATION_TEMPLATES = {
+  '4-3-3':   { DEF: [0, 1, 3, 4],    MED: [1, 2, 3],       ENG: [],           DEL: [0, 2, 4] },
+  '4-4-2':   { DEF: [0, 1, 3, 4],    MED: [0, 1, 3, 4],    ENG: [],           DEL: [1, 3] },
+  '4-2-3-1': { DEF: [0, 1, 3, 4],    MED: [1, 3],          ENG: [0, 2, 4],    DEL: [2] },
+  '3-5-2':   { DEF: [1, 2, 3],       MED: [0, 1, 2, 3, 4], ENG: [],           DEL: [1, 3] },
+  '5-3-2':   { DEF: [0, 1, 2, 3, 4], MED: [1, 2, 3],       ENG: [],           DEL: [1, 3] },
+  '4-3-1-2': { DEF: [0, 1, 3, 4],    MED: [1, 2, 3],       ENG: [2],          DEL: [1, 3] },
+  '3-4-3':   { DEF: [1, 2, 3],       MED: [0, 1, 3, 4],    ENG: [],           DEL: [0, 2, 4] },
+  '4-2-4':   { DEF: [0, 1, 3, 4],    MED: [1, 3],          ENG: [],           DEL: [0, 1, 3, 4] },
+  '3-2-4-1': { DEF: [1, 2, 3],       MED: [1, 3],          ENG: [0, 1, 3, 4], DEL: [2] },
 };
 
-// Tipo/identidad de juego que proyecta cada dibujo. Se usa para la cohesión de
-// química (jugadores que encajan con el estilo) y como etiqueta informativa en la
-// UI. NO crea ventajas/desventajas respecto al rival: cada táctica vale por sus
-// propios trade-offs (FORMATION_MODIFIERS).
+// Celdas de una plantilla como huecos del motor { line, slotIndex } (ENG→MID+5).
+export function templateSlots(formation) {
+  const tmpl = FORMATION_TEMPLATES[formation] || FORMATION_TEMPLATES['4-3-3'];
+  const cells = [{ line: 'GK', slotIndex: 0 }];
+  for (const col of tmpl.DEF) cells.push({ line: 'DEF', slotIndex: col });
+  for (const col of tmpl.MED) cells.push({ line: 'MID', slotIndex: col });
+  for (const col of tmpl.ENG) cells.push({ line: 'MID', slotIndex: col + GRID_COLS });
+  for (const col of tmpl.DEL) cells.push({ line: 'FWD', slotIndex: col });
+  return cells;
+}
+
+// Etiqueta de la formación cuando el grid no coincide con NINGUNA plantilla (se ha
+// deformado moviendo jugadores) o está incompleto. Valor interno (se guarda en el
+// estado y en el snapshot del ranking); la UI lo localiza para mostrarlo.
+export const CUSTOM_FORMATION = 'Personalizada';
+
+// Detecta qué plantilla coincide EXACTAMENTE con los huecos ocupados del grid
+// (mismo conjunto de celdas line:slotIndex), o CUSTOM_FORMATION si no hay match.
+export function detectFormation(starting11) {
+  const occupied = new Set();
+  for (const line of LINES) {
+    (starting11[line] || []).forEach((p, i) => { if (p) occupied.add(`${line}:${i}`); });
+  }
+  for (const name of Object.keys(FORMATION_TEMPLATES)) {
+    const cells = templateSlots(name);
+    if (cells.length !== occupied.size) continue;
+    if (cells.every((c) => occupied.has(`${c.line}:${c.slotIndex}`))) return name;
+  }
+  return CUSTOM_FORMATION;
+}
+
+// Los modificadores de formación (±2-6% a ataque/medio/defensa) se ELIMINARON:
+// con colocación libre en el grid, el trade-off táctico emerge de dónde colocas a
+// tus jugadores (5 defensas = más defensa de forma natural), sin multiplicadores.
+
+// Tipo/identidad de juego que proyecta cada dibujo. Hoy NO gobierna el estilo del
+// equipo del jugador (eso lo elige el usuario, ver state.style): se usa solo como
+// (a) estilo por defecto sugerido al aplicar una plantilla y (b) estilo de los
+// rivales históricos (que no tienen selector). Alimenta las sinergias de química,
+// objetos y DT a través de team.style.
 export const FORMATION_TYPE = {
   '3-5-2': 'posesion', '4-3-1-2': 'posesion', '4-2-3-1': 'posesion',
   '4-3-3': 'presion', '3-4-3': 'presion', '3-2-4-1': 'presion',
@@ -230,262 +291,130 @@ export const RARITIES = ['common', 'rare', 'epic', 'legend'];
 // Estilos de juego de un DT (coinciden con los valores de FORMATION_TYPE).
 export const MANAGER_STYLES = ['posesion', 'presion', 'contra'];
 
-// Perfil táctico de cada hueco (por formación → línea → slotIndex). No cambia
-// qué posiciones acepta el hueco (eso es FORMATION_SLOT_RULES), solo cómo
-// puntúa el jugador que lo ocupa:
-//  DEF: 'central' (corte/físico) | 'lateral' (recorrido: pace/pase, proyección)
-//  MID: 'pivote' (corte+físico, salida) | 'mixto' (box-to-box) |
-//       'interior' (pase/regate, llegada) | 'banda' (regate/pace)
-//  ENG: 'mediapunta' (pase/remate) | 'extremo' (regate/pace)
-//  FWD: 'nueve' (remate, referencia del tridente) | 'extremo' (regate/pace) |
-//       'delantero' (punta genérico en duplas o solo)
-// El orden sigue los slots de izquierda a derecha tal como los pinta la UI.
-export const SLOT_PROFILES = {
-  '4-3-3': {
-    DEF: ['lateral', 'central', 'central', 'lateral'],
-    MID: ['interior', 'pivote', 'interior'],
-    FWD: ['extremo', 'nueve', 'extremo'],
-  },
-  '4-4-2': {
-    DEF: ['lateral', 'central', 'central', 'lateral'],
-    MID: ['banda', 'mixto', 'mixto', 'banda'],
-    FWD: ['delantero', 'delantero'],
-  },
-  '4-2-3-1': {
-    DEF: ['lateral', 'central', 'central', 'lateral'],
-    MID: ['pivote', 'pivote', 'extremo', 'mediapunta', 'extremo'],
-    FWD: ['delantero'],
-  },
-  '3-5-2': {
-    DEF: ['central', 'central', 'central'],
-    MID: ['banda', 'interior', 'pivote', 'interior', 'banda'],
-    FWD: ['delantero', 'delantero'],
-  },
-  '5-3-2': {
-    DEF: ['lateral', 'central', 'central', 'central', 'lateral'],
-    MID: ['mixto', 'pivote', 'mixto'],
-    FWD: ['delantero', 'delantero'],
-  },
-  '4-3-1-2': {
-    DEF: ['lateral', 'central', 'central', 'lateral'],
-    MID: ['mixto', 'pivote', 'mixto', 'mediapunta'],
-    FWD: ['delantero', 'delantero'],
-  },
-  '3-4-3': {
-    DEF: ['central', 'central', 'central'],
-    MID: ['banda', 'mixto', 'mixto', 'banda'],
-    FWD: ['extremo', 'nueve', 'extremo'],
-  },
-  '4-2-4': {
-    DEF: ['lateral', 'central', 'central', 'lateral'],
-    MID: ['pivote', 'pivote'],
-    FWD: ['extremo', 'delantero', 'delantero', 'extremo'],
-  },
-  '3-2-4-1': {
-    DEF: ['central', 'central', 'central'],
-    // 0-1 = mediocentros de corte; 2-5 = línea de 4 (extremo · enganche ·
-    // enganche · extremo) por delante, todos puntúan como ENG.
-    MID: ['pivote', 'pivote', 'extremo', 'mediapunta', 'mediapunta', 'extremo'],
-    FWD: ['delantero'],
-  },
-};
-
-// Perfil por defecto cuando la formación no define uno para el hueco.
-const DEFAULT_PROFILE = { GK: 'gk', DEF: 'central', MID: 'mixto', FWD: 'delantero' };
-
-export function slotProfile(formation, line, slotIndex, role = line) {
-  const fromMap = SLOT_PROFILES[formation]?.[line]?.[slotIndex];
-  if (fromMap) return fromMap;
-  if (role === 'ENG') return 'mediapunta';
-  return DEFAULT_PROFILE[line] || 'mixto';
+// Fila del grid (POR/DEF/MED/ENG/DEL) que corresponde a un hueco del motor.
+function gridRowFor(line, slotIndex) {
+  if (line === 'GK') return 'POR';
+  if (line === 'DEF') return 'DEF';
+  if (line === 'FWD') return 'DEL';
+  return slotIndex >= GRID_COLS ? 'ENG' : 'MED'; // MID: 0-4 = MED, 5-9 = ENG
+}
+// Columna (0-4) del hueco dentro de su fila del grid (el portero va centrado).
+function slotColFor(line, slotIndex) {
+  if (line === 'GK') return 2;
+  if (line === 'MID') return slotIndex % GRID_COLS;
+  return slotIndex;
+}
+// Qué posiciones admite cada hueco del grid (colocación restringida por posición
+// natural):
+//  · POR → solo portero.
+//  · DEF → solo defensa (y un defensa también puede subir a los 2 MED laterales).
+//  · MED central (col 1,2,3) → solo medio; MED lateral (col 0,4) → medio o defensa.
+//  · ENG → medio o delantero (rol creativo).
+//  · DEL → solo delantero (el medio ya NO puede subir al ataque).
+// Resumen por posición del jugador: MID → MED + ENG; FWD → DEL + ENG; DEF → 5 DEF
+// + 2 MED laterales; GK → POR.
+function gridAccepts(gridRow, col) {
+  switch (gridRow) {
+    case 'POR': return ['GK'];
+    case 'DEF': return ['DEF'];
+    case 'MED': return (col === 0 || col === 4) ? ['MID', 'DEF'] : ['MID'];
+    case 'ENG': return ['MID', 'FWD'];
+    case 'DEL': return ['FWD'];
+    default: return [];
+  }
 }
 
-// Reglas de slot por formación. `accepts` define qué posiciones admite el hueco;
-// `role` cómo puntúa ese hueco (ENG = híbrido medio/ataque).
-// Los EXTREMOS (huecos anchos de la línea de ataque) admiten delanteros o medios.
-export const FORMATION_SLOT_RULES = {
-  '4-3-3': {
-    FWD: {
-      0: { accepts: ['FWD', 'MID'], role: 'FWD' }, // extremo izquierdo
-      2: { accepts: ['FWD', 'MID'], role: 'FWD' }, // extremo derecho
-    },
-  },
-  '3-4-3': {
-    FWD: {
-      0: { accepts: ['FWD', 'MID'], role: 'FWD' },
-      2: { accepts: ['FWD', 'MID'], role: 'FWD' },
-    },
-  },
-  '4-2-3-1': {
-    MID: {
-      // 0-1 = pivotes (MID puro); 2-4 = línea de creación (extremos + mediapunta).
-      2: { accepts: ['MID', 'FWD'], role: 'ENG' },
-      3: { accepts: ['MID', 'FWD'], role: 'ENG' },
-      4: { accepts: ['MID', 'FWD'], role: 'ENG' },
-    },
-  },
-  '4-3-1-2': {
-    MID: {
-      3: { accepts: ['MID', 'FWD'], role: 'ENG' },
-    },
-  },
-  '4-2-4': {
-    FWD: {
-      0: { accepts: ['FWD', 'MID'], role: 'FWD' }, // punta izquierda
-      3: { accepts: ['FWD', 'MID'], role: 'FWD' }, // punta derecha
-    },
-  },
-  '3-2-4-1': {
-    MID: {
-      // 0-1 = mediocentros (MID puro). 2-5 = línea ofensiva de 4 (extremos y
-      // enganches): admiten medios o delanteros y puntúan como enganche.
-      2: { accepts: ['MID', 'FWD'], role: 'ENG' },
-      3: { accepts: ['MID', 'FWD'], role: 'ENG' },
-      4: { accepts: ['MID', 'FWD'], role: 'ENG' },
-      5: { accepts: ['MID', 'FWD'], role: 'ENG' },
-    },
-  },
-};
-
-// Web de química de cercanía: el grafo de cercanía de cada formación. Cada
-// arista une dos huecos [línea, slotIndex] (los slotIndex van de izquierda a
-// derecha tal como pinta la UI) y declara que esos dos jugadores hacen química
-// entre sí — y SOLO entre sí: no hay clique de línea, solo estas vecindades.
-// Cada arista reparte su pairChem mitad a la línea de cada extremo, así un
-// enlace dentro de una línea vale lo mismo que uno entre líneas.
-//
-// Regla de autoría (cercanía): misma línea → huecos contiguos; portero → los
-// centrales más interiores; entre líneas contiguas → cada jugador con su columna
-// y el vecino diagonal inmediato hacia el centro (laterales/carrileros con el
-// central y el hombre de banda de delante; extremos con el interior de su lado;
-// el 9 y los enganches con los medios cercanos). Nunca se salta una línea entera
-// ni se enlazan bandas opuestas.
-export const CHEM_LINKS = {
-  '4-4-2': [
-    [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]],
-    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]], [['DEF', 2], ['DEF', 3]],
-    [['DEF', 0], ['MID', 0]], [['DEF', 0], ['MID', 1]], [['DEF', 1], ['MID', 1]],
-    [['DEF', 2], ['MID', 2]], [['DEF', 3], ['MID', 2]], [['DEF', 3], ['MID', 3]],
-    [['MID', 0], ['MID', 1]], [['MID', 1], ['MID', 2]], [['MID', 2], ['MID', 3]],
-    [['MID', 0], ['FWD', 0]], [['MID', 1], ['FWD', 0]],
-    [['MID', 2], ['FWD', 1]], [['MID', 3], ['FWD', 1]],
-    [['FWD', 0], ['FWD', 1]],
-  ],
-  '4-3-3': [
-    [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]],
-    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]], [['DEF', 2], ['DEF', 3]],
-    [['DEF', 0], ['MID', 0]], [['DEF', 1], ['MID', 0]], [['DEF', 1], ['MID', 1]],
-    [['DEF', 2], ['MID', 1]], [['DEF', 2], ['MID', 2]], [['DEF', 3], ['MID', 2]],
-    [['MID', 0], ['MID', 1]], [['MID', 1], ['MID', 2]],
-    [['MID', 0], ['FWD', 0]], [['MID', 0], ['FWD', 1]],
-    [['MID', 2], ['FWD', 1]], [['MID', 2], ['FWD', 2]],
-    [['FWD', 0], ['FWD', 1]], [['FWD', 1], ['FWD', 2]],
-  ],
-  '4-2-3-1': [
-    [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]],
-    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]], [['DEF', 2], ['DEF', 3]],
-    [['DEF', 0], ['MID', 0]], [['DEF', 1], ['MID', 0]],
-    [['DEF', 2], ['MID', 1]], [['DEF', 3], ['MID', 1]],
-    [['MID', 0], ['MID', 1]],
-    // pivotes (0,1) → línea de creación (2=extremo izq, 3=mediapunta, 4=extremo der)
-    [['MID', 0], ['MID', 2]], [['MID', 0], ['MID', 3]],
-    [['MID', 1], ['MID', 3]], [['MID', 1], ['MID', 4]],
-    [['MID', 2], ['MID', 3]], [['MID', 3], ['MID', 4]],
-    [['MID', 2], ['FWD', 0]], [['MID', 3], ['FWD', 0]], [['MID', 4], ['FWD', 0]],
-  ],
-  '3-5-2': [
-    [['GK', 0], ['DEF', 0]], [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]],
-    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]],
-    // MID: 0=carrilero izq, 1=interior, 2=pivote, 3=interior, 4=carrilero der
-    [['DEF', 0], ['MID', 0]], [['DEF', 0], ['MID', 1]], [['DEF', 1], ['MID', 1]],
-    [['DEF', 1], ['MID', 2]], [['DEF', 1], ['MID', 3]], [['DEF', 2], ['MID', 3]],
-    [['DEF', 2], ['MID', 4]],
-    [['MID', 0], ['MID', 1]], [['MID', 1], ['MID', 2]], [['MID', 2], ['MID', 3]],
-    [['MID', 3], ['MID', 4]],
-    [['MID', 0], ['FWD', 0]], [['MID', 1], ['FWD', 0]],
-    [['MID', 2], ['FWD', 0]], [['MID', 2], ['FWD', 1]],
-    [['MID', 3], ['FWD', 1]], [['MID', 4], ['FWD', 1]],
-    [['FWD', 0], ['FWD', 1]],
-  ],
-  '5-3-2': [
-    [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]], [['GK', 0], ['DEF', 3]],
-    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]], [['DEF', 2], ['DEF', 3]],
-    [['DEF', 3], ['DEF', 4]],
-    [['DEF', 0], ['MID', 0]], [['DEF', 1], ['MID', 0]], [['DEF', 2], ['MID', 1]],
-    [['DEF', 3], ['MID', 2]], [['DEF', 4], ['MID', 2]],
-    [['MID', 0], ['MID', 1]], [['MID', 1], ['MID', 2]],
-    [['MID', 0], ['FWD', 0]], [['MID', 1], ['FWD', 0]],
-    [['MID', 1], ['FWD', 1]], [['MID', 2], ['FWD', 1]],
-    [['FWD', 0], ['FWD', 1]],
-  ],
-  '4-3-1-2': [
-    [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]],
-    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]], [['DEF', 2], ['DEF', 3]],
-    [['DEF', 0], ['MID', 0]], [['DEF', 1], ['MID', 0]], [['DEF', 1], ['MID', 1]],
-    [['DEF', 2], ['MID', 1]], [['DEF', 2], ['MID', 2]], [['DEF', 3], ['MID', 2]],
-    [['MID', 0], ['MID', 1]], [['MID', 1], ['MID', 2]],
-    // 3 = enganche (mediapunta) por delante del triángulo
-    [['MID', 0], ['MID', 3]], [['MID', 1], ['MID', 3]], [['MID', 2], ['MID', 3]],
-    [['MID', 0], ['FWD', 0]], [['MID', 2], ['FWD', 1]],
-    [['MID', 3], ['FWD', 0]], [['MID', 3], ['FWD', 1]],
-    [['FWD', 0], ['FWD', 1]],
-  ],
-  '3-4-3': [
-    [['GK', 0], ['DEF', 0]], [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]],
-    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]],
-    // MID: 0=banda izq, 1=mixto, 2=mixto, 3=banda der
-    [['DEF', 0], ['MID', 0]], [['DEF', 0], ['MID', 1]], [['DEF', 1], ['MID', 1]],
-    [['DEF', 1], ['MID', 2]], [['DEF', 2], ['MID', 2]], [['DEF', 2], ['MID', 3]],
-    [['MID', 0], ['MID', 1]], [['MID', 1], ['MID', 2]], [['MID', 2], ['MID', 3]],
-    [['MID', 0], ['FWD', 0]], [['MID', 1], ['FWD', 0]], [['MID', 1], ['FWD', 1]],
-    [['MID', 2], ['FWD', 1]], [['MID', 2], ['FWD', 2]], [['MID', 3], ['FWD', 2]],
-    [['FWD', 0], ['FWD', 1]], [['FWD', 1], ['FWD', 2]],
-  ],
-  '4-2-4': [
-    [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]],
-    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]], [['DEF', 2], ['DEF', 3]],
-    [['DEF', 0], ['MID', 0]], [['DEF', 1], ['MID', 0]],
-    [['DEF', 2], ['MID', 1]], [['DEF', 3], ['MID', 1]],
-    [['MID', 0], ['MID', 1]],
-    // FWD: 0=extremo izq, 1=punta, 2=punta, 3=extremo der
-    [['MID', 0], ['FWD', 0]], [['MID', 0], ['FWD', 1]],
-    [['MID', 1], ['FWD', 2]], [['MID', 1], ['FWD', 3]],
-    [['FWD', 0], ['FWD', 1]], [['FWD', 1], ['FWD', 2]], [['FWD', 2], ['FWD', 3]],
-  ],
-  '3-2-4-1': [
-    [['GK', 0], ['DEF', 0]], [['GK', 0], ['DEF', 1]], [['GK', 0], ['DEF', 2]],
-    [['DEF', 0], ['DEF', 1]], [['DEF', 1], ['DEF', 2]],
-    // MID: 0,1 = mediocentros; 2=extremo izq, 3,4=enganches, 5=extremo der
-    [['DEF', 0], ['MID', 0]], [['DEF', 1], ['MID', 0]],
-    [['DEF', 1], ['MID', 1]], [['DEF', 2], ['MID', 1]],
-    [['MID', 0], ['MID', 1]],
-    [['MID', 0], ['MID', 2]], [['MID', 0], ['MID', 3]],
-    [['MID', 1], ['MID', 4]], [['MID', 1], ['MID', 5]],
-    [['MID', 2], ['MID', 3]], [['MID', 3], ['MID', 4]], [['MID', 4], ['MID', 5]],
-    [['MID', 3], ['FWD', 0]], [['MID', 4], ['FWD', 0]],
-  ],
-};
-
-// Aristas del web de química de una formación: lista de pares [[línea, slot], [línea, slot]].
-export function chemLinks(formation) {
-  return CHEM_LINKS[formation] || [];
+// Perfil de puntuación de un hueco, uniforme en todo el grid: fila × columna
+// (central col 1-3 / lateral col 0,4). Reemplaza a los perfiles por formación.
+//  def_central: defensa+pase   · def_lateral: defensa/pase/regate/físico
+//  med_central: defensa/pase/regate/físico · med_lateral: regate/pase/físico/defensa
+//  eng_central: pase/remate/regate · eng_lateral: pase/regate/ritmo/remate
+//  del_central: remate/físico   · del_lateral: regate/ritmo/remate/pase
+export function slotProfile(formation, line, slotIndex) {
+  const gridRow = gridRowFor(line, slotIndex);
+  if (gridRow === 'POR') return 'gk';
+  const col = slotColFor(line, slotIndex);
+  const zone = (col === 0 || col === 4) ? 'lateral' : 'central';
+  const prefix = { DEF: 'def', MED: 'med', ENG: 'eng', DEL: 'del' }[gridRow];
+  return `${prefix}_${zone}`;
 }
 
+// Huecos del grid para una línea del motor (formation se ignora: grid fijo de
+// 1-5-5-5-5). Cada hueco lleva su fila/columna del grid, qué acepta, su rol de
+// puntuación (ENG = fila de enganches dentro de MID) y su perfil central/lateral.
 export function formationLineSlots(formation, line) {
-  const shape = FORMATIONS[formation] || FORMATIONS['4-3-3'];
-  const count = shape[line] || 0;
-  const rules = FORMATION_SLOT_RULES[formation]?.[line] || {};
-  return Array.from({ length: count }, (_, slotIndex) => {
-    const rule = rules[slotIndex] || {};
-    const role = rule.role || line;
+  const cap = LINE_CAPACITY[line] || 0;
+  return Array.from({ length: cap }, (_, slotIndex) => {
+    const gridRow = gridRowFor(line, slotIndex);
+    const col = slotColFor(line, slotIndex);
     return {
       line,
       slotIndex,
-      accepts: rule.accepts || [line],
-      role,
-      profile: slotProfile(formation, line, slotIndex, role),
+      gridRow,
+      col,
+      accepts: gridAccepts(gridRow, col),
+      role: gridRow === 'ENG' ? 'ENG' : line,
+      profile: slotProfile(formation, line, slotIndex),
     };
   });
+}
+
+// === Química de cercanía: web geométrico ===
+// El grafo de cercanía se calcula desde los huecos OCUPADOS del grid (ya no hay
+// tabla por formación). Reglas: misma fila → vecinos ocupados contiguos por
+// columna; entre filas ocupadas contiguas → el/los más cercanos por columna (sin
+// enlazar bandas opuestas, |Δcol| < 3); el portero con los DEF ocupados más
+// centrales; las filas vacías se ignoran (no se salta contenido). Devuelve aristas
+// [[line, slotIndex], [line, slotIndex]] en huecos del motor, listas para
+// computeChemistry y para dibujar el web del campo. Una sola fuente para cálculo
+// y dibujo: así los números y las líneas pintadas siempre coinciden.
+export function geometricLinks(starting11) {
+  const rows = { POR: [], DEF: [], MED: [], ENG: [], DEL: [] };
+  const occupant = (line, slotIndex) => {
+    const arr = starting11 && starting11[line];
+    return arr && arr[slotIndex] ? arr[slotIndex] : null;
+  };
+  if (occupant('GK', 0)) rows.POR.push({ col: 2, line: 'GK', slotIndex: 0 });
+  for (let c = 0; c < GRID_COLS; c++) {
+    if (occupant('DEF', c)) rows.DEF.push({ col: c, line: 'DEF', slotIndex: c });
+    if (occupant('MID', c)) rows.MED.push({ col: c, line: 'MID', slotIndex: c });
+    if (occupant('MID', c + GRID_COLS)) rows.ENG.push({ col: c, line: 'MID', slotIndex: c + GRID_COLS });
+    if (occupant('FWD', c)) rows.DEL.push({ col: c, line: 'FWD', slotIndex: c });
+  }
+  const order = ['POR', 'DEF', 'MED', 'ENG', 'DEL'];
+  const links = [];
+  const seen = new Set();
+  const ref = (slot) => [slot.line, slot.slotIndex];
+  const addLink = (a, b) => {
+    const ka = `${a.line}:${a.slotIndex}`;
+    const kb = `${b.line}:${b.slotIndex}`;
+    if (ka === kb) return;
+    const key = ka < kb ? `${ka}|${kb}` : `${kb}|${ka}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    links.push([ref(a), ref(b)]);
+  };
+  // Horizontal: vecinos ocupados contiguos dentro de cada fila.
+  for (const name of order) {
+    const slots = rows[name].slice().sort((a, b) => a.col - b.col);
+    for (let i = 1; i < slots.length; i++) addLink(slots[i - 1], slots[i]);
+  }
+  // Vertical/diagonal: entre filas ocupadas contiguas (las vacías se ignoran).
+  // Enlace simétrico al más cercano por columna en ambas direcciones.
+  const occupiedRows = order.filter((name) => rows[name].length);
+  const connect = (from, to) => {
+    let best = Infinity;
+    for (const b of to) best = Math.min(best, Math.abs(from.col - b.col));
+    if (best >= 3) return; // no enlazar bandas opuestas
+    for (const b of to) if (Math.abs(from.col - b.col) === best) addLink(from, b);
+  };
+  for (let r = 1; r < occupiedRows.length; r++) {
+    const lower = rows[occupiedRows[r - 1]];
+    const upper = rows[occupiedRows[r]];
+    for (const a of lower) connect(a, upper);
+    for (const b of upper) connect(b, lower);
+  }
+  return links;
 }
 
 export function slotAcceptsPosition(formation, line, slotIndex, position) {

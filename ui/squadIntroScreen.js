@@ -14,16 +14,16 @@ import { playerInitials, portraitPathForPlayer } from '../data/playerAssets.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { t } from '../data/i18n.js';
-import { lineupFieldHTML, positionSlots, staticChipHTML } from './lineupBoard.js';
+import { lineupFieldHTML, layoutInformative, staticChipHTML } from './lineupBoard.js';
 
 // Coordenadas del once: huecos visibles por línea (assignLineToSlots) colocados
 // con la MISMA lógica del tablero táctico (lineupBoard): idéntico esquema.
 function lineupPositions(state) {
-  return LINES.flatMap((line) => {
-    const slots = assignLineToSlots(state.formation, line, state.starting11[line] || [])
-      .filter((slot) => slot.player);
-    return positionSlots(state.formation, line, slots);
-  });
+  // Reparto informativo equilibrado por fila (igual que scouting/ranking).
+  const slots = LINES.flatMap((line) =>
+    assignLineToSlots(state.formation, line, state.starting11[line] || [])
+      .filter((slot) => slot.player));
+  return layoutInformative(slots);
 }
 
 function field(state) {

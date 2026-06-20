@@ -1,15 +1,16 @@
 // Torre de Leyendas — Cálculo de química / sinergias (§4.7).
-// Modelo de cercanía: cada formación define un web de cercanía (CHEM_LINKS),
-// un grafo de aristas entre huecos vecinos. Dos titulares hacen química SOLO si
-// hay arista entre sus huecos (no hay clique de línea). Cada arista vale el
-// pairChem del par —nación compartida (+CHEM_NATION) y época (década exacta
-// +CHEM_ERA; contiguas la mitad)— repartido mitad a la línea de cada extremo,
+// Modelo de cercanía GEOMÉTRICO: el web de cercanía (geometricLinks) se calcula
+// desde los huecos OCUPADOS del grid — vecinos contiguos en la misma fila y los
+// más cercanos por columna entre filas contiguas (sin clique de línea ni bandas
+// opuestas). Dos titulares hacen química SOLO si hay arista entre sus huecos. Cada
+// arista vale el pairChem del par —nación compartida (+CHEM_NATION) y época (década
+// exacta +CHEM_ERA; contiguas la mitad)— repartido mitad a la línea de cada extremo,
 // así un enlace dentro de una línea vale lo mismo que uno entre líneas.
 // Además, dos bonus globales de equipo (computeTeamChem): un "núcleo nacional"
 // (premia construir el XI en torno a 1-2 naciones) y una "cohesión táctica" (premia
-// que tus jugadores encajen con el tipo del dibujo). Ambos modestos.
+// que tus jugadores encajen con el ESTILO elegido). Ambos modestos.
 
-import { CONFIG, LINES, chemLinks, formationLineSlots, formationType } from '../data/config.js';
+import { CONFIG, LINES, geometricLinks } from '../data/config.js';
 
 // Naciones históricas que cuentan como la misma selección a efectos de química
 // (y de enlaces en el campo): Alemania Occidental ≡ Alemania.
@@ -40,39 +41,28 @@ function pairChem(a, b) {
   return total;
 }
 
-// Asignación hueco→jugador de una línea, replicando teamRatings/run.js: cada
-// hueco toma el primer jugador compatible que quede. Devuelve slotIndex→player.
-function lineSlotOccupants(starting11, formation, line) {
-  const occupants = new Map();
-  const remaining = (starting11[line] || []).filter(Boolean).slice();
-  for (const slot of formationLineSlots(formation, line)) {
-    const idx = remaining.findIndex((p) => slot.accepts.includes(p.position));
-    if (idx < 0) continue;
-    occupants.set(slot.slotIndex, remaining.splice(idx, 1)[0]);
-  }
-  return occupants;
-}
-
-// Devuelve la química por línea: { GK, DEF, MID, FWD }, sin tope. Recorre el web
-// de cercanía de la formación (CHEM_LINKS): por cada arista cuyos dos huecos están
-// ocupados, suma pairChem mitad a la línea de cada extremo (una arista dentro de
-// una línea suma su valor completo a esa línea; una entre líneas, mitad a cada una).
-// Un Capitán alineado suma +1 a la química de su línea. El director técnico
-// (manager), si comparte nacionalidad, suma CHEM_MANAGER_NATION por cada titular
-// connacional a la química de SU línea (modelo "por jugador, a su línea").
+// Devuelve la química por línea del motor: { GK, DEF, MID, FWD }, sin tope.
+// Recorre el web de cercanía geométrico (geometricLinks, calculado desde los
+// huecos OCUPADOS del grid): por cada arista, suma pairChem mitad a la línea de
+// cada extremo (una arista dentro de una línea suma su valor completo a esa línea;
+// una entre líneas, mitad a cada una). Los huecos se leen POSICIONALMENTE
+// (starting11[line][slotIndex]), igual que el web y los ratings. Un Capitán
+// alineado suma +1 a la química de su línea. El director técnico (manager), si
+// comparte nacionalidad, suma CHEM_MANAGER_NATION por cada titular connacional a
+// la química de SU línea del motor (ENG cae en MID). `formation` se ignora.
 export function computeChemistry(starting11, formation = null, manager = null) {
   const chem = { GK: 0, DEF: 0, MID: 0, FWD: 0 };
-  if (formation) {
-    const occupants = {};
-    for (const line of LINES) occupants[line] = lineSlotOccupants(starting11, formation, line);
-    for (const [a, b] of chemLinks(formation)) {
-      const pa = occupants[a[0]].get(a[1]);
-      const pb = occupants[b[0]].get(b[1]);
-      if (!pa || !pb) continue;
-      const half = pairChem(pa, pb) / 2;
-      chem[a[0]] += half;
-      chem[b[0]] += half;
-    }
+  const at = (line, slotIndex) => {
+    const arr = starting11 && starting11[line];
+    return arr && arr[slotIndex] ? arr[slotIndex] : null;
+  };
+  for (const [a, b] of geometricLinks(starting11)) {
+    const pa = at(a[0], a[1]);
+    const pb = at(b[0], b[1]);
+    if (!pa || !pb) continue;
+    const half = pairChem(pa, pb) / 2;
+    chem[a[0]] += half;
+    chem[b[0]] += half;
   }
   const managerNation = manager && manager.nation ? chemNation(manager.nation) : null;
   for (const line of LINES) {
@@ -92,9 +82,9 @@ export function computeChemistry(starting11, formation = null, manager = null) {
 //    Cuenta por nación, así que un XI repartido puede tener doble núcleo (5+5 → +2).
 //  - attackMid: "cohesión táctica" — si la mayoría de tus jugadores de campo con
 //    tacticalType definido coincide con el tipo del dibujo, sube ataque y medio.
-export function computeTeamChem(starting11, formation) {
+export function computeTeamChem(starting11, style = null) {
   const all = [];
-  for (const line of LINES) for (const p of starting11[line] || []) all.push(p);
+  for (const line of LINES) for (const p of starting11[line] || []) if (p) all.push(p);
 
   // Núcleo nacional: cuenta los jugadores de cada nación del XI.
   const byNation = {};
@@ -110,14 +100,13 @@ export function computeTeamChem(starting11, formation) {
     core += Math.max(0, Math.floor((size - 3) / 2)) * CONFIG.CHEM_CORE;
   }
 
-  // Cohesión táctica: requiere que el dibujo tenga tipo y que la mayoría de los
+  // Cohesión táctica: requiere un estilo elegido y que la mayoría de los
   // jugadores de campo tipados lo compartan.
   let tactic = 0;
-  const type = formationType(formation);
-  if (type) {
+  if (style) {
     const typed = all.filter((p) => p && p.position !== 'GK' && p.tacticalType);
     if (typed.length) {
-      const matching = typed.filter((p) => p.tacticalType === type).length;
+      const matching = typed.filter((p) => p.tacticalType === style).length;
       if (matching / typed.length > 0.5) tactic = CONFIG.CHEM_TACTIC;
     }
   }
@@ -126,8 +115,8 @@ export function computeTeamChem(starting11, formation) {
 }
 
 // Química total (suma de líneas + bonus globales), útil para un indicador global.
-export function totalChemistry(starting11, formation, manager = null) {
-  const chem = computeChemistry(starting11, formation, manager);
-  const team = computeTeamChem(starting11, formation);
+export function totalChemistry(starting11, style = null, manager = null) {
+  const chem = computeChemistry(starting11, null, manager);
+  const team = computeTeamChem(starting11, style);
   return LINES.reduce((s, l) => s + chem[l], 0) + team.all + team.attackMid;
 }
