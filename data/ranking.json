@@ -89,6 +89,98 @@
       ]
     },
     {
+      "id": "96aa6572-d13e-40f3-8058-89af2b472d1b",
+      "teamName": "Leyendas",
+      "nation": "River Plate",
+      "floor": 13,
+      "createdAt": "2026-06-20T22:57:43.107Z",
+      "runId": "76558537-bde8-4e95-8940-2fc565a86bde",
+      "lineup": [
+        {
+          "name": "Robin Olsen",
+          "position": "GK",
+          "line": "GK",
+          "ovr": 68,
+          "rarity": "common"
+        },
+        {
+          "name": "Victor Lindelöf",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 69,
+          "rarity": "common"
+        },
+        {
+          "name": "Mario Fernandes",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 66,
+          "rarity": "common"
+        },
+        {
+          "name": "Lamine Diatta",
+          "position": "DEF",
+          "line": "MID",
+          "ovr": 69,
+          "rarity": "common"
+        },
+        {
+          "name": "Anthony Annan",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 67,
+          "rarity": "common"
+        },
+        {
+          "name": "Nico Bianchi",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 60,
+          "rarity": "common"
+        },
+        {
+          "name": "David Villa",
+          "position": "FWD",
+          "line": "MID",
+          "ovr": 95,
+          "rarity": "legend"
+        },
+        {
+          "name": "Aleksandr Golovin",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 68,
+          "rarity": "common"
+        },
+        {
+          "name": "Iván García",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 60,
+          "rarity": "common"
+        },
+        {
+          "name": "Asamoah Gyan",
+          "position": "FWD",
+          "line": "MID",
+          "ovr": 67,
+          "rarity": "common"
+        },
+        {
+          "name": "André Ayew",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 68,
+          "rarity": "common"
+        }
+      ],
+      "manager": {
+        "id": "manager_daniel_passarella",
+        "name": "Daniel Passarella",
+        "nation": "Argentina"
+      }
+    },
+    {
       "id": "23d1ff6f-12d1-4cda-a09e-d96a5232ce15",
       "teamName": "Leyendas",
       "nation": "River Plate",
@@ -1709,99 +1801,6 @@
         "id": "manager_valeri_nepomnyashchy",
         "name": "Valeri Nepomnyashchy",
         "nation": "Camerún"
-      }
-    },
-    {
-      "id": "8bf7c319-af1f-4683-b2e7-4be8bf9b5e74",
-      "teamName": "Leyendas",
-      "nation": "River Plate",
-      "floor": 5,
-      "createdAt": "2026-06-16T12:03:36.938Z",
-      "runId": "7cd50549-a925-435b-a5d1-0542b46a39de",
-      "formation": "4-3-3",
-      "lineup": [
-        {
-          "name": "Florin Prunea",
-          "position": "GK",
-          "line": "GK",
-          "ovr": 73,
-          "rarity": "common"
-        },
-        {
-          "name": "Raphaël Guerreiro",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 85,
-          "rarity": "epic"
-        },
-        {
-          "name": "Gregg Berhalter",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 69,
-          "rarity": "common"
-        },
-        {
-          "name": "Ferdinand Coly",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Ludwig Augustinsson",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Anatoliy Tymoshchuk",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 69,
-          "rarity": "common"
-        },
-        {
-          "name": "Celso Borges",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Jonathan Santana",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 67,
-          "rarity": "common"
-        },
-        {
-          "name": "Mesut Özil",
-          "position": "FWD",
-          "line": "FWD",
-          "ovr": 95,
-          "rarity": "legend"
-        },
-        {
-          "name": "Luis Suárez",
-          "position": "FWD",
-          "line": "FWD",
-          "ovr": 92,
-          "rarity": "legend"
-        },
-        {
-          "name": "Richarlison",
-          "position": "FWD",
-          "line": "FWD",
-          "ovr": 90,
-          "rarity": "legend"
-        }
-      ],
-      "manager": {
-        "id": "manager_jorge_sampaoli",
-        "name": "Jorge Sampaoli",
-        "nation": "Argentina"
       }
     }
   ]
