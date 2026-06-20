@@ -2004,6 +2004,21 @@ export const OPPONENTS = [
         "name": "Pedro Rodríguez",
         "position": "FWD",
         "ovr": 96
+      },
+      {
+        "name": "Koke",
+        "position": "MID",
+        "ovr": 92
+      },
+      {
+        "name": "Jesús Navas",
+        "position": "FWD",
+        "ovr": 93
+      },
+      {
+        "name": "David Silva",
+        "position": "MID",
+        "ovr": 88
       }
     ],
     "managerId": "manager_vicente_del_bosque",
