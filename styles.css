@@ -5207,8 +5207,8 @@ button.primary:active:not(:disabled),
 
 .field-chip .chip-ovr {
   position: absolute;
-  top: 4px;
-  left: 4px;
+  top: 0px;
+  left: 0px;
   z-index: 3;
   min-width: 24px;
   padding: 3px 4px;
@@ -5851,7 +5851,7 @@ button.primary:active:not(:disabled),
 .tdl-head { display: flex; justify-content: space-between; align-items: center; gap: .5em; }
 .tdl-ovr {
   font-size: 3em; font-weight: 800; line-height: .9; color: var(--accent);
-  background: var(--plate); padding: .04em .2em; border-radius: .18em;
+  background: var(--plate); padding: .15em; border-radius: 0;
   text-shadow: -1px 0 0 var(--ink), 1px 0 0 var(--ink), 0 -1px 0 var(--ink), 0 1px 0 var(--ink),
     0 0 14px rgba(var(--accent-rgb), .5);
 }
@@ -5944,7 +5944,7 @@ button.primary:active:not(:disabled),
 }
 .tdl-art-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; image-rendering: pixelated; }
 .tdl-desc p { margin: 0; color: #f1f5ff; font-size: 1.5em; font-weight: 600; line-height: 1.32; text-align: center; text-wrap: balance; }
-.tdl-item-synergy { margin-top: .6em; text-align: center; font-size: 1.05em; font-weight: 700; color: var(--accent); }
+.tdl-item-synergy { margin-top: .6em; text-align: center; font-size: 1.3em; font-weight: 700; color: var(--accent); }
 
 /* -------- DT: sinergia + modificadores -------- */
 .tdl-synergy {
