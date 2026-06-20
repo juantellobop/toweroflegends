@@ -410,7 +410,7 @@ select {
 .path-score { font-weight: 700; font-variant-numeric: tabular-nums; }
 .path-opp { color: var(--muted); }
 .squad-final { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 22px; }
-.squad-chip { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: var(--panel); border-left: 3px solid var(--common); }
+.squad-chip { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: var(--panel); }
 .squad-chip.rarity-rare { border-left-color: var(--rare); }
 .squad-chip.rarity-epic { border-left-color: var(--epic); }
 .squad-chip.rarity-legend { border-left-color: var(--legend); }
@@ -2678,7 +2678,6 @@ select {
   background: rgba(7,20,89,.82);
   border: 3px solid #fff;
   -webkit-backdrop-filter: none; backdrop-filter: none;
-  box-shadow: 0 4px 0 rgba(0,0,0,.35);
 }
 
 .field-chip:hover {
@@ -2842,7 +2841,6 @@ select {
 .lineup-board .field-chip {
   width: var(--lineup-card);
   min-height: calc(var(--lineup-card) + 24px);
-  padding: 6px 3px 5px;
   gap: 2px;
   touch-action: none;
   -webkit-user-select: none;
@@ -3653,7 +3651,6 @@ select {
 
 .squad-chip {
   color: #fff;
-  border-left-width: 8px;
 }
 
 /* === Fin de la run: cabecera centrada, torre grande y CTA pegado abajo === */
@@ -5206,10 +5203,6 @@ button.primary:active:not(:disabled),
   background:
     linear-gradient(180deg, rgba(24,55,132,.94), rgba(7,20,89,.94));
   border-color: rgba(255,255,255,.92);
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.16) inset,
-    0 5px 0 rgba(3,8,38,.62),
-    0 9px 18px rgba(0,0,0,.26);
 }
 
 .field-chip .chip-ovr {
@@ -5229,7 +5222,7 @@ button.primary:active:not(:disabled),
 .field-chip .chip-name {
   width: calc(100% - 4px);
   max-width: none;
-  padding: 3px 3px 5px;
+  padding: 3px 0px;
   color: #fff;
   background: rgba(3,8,38,.62);
   font-weight: 900;
