@@ -5898,7 +5898,7 @@ button.primary:active:not(:disabled),
 }
 
 /* -------- Metadatos -------- */
-.tdl-meta { display: flex; gap: .2em; justify-content: center; margin-top: auto; margin-bottom: auto; flex-wrap: wrap; }
+.tdl-meta { display: flex; gap: .2em; justify-content: center; margin-top: .5em; margin-bottom: auto; flex-wrap: wrap; }
 .tdl-chip {
   display: flex; align-items: center; gap: .4em; font-size: 1.2em; font-weight: 700; color: #eef3ff;
   padding: .3em .6em; border-radius: .5em; border: 2px solid rgba(var(--accent-rgb), .65);
