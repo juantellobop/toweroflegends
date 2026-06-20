@@ -89,10 +89,28 @@ function portrait(src, name) {
 // === Carta de jugador ======================================================
 // opts: { manager } suma el bonus del DT connacional (sube OVR/stats y los
 // recolorea), { idValue } la identifica, { disabled } la marca como ya poseída.
+// { clickable } la hace seleccionable (clase .clickable); { injured }/{ suspended }
+// (con { injuryMatches }) la marcan como no disponible (atenuada, no clicable e
+// icono de estado) — igual que la carta compacta, para el selector del tablero.
 export function playerShowcaseHTML(player, opts = {}) {
   const bonus = managerNationStatBonus(player, opts.manager);
   const ovr = playerOVR(player, opts.manager);
   const owned = Boolean(opts.disabled);
+  const injured = Boolean(opts.injured);
+  const suspended = Boolean(opts.suspended) && !injured;
+  const unavailable = injured || suspended;
+  const extra = [
+    owned ? 'tdl-card--owned' : '',
+    unavailable ? 'card--unavailable' : '',
+    (opts.clickable && !unavailable) ? 'clickable' : '',
+  ].filter(Boolean).join(' ');
+  // Iconos de baja reutilizando las clases de la carta compacta (overlay, fuera
+  // de .tdl-content para que no los recorte la atenuación del contenido).
+  const statusIcon = injured
+    ? `<span class="card-injury" aria-hidden="true"></span><span class="card-injury-count" aria-hidden="true">${esc(opts.injuryMatches ?? '')}</span>`
+    : suspended
+      ? `<span class="card-redcard" aria-hidden="true"></span>`
+      : '';
   const body = `
     <div class="tdl-head">
       <div class="tdl-ovr${bonus > 0 ? ' tdl-ovr--mgr' : ''}">${ovr}</div>
@@ -102,8 +120,8 @@ export function playerShowcaseHTML(player, opts = {}) {
     <div class="tdl-namebar"><div class="tdl-name">${esc(player.name)}</div></div>
     ${metaRow(player.nation, localizeEra(player.era), player.trait)}
     <div class="tdl-panel"><div class="tdl-stats">${statRows(player, bonus)}</div></div>`;
-  const overlay = owned ? `<div class="tdl-owned"><span aria-hidden="true">✓</span> ${esc(t('card.owned'))}</div>` : '';
-  return chassis({ kind: 'player', rarity: player.rarity, idValue: opts.idValue, extra: owned ? 'tdl-card--owned' : '', body, overlay });
+  const overlay = (owned ? `<div class="tdl-owned"><span aria-hidden="true">✓</span> ${esc(t('card.owned'))}</div>` : '') + statusIcon;
+  return chassis({ kind: 'player', rarity: player.rarity, idValue: opts.idValue, extra, body, overlay });
 }
 
 // === Carta de director técnico (DT) ========================================

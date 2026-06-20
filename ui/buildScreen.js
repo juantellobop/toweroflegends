@@ -5,7 +5,7 @@
 // tocar hueco → selector; tocar ficha → la quita. Enlaces de química sutiles.
 // Suplentes en una tira inferior. Botón "Jugar" flotante (cristal).
 
-import { playerCardHTML, managerCardHTML, POSITION_LABEL, LINE_LABEL } from './cards.js';
+import { managerCardHTML, POSITION_LABEL, LINE_LABEL } from './cards.js';
 import { playerShowcaseHTML, itemShowcaseHTML } from './showcaseCard.js';
 import { esc } from './dom.js';
 import {
@@ -920,7 +920,7 @@ function openPicker(root, state, line, slotIndex, handlers) {
         ${candidates.map((p) => {
           const injured = isInjured(p);
           const suspended = !injured && isSuspended(p);
-          return playerCardHTML(p, {
+          return playerShowcaseHTML(p, {
             idValue: p.uid,
             clickable: true,
             injured,
@@ -936,7 +936,7 @@ function openPicker(root, state, line, slotIndex, handlers) {
   picker.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
 
   picker.querySelector('[data-close]')?.addEventListener('click', () => { picker.hidden = true; });
-  picker.querySelectorAll('.card.clickable').forEach((node) => {
+  picker.querySelectorAll('.tdl-card.clickable').forEach((node) => {
     node.addEventListener('click', () => {
       const player = state.squad.find((p) => p.uid === node.dataset.id);
       if (player) handlers.onPlace(player, line, slotIndex); // re-render cierra el selector

@@ -1350,16 +1350,18 @@ select {
 
 .slot-picker { border-radius: var(--radius-l); padding: var(--space-4); margin-top: var(--space-4); }
 .picker-head { font-size: var(--t-headline); font-weight: 600; margin-bottom: var(--space-3); }
+/* El selector del tablero muestra las cartas escaparate completas (.tdl-card),
+   seleccionables. Rejilla fluida: tantas columnas como quepan a ≥160px. */
 .picker-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: var(--space-3);
   margin-bottom: var(--space-3);
 }
-.picker-grid .card { width: 100%; min-width: 0; }
-@media (max-width: 767px) {
-  .picker-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
+.picker-grid .tdl-slot { width: 100%; min-width: 0; }
+.picker-grid .tdl-card { transition: transform var(--dur-base, .16s) ease; }
+.tdl-card.clickable { cursor: pointer; }
+.picker-grid .tdl-card.clickable:hover { transform: translateY(-4px) scale(1.02); }
 
 .bench-strip { display: flex; gap: var(--space-2); overflow-x: auto; padding-bottom: var(--space-2); -webkit-overflow-scrolling: touch; }
 .bench-item {
