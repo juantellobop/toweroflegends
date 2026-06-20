@@ -6,11 +6,12 @@
 // "vuela" a la plantilla. "Lectura total": cada carta muestra todo lo necesario.
 
 import { playerCardHTML, itemCardHTML, managerCardHTML } from './cards.js';
+import { playerShowcaseHTML, itemShowcaseHTML, managerShowcaseHTML } from './showcaseCard.js';
 import { esc, prefersReducedMotion } from './dom.js';
 import { haptic } from '../match/feedback.js';
 import { UI_ASSETS, preloadImages } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
-import { portraitPathForManager, portraitPathForPlayer } from '../data/playerAssets.js';
+import { artworkPathForItem, portraitPathForManager, portraitPathForPlayer } from '../data/playerAssets.js';
 import { LINES } from '../data/config.js';
 import { playerOVR } from '../engine/ovr.js';
 import { localizeEra, localizeNation, t } from '../data/i18n.js';
@@ -210,7 +211,7 @@ export function renderPlayerPack(root, state, choices, onPick, onDiscard) {
     ...choices.map((c) => flagSrcForNation(c.nation)),
   ], { priority: 'high' });
   const body = choices.map((c, i) =>
-    dealCard(playerCardHTML(c, { idValue: c.id, disabled: c.selectable === false }), c.id, i, 'player', c.selectable !== false)
+    dealCard(playerShowcaseHTML(c, { idValue: c.id, disabled: c.selectable === false }), c.id, i, 'player', c.selectable !== false)
   ).join('');
   root.innerHTML = shell(state, 'player', choices.length, body);
   const onReveal = attachDiscardBar(root, t('pack.playerDiscard'), onDiscard);
@@ -218,10 +219,13 @@ export function renderPlayerPack(root, state, choices, onPick, onDiscard) {
 }
 
 export function renderItemPack(root, state, choices, onPick, onDiscard) {
+  // Calienta el arte de los objetos a revelar (si falta, falla en silencio y
+  // queda el icono provisional) para que el flip muestre la cara al instante.
+  preloadImages(choices.map((c) => artworkPathForItem(c)), { priority: 'high' });
   const ownedCount = (id) => (state.items || []).filter((it) => it.id === id).length;
   const body = choices.map((c, i) =>
     // stack = copias que tendrías al elegirlo (las que ya tienes + 1).
-    dealCard(itemCardHTML(c, { idValue: c.id, stack: ownedCount(c.id) + 1 }), c.id, i, 'item')
+    dealCard(itemShowcaseHTML(c, { idValue: c.id, stack: ownedCount(c.id) + 1 }), c.id, i, 'item')
   ).join('');
   root.innerHTML = shell(state, 'item', choices.length, body);
   const onReveal = attachDiscardBar(root, t('pack.itemDiscard'), onDiscard);
@@ -237,7 +241,7 @@ export function renderManagerPack(root, state, choices, onPick, onDiscard) {
     ...choices.map((c) => flagSrcForNation(c.nation)),
   ], { priority: 'high' });
   const body = choices.map((c, i) =>
-    dealCard(managerCardHTML(c, { idValue: c.id }), c.id, i, 'manager')
+    dealCard(managerShowcaseHTML(c, { idValue: c.id }), c.id, i, 'manager')
   ).join('');
   root.innerHTML = shell(state, 'manager', choices.length, body);
   // Barra de descartar: solo cuando se permite descartar (en el nivel 1 elegir DT
@@ -292,7 +296,7 @@ function renderNationRoster(root, state, team, onPick) {
     ...team.players.map((p) => flagSrcForNation(p.nation)),
   ], { priority: 'high' });
   const body = team.players.map((p, i) =>
-    dealCard(playerCardHTML(p, { idValue: p.id, disabled: p.selectable === false }), p.id, i, 'nation', p.selectable !== false)
+    dealCard(playerShowcaseHTML(p, { idValue: p.id, disabled: p.selectable === false }), p.id, i, 'nation', p.selectable !== false)
   ).join('');
   root.innerHTML = `
     <section class="screen pack-screen pixel-screen nation-roster-screen" data-kind="nation">

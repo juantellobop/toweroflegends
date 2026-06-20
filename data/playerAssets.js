@@ -90,3 +90,17 @@ export function portraitPathForManager(manager) {
   if (manager.id) return `${PORTRAIT_DIR}/${manager.id}.jpg${PORTRAIT_SUFFIX}`;
   return null;
 }
+
+// Arte cuadrado del objeto para el hueco .art de la carta escaparate. Se deriva
+// del id ({id}.png), igual que los retratos: si el PNG no existe, la imagen falla
+// y el icono/placeholder de debajo queda a la vista (data-hide-on-error). Se
+// gestiona desde el panel admin (#playeredit → Objetos). `artDataUrl` es el
+// preview en vivo durante la edición.
+export const ITEM_ART_DIR = 'assets/items';
+
+export function artworkPathForItem(item) {
+  if (!item) return null;
+  if (item.artDataUrl) return item.artDataUrl;
+  const id = item.id || slugifyName(item.name);
+  return `${ITEM_ART_DIR}/${id}.png${PORTRAIT_SUFFIX}`;
+}

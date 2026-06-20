@@ -36,8 +36,8 @@ try {
   if (root.querySelectorAll('.squad-chip').length !== 11) errors.push('presentación del equipo sin 11 titulares');
   if (!root.querySelectorAll('.bench-item').length) errors.push('presentación del equipo sin suplentes');
   click(root.querySelector('#squad-continue'));
-  console.log('3. Sobre jugador:', show(), '| cartas:', root.querySelectorAll('.player-card').length);
-  if (!root.querySelector('.card-portrait')) errors.push('cartas sin bloque de retrato');
+  console.log('3. Sobre jugador:', show(), '| cartas:', root.querySelectorAll('.tdl-card--player').length);
+  if (!root.querySelector('.tdl-card--player .tdl-portrait')) errors.push('cartas de jugador sin bloque de retrato');
 
   // Popup "Revisar mi equipo" antes de abrir el sobre
   click(root.querySelector('.review-btn[data-review="reviewSquad"]'));
@@ -50,12 +50,13 @@ try {
   click(root.querySelector('.deal-card:not(.disabled-deal)')); await wait(420); // selección directa
 
   // Sobre de director técnico (nivel 1, justo tras el de jugadores)
-  console.log('3b. Sobre DT:', show(), '| cartas:', root.querySelectorAll('.manager-card').length);
-  if (!root.querySelector('.manager-card')) errors.push('sobre de DT sin cartas');
+  console.log('3b. Sobre DT:', show(), '| cartas:', root.querySelectorAll('.tdl-card--manager').length);
+  if (!root.querySelector('.tdl-card--manager')) errors.push('sobre de DT sin cartas');
   click(root.querySelector('#openBtn')); // abrir el sobre sellado de DT
   click(root.querySelector('.deal-card:not(.disabled-deal)')); await wait(420); // elegir DT
 
-  console.log('4. Sobre objeto:', show(), '| objetos:', root.querySelectorAll('.item-card').length);
+  console.log('4. Sobre objeto:', show(), '| objetos:', root.querySelectorAll('.tdl-card--item').length);
+  if (!root.querySelector('.tdl-card--item .tdl-art')) errors.push('sobre de objeto sin hueco de arte');
 
   click(root.querySelector('#openBtn')); // abrir el sobre sellado de objetos
   click(root.querySelector('.deal-card')); await wait(420); // selección directa

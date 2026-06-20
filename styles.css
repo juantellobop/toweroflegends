@@ -308,17 +308,33 @@ select {
 .bench-grid { display: flex; gap: 10px; flex-wrap: wrap; }
 .bench-item { position: relative; }
 .bench-item .card { width: 140px; }
-.items-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.items-strip .item-card { width: 100%; }
-/* Objetos activos en 2 columnas dentro de la columna lateral estrecha:
-   tipografías reducidas para que la carta entre en media columna. */
-.items-strip .item-card .card-rarity,
-.items-strip .item-card .item-type { font-size: 10px; }
-.items-strip .item-card .card-name { font-size: 16px; }
-.items-strip .item-card .item-desc { font-size: 12px; }
-.items-strip .item-card .item-stack { font-size: 10px; }
-.items-strip .item-card .item-stack-note { font-size: 9px; }
-.items-strip .item-card .chip { font-size: 9px; }
+.items-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; }
+/* Objeto en el tablero (items-fold): chip compacto con icono (arte) + título y
+   botón "i" —igual que los jugadores—; la carta completa se ve en el modal.
+   El borde izquierdo tiñe por rareza. */
+.board-item {
+  position: relative;
+  display: flex; align-items: center; gap: 8px;
+  flex-flow: column;
+  min-width: 0; padding: 8px;
+  border: 2px solid var(--common);
+  background: rgba(7,20,89,.5);
+  text-align: center;
+}
+.board-item.rarity-rare { border-color: var(--rare); }
+.board-item.rarity-epic { border-color: var(--epic); }
+.board-item.rarity-legend { border-color: var(--legend); }
+.board-item-icon {
+  flex: none; width: 66px; height: 66px; border-radius: 8px; overflow: hidden;
+  display: grid; place-items: center;
+  background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.16);
+}
+.board-item-icon img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+.board-item-name {
+  flex: 1; min-width: 0; color: #fff; font-weight: 700; font-size: 12px; line-height: 1.15;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
+}
+.board-item-stack { flex: none; font-size: 11px; font-weight: 800; color: var(--arcade-yellow, #f4c64a); }
 
 /* === Sobres === */
 .pack-head { text-align: center; }
@@ -797,11 +813,7 @@ select {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  /* En mobile, anclado ARRIBA (no centrado al viewport): así el sobre y las
-     cartas no "saltan" cuando aparece/desaparece la barra del navegador y
-     cambia la altura visible. El min-height sólo reserva el alto (mantiene el
-     botón fijo abajo) sin mover el contenido superior. */
+  align-items: normal;
   justify-content: flex-start;
   gap: 48px;
   min-height: calc(100vh - 220px);
@@ -1391,7 +1403,7 @@ select {
 }
 
 .items-fold { margin: var(--space-4) 0; }
-.items-fold summary { cursor: pointer; color: var(--label-secondary); font-size: var(--t-subhead); padding: var(--space-2) 0; }
+.items-fold summary { cursor: pointer; color: #fff; font-size: var(--t-subhead); padding: var(--space-2) 0; }
 
 
 /* --- Scouting del rival --- */
@@ -2129,10 +2141,6 @@ select {
     linear-gradient(180deg, rgba(255,255,255,.08), transparent 30%),
     var(--arcade-panel);
   color: #fff;
-  box-shadow:
-    0 0 0 4px rgba(255,255,255,.72) inset,
-    0 10px 0 rgba(0,0,0,.3),
-    0 22px 26px rgba(0,0,0,.34);
   overflow: hidden;
 }
 
@@ -2410,16 +2418,15 @@ select {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     justify-items: center;
     gap: 10px;
-    width: min(100%, 404px);
+    width: 100%;
     margin-inline: auto;
   }
   /* El hueco reservado (visibility) debe medirse con la misma rejilla. */
   .pack-screen .pack-reveal > .pack-deal[hidden] { display: grid !important; }
   .pack-screen .deal-card {
     width: 100%;
-    max-width: 196px;
+    max-width: 100%;
   }
-  .pack-screen .deal-card:nth-child(odd):last-child { grid-column: 1 / -1; }
 
   .pack-screen .player-card.card {
     width: 100%;
@@ -5205,18 +5212,6 @@ button.primary:active:not(:disabled),
     0 9px 18px rgba(0,0,0,.26);
 }
 
-.field-chip.filled::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 0;
-  height: 4px;
-  background: var(--common);
-}
-
-.field-chip.filled.rarity-rare::after { background: var(--rare); }
-.field-chip.filled.rarity-epic::after { background: var(--epic); }
-.field-chip.filled.rarity-legend::after { background: var(--legend); }
-
 .field-chip .chip-ovr {
   position: absolute;
   top: 4px;
@@ -5829,3 +5824,186 @@ button.primary:active:not(:disabled),
   .press-photo { width: min(132px, 42%); margin-right: 12px; }
   .press-photo-fallback { font-size: 1.3rem; }
 }
+
+/* ============================================================================
+   Carta "escaparate" (.tdl-card) — diseño a sangre por rareza.
+   Solo en superficies grandes: cartas a elegir del sobre (.pack-stage) y modal
+   de info (#playerModalBody). El interior se mide en em/% y la carta fija su
+   font-size en cqw; el contenedor .tdl-slot declara la container query → la
+   proporción contenido/carta es constante a cualquier ancho. Clases con prefijo
+   tdl- para no chocar con los estilos compactos (.card-*, .chip, .stat…).
+   ========================================================================== */
+.tdl-slot { container-type: inline-size; width: 100%; }
+
+.tdl-card {
+  --ink: #08163a;
+  --plate: rgba(4,10,28,.8);
+  --good: #6cf08a; --bad: #ff8080; --flat: #bcc8e4;
+  position: relative; width: 100%; aspect-ratio: 1024 / 1536;
+  background-size: 100% 100%; background-repeat: no-repeat;
+  border-radius: 12px; overflow: hidden;
+  image-rendering: pixelated;
+  font-family: var(--font-game, ui-monospace, Menlo, monospace);
+  font-size: clamp(7px, 4cqw, 13px);
+  -webkit-user-select: none; user-select: none;
+}
+.tdl-rar-common { --accent: #aeb9cf; --accent-rgb: 174,185,207; }
+.tdl-rar-rare   { --accent: #5fd2ff; --accent-rgb: 95,210,255; }
+.tdl-rar-epic   { --accent: #e884ff; --accent-rgb: 232,132,255; }
+.tdl-rar-legend { --accent: #f4c64a; --accent-rgb: 244,198,74; }
+
+.tdl-content { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 6% 6.5%; }
+
+/* -------- Cabecera -------- */
+.tdl-head { display: flex; justify-content: space-between; align-items: center; gap: .5em; }
+.tdl-ovr {
+  font-size: 3em; font-weight: 800; line-height: .9; color: var(--accent);
+  background: var(--plate); padding: .04em .2em; border-radius: .18em;
+  text-shadow: -1px 0 0 var(--ink), 1px 0 0 var(--ink), 0 -1px 0 var(--ink), 0 1px 0 var(--ink),
+    0 0 14px rgba(var(--accent-rgb), .5);
+}
+.tdl-ovr--mgr { color: #08121f; background: var(--mgr-boost, #7be0b0); text-shadow: none; }
+.tdl-pos, .tdl-badge-dt {
+  font-weight: 700; color: #eaf3ff; border-radius: .5em;
+  border: 2px solid rgba(var(--accent-rgb), .85); background: rgba(6,16,40,.7);
+  box-shadow: inset 0 0 10px rgba(var(--accent-rgb), .3);
+}
+.tdl-pos { font-size: .92em; padding: .35em .6em; }
+.tdl-badge-dt { font-size: 1.15em; font-weight: 800; padding: .45em .8em; }
+.tdl-typewrap { display: flex; align-items: center; background: var(--plate); padding: .28em .5em; border-radius: .55em; }
+.tdl-type { font-size: .92em; font-weight: 800; letter-spacing: 1px; line-height: 1; color: var(--accent); }
+
+/* -------- Retrato (jugador / DT) -------- */
+.tdl-portrait {
+  align-self: center; margin-top: 2%; width: 50%; aspect-ratio: 1 / 1; padding: 3px;
+  background: linear-gradient(160deg, var(--accent), rgba(var(--accent-rgb), .35) 60%, rgba(var(--accent-rgb), .15));
+  -webkit-clip-path: polygon(14% 0,86% 0,100% 14%,100% 86%,86% 100%,14% 100%,0 86%,0 14%);
+  clip-path: polygon(14% 0,86% 0,100% 14%,100% 86%,86% 100%,14% 100%,0 86%,0 14%);
+}
+.tdl-portrait-inner {
+  position: relative; width: 100%; height: 100%; overflow: hidden;
+  background: radial-gradient(circle at 50% 38%, rgba(var(--accent-rgb), .5) 0%, #0a1b44 55%, #04102b 100%);
+  -webkit-clip-path: polygon(14% 0,86% 0,100% 14%,100% 86%,86% 100%,14% 100%,0 86%,0 14%);
+  clip-path: polygon(14% 0,86% 0,100% 14%,100% 86%,86% 100%,14% 100%,0 86%,0 14%);
+}
+.tdl-portrait-fallback {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 2.4em; font-weight: 900; color: rgba(255,255,255,.55); letter-spacing: .04em;
+  z-index: -1
+}
+.tdl-portrait img {
+  position: relative; width: 100%; height: 100%; object-fit: cover; display: block; image-rendering: pixelated;
+}
+
+/* -------- Nombre -------- */
+.tdl-namebar {
+  margin-top: 2.4%; text-align: center; padding: .35em .5em;
+  background: rgba(5,12,32,.62); box-shadow: inset 0 0 18px rgba(0,0,0,.35);
+  border-top: 2px solid rgba(var(--accent-rgb), .6); border-bottom: 2px solid rgba(var(--accent-rgb), .6);
+}
+.tdl-name {
+  margin: 0; color: #fff; font-weight: 800; font-size: 1.6em; line-height: 1.05; letter-spacing: .5px;
+  text-shadow: 0 2px 0 var(--ink), 0 0 13px rgba(var(--accent-rgb), .5);
+  /* Nombres largos: máximo 2 líneas (con elipsis) para no desbordar la carta 2:3. */
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
+}
+
+/* -------- Metadatos -------- */
+.tdl-meta { display: flex; gap: .5em; justify-content: center; margin-top: auto; flex-wrap: wrap; }
+.tdl-chip {
+  display: flex; align-items: center; gap: .4em; font-size: 1.2em; font-weight: 700; color: #eef3ff;
+  padding: .3em .6em; border-radius: .5em; border: 2px solid rgba(var(--accent-rgb), .65);
+  background: rgba(6,16,40,.68); box-shadow: inset 0 0 7px rgba(60,120,255,.25);
+}
+.tdl-chip--trait { color: var(--accent); border-color: rgba(var(--accent-rgb), .85); }
+.tdl-flag { width: 1.7em; height: 1.15em; object-fit: cover; image-rendering: pixelated; border: 1px solid rgba(0,0,0,.5); }
+
+/* -------- Panel (stats jugador / descripción objeto) -------- */
+.tdl-panel {
+  margin-top: auto; margin-bottom: auto; background: rgba(5,12,32,.66);
+  border: 2px solid rgba(var(--accent-rgb), .5); border-radius: .7em;
+  box-shadow: inset 0 0 14px rgba(var(--accent-rgb), .1), 0 2px 8px rgba(0,0,0,.35);
+  padding: .55em .7em; text-wrap: balance;
+}
+.tdl-stats { display: flex; flex-direction: column; gap: .32em; }
+.tdl-stat { display: flex; align-items: center; gap: .6em; line-height: 1; }
+.tdl-stat-label { width: 2.5em; font-size: .95em; font-weight: 800; color: #e7eeff; }
+.tdl-stat-bar {
+  display: block; flex: 1; height: .72em; border-radius: .42em; background: #0a1733; overflow: hidden;
+  box-shadow: inset 0 0 0 2px #20407e;
+}
+.tdl-stat-fill { display: block; height: 100%; background: linear-gradient(90deg,#e23b3b 0%,#f3892f 32%,#f2d23a 58%,#7be05a 100%); }
+.tdl-stat-val { width: 2.3em; text-align: right; font-size: 1em; font-weight: 800; color: #fff; }
+.tdl-stat--mgr .tdl-stat-label, .tdl-stat--mgr .tdl-stat-val { color: var(--mgr-boost, #7be0b0); }
+.tdl-stat--mgr .tdl-stat-fill { background: var(--mgr-boost, #7be0b0); }
+
+/* -------- Objeto: arte cuadrado + sinergia -------- */
+.tdl-art {
+  align-self: center; margin-top: 10%; width: 62%; aspect-ratio: 1 / 1; padding: 4px;
+  background: linear-gradient(160deg, var(--accent), rgba(var(--accent-rgb), .4) 55%, rgba(var(--accent-rgb), .12));
+  -webkit-clip-path: polygon(12% 0,88% 0,100% 12%,100% 88%,88% 100%,12% 100%,0 88%,0 12%);
+  clip-path: polygon(12% 0,88% 0,100% 12%,100% 88%,88% 100%,12% 100%,0 88%,0 12%);
+}
+.tdl-art-inner {
+  position: relative; width: 100%; height: 100%;
+  -webkit-clip-path: polygon(12% 0,88% 0,100% 12%,100% 88%,88% 100%,12% 100%,0 88%,0 12%);
+  clip-path: polygon(12% 0,88% 0,100% 12%,100% 88%,88% 100%,12% 100%,0 88%,0 12%);
+}
+.tdl-art-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; image-rendering: pixelated; }
+.tdl-desc p { margin: 0; color: #f1f5ff; font-size: 1.5em; font-weight: 600; line-height: 1.32; text-align: center; text-wrap: balance; }
+.tdl-item-synergy { margin-top: .6em; text-align: center; font-size: 1.05em; font-weight: 700; color: var(--accent); }
+
+/* -------- DT: sinergia + modificadores -------- */
+.tdl-synergy {
+  display: flex; align-items: center; justify-content: center; gap: .55em; margin-top: 4%;
+  font-size: 1.1em; font-weight: 700; color: var(--accent); padding: .5em .8em; border-radius: .6em;
+  border: 2px solid rgba(var(--accent-rgb), .65); background: rgba(6,16,40,.66);
+  box-shadow: inset 0 0 10px rgba(var(--accent-rgb), .22);
+}
+.tdl-synergy svg { width: 1.25em; height: 1.25em; flex: none; }
+.tdl-mods { display: flex; gap: .55em; margin-top: auto; }
+.tdl-mod {
+  flex: 1; text-align: center; padding: .5em .25em .6em; border-radius: .6em;
+  border: 2px solid rgba(var(--accent-rgb), .6); background: rgba(6,16,40,.66);
+  box-shadow: inset 0 0 9px rgba(var(--accent-rgb), .18);
+}
+.tdl-mod-k { font-size: 1em; font-weight: 800; letter-spacing: .5px; color: var(--accent); }
+.tdl-mod-v { display: block; margin-top: .4em; font-size: 1.15em; font-weight: 800; color: var(--flat); }
+.tdl-mod-v.up { color: var(--good); } .tdl-mod-v.down { color: var(--bad); } .tdl-mod-v.flat { color: var(--flat); }
+
+/* -------- Estados: poseída (sobre) + badge ×N -------- */
+.tdl-card--owned .tdl-content { opacity: .5; }
+.tdl-owned {
+  position: absolute; left: 50%; bottom: 9%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: .35em; white-space: nowrap;
+  font-size: .9em; font-weight: 800; color: #fff;
+  background: rgba(4,10,28,.88); padding: .35em .7em; border-radius: .45em;
+  border: 2px solid rgba(var(--accent-rgb), .8);
+}
+.tdl-stack {
+  position: absolute; top: 7%; right: 7%;
+  font-size: 1.05em; font-weight: 800; color: #08121f;
+  background: var(--accent); padding: .12em .45em; border-radius: .4em;
+  box-shadow: 0 2px 0 rgba(0,0,0,.35);
+}
+
+/* ============================================================================
+   Integración de la carta escaparate en sus dos contenedores.
+   ========================================================================== */
+/* Sobre: la carta vive dentro de .deal-front (volteo 3D). En escritorio el ancho
+   lo fija .deal-card; en móvil NO se fija aquí (misma especificidad 0,2,0 que la
+   rejilla 2-col .pack-screen .deal-card, y esta debe ganar) → se limita al
+   @media de escritorio. El alto sale de la proporción 2:3. */
+@media (min-width: 768px) {
+  .deal-card:has(.tdl-card) { min-width: 256px; }
+}
+.deal-card[role="button"] .tdl-card { cursor: pointer; }
+.deal-card.selected .tdl-card {
+  box-shadow: 0 0 0 3px var(--arcade-yellow), 0 14px 0 rgba(0,0,0,.32), 0 24px 30px rgba(0,0,0,.36);
+}
+
+/* Modal de info: la carta llena el ancho disponible, acotado además por la
+   altura del viewport para que la 2:3 nunca desborde en pantallas bajas. */
+.player-modal-card:has(.tdl-card) { width: min(340px, 92vw, calc((100dvh - 96px) / 1.5)); }
+.player-modal-card .tdl-slot { width: 100%; }
+.player-modal-card .tdl-card { cursor: default; }

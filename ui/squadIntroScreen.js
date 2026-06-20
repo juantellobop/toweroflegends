@@ -4,7 +4,8 @@
 // scouting) y suplentes. Tocar cualquier carta abre su ficha completa con el
 // mismo modal de la pantalla de armado.
 
-import { playerCardHTML, POSITION_LABEL } from './cards.js';
+import { POSITION_LABEL } from './cards.js';
+import { playerShowcaseHTML } from './showcaseCard.js';
 import { esc } from './dom.js';
 import { LINES } from '../data/config.js';
 import { liveRatings, assignLineToSlots, isStarter } from '../state/run.js';
@@ -144,7 +145,7 @@ function wirePlayerModal(root, state) {
   const open = (uid) => {
     const player = state.squad.find((p) => p.uid === uid);
     if (!player) return;
-    body.innerHTML = playerCardHTML(player);
+    body.innerHTML = playerShowcaseHTML(player, { manager: state.manager });
     modal.hidden = false;
   };
   const close = () => { modal.hidden = true; body.innerHTML = ''; };

@@ -25,6 +25,19 @@ export const UI_ASSETS = {
       epic: 'assets/ui/pixel/card-frame-epic.svg',
       legend: 'assets/ui/pixel/card-frame-legend.svg',
     },
+    // Fondos a sangre de la carta "escaparate" (sobres + modal de info), por
+    // tipo y rareza. Jugador y DT comparten el fondo player-dt; el objeto usa
+    // el suyo. Nombres de archivo en castellano (comun/rara/epica/leyenda).
+    bg: {
+      playerCommon: 'assets/ui/cards/card-comun-player-dt.jpg',
+      playerRare: 'assets/ui/cards/card-rara-player-dt.jpg',
+      playerEpic: 'assets/ui/cards/card-epica-player-dt.jpg',
+      playerLegend: 'assets/ui/cards/card-leyenda-player-dt.jpg',
+      itemCommon: 'assets/ui/cards/card-comun-item.jpg',
+      itemRare: 'assets/ui/cards/card-rara-item.jpg',
+      itemEpic: 'assets/ui/cards/card-epica-item.jpg',
+      itemLegend: 'assets/ui/cards/card-leyenda-item.jpg',
+    },
   },
   icons: {
     attack: 'assets/ui/pixel/stat-attack.svg',

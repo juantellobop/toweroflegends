@@ -5,7 +5,8 @@
 // tocar hueco → selector; tocar ficha → la quita. Enlaces de química sutiles.
 // Suplentes en una tira inferior. Botón "Jugar" flotante (cristal).
 
-import { playerCardHTML, itemCardHTML, managerCardHTML, POSITION_LABEL, LINE_LABEL } from './cards.js';
+import { playerCardHTML, managerCardHTML, POSITION_LABEL, LINE_LABEL } from './cards.js';
+import { playerShowcaseHTML, itemShowcaseHTML } from './showcaseCard.js';
 import { esc } from './dom.js';
 import {
   liveRatings, liveChemistry, liveItemDelta, isLineupComplete, isStarter, isSuspended, isInjured, formationSlots,
@@ -16,10 +17,10 @@ import { chemNation, managerNationStatBonus } from '../engine/chemistry.js';
 import { chemTeamBonus } from '../engine/items.js';
 import { FORMATIONS, LINES, chemLinks, formationLineSlots, formationType } from '../data/config.js';
 import { countTo } from '../match/feedback.js';
-import { playerInitials, playerSurname, portraitPathForPlayer } from '../data/playerAssets.js';
+import { playerInitials, playerSurname, portraitPathForPlayer, artworkPathForItem } from '../data/playerAssets.js';
 import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
-import { localizeNation, localizeOpponentName, t } from '../data/i18n.js';
+import { localizeItem, localizeNation, localizeOpponentName, t } from '../data/i18n.js';
 import { PITCH_MARKINGS } from './pitchArt.js';
 import { positionSlots } from './lineupBoard.js';
 
@@ -269,6 +270,23 @@ function bench(state) {
   <p class="empty-note bench-filter-empty" hidden>${t('build.noSubs')}</p>`;
 }
 
+// Objeto en el tablero (items-fold): chip compacto con icono (arte) + título y
+// botón "i" —igual que los jugadores— que abre la carta completa en el modal.
+// `count` (>1) muestra ×N (copias acumuladas). El icono usa el arte del objeto
+// (assets/items/{id}.png); si falta, queda el marco vacío (data-hide-on-error).
+function itemBoardHTML(item, count) {
+  const name = localizeItem(item, 'name');
+  return `
+    <div class="board-item rarity-${esc(item.rarity)}">
+      <span class="board-item-icon" aria-hidden="true">
+        <img src="${esc(artworkPathForItem(item))}" alt="" loading="lazy" decoding="async" data-hide-on-error="true" />
+      </span>
+      <span class="board-item-name">${esc(name)}</span>
+      ${count > 1 ? `<span class="board-item-stack">×${count}</span>` : ''}
+      <span class="chip-info" role="button" tabindex="0" data-info-item="${esc(item.id)}" aria-label="${esc(t('build.viewItemAria', { name }))}">i</span>
+    </div>`;
+}
+
 export function renderBuild(root, state, handlers) {
   const complete = isLineupComplete(state);
   const positions = lineupPositions(state);
@@ -280,7 +298,7 @@ export function renderBuild(root, state, handlers) {
     else { const g = { item: it, count: 1 }; byId.set(it.id, g); grouped.push(g); }
   }
   const itemsHTML = grouped.length
-    ? `<div class="items-strip">${grouped.map((g) => itemCardHTML(g.item, { stack: g.count })).join('')}</div>`
+    ? `<div class="items-strip">${grouped.map((g) => itemBoardHTML(g.item, g.count)).join('')}</div>`
     : `<p class="empty-note">${t('build.noItems')}</p>`;
   const opponentHTML = state.opponent ? `
     <button class="opponent-brief" id="viewOpponent">
@@ -439,10 +457,33 @@ function wirePlayerStats(root, state) {
   const open = (uid) => {
     const player = state.squad.find((p) => p.uid === uid);
     if (!player) return;
-    body.innerHTML = playerCardHTML(player, { manager: state.manager });
+    body.innerHTML = playerShowcaseHTML(player, { manager: state.manager });
+    modal.hidden = false;
+  };
+  // Igual que los jugadores, pero con la carta completa del objeto. El stack =
+  // copias acumuladas de ese objeto en la run.
+  const openItem = (id) => {
+    const copies = (state.items || []).filter((it) => it.id === id);
+    if (!copies.length) return;
+    body.innerHTML = itemShowcaseHTML(copies[0], { stack: copies.length });
     modal.hidden = false;
   };
   const close = () => { modal.hidden = true; body.innerHTML = ''; };
+
+  root.querySelectorAll('.chip-info[data-info-item]').forEach((node) => {
+    node.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      openItem(node.dataset.infoItem);
+    });
+    node.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.stopPropagation();
+        e.preventDefault();
+        openItem(node.dataset.infoItem);
+      }
+    });
+  });
 
   root.querySelectorAll('.chip-info[data-info-uid]').forEach((node) => {
     // Bloquea el arranque del drag y el click de la ficha contenedora.

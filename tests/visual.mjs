@@ -49,23 +49,25 @@ async function playToBuild(page) {
   // El sobre llega sellado: abrirlo revela las cartas.
   await page.waitForSelector('.pack-screen .pack-opener');
   await page.click('#openBtn');
-  await page.waitForSelector('.pack-screen .player-card', { state: 'visible' });
+  await page.waitForSelector('.pack-screen .tdl-card--player', { state: 'visible' });
   await page.waitForTimeout(900);
-  await assertSquareBoxes(page, '.player-card .card-portrait', 'player card portraits');
-  await assertInsideCards(page, '.player-card', ['.card-head', '.card-portrait', '.card-name', '.card-meta', '.card-stats'], 'player cards');
+  await assertSquareBoxes(page, '.tdl-card--player .tdl-portrait', 'player card portraits');
+  await assertInsideCards(page, '.tdl-card--player', ['.tdl-head', '.tdl-portrait', '.tdl-namebar', '.tdl-meta', '.tdl-panel'], 'player cards');
   // Selección directa: tocar la carta confirma sin botón aparte.
   await page.click('.deal-card:not(.disabled-deal)');
   // Sobre de director técnico (nivel 1, justo tras el de jugadores).
   await page.waitForSelector('.pack-screen[data-kind="manager"]');
   await page.click('#openBtn');
-  await page.waitForSelector('.pack-screen .manager-card', { state: 'visible' });
+  await page.waitForSelector('.pack-screen .tdl-card--manager', { state: 'visible' });
   await page.waitForTimeout(700);
+  await assertSquareBoxes(page, '.tdl-card--manager .tdl-portrait', 'manager card portraits');
+  await assertInsideCards(page, '.tdl-card--manager', ['.tdl-head', '.tdl-portrait', '.tdl-namebar', '.tdl-meta', '.tdl-mods'], 'manager cards');
   await page.click('.deal-card:not(.disabled-deal)');
   await page.waitForSelector('.pack-screen[data-kind="item"]');
   await page.click('#openBtn');
-  await page.waitForSelector('.pack-screen .item-card', { state: 'visible' });
+  await page.waitForSelector('.pack-screen .tdl-card--item', { state: 'visible' });
   await page.waitForTimeout(700);
-  await assertInsideCards(page, '.item-card', ['.card-head', '.card-name', '.item-desc'], 'item cards');
+  await assertInsideCards(page, '.tdl-card--item', ['.tdl-head', '.tdl-namebar', '.tdl-art', '.tdl-panel'], 'item cards');
   await page.click('.deal-card');
   await page.waitForSelector('.scouting-screen');
   await assertScoutingLayout(page);
