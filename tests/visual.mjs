@@ -102,10 +102,8 @@ async function assertScoutingLayout(page) {
   assert.ok(flag && strength, 'Mobile scouting must show flag and strength');
   assert.ok(Math.abs(flag.y - strength.y) <= 4, 'Mobile scouting flag and strength must share a row');
 
-  const ratingTops = await page.locator('.scout-rating').evaluateAll((nodes) =>
-    nodes.map((node) => Math.round(node.getBoundingClientRect().top))
-  );
-  assert.equal(new Set(ratingTops).size, 1, 'Mobile opponent ratings must fit in one row');
+  const radarBox = await page.locator('.scouting-screen .team-radar').boundingBox();
+  assert.ok(radarBox && radarBox.width >= 110 && radarBox.height >= 80, 'Mobile opponent stats radar must render at a usable size');
 }
 
 async function assertInsideCards(page, cardSelector, childSelectors, label) {
@@ -170,10 +168,8 @@ async function assertBuildLayout(page, label) {
     assert.equal(await page.locator('.build-screen .roster-head h2').textContent(), 'Substitutes');
     assert.equal(await page.locator('.build-screen .roster-head p').count(), 0, 'Substitutes summary must be removed');
 
-    const ratingTops = await page.locator('.build-screen .rating-row').evaluateAll((nodes) =>
-      nodes.map((node) => Math.round(node.getBoundingClientRect().top))
-    );
-    assert.equal(new Set(ratingTops).size, 1, 'Mobile team ratings must fit in one row');
+    const radarBox = await page.locator('.build-screen #ratingsHeader .team-radar').boundingBox();
+    assert.ok(radarBox && radarBox.width >= 120 && radarBox.height >= 120, 'Mobile team stats radar must render at a usable size');
 
     const playBox = await page.locator('.build-screen #play').boundingBox();
     assert.ok(playBox && playBox.width >= 320 && playBox.height >= 54, 'Mobile play CTA must match the larger floating buttons');

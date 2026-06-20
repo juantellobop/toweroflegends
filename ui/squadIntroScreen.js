@@ -8,13 +8,13 @@ import { POSITION_LABEL } from './cards.js';
 import { playerShowcaseHTML } from './showcaseCard.js';
 import { esc } from './dom.js';
 import { LINES } from '../data/config.js';
-import { liveRatings, assignLineToSlots, isStarter } from '../state/run.js';
+import { liveRadar, assignLineToSlots, isStarter } from '../state/run.js';
 import { playerOVR } from '../engine/ovr.js';
 import { playerInitials, portraitPathForPlayer } from '../data/playerAssets.js';
-import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { t } from '../data/i18n.js';
 import { lineupFieldHTML, layoutInformative, staticChipHTML } from './lineupBoard.js';
+import { teamRadarHTML } from './radar.js';
 
 // Coordenadas del once: huecos visibles por línea (assignLineToSlots) colocados
 // con la MISMA lógica del tablero táctico (lineupBoard): idéntico esquema.
@@ -42,21 +42,8 @@ function field(state) {
 }
 
 function ratings(state) {
-  const r = liveRatings(state);
-  const rows = [
-    [t('ratings.attack'), Math.round(r.attack), UI_ASSETS.icons.attack],
-    [t('ratings.midfield'), Math.round(r.midfield), UI_ASSETS.icons.midfield],
-    [t('ratings.defense'), Math.round(r.defense), UI_ASSETS.icons.defense],
-    [t('ratings.gk'), Math.round(r.gk), UI_ASSETS.icons.gk],
-  ];
   return `<div class="scout-ratings arcade-panel">
-    ${rows.map(([label, value, icon]) => `
-      <div class="scout-rating">
-        <img src="${icon}" alt="" aria-hidden="true" loading="eager" decoding="async" />
-        <span>${label}</span>
-        <b>${value}</b>
-        <i><span style="width:${Math.min(100, value)}%"></span></i>
-      </div>`).join('')}
+    ${teamRadarHTML(liveRadar(state), { color: state.team?.color || 'var(--arcade-cyan)' })}
   </div>`;
 }
 

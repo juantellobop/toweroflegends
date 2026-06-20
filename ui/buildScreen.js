@@ -9,16 +9,16 @@ import { managerCardHTML, POSITION_LABEL, LINE_LABEL } from './cards.js';
 import { playerShowcaseHTML, itemShowcaseHTML } from './showcaseCard.js';
 import { esc } from './dom.js';
 import {
-  liveRatings, liveChemistry, liveItemDelta, isLineupComplete, isStarter, isSuspended, isInjured,
+  liveRadar, liveChemistry, liveItemDelta, isLineupComplete, isStarter, isSuspended, isInjured,
   canPlacePlayerInSlot, assignLineToSlots,
 } from '../state/run.js';
+import { teamRadarHTML } from './radar.js';
 import { playerOVR } from '../engine/ovr.js';
 import { chemNation, managerNationStatBonus } from '../engine/chemistry.js';
 import { chemTeamBonus } from '../engine/items.js';
 import { FORMATIONS, LINES, geometricLinks, formationLineSlots, MANAGER_STYLES, CUSTOM_FORMATION } from '../data/config.js';
 import { countTo } from '../match/feedback.js';
 import { playerInitials, playerSurname, portraitPathForPlayer, artworkPathForItem } from '../data/playerAssets.js';
-import { UI_ASSETS } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { localizeItem, localizeNation, localizeOpponentName, t } from '../data/i18n.js';
 import { PITCH_MARKINGS } from './pitchArt.js';
@@ -174,14 +174,6 @@ function tacticControls(state) {
     </div>`;
 }
 
-// "+N" verde / "−N" rojo: cuánto aporta el conjunto de objetos a ese rating.
-function itemDeltaHTML(d) {
-  if (!d || Math.abs(d) < 0.05) return '';
-  const up = d > 0;
-  const val = Math.abs(Math.round(d * 10) / 10);
-  return `<span class="rt-delta ${up ? 'up' : 'down'}" title="${esc(t('build.fromItems'))}">${up ? '+' : '−'}${val}</span>`;
-}
-
 // Leyenda + desglose por línea: explica qué significan las líneas del campo
 // (nación / época / equipo unido) y dónde tienes química, para que no se
 // perciba como "0". Con el boost activo, la época queda pintada en violeta.
@@ -201,24 +193,23 @@ function chemLegend(state) {
 }
 
 function ratingsHeader(state) {
-  const r = liveRatings(state);
+  // Radar de fuerza de equipo (5 ejes). El aporte de los objetos —que las barras
+  // mostraban como "+N" por línea— se conserva como una tira compacta debajo.
   const itemD = liveItemDelta(state);
-  const rows = [
-    [t('ratings.attack'), r.attack, UI_ASSETS.icons.attack, itemD.attack],
-    [t('ratings.midfield'), r.midfield, UI_ASSETS.icons.midfield, itemD.midfield],
-    [t('ratings.defense'), r.defense, UI_ASSETS.icons.defense, itemD.defense],
-    [t('ratings.gk'), r.gk, UI_ASSETS.icons.gk, itemD.gk],
-  ];
-  const rowHTML = rows.map(([label, val, icon, d]) => `
-    <div class="rating-row">
-      <img src="${icon}" alt="" aria-hidden="true" loading="eager" decoding="async" />
-      <span class="rt-label">${label}</span>
-      <span class="rt-bar"><span class="rt-fill" style="width:${Math.min(100, Math.round(val))}%"></span></span>
-      <span class="rt-valwrap"><b class="rt-val tabular" data-val="${Math.round(val)}">0</b>${itemDeltaHTML(d)}</span>
-    </div>`).join('');
+  const deltas = [
+    [t('ratings.attack'), itemD.attack],
+    [t('ratings.midfield'), itemD.midfield],
+    [t('ratings.defense'), itemD.defense],
+    [t('ratings.gk'), itemD.gk],
+  ].filter(([, d]) => Math.abs(d) >= 0.05);
+  const deltaStrip = deltas.length
+    ? `<div class="radar-items" title="${esc(t('build.fromItems'))}">${deltas.map(([label, d]) =>
+        `<span class="ri-chip ${d > 0 ? 'up' : 'down'}">${esc(label)} ${d > 0 ? '+' : '−'}${Math.abs(Math.round(d * 10) / 10)}</span>`).join('')}</div>`
+    : '';
   return `
     <div class="ratings-glass glass" id="ratingsHeader">
-      <div class="rt-grid">${rowHTML}</div>
+      ${teamRadarHTML(liveRadar(state), { color: state.team?.color || 'var(--arcade-cyan)' })}
+      ${deltaStrip}
     </div>`;
 }
 

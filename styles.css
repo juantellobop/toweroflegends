@@ -714,7 +714,7 @@ select {
 .nav-large { margin-bottom: var(--space-4); }
 .large-title {
   font-family: var(--font-display);
-  font-size: var(--t-large-title); font-weight: 700; line-height: 1.1;
+  font-size: 1.5rem; font-weight: 700; line-height: 1.1;
   letter-spacing: -0.02em; margin: var(--space-2) 0 0; text-align: left;
 }
 .section-title { font-size: var(--t-title-3); font-weight: 600; margin: var(--space-5) 0 var(--space-2); }
@@ -1089,7 +1089,7 @@ select {
 /* --- §4.3 Armar equipo --- */
 .ratings-glass {
   position: sticky; top: calc(env(safe-area-inset-top) + 6px); z-index: 8;
-  display: flex; align-items: center; gap: var(--space-4);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-2);
   border-radius: var(--radius-l); padding: var(--space-3) var(--space-4);
   margin-bottom: var(--space-3);
 }
@@ -1099,6 +1099,45 @@ select {
 .rt-val { font-family: var(--font-rounded); font-size: var(--t-title-3); font-weight: 800; line-height: 1; }
 .rt-bar { width: 100%; height: 4px; background: var(--fill-secondary); border-radius: 2px; overflow: hidden; }
 .rt-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--accent2), var(--brand)); transition: width var(--dur-base) var(--ease-standard); }
+
+/* === Radar de estadísticas de equipo (pentágono, 5 ejes) === */
+.team-radar {
+  width: 100%;
+  max-width: 173px; /* 130 × 4/3: a la altura máxima conserva el 4/3 */
+  max-height: 130px;
+  margin-inline: auto;
+  aspect-ratio: 4 / 3;
+}
+.team-radar svg { width: 100%; height: 100%; overflow: visible; display: block; }
+.radar-ring { fill: none; stroke: rgba(255, 255, 255, 0.14); stroke-width: 0.5; }
+.radar-ring:last-of-type { stroke: rgba(255, 255, 255, 0.28); }
+.radar-spoke { stroke: rgba(255, 255, 255, 0.12); stroke-width: 0.5; }
+.radar-area {
+  fill: var(--radar-color, var(--arcade-cyan));
+  fill-opacity: 0.3;
+  stroke: var(--radar-color, var(--arcade-cyan));
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+.radar-dot { fill: var(--radar-color, var(--arcade-cyan)); }
+.radar-label {
+  fill: var(--label-secondary, rgba(255, 255, 255, 0.7));
+  font-family: var(--font-rounded);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.radar-val { fill: #fff; font-weight: 800; }
+
+/* Aporte de los objetos a los ratings (lo que las barras mostraban como "+N"). */
+.radar-items { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-top: 6px; }
+.ri-chip {
+  font-size: var(--t-caption-2); font-weight: 700; line-height: 1;
+  padding: 2px 6px; border-radius: 999px;
+  background: var(--fill-secondary);
+}
+.ri-chip.up { color: var(--arcade-green, #6cf08a); }
+.ri-chip.down { color: var(--arcade-red, #ff6b6b); }
 .chem-pill {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   padding-left: var(--space-4); border-left: 1px solid var(--separator);
@@ -1411,9 +1450,20 @@ select {
 
 /* --- Scouting del rival --- */
 .scouting-screen { max-width: 720px; margin: 0 auto; }
+/* En el scouting de dos columnas (mismo esquema que el armado) el contenedor
+   ocupa todo el ancho, igual que la build-screen: el campo se queda con su 1fr y
+   la columna lateral con su ancho fijo. (No afecta a la plantilla inicial, que
+   comparte .scouting-screen pero NO es .team-select-screen.) */
+.scouting-screen.team-select-screen { max-width: none; }
 /* Cabecera del rival en grid de 3 columnas (texto flexible · bandera · fuerza),
    más compacta que el flex anterior. .scout-team-meta se vuelve transparente
    para que sus dos hijos sean columnas del hero (en móvil vuelve a ser grid). */
+.scouting-screen .scout-hero{
+  grid-template-columns: 1fr;
+}
+.scouting-screen .scout-team-meta{
+  justify-content: center;
+}
 .scout-hero {
   display: grid; grid-template-columns: 1fr auto auto; align-items: center;
   gap: var(--space-3) var(--space-4);
@@ -1434,7 +1484,7 @@ select {
 /* Con DT del rival, ratings y carta del DT comparten fila (igual que el tablero):
    apilados en móvil; en desktop ratings flexible + carta estrecha (ver media query). */
 .scout-header-row { display: grid; grid-template-columns: 1fr; gap: var(--space-3); margin-bottom: var(--space-4); }
-.scout-ratings { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3); padding: var(--space-3); border-radius: var(--radius-l); }
+.scout-ratings { display: flex; justify-content: center; align-items: center; padding: var(--space-3); border-radius: var(--radius-l); }
 .scout-rating { display: grid; grid-template-columns: auto auto; gap: 3px var(--space-2); align-items: center; }
 .scout-rating span { color: var(--label-secondary); font-size: var(--t-caption-2); font-weight: 700; }
 .scout-rating b { justify-self: end; font-family: var(--font-rounded); }
@@ -2737,7 +2787,7 @@ select {
 
 .team-select-screen .build-nav .large-title {
   margin: 0;
-  font-size: clamp(1.3rem, 1.9vw, 1.8rem);
+  font-size: 1.5em;
 }
 
 .team-layout {
@@ -5369,8 +5419,8 @@ button.primary:active:not(:disabled),
   .team-select-screen .team-field-panel { order: 1; }
   .team-select-screen .team-roster { order: 2; }
   .team-select-screen .ratings-glass { order: 3; }
-  .team-select-screen .manager-glass { order: 3; }
-  .team-select-screen .opponent-brief { order: 4; }
+  .team-select-screen .manager-glass { order: 3; margin-top: 14px }
+  .team-select-screen .opponent-brief { order: 4; margin-top: 14px}
 
   .team-field-panel .team-panel-head {
     gap: 8px;

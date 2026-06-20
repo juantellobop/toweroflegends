@@ -257,6 +257,34 @@ export function calcularRatings(team) {
   return r;
 }
 
+// Estadísticas para el RADAR de equipo (5 ejes): los 4 ratings + Físico. Mismo
+// orden y escala que los ratings, para un radar coherente entre equipos.
+//  · Equipo del jugador (con once): el físico es la MEDIA real del atributo
+//    físico de sus jugadores de campo (con rasgo + DT).
+//  · Rival (sin atributos de jugador, solo ratings): se ESTIMA el físico desde
+//    sus ratings (defensa y medio, donde más pesa el físico en el motor).
+export function teamRadarStats(team) {
+  const r = calcularRatings(team);
+  let physical;
+  if (team.starting11) {
+    const groups = tacticalGroups(team.starting11, team.formation);
+    const field = [...groups.DEF, ...groups.MID, ...groups.ENG, ...groups.FWD];
+    const vals = field
+      .map(({ player }) => effectiveStats(player, team.manager || null)?.physical)
+      .filter((n) => Number.isFinite(n));
+    physical = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : (r.defense + r.midfield) / 2;
+  } else {
+    physical = 0.45 * r.defense + 0.35 * r.midfield + 0.2 * r.attack;
+  }
+  return {
+    attack: r.attack,
+    midfield: r.midfield,
+    defense: r.defense,
+    gk: r.gk,
+    physical: Math.max(1, Math.round(physical * 10) / 10),
+  };
+}
+
 // Construye un rematador "ponderable": el peso sale del perfil del hueco
 // (el 9 remata, el extremo llega por regate/pace), modulado por el rasgo.
 // Para rivales sin once se sintetiza desde el ataque.

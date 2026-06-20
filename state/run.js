@@ -13,7 +13,7 @@ import { MANAGERS } from '../data/managers.js';
 import { RNG, randomSeed } from '../engine/rng.js';
 import { generateOpponent } from '../data/opponents.js';
 import { simularPartido } from '../engine/simulate.js';
-import { calcularRatings } from '../engine/teamRatings.js';
+import { calcularRatings, teamRadarStats } from '../engine/teamRatings.js';
 import { computeChemistry, totalChemistry } from '../engine/chemistry.js';
 import { rewardFor, classifyResult, rollRarity } from '../engine/rewards.js';
 import { chemTeamBonus, metaBonuses } from '../engine/items.js';
@@ -550,6 +550,10 @@ export function setStyle(state, style) {
 
 export function liveRatings(state) {
   return calcularRatings({ formation: state.formation, style: state.style, starting11: state.starting11, items: state.items, manager: state.manager });
+}
+// Estadísticas del radar de equipo (5 ejes: ataque/medio/defensa/portería/físico).
+export function liveRadar(state) {
+  return teamRadarStats({ formation: state.formation, style: state.style, starting11: state.starting11, items: state.items, manager: state.manager });
 }
 export function liveChemistry(state) {
   // El total incluye la química de equipo aportada por reliquias (p. ej. el

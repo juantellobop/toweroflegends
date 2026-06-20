@@ -3,12 +3,13 @@
 import { esc } from './dom.js';
 import { managerCardHTML } from './cards.js';
 import { LINES } from '../data/config.js';
-import { calcularRatings } from '../engine/teamRatings.js';
+import { teamRadarStats } from '../engine/teamRatings.js';
 import { portraitPathForName, portraitPathForPlayer } from '../data/playerAssets.js';
-import { UI_ASSETS, preloadImages } from '../data/uiAssets.js';
+import { preloadImages } from '../data/uiAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { localizeOpponentName, t } from '../data/i18n.js';
 import { lineupFieldHTML, layoutInformative, staticChipHTML } from './lineupBoard.js';
+import { teamRadarHTML } from './radar.js';
 import { sceneSources } from '../match/scenes.js';
 
 // Al conocer al rival, el partido es inminente: calienta en segundo plano lo que
@@ -54,61 +55,60 @@ function field(opponent) {
 }
 
 function ratings(opponent) {
-  // Ratings efectivos: los mismos que usará la simulación (incluyen el
-  // modificador de la formación del rival), no los base precomputados.
-  const r = calcularRatings(opponent);
-  const rows = [
-    [t('ratings.attack'), Math.round(r.attack), UI_ASSETS.icons.attack],
-    [t('ratings.midfield'), Math.round(r.midfield), UI_ASSETS.icons.midfield],
-    [t('ratings.defense'), Math.round(r.defense), UI_ASSETS.icons.defense],
-    [t('ratings.gk'), Math.round(r.gk), UI_ASSETS.icons.gk],
-  ];
-  return `<div class="scout-ratings arcade-panel">
-    ${rows.map(([label, value, icon]) => `
-      <div class="scout-rating">
-        <img src="${icon}" alt="" aria-hidden="true" loading="eager" decoding="async" />
-        <span>${label}</span>
-        <b>${value}</b>
-        <i><span style="width:${Math.min(100, value)}%"></span></i>
-      </div>`).join('')}
+  // Radar del rival (5 ejes): los ratings efectivos —los mismos que usará la
+  // simulación— + el físico estimado. En el MISMO contenedor (.ratings-glass)
+  // que el radar del equipo propio en el armado, para idéntico estilo.
+  const color = opponent.color || opponent.colors?.primary || 'var(--arcade-cyan)';
+  return `<div class="ratings-glass glass">
+    ${teamRadarHTML(teamRadarStats(opponent), { color })}
   </div>`;
 }
 
-// DT del rival, si esta edición tiene uno enlazado (nation + año). Sus mods ya
-// están aplicados en los ratings de al lado; aquí muestra su carta —el mismo
-// chasis horizontal del tablero táctico (managerCardHTML en .manager-glass)—
-// repartiendo la fila con los ratings. Sin DT, los ratings ocupan todo el ancho.
+// Fila de cabecera de la columna lateral: radar + carta de DT (si la edición
+// tiene uno). Reutiliza .team-header-row del armado para el mismo reparto/orden.
 function ratingsRow(opponent) {
-  if (!opponent.manager) return ratings(opponent);
-  return `<div class="scout-header-row">
+  return `<div class="team-header-row">
     ${ratings(opponent)}
-    <div class="manager-glass arcade-panel">${managerCardHTML(opponent.manager)}</div>
+    ${opponent.manager ? `<div class="manager-glass arcade-panel">${managerCardHTML(opponent.manager)}</div>` : ''}
   </div>`;
 }
 
 export function renderScouting(root, state, handlers) {
   const opponent = state.opponent;
   warmUpcomingMatch(state);
+  // Mismo diseño de dos columnas que el armado (team-select-screen): el once del
+  // rival ocupa el panel izquierdo (tablero) y su identidad/ratings/DT la columna
+  // lateral derecha.
   root.innerHTML = `
-    <section class="screen scouting-screen pixel-screen">
-      <header class="scout-hero" style="--team-primary:${opponent.colors.primary};--team-secondary:${opponent.colors.secondary}">
-        <div>
-          <div class="scout-eyebrow">
-            <div class="level-badge">${t('generic.level', { level: state.level })}</div>
-            <p class="scout-kicker">${t('scouting.report')}</p>
+    <section class="screen scouting-screen pixel-screen team-select-screen" style="--team-primary:${opponent.colors.primary};--team-secondary:${opponent.colors.secondary}">
+      <div class="team-layout">
+        <main class="team-field-panel arcade-panel">
+          <div class="team-panel-head">
+            <div><h2>${t('scouting.opponentEleven')}</h2></div>
           </div>
-          <h1 class="large-title">${esc(localizeOpponentName(opponent))}</h1>
-        </div>
-        <div class="scout-team-meta">
-          <div class="scout-team-card" aria-hidden="true">
-            <img class="scout-flag-img" src="${esc(flagSrcForNation(opponent.name, [opponent.colors.primary, opponent.colors.secondary]))}" alt="" loading="eager" decoding="async" />
-          </div>
-          <div class="scout-strength"><span>${t('scouting.strength')}</span><b>${opponent.strength}</b></div>
-        </div>
-      </header>
-      ${ratingsRow(opponent)}
-      <h2 class="section-title">${t('scouting.opponentEleven')}</h2>
-      ${field(opponent)}
+          ${field(opponent)}
+        </main>
+
+        <aside class="team-side">
+          <header class="scout-hero">
+            <div>
+              <div class="scout-eyebrow">
+                <div class="level-badge">${t('generic.level', { level: state.level })}</div>
+                <p class="scout-kicker">${t('scouting.report')}</p>
+              </div>
+              <h1 class="large-title">${esc(localizeOpponentName(opponent))}</h1>
+            </div>
+            <div class="scout-team-meta">
+              <div class="scout-team-card" aria-hidden="true">
+                <img class="scout-flag-img" src="${esc(flagSrcForNation(opponent.name, [opponent.colors.primary, opponent.colors.secondary]))}" alt="" loading="eager" decoding="async" />
+              </div>
+              <div class="scout-strength"><span>${t('scouting.strength')}</span><b>${opponent.strength}</b></div>
+            </div>
+          </header>
+          ${ratingsRow(opponent)}
+        </aside>
+      </div>
+
       <div class="play-bar action-bar">
         <button id="scout-continue" class="primary big glass-cta">${t('scouting.continue')}</button>
       </div>
