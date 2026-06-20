@@ -42,8 +42,10 @@ function field(state) {
 }
 
 function ratings(state) {
+  // Equipo del usuario: el Físico es la media real del atributo (1-99), tope 100;
+  // los 4 ratings mantienen el tope 200.
   return `<div class="scout-ratings arcade-panel">
-    ${teamRadarHTML(liveRadar(state), { color: state.team?.color || 'var(--arcade-cyan)' })}
+    ${teamRadarHTML(liveRadar(state), { color: state.team?.color || 'var(--arcade-cyan)', physicalMax: 100 })}
   </div>`;
 }
 

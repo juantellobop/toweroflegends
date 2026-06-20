@@ -25,11 +25,15 @@ function polygonPoints(radii) {
 }
 
 // Radar de equipo. `stats` = { attack, midfield, defense, gk, physical }. `max`
-// normaliza (un valor ≥ max = pentágono más grande, en el borde). El tope es 200:
-// los ratings no están limitados a 100 (con química/objetos/DT llegan a ~180).
+// normaliza (un valor ≥ su tope = pentágono más grande, en el borde). El tope de
+// los 4 ratings es 200 (no están limitados a 100: con química/objetos/DT llegan a
+// ~180). `physicalMax` permite un tope distinto para el eje Físico: en el equipo
+// del usuario el Físico es la MEDIA real del atributo (escala 1-99), así que su
+// tope es 100; en el rival se estima desde los ratings, así que mantiene 200.
 // `color` tiñe el polígono de datos.
-export function teamRadarHTML(stats, { color = 'var(--arcade-cyan)', max = 200, ariaLabel = '' } = {}) {
-  const norm = (v) => Math.max(0.04, Math.min(1, (Number(v) || 0) / max));
+export function teamRadarHTML(stats, { color = 'var(--arcade-cyan)', max = 200, physicalMax = max, ariaLabel = '' } = {}) {
+  const maxFor = (key) => (key === 'physical' ? physicalMax : max);
+  const norm = (key) => Math.max(0.04, Math.min(1, (Number(stats[key]) || 0) / maxFor(key)));
   const label = ariaLabel || AXES.map((k) => `${t(`ratings.${k}`)} ${Math.round(Number(stats[k]) || 0)}`).join(', ');
 
   // Anillos de fondo (pentágonos concéntricos) + radios (uno por eje).
@@ -42,10 +46,10 @@ export function teamRadarHTML(stats, { color = 'var(--arcade-cyan)', max = 200, 
   }).join('');
 
   // Polígono de datos + vértices.
-  const dataRadii = AXES.map((key) => R * norm(stats[key]));
+  const dataRadii = AXES.map((key) => R * norm(key));
   const area = `<polygon class="radar-area" points="${polygonPoints(dataRadii)}" />`;
   const dots = AXES.map((key, i) => {
-    const [x, y] = vertex(i, R * norm(stats[key]));
+    const [x, y] = vertex(i, R * norm(key));
     return `<circle class="radar-dot" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="1.4" />`;
   }).join('');
 

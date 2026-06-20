@@ -208,7 +208,7 @@ function ratingsHeader(state) {
     : '';
   return `
     <div class="ratings-glass glass" id="ratingsHeader">
-      ${teamRadarHTML(liveRadar(state), { color: state.team?.color || 'var(--arcade-cyan)' })}
+      ${teamRadarHTML(liveRadar(state), { color: state.team?.color || 'var(--arcade-cyan)', physicalMax: 100 })}
       ${deltaStrip}
     </div>`;
 }
