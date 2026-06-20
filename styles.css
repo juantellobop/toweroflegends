@@ -1345,7 +1345,7 @@ select {
   object-fit: cover;
   image-rendering: pixelated;
 }
-.field-chip.empty { background: rgba(0,0,0,0.18); border-style: dashed; border-color: rgba(255,255,255,0.55); }
+.field-chip.empty { background: rgba(0,0,0,0.18); border-style: dashed; border-color: rgba(255,255,255,0.25); }
 .chip-plus { font-size: 22px; font-weight: 300; line-height: 1; }
 
 .slot-picker { border-radius: var(--radius-l); padding: 0px; margin-top: var(--space-4); }
