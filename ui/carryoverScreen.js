@@ -2,14 +2,14 @@
 // para arrastrarlo a una run nueva. Se entra desde el fin de run (renderGameOver).
 
 import { t } from '../data/i18n.js';
-import { playerCardHTML } from './cards.js';
+import { playerShowcaseHTML } from './showcaseCard.js';
 
 const LINE_ORDER = { GK: 0, DEF: 1, MID: 2, FWD: 3 };
 
 export function renderCarryover(root, state, handlers) {
   const squad = (state.squad || []).slice().sort((a, b) => LINE_ORDER[a.position] - LINE_ORDER[b.position]);
   const cards = squad
-    .map((p) => playerCardHTML(p, { idValue: p.uid, clickable: true, lazy: true }))
+    .map((p) => playerShowcaseHTML(p, { idValue: p.uid, clickable: true }))
     .join('');
 
   root.innerHTML = `
@@ -26,7 +26,7 @@ export function renderCarryover(root, state, handlers) {
 
   const grid = root.querySelector('.carryover-grid');
   grid.addEventListener('click', (event) => {
-    const card = event.target.closest('.card.clickable');
+    const card = event.target.closest('.tdl-card.clickable');
     if (!card || !grid.contains(card)) return;
     const player = squad.find((p) => p.uid === card.dataset.id);
     if (player) handlers.onPick(player);

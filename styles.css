@@ -194,6 +194,10 @@ select {
 
 /* === Cartas === */
 .card-grid { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 18px; }
+/* Carryover ("Volver a jugar"): la plantilla con la carta escaparate completa
+   (.tdl-card). El .tdl-slot lleva la container query, así que basta fijar su
+   ancho para que las cartas se repartan en la rejilla. */
+.carryover-grid .tdl-slot { width: clamp(128px, 18vw, 168px); }
 .card {
   width: 188px;
   background: linear-gradient(160deg, var(--panel2), var(--panel));
