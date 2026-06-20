@@ -15137,5 +15137,205 @@ export const PLAYERS = [
     "gk": null,
     "trait": null,
     "tacticalType": null
+  },
+  {
+    "id": "fwd_samuel_eto_o",
+    "name": "Samuel Eto'o",
+    "nation": "Camerún",
+    "era": "2010",
+    "position": "FWD",
+    "rarity": "legend",
+    "ovr": 95,
+    "stats": {
+      "pace": 99,
+      "shooting": 99,
+      "passing": 64,
+      "dribbling": 99,
+      "defending": 60,
+      "physical": 99
+    },
+    "gk": null,
+    "trait": "Velocista",
+    "tacticalType": "contra"
+  },
+  {
+    "id": "fwd_fernando_torres",
+    "name": "Fernando Torres",
+    "nation": "España",
+    "era": "2010",
+    "position": "FWD",
+    "rarity": "legend",
+    "ovr": 92,
+    "stats": {
+      "pace": 99,
+      "shooting": 99,
+      "passing": 80,
+      "dribbling": 80,
+      "defending": 70,
+      "physical": 99
+    },
+    "gk": null,
+    "trait": "Killer",
+    "tacticalType": "posesion"
+  },
+  {
+    "id": "mid_david_silva",
+    "name": "David Silva",
+    "nation": "España",
+    "era": "2010",
+    "position": "MID",
+    "rarity": "legend",
+    "ovr": 88,
+    "stats": {
+      "pace": 99,
+      "shooting": 90,
+      "passing": 99,
+      "dribbling": 90,
+      "defending": 60,
+      "physical": 85
+    },
+    "gk": null,
+    "trait": "Maestro",
+    "tacticalType": "posesion"
+  },
+  {
+    "id": "def_jordi_alba",
+    "name": "Jordi Alba",
+    "nation": "España",
+    "era": "2014",
+    "position": "DEF",
+    "rarity": "legend",
+    "ovr": 91,
+    "stats": {
+      "pace": 99,
+      "shooting": 70,
+      "passing": 99,
+      "dribbling": 99,
+      "defending": 90,
+      "physical": 83
+    },
+    "gk": null,
+    "trait": "Motor",
+    "tacticalType": "posesion"
+  },
+  {
+    "id": "fwd_mikel_oyarzabal",
+    "name": "Mikel Oyarzabal",
+    "nation": "España",
+    "era": "2022",
+    "position": "FWD",
+    "rarity": "legend",
+    "ovr": 92,
+    "stats": {
+      "pace": 95,
+      "shooting": 95,
+      "passing": 90,
+      "dribbling": 90,
+      "defending": 70,
+      "physical": 85
+    },
+    "gk": null,
+    "trait": "Capitán",
+    "tacticalType": "posesion"
+  },
+  {
+    "id": "fwd_jesus_navas",
+    "name": "Jesús Navas",
+    "nation": "España",
+    "era": "2010",
+    "position": "FWD",
+    "rarity": "legend",
+    "ovr": 93,
+    "stats": {
+      "pace": 99,
+      "shooting": 95,
+      "passing": 85,
+      "dribbling": 85,
+      "defending": 80,
+      "physical": 99
+    },
+    "gk": null,
+    "trait": "Capitán",
+    "tacticalType": "posesion"
+  },
+  {
+    "id": "mid_koke",
+    "name": "Koke",
+    "nation": "España",
+    "era": "2014",
+    "position": "MID",
+    "rarity": "legend",
+    "ovr": 92,
+    "stats": {
+      "pace": 99,
+      "shooting": 85,
+      "passing": 90,
+      "dribbling": 85,
+      "defending": 99,
+      "physical": 99
+    },
+    "gk": null,
+    "trait": "Motor",
+    "tacticalType": "posesion"
+  },
+  {
+    "id": "fwd_lamine_yamal",
+    "name": "Lamine Yamal",
+    "nation": "España",
+    "era": "2026",
+    "position": "FWD",
+    "rarity": "legend",
+    "ovr": 92,
+    "stats": {
+      "pace": 99,
+      "shooting": 90,
+      "passing": 85,
+      "dribbling": 99,
+      "defending": 60,
+      "physical": 80
+    },
+    "gk": null,
+    "trait": "Velocista",
+    "tacticalType": "posesion"
+  },
+  {
+    "id": "mid_santi_cazorla",
+    "name": "Santi Cazorla",
+    "nation": "España",
+    "era": "2014",
+    "position": "MID",
+    "rarity": "legend",
+    "ovr": 92,
+    "stats": {
+      "pace": 99,
+      "shooting": 90,
+      "passing": 99,
+      "dribbling": 85,
+      "defending": 85,
+      "physical": 90
+    },
+    "gk": null,
+    "trait": "Maestro",
+    "tacticalType": "posesion"
+  },
+  {
+    "id": "fwd_enzo_francescoli",
+    "name": "Enzo Francescoli",
+    "nation": "Uruguay",
+    "era": "1986",
+    "position": "FWD",
+    "rarity": "legend",
+    "ovr": 93,
+    "stats": {
+      "pace": 90,
+      "shooting": 95,
+      "passing": 90,
+      "dribbling": 95,
+      "defending": 60,
+      "physical": 95
+    },
+    "gk": null,
+    "trait": "Maestro",
+    "tacticalType": "posesion"
   }
 ];

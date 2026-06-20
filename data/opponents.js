@@ -1981,7 +1981,7 @@ export const OPPONENTS = [
       {
         "name": "Xavi Hernández",
         "position": "MID",
-        "ovr": 100
+        "ovr": 99
       },
       {
         "name": "Andrés Iniesta",
@@ -1989,17 +1989,23 @@ export const OPPONENTS = [
         "ovr": 94
       },
       {
+        "name": "Fernando Torres",
+        "position": "FWD",
+        "ovr": 92
+      },
+      {
         "name": "David Villa",
         "position": "FWD",
         "ovr": 95
-      },
+      }
+    ],
+    "bench": [
       {
         "name": "Pedro Rodríguez",
         "position": "FWD",
         "ovr": 96
       }
     ],
-    "bench": [],
     "managerId": "manager_vicente_del_bosque",
     "stage": "quarterfinal-or-better"
   },
@@ -5773,7 +5779,7 @@ export const OPPONENTS = [
       {
         "name": "Héctor Enrique",
         "position": "MID",
-        "ovr": 100
+        "ovr": 99
       },
       {
         "name": "Diego Maradona",
@@ -5788,7 +5794,7 @@ export const OPPONENTS = [
       {
         "name": "Pedro Pasculli",
         "position": "FWD",
-        "ovr": 100
+        "ovr": 99
       }
     ],
     "bench": [],
