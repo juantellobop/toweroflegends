@@ -361,12 +361,12 @@ export const PLAYERS = [
     "era": "2010",
     "position": "DEF",
     "rarity": "legend",
-    "ovr": 93,
+    "ovr": 94,
     "stats": {
       "pace": 90,
-      "shooting": 70,
-      "passing": 78,
-      "dribbling": 74,
+      "shooting": 80,
+      "passing": 80,
+      "dribbling": 80,
       "defending": 99,
       "physical": 99
     },
@@ -561,14 +561,14 @@ export const PLAYERS = [
     "era": "2010",
     "position": "MID",
     "rarity": "legend",
-    "ovr": 93,
+    "ovr": 94,
     "stats": {
       "pace": 99,
       "shooting": 99,
       "passing": 99,
       "dribbling": 99,
       "defending": 73,
-      "physical": 87
+      "physical": 93
     },
     "gk": null,
     "trait": "Maestro",
@@ -5550,7 +5550,7 @@ export const PLAYERS = [
     "nation": "Francia",
     "era": "2014",
     "position": "FWD",
-    "rarity": "rare",
+    "rarity": "epic",
     "ovr": 90,
     "stats": {
       "pace": 83,
@@ -6065,12 +6065,12 @@ export const PLAYERS = [
     "era": "2010",
     "position": "DEF",
     "rarity": "legend",
-    "ovr": 96,
+    "ovr": 95,
     "stats": {
       "pace": 93,
       "shooting": 81,
       "passing": 91,
-      "dribbling": 89,
+      "dribbling": 79,
       "defending": 99,
       "physical": 97
     },
@@ -6105,12 +6105,12 @@ export const PLAYERS = [
     "era": "2010",
     "position": "MID",
     "rarity": "legend",
-    "ovr": 94,
+    "ovr": 93,
     "stats": {
       "pace": 91,
       "shooting": 70,
       "passing": 99,
-      "dribbling": 95,
+      "dribbling": 91,
       "defending": 95,
       "physical": 96
     },
@@ -6560,16 +6560,16 @@ export const PLAYERS = [
     "name": "Maxi Rodríguez",
     "nation": "Argentina",
     "era": "2006",
-    "position": "FWD",
+    "position": "MID",
     "rarity": "legend",
-    "ovr": 92,
+    "ovr": 90,
     "stats": {
-      "pace": 90,
+      "pace": 96,
       "shooting": 99,
-      "passing": 84,
-      "dribbling": 88,
-      "defending": 72,
-      "physical": 86
+      "passing": 89,
+      "dribbling": 90,
+      "defending": 82,
+      "physical": 90
     },
     "gk": null,
     "trait": null,
@@ -9185,18 +9185,18 @@ export const PLAYERS = [
     "nation": "España",
     "era": "2002",
     "position": "FWD",
-    "rarity": "epic",
-    "ovr": 90,
+    "rarity": "legend",
+    "ovr": 91,
     "stats": {
       "pace": 90,
       "shooting": 99,
       "passing": 78,
       "dribbling": 82,
       "defending": 66,
-      "physical": 90
+      "physical": 97
     },
     "gk": null,
-    "trait": null,
+    "trait": "Killer",
     "tacticalType": null
   },
   {
@@ -10645,14 +10645,14 @@ export const PLAYERS = [
     "era": "1998",
     "position": "DEF",
     "rarity": "legend",
-    "ovr": 90,
+    "ovr": 93,
     "stats": {
-      "pace": 91,
+      "pace": 99,
       "shooting": 71,
       "passing": 86,
       "dribbling": 86,
       "defending": 91,
-      "physical": 92
+      "physical": 99
     },
     "gk": null,
     "trait": null,
@@ -10783,14 +10783,14 @@ export const PLAYERS = [
     "name": "Marcelo Gallardo",
     "nation": "Argentina",
     "era": "1998",
-    "position": "FWD",
+    "position": "MID",
     "rarity": "legend",
-    "ovr": 91,
+    "ovr": 90,
     "stats": {
       "pace": 90,
       "shooting": 94,
-      "passing": 96,
-      "dribbling": 88,
+      "passing": 99,
+      "dribbling": 92,
       "defending": 72,
       "physical": 86
     },
@@ -12247,14 +12247,14 @@ export const PLAYERS = [
     "era": "1994",
     "position": "GK",
     "rarity": "epic",
-    "ovr": 84,
+    "ovr": 88,
     "stats": null,
     "gk": {
-      "reflexes": 83,
-      "handling": 85,
-      "positioning": 83
+      "reflexes": 86,
+      "handling": 88,
+      "positioning": 90
     },
-    "trait": null,
+    "trait": "Capitán",
     "tacticalType": null
   },
   {
