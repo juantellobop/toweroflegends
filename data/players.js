@@ -1061,13 +1061,13 @@ export const PLAYERS = [
     "era": "1998",
     "position": "FWD",
     "rarity": "legend",
-    "ovr": 92,
+    "ovr": 93,
     "stats": {
       "pace": 99,
       "shooting": 99,
       "passing": 70,
       "dribbling": 85,
-      "defending": 30,
+      "defending": 66,
       "physical": 99
     },
     "gk": null,
@@ -15453,5 +15453,25 @@ export const PLAYERS = [
     },
     "trait": "Paradón",
     "tacticalType": null
+  },
+  {
+    "id": "mid_patxi_salinas",
+    "name": "Patxi Salinas",
+    "nation": "España",
+    "era": "1988",
+    "position": "DEF",
+    "rarity": "epic",
+    "ovr": 87,
+    "stats": {
+      "pace": 97,
+      "shooting": 69,
+      "passing": 69,
+      "dribbling": 69,
+      "defending": 91,
+      "physical": 89
+    },
+    "gk": null,
+    "trait": "Muro",
+    "tacticalType": "presion"
   }
 ];
