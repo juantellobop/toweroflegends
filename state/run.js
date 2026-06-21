@@ -446,6 +446,18 @@ function emptyStarting11() {
   };
 }
 
+// Todos los huecos del grid (en CUALQUIER línea del motor) que admiten una posición
+// natural, como { line, slotIndex }. P. ej. un FWD puede caer en DEL (5 huecos) o
+// ENG (5); un MID en MED + ENG; un DEF en sus 5 + los 2 MED laterales; un GK solo en
+// POR. Define dónde puede ubicarse un Corrupto sellado.
+function eligibleSlots(formation, position) {
+  return LINES.flatMap((line) =>
+    formationLineSlots(formation, line)
+      .filter((s) => s.accepts.includes(position))
+      .map((s) => ({ line, slotIndex: s.slotIndex }))
+  );
+}
+
 // Rellena el once desde la PLANTILLA de la formación elegida (qué celdas del grid
 // ocupa), hueco a hueco con los mejores de la plantilla. Las celdas más
 // restrictivas (una sola posición) eligen primero para no quedarse sin
@@ -454,25 +466,46 @@ function emptyStarting11() {
 export function autoFillStarting11(state) {
   const used = new Set();
   const eleven = emptyStarting11();
+  const key = (c) => `${c.line}:${c.slotIndex}`;
+  // Hueco ACTUAL de cada Corrupto antes de reconstruir: respaldo para saves previos
+  // a corruptoSlot, que así conservan su sitio en vez de saltar a uno fijo.
+  const currentSlot = new Map();
+  for (const line of LINES) {
+    (state.starting11[line] || []).forEach((p, i) => {
+      if (p && isCorrupto(p)) currentSlot.set(p.uid, { line, slotIndex: i });
+    });
+  }
   // Celdas de la plantilla, con su rol/accepts del grid (vía formationLineSlots).
   const cells = templateSlots(state.formation).map((cell) => {
     const slot = formationLineSlots(state.formation, cell.line)[cell.slotIndex];
     return { line: cell.line, slotIndex: cell.slotIndex, accepts: slot.accepts, gridRow: slot.gridRow };
   });
-  // Los Corruptos (sellados) se FIJAN primero en una celda de su línea natural;
-  // el relleno normal no puede tocar ni su jugador ni su hueco.
-  const pinned = new Set();
+  // Los Corruptos (sellados) van a su hueco GUARDADO (corruptoSlot, sorteado al
+  // incorporarse), no a una celda fija de la plantilla. Si un save antiguo no lo
+  // tiene, conservan donde estaban o, en último caso, el primer hueco compatible.
+  // Cada Corrupto colocado gasta una plaza: si cae fuera de la plantilla, una de sus
+  // celdas más flexibles queda vacía para no pasar de 11.
+  const taken = new Set();
+  let pinnedCount = 0;
   for (const corrupto of state.squad.filter(isCorrupto)) {
-    const key = (c) => `${c.line}:${c.slotIndex}`;
-    const cell = cells.find((c) => !pinned.has(key(c)) && c.line === corrupto.position && c.accepts.includes(corrupto.position))
-      || cells.find((c) => !pinned.has(key(c)) && c.accepts.includes(corrupto.position));
-    if (!cell) continue;
-    eleven[cell.line][cell.slotIndex] = corrupto;
+    const eligible = eligibleSlots(state.formation, corrupto.position);
+    const free = (s) => s && !taken.has(key(s)) &&
+      eligible.some((e) => e.line === s.line && e.slotIndex === s.slotIndex);
+    const slot = [corrupto.corruptoSlot, currentSlot.get(corrupto.uid)].find(free)
+      || eligible.find((s) => !taken.has(key(s)));
+    if (!slot) continue;
+    corrupto.corruptoSlot = { line: slot.line, slotIndex: slot.slotIndex };
+    eleven[slot.line][slot.slotIndex] = corrupto;
     used.add(corrupto.id);
-    pinned.add(key(cell));
+    taken.add(key(slot));
+    pinnedCount += 1;
   }
+  // Rellena con los mejores las celdas libres de la plantilla, parando al completar
+  // los 11 (las celdas que un Corrupto ocupa fuera de plantilla restan presupuesto).
+  let budget = cells.length - pinnedCount;
   for (const cell of cells.slice().sort((a, b) => a.accepts.length - b.accepts.length)) {
-    if (pinned.has(`${cell.line}:${cell.slotIndex}`)) continue;
+    if (budget <= 0) break;
+    if (taken.has(key(cell))) continue;
     const player = state.squad
       .filter((p) => cell.accepts.includes(p.position) && !used.has(p.id) && !isUnavailable(p) && !isCorrupto(p))
       .sort((a, b) =>
@@ -482,6 +515,7 @@ export function autoFillStarting11(state) {
     if (!player) continue;
     used.add(player.id);
     eleven[cell.line][cell.slotIndex] = player;
+    budget -= 1;
   }
   state.starting11 = eleven;
 }
@@ -764,37 +798,46 @@ export function chooseCorruptoCard(state, template) {
   return card;
 }
 
-// Coloca al Corrupto (sellado) en un hueco de su LÍNEA natural y garantiza que
-// entra al once. Con el once lleno (11), ocupa el hueco del titular más flojo de
-// su línea, que pasa al banquillo; si su línea no tiene a nadie de su posición,
-// libera al titular global más flojo. Con menos de 11, ocupa un hueco vacío.
+// Coloca al Corrupto (sellado) en un hueco AL AZAR de los que admite su posición
+// (cualquier línea, no solo la natural: un FWD puede caer en DEL o ENG) y garantiza
+// que entra al once. Guarda el hueco en la carta (corruptoSlot) para conservarlo al
+// recomponer la alineación. Mantiene 11 titulares: si el hueco sorteado está
+// ocupado, su titular pasa al banquillo; si está vacío con el once lleno, sale el
+// titular más flojo (que no sea Corrupto).
 function forcePlaceSealed(state, player) {
-  const line = player.position;
-  const slots = formationLineSlots(state.formation, line).filter((s) => s.accepts.includes(player.position));
-  if (!slots.length) return;
-  const arr = lineSlotArray(state, line);
-  const occupied = slots.filter((s) => arr[s.slotIndex]);
+  const eligible = eligibleSlots(state.formation, player.position);
+  if (!eligible.length) return;
+  const occupantOf = (s) => lineSlotArray(state, s.line)[s.slotIndex];
   const total = LINES.reduce((n, l) => n + (state.starting11[l] || []).filter(Boolean).length, 0);
+  const empty = eligible.filter((s) => !occupantOf(s));
+  // A un Corrupto sellado no se le desaloja: solo se reemplaza a titulares normales.
+  const replaceable = eligible.filter((s) => { const o = occupantOf(s); return o && !isCorrupto(o); });
 
   let target;
-  if (total >= 11) {
-    if (occupied.length) {
-      target = occupied.sort((a, b) => playerOVR(arr[a.slotIndex]) - playerOVR(arr[b.slotIndex]))[0];
-    } else {
-      // Su línea no tiene titulares de su posición: deja sitio liberando al
-      // titular global más flojo (de otra línea) y ocupa un hueco vacío.
+  if (total < 11 && empty.length) {
+    // Once incompleto: ocupa un hueco vacío al azar sin desplazar a nadie.
+    target = state.rng.pick(empty);
+  } else {
+    // Once lleno (o sin huecos vacíos compatibles): cualquier hueco al azar.
+    const pool = empty.concat(replaceable);
+    if (!pool.length) return;
+    target = state.rng.pick(pool);
+    if (!occupantOf(target)) {
+      // Hueco vacío con el once lleno: libera al titular global más flojo (no
+      // corrupto) para no pasar de 11. Nunca al portero ni al último defensa, para
+      // no romper el mínimo de 1 GK y ≥1 DEF que exige el once.
+      const defCount = (state.starting11.DEF || []).filter(Boolean).length;
       const weakest = LINES.flatMap((l) => (state.starting11[l] || []).filter(Boolean).map((p) => ({ l, p })))
-        .filter(({ p }) => !isCorrupto(p))
+        .filter(({ l, p }) => !isCorrupto(p) && l !== 'GK' && !(l === 'DEF' && defCount <= 1))
         .sort((a, b) => playerOVR(a.p) - playerOVR(b.p))[0];
       if (weakest) clearLineupSlot(state, weakest.p.uid);
-      target = slots.find((s) => !arr[s.slotIndex]) || slots[0];
     }
-  } else {
-    target = slots.find((s) => !arr[s.slotIndex]) || occupied[0] || slots[0];
   }
-  if (!target) return;
+
+  player.corruptoSlot = { line: target.line, slotIndex: target.slotIndex };
+  const arr = lineSlotArray(state, target.line);
   arr[target.slotIndex] = player;
-  state.starting11[line] = arr;
+  state.starting11[target.line] = arr;
   state.formation = detectFormation(state.starting11);
 }
 
