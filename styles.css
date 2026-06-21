@@ -2862,6 +2862,7 @@ select {
   width: min(100%, 80vh, 860px);
   max-width: none;
   height: min(84vh, 880px, calc(100vh - 205px));
+  max-height: 820px;
   min-height: 520px;
   aspect-ratio: 3 / 4;
   margin: 0 auto;
