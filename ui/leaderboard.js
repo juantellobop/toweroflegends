@@ -230,10 +230,12 @@ function lineupSlots(lineup, formation) {
   const tmpl = FORMATION_TEMPLATES[formation];
   const medCount = tmpl ? tmpl.MED.length : Math.ceil(byLine.MID.length / 2);
   const slots = [];
-  byLine.GK.forEach((p) => slots.push({ line: 'GK', slotIndex: 0, gridRow: 'POR', col: 2, player: p }));
-  byLine.DEF.forEach((p, i) => slots.push({ line: 'DEF', slotIndex: i, gridRow: 'DEF', col: i, player: p }));
-  byLine.FWD.forEach((p, i) => slots.push({ line: 'FWD', slotIndex: i, gridRow: 'DEL', col: i, player: p }));
-  byLine.MID.forEach((p, i) => slots.push({ line: 'MID', slotIndex: i, gridRow: i < medCount ? 'MED' : 'ENG', col: i, player: p }));
+  // Saves antiguos: SIN columna real del grid (solo orden secuencial), para que
+  // layoutInformative reparta equilibrado en vez de amontonar a la izquierda.
+  byLine.GK.forEach((p) => slots.push({ line: 'GK', slotIndex: 0, gridRow: 'POR', player: p }));
+  byLine.DEF.forEach((p, i) => slots.push({ line: 'DEF', slotIndex: i, gridRow: 'DEF', player: p }));
+  byLine.FWD.forEach((p, i) => slots.push({ line: 'FWD', slotIndex: i, gridRow: 'DEL', player: p }));
+  byLine.MID.forEach((p, i) => slots.push({ line: 'MID', slotIndex: i, gridRow: i < medCount ? 'MED' : 'ENG', player: p }));
   return slots;
 }
 

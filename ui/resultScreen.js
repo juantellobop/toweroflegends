@@ -8,7 +8,7 @@ import { flagSrcForNation } from '../data/flags.js';
 import { renderLeaderboard } from './leaderboard.js';
 import { pressArticleHTML } from './prensa.js';
 import { localizeNation, localizeOpponentName, t, tIndexed } from '../data/i18n.js';
-import { CONFIG, FORMATIONS, LINES } from '../data/config.js';
+import { CONFIG, FORMATIONS, LINES, CUSTOM_FORMATION } from '../data/config.js';
 import { assignLineToSlots } from '../state/run.js';
 import { portraitPathForPlayer } from '../data/playerAssets.js';
 import { lineupFieldHTML, positionSlots, staticChipHTML } from './lineupBoard.js';
@@ -39,13 +39,19 @@ function redsRowHTML(reds) {
 // exactas del dibujo. Los expulsados se muestran en su sitio con tarjeta roja.
 // Sin kickoff11 (saves antiguos) cae al once actual. Vacío sin alineación.
 function lastTacticHTML(state) {
-  if (!state.formation || !FORMATIONS[state.formation]) return '';
+  // Acepta tanto un dibujo con nombre como "Personalizada" (once a medida): el
+  // tablero del grid coloca a los 11 por su hueco igual. Antes se exigía un
+  // FORMATIONS[...] válido y el campo DESAPARECÍA con cualquier once personalizado.
+  if (!state.formation || (!FORMATIONS[state.formation] && state.formation !== CUSTOM_FORMATION)) return '';
   const m = state.lastMatch;
   const byUid = new Map((state.squad || []).map((p) => [p.uid, p]));
   const kickoff = m?.kickoff11;
-  const lineFor = (line) => kickoff
-    ? (kickoff[line] || []).map((uid) => (uid != null && byUid.get(uid)) || null)
-    : (state.starting11?.[line] || []);
+  const fromKickoff = (line) => (kickoff?.[line] || []).map((uid) => (uid != null && byUid.get(uid)) || null);
+  // El once tal como saltó al campo (kickoff11) tiene prioridad; si sus uids no
+  // resuelven contra la plantilla (save antiguo/incoherente) se cae al once actual
+  // para que el tablero del último partido NUNCA desaparezca.
+  const kickoffHasPlayers = kickoff && LINES.some((line) => fromKickoff(line).some(Boolean));
+  const lineFor = kickoffHasPlayers ? fromKickoff : ((line) => state.starting11?.[line] || []);
   const expelled = new Set((m?.expulsadosA || []).map((e) => e.uid));
   const injured = new Set((m?.lesionadosA || []).map((e) => e.uid));
   const slots = LINES.flatMap((line) => {
@@ -77,7 +83,7 @@ function lastTacticHTML(state) {
     : '';
   return `
     <div class="gameover-tactic arcade-panel">
-      <span class="gameover-match-label">${t('result.lastTactic')} · ${t('scouting.formation', { formation: state.formation })}</span>
+      <span class="gameover-match-label">${t('result.lastTactic')} · ${t('scouting.formation', { formation: state.formation === CUSTOM_FORMATION ? t('tactics.custom') : state.formation })}</span>
       ${field}
       ${managerHTML}
     </div>`;
@@ -236,9 +242,9 @@ export function renderGameOver(root, state, best, handlers) {
       <div class="gameover-match arcade-panel">
         <span class="gameover-match-label">${t('result.lastMatch')}</span>
         <div class="gameover-match-score">
-          <span>${esc(state.team?.name || 'Leyendas')}</span>
+          <span><img class="flag-img" src="${esc(flagSrcForNation(state.team?.nation || state.team?.name || 'Leyendas', [state.team?.color || '#d4af37', '#071459']))}" alt="" loading="eager" decoding="async" />${esc(state.team?.name || 'Leyendas')}</span>
           <b class="final-score">${m.golesA} <span class="sep">:</span> ${m.golesB}</b>
-          <span>${esc(oppName)}</span>
+          <span>${state.opponent ? `<img class="flag-img" src="${esc(flagSrcForNation(state.opponent.name, [state.opponent.colors.primary, state.opponent.colors.secondary]))}" alt="" loading="eager" decoding="async" />` : ''}${esc(oppName)}</span>
         </div>
         <div class="result-scorers">
           <span>${t('result.scorers')}</span>

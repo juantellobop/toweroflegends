@@ -207,7 +207,6 @@ select {
   width: 188px;
   background: linear-gradient(160deg, var(--panel2), var(--panel));
   border: 1px solid var(--line);
-  border-top: 4px solid var(--common);
   border-radius: 14px;
   padding: 12px;
   transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
@@ -390,7 +389,7 @@ select {
 
 /* === Resultado === */
 .result-screen { text-align: center; max-width: 620px; margin: 0 auto; }
-.final-score { font-size: 64px; font-weight: 800; margin: 14px 0 4px; }
+.final-score { font-size: 64px; font-weight: 800; }
 .vs-line { color: var(--muted); margin-bottom: 18px; }
 .reward-box { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin: 0 auto 18px; max-width: 460px; }
 .tier-tag { display: inline-block; font-weight: 800; padding: 4px 14px; border-radius: 999px; margin-bottom: 8px; }
@@ -948,7 +947,7 @@ select {
   transform: translateX(-50%);
   font-family: var(--font-pixel); font-size: var(--t-caption-1); font-weight: 700;
   color: var(--arcade-blue-900); background: var(--arcade-yellow);
-  padding: 6px 12px; border: 3px solid #fff;
+  padding: 6px 12px; border: 2px solid #fff;
   text-transform: uppercase; letter-spacing: 1px; white-space: nowrap;
   box-shadow: 0 6px 0 rgba(0,0,0,.32);
   animation: pack-tap-blink 1.4s steps(1, end) infinite;
@@ -1475,8 +1474,7 @@ select {
 }
 .scout-hero {
   display: grid; grid-template-columns: 1fr auto auto; align-items: center;
-  gap: var(--space-3) var(--space-4);
-  margin-bottom: var(--space-4); padding: var(--space-4); border-radius: var(--radius-l);
+  gap: var(--space-3) var(--space-4); padding: var(--space-4); border-radius: var(--radius-l);
   background: linear-gradient(135deg, color-mix(in srgb, var(--team-primary) 35%, var(--bg-tertiary)), color-mix(in srgb, var(--team-secondary) 24%, var(--bg-secondary)));
   border: 1px solid color-mix(in srgb, var(--team-primary) 55%, var(--separator));
 }
@@ -1616,7 +1614,7 @@ button.primary:active:not(:disabled),
 
 select {
   border-radius: 0;
-  border: 3px solid var(--arcade-cyan);
+  border: 2px solid var(--arcade-cyan);
   background: var(--arcade-paper);
   color: var(--arcade-blue-900);
   font-family: var(--font-pixel);
@@ -1680,7 +1678,7 @@ select {
   border-radius: 0;
   background: var(--arcade-yellow);
   color: var(--arcade-blue-900);
-  border: 3px solid var(--arcade-blue-900);
+  border: 2px solid var(--arcade-blue-900);
   box-shadow: 0 0 0 2px #FFF5A8 inset;
   text-transform: uppercase;
 }
@@ -1706,7 +1704,7 @@ select {
     radial-gradient(circle at 35% 42%, rgba(255,49,84,.18), transparent 30%),
     linear-gradient(180deg, rgba(5,12,44,.02), rgba(5,12,44,.72) 72%, #050C2C),
     var(--title-bg) center / cover no-repeat;
-  border: 4px solid rgba(37,230,255,.28);
+  border: 2px solid rgba(37,230,255,.28);
   box-shadow: 0 0 0 4px rgba(0,0,0,.26) inset;
 }
 
@@ -1755,7 +1753,7 @@ select {
   justify-self: center;
   padding: 4px 10px;
   background: var(--arcade-red);
-  border: 3px solid var(--arcade-blue-900);
+  border: 2px solid var(--arcade-blue-900);
   color: #fff;
   font-family: var(--font-pixel);
   font-weight: 900;
@@ -2140,7 +2138,7 @@ select {
 .pack-screen .nav-large {
   padding: 14px;
   background: rgba(7,20,89,.62);
-  border: 4px solid rgba(37,230,255,.42);
+  border: 2px solid rgba(37,230,255,.42);
   border-radius: var(--pixel-radius);
 }
 
@@ -2197,7 +2195,7 @@ select {
   min-height: 292px;
   padding: 18px 16px 16px;
   --card-border: var(--common);
-  border: 4px solid var(--card-border);
+  border: 2px solid var(--card-border);
   border-radius: 0;
   background:
     linear-gradient(180deg, rgba(255,255,255,.08), transparent 30%),
@@ -2271,7 +2269,7 @@ select {
 .card-portrait {
   height: 94px;
   border-radius: 0;
-  border: 3px solid var(--arcade-cyan);
+  border: 2px solid var(--arcade-cyan);
   background:
     linear-gradient(180deg, #71d7ff 0 36%, var(--arcade-pitch) 36%),
     var(--arcade-blue-800);
@@ -2639,7 +2637,7 @@ select {
 .seg-control {
   border-radius: var(--pixel-radius);
   background: var(--arcade-blue-900);
-  border: 3px solid var(--arcade-cyan);
+  border: 2px solid var(--arcade-cyan);
 }
 
 .seg {
@@ -2736,7 +2734,7 @@ select {
   width: 68px;
   border-radius: 0;
   background: rgba(7,20,89,.82);
-  border: 3px solid #fff;
+  border: 2px solid #fff;
   -webkit-backdrop-filter: none; backdrop-filter: none;
 }
 
@@ -2768,7 +2766,7 @@ select {
 .bench-item {
   border-radius: 0;
   background: var(--arcade-panel);
-  border: 3px solid var(--common);
+  border: 2px solid var(--common);
   box-shadow: 0 6px 0 rgba(0,0,0,.28);
 }
 
@@ -2866,7 +2864,7 @@ select {
   max-width: none;
   height: min(84vh, 880px, calc(100vh - 205px));
   min-height: 520px;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 3 / 4;
   margin: 0 auto;
 }
 
@@ -3152,7 +3150,7 @@ select {
   min-width: 92px;
   padding: 10px;
   background: rgba(7,20,89,.78);
-  border: 3px solid rgba(255,255,255,.8);
+  border: 2px solid rgba(255,255,255,.8);
 }
 
 .scout-team-card img {
@@ -3164,14 +3162,14 @@ select {
 .scout-team-card .scout-flag-img {
   width: 68px;
   height: 44px;
-  border: 3px solid #fff;
+  border: 2px solid #fff;
   box-shadow: 0 0 0 3px var(--arcade-blue-900);
 }
 
 .scout-strength {
   border-radius: 0;
   background: var(--arcade-blue-900);
-  border: 3px solid var(--arcade-yellow);
+  border: 2px solid var(--arcade-yellow);
 }
 
 .scout-strength span,
@@ -3297,7 +3295,7 @@ select {
   top: calc(env(safe-area-inset-top) + 8px);
   z-index: 6;
   border-radius: var(--pixel-radius);
-  border: 3px solid rgba(37,230,255,.86);
+  border: 2px solid rgba(37,230,255,.86);
   background:
     linear-gradient(180deg, rgba(15,32,86,.92), rgba(7,20,89,.84));
   box-shadow:
@@ -3407,7 +3405,7 @@ select {
 
 .match-ticker {
   border-radius: var(--pixel-radius);
-  border: 3px solid rgba(37,230,255,.68);
+  border: 2px solid rgba(37,230,255,.68);
   background:
     linear-gradient(180deg, rgba(9,24,76,.90), rgba(7,20,89,.78));
   box-shadow: 0 0 0 3px rgba(7,20,89,.86), 0 10px 28px rgba(0,0,0,.28);
@@ -3479,7 +3477,7 @@ select {
   gap: 10px;
   padding: 10px;
   border-radius: var(--pixel-radius);
-  border: 3px solid rgba(255,255,255,.22);
+  border: 2px solid rgba(255,255,255,.22);
   background:
     linear-gradient(180deg, rgba(7,20,89,.86), rgba(3,6,22,.72));
   box-shadow: 0 0 0 3px rgba(7,20,89,.86), 0 12px 34px rgba(0,0,0,.32);
@@ -3650,7 +3648,7 @@ select {
 
 .tier-tag {
   border-radius: 0;
-  border: 3px solid var(--arcade-blue-900);
+  border: 2px solid var(--arcade-blue-900);
   box-shadow: 0 0 0 2px rgba(255,255,255,.42) inset;
 }
 
@@ -3664,7 +3662,7 @@ select {
 .path-item,
 .squad-chip {
   background: var(--arcade-panel);
-  border: 3px solid rgba(37,230,255,.65);
+  border: 2px solid rgba(37,230,255,.65);
   border-radius: 0;
 }
 
@@ -3752,7 +3750,7 @@ select {
   margin: 6px 0 0;
   padding: 6px 14px;
   background: var(--arcade-blue-900);
-  border: 3px solid var(--arcade-yellow);
+  border: 2px solid var(--arcade-yellow);
   border-radius: 0;
   box-shadow: 0 0 0 2px rgba(255,255,255,.42) inset;
   color: var(--arcade-yellow);
@@ -3805,6 +3803,10 @@ select {
   color: var(--arcade-yellow);
 }
 
+/* Banderas de los dos equipos junto a su nombre en el marcador del gameover. */
+.gameover-match-score span { display: inline-flex; align-items: center; gap: 8px; }
+.gameover-match-score .flag-img { width: clamp(28px, 4.5vw, 40px); height: auto; aspect-ratio: 28 / 18; border-width: 3px; }
+
 .gameover-match .result-scorers {
   text-align: center;
 }
@@ -3824,6 +3826,7 @@ select {
   width: min(100%, 560px);
   max-width: 560px;
   margin: 0 auto;
+  aspect-ratio: 3/4;
 }
 
 /* DT que dirigió el último partido, junto al once del gameover. */
@@ -3939,7 +3942,7 @@ select {
   bottom: 16px;
   padding: 8px 12px;
   background: var(--arcade-red);
-  border: 3px solid var(--arcade-yellow);
+  border: 2px solid var(--arcade-yellow);
   color: #fff;
   font-family: var(--font-pixel);
   text-align: center;
@@ -4131,7 +4134,7 @@ select {
   padding: 12px;
   color: #fff;
   background: var(--arcade-blue-900);
-  border: 3px solid var(--arcade-cyan);
+  border: 2px solid var(--arcade-cyan);
   box-shadow: 0 6px 0 rgba(0,0,0,.28);
 }
 
@@ -4196,7 +4199,7 @@ select {
   padding: 16px;
   color: #fff;
   background: var(--arcade-panel);
-  border: 3px solid rgba(37,230,255,.7);
+  border: 2px solid rgba(37,230,255,.7);
 }
 
 .result-stat-card span {
@@ -4337,7 +4340,7 @@ select {
   .tower-next span {
     color: var(--arcade-yellow);
     background: var(--arcade-blue-900);
-    border: 3px solid var(--arcade-cyan);
+    border: 2px solid var(--arcade-cyan);
     text-align: center;
     text-shadow: 2px 2px 0 var(--arcade-blue-900);
   }
@@ -4999,7 +5002,7 @@ select {
   border-radius: 0;
   background: var(--arcade-red, var(--arcade-red));
   color: #fff;
-  border: 3px solid #fff;
+  border: 2px solid #fff;
   box-shadow: 0 0 0 3px var(--arcade-blue-900), 0 4px 0 rgba(0,0,0,.35);
   cursor: pointer;
 }
@@ -5224,6 +5227,8 @@ button.primary:active:not(:disabled),
   .team-select-screen .team-roster { order: 3; }
   .team-select-screen .ratings-glass { order: 4; }
   .team-select-screen .opponent-brief { order: 5; }
+  /* Plantilla inicial: la nota informativa, al final de la columna. */
+  .squad-intro-screen .scout-note { order: 6; }
 }
 
 .field {
@@ -5333,7 +5338,7 @@ button.primary:active:not(:disabled),
   padding: 9px 6px;
   color: #fff;
   background: var(--arcade-blue-900);
-  border: 3px solid var(--arcade-cyan);
+  border: 2px solid var(--arcade-cyan);
   font-family: var(--font-pixel);
   font-size: 9px;
 }
@@ -5434,6 +5439,8 @@ button.primary:active:not(:disabled),
   .team-select-screen .ratings-glass { order: 3; }
   .team-select-screen .manager-glass { order: 3; margin-top: 14px }
   .team-select-screen .opponent-brief { order: 4; margin-top: 14px}
+  /* Plantilla inicial: la nota informativa, al final del apilado móvil. */
+  .squad-intro-screen .scout-note { order: 6; }
 
   .team-field-panel .team-panel-head {
     gap: 8px;
@@ -5808,7 +5815,7 @@ button.primary:active:not(:disabled),
   position: relative;
   display: block;
   aspect-ratio: 1;
-  border: 3px solid var(--press-ink);
+  border: 2px solid var(--press-ink);
   background: #2E86E8; /* fondo azul plano, como una foto de archivo 16 bits */
   overflow: hidden;
 }

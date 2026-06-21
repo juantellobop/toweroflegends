@@ -55,9 +55,15 @@ function centeredColsForCount(n) {
   }
 }
 
-// Cuando NO hay ENG y el medio tiene 3, se adelanta la fila MED hacia la mitad
-// del campo (rellena el hueco que deja la línea de enganches vacía).
+// Cuando NO hay ENG, se adelanta la fila MED hacia la mitad del campo (rellena el
+// hueco que deja la línea de enganches vacía), sean cuantos sean los medios. La
+// altura es la misma que el 4-3-3 ya usaba para sus 3 MED.
 const MED_ADVANCED_TOP = 44;
+
+// Las "4 posiciones normales" de una línea (back/medio-4 centrado): cols 0,1,3,4,
+// con el centro libre. Es la ÚNICA disposición que se reparte equidistante; toda
+// otra colocación conserva sus columnas reales (respeta la asimetría del usuario).
+const NORMAL_4_COLS = [0, 1, 3, 4];
 
 // Reparto horizontal EQUILIBRADO: N huecos a distancias iguales (los 4 defensas
 // quedan con la misma separación entre laterales y centrales, no el centro abierto
@@ -70,10 +76,12 @@ function evenSpread(n) {
 }
 
 // Posicionado para tableros INFORMATIVOS (scouting, plantilla inicial, modal del
-// ranking): agrupa los jugadores OCUPADOS por fila del grid y los reparte de forma
-// equilibrada (no en las columnas rígidas del tablero editable). Sin ENG y con 3
-// MED, adelanta la fila MED hacia la mitad del campo. Recibe TODOS los huecos de
-// una vez (no por línea) para poder repartir cada fila por su cuenta.
+// ranking): agrupa los jugadores OCUPADOS por fila del grid. Si los huecos traen
+// su COLUMNA real del grid (once del usuario: plantilla inicial y ranking) se
+// respeta su colocación EXACTA —incluidas las asimetrías— y solo se normaliza la
+// disposición "4 normales" (cols 0,1,3,4) repartiéndola equidistante. Si NO hay
+// columnas (once rival: lista plana por posición) se reparte equilibrado. Sin ENG
+// (haya los medios que haya) la fila MED se adelanta hacia la mitad del campo.
 export function layoutInformative(slots) {
   const byRow = new Map();
   for (const slot of slots) {
@@ -85,10 +93,15 @@ export function layoutInformative(slots) {
   const engEmpty = !(byRow.get('ENG') || []).length;
   for (const [row, rowSlots] of byRow) {
     rowSlots.sort((a, b) => (a.col ?? a.slotIndex ?? 0) - (b.col ?? b.slotIndex ?? 0));
-    const xs = evenSpread(rowSlots.length);
-    const top = (row === 'MED' && rowSlots.length === 3 && engEmpty) ? MED_ADVANCED_TOP : ROW_TOP[row];
+    const top = (row === 'MED' && engEmpty) ? MED_ADVANCED_TOP : ROW_TOP[row];
+    // ¿Tenemos las columnas reales del grid (once del usuario) o solo un orden
+    // secuencial (once rival)? Con columnas reales se respeta la colocación.
+    const hasRealCols = row !== 'POR' && rowSlots.every((s) => s.col != null);
+    const cols = hasRealCols ? rowSlots.map((s) => s.col) : null;
+    const normalize4 = hasRealCols && cols.length === 4 && NORMAL_4_COLS.every((c, i) => cols[i] === c);
+    const xs = (!hasRealCols || normalize4) ? evenSpread(rowSlots.length) : null;
     rowSlots.forEach((slot, i) => {
-      slot.x = row === 'POR' ? 50 : xs[i];
+      slot.x = row === 'POR' ? 50 : (xs ? xs[i] : COL_LEFT[slot.col]);
       slot.y = top;
     });
   }

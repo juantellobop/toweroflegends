@@ -548,6 +548,212 @@
       }
     },
     {
+      "id": "69879590-1698-40fa-b7b5-3630490eef17",
+      "teamName": "Leyendas",
+      "nation": "River Plate",
+      "floor": 10,
+      "createdAt": "2026-06-21T00:09:15.563Z",
+      "runId": "7ef23416-35d0-4d58-87cc-4ac7c02c6c8c",
+      "lineup": [
+        {
+          "name": "Robin Olsen",
+          "position": "GK",
+          "line": "GK",
+          "ovr": 68,
+          "rarity": "common",
+          "slot": 0
+        },
+        {
+          "name": "Ron Vlaar",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 87,
+          "rarity": "epic",
+          "slot": 0
+        },
+        {
+          "name": "Victor Lindelöf",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 69,
+          "rarity": "common",
+          "slot": 1
+        },
+        {
+          "name": "Ludwig Augustinsson",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 68,
+          "rarity": "common",
+          "slot": 3
+        },
+        {
+          "name": "Darío Verón",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 67,
+          "rarity": "common",
+          "slot": 4
+        },
+        {
+          "name": "Diego Santos",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 58,
+          "rarity": "common",
+          "slot": 0
+        },
+        {
+          "name": "Albin Ekdal",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 69,
+          "rarity": "common",
+          "slot": 1
+        },
+        {
+          "name": "Anthony Annan",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 67,
+          "rarity": "common",
+          "slot": 2
+        },
+        {
+          "name": "Daler Kuzyaev",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 67,
+          "rarity": "common",
+          "slot": 3
+        },
+        {
+          "name": "Enrique Vera",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 65,
+          "rarity": "common",
+          "slot": 4
+        },
+        {
+          "name": "Clint Mathis",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 69,
+          "rarity": "common",
+          "slot": 2
+        }
+      ],
+      "manager": {
+        "id": "manager_bruce_arena",
+        "name": "Bruce Arena",
+        "nation": "Estados Unidos"
+      }
+    },
+    {
+      "id": "1153a305-a187-4745-be50-ebef91d52ab2",
+      "teamName": "Leyendas",
+      "nation": "River Plate",
+      "floor": 10,
+      "createdAt": "2026-06-21T11:06:09.711Z",
+      "runId": "56d93917-9b57-4384-8e28-c3b6f9ab9ab6",
+      "lineup": [
+        {
+          "name": "Tony Sylva",
+          "position": "GK",
+          "line": "GK",
+          "ovr": 68,
+          "rarity": "common",
+          "slot": 0
+        },
+        {
+          "name": "John Mensah",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 66,
+          "rarity": "common",
+          "slot": 0
+        },
+        {
+          "name": "Eddie Pope",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 68,
+          "rarity": "common",
+          "slot": 1
+        },
+        {
+          "name": "Frankie Hejduk",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 67,
+          "rarity": "common",
+          "slot": 3
+        },
+        {
+          "name": "Iván García",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 60,
+          "rarity": "common",
+          "slot": 1
+        },
+        {
+          "name": "Sebastian Larsson",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 68,
+          "rarity": "common",
+          "slot": 2
+        },
+        {
+          "name": "Diego Santos",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 58,
+          "rarity": "common",
+          "slot": 3
+        },
+        {
+          "name": "Andriy Nesmachnyi",
+          "position": "DEF",
+          "line": "MID",
+          "ovr": 70,
+          "rarity": "common",
+          "slot": 4
+        },
+        {
+          "name": "Dani Navarro",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 59,
+          "rarity": "common",
+          "slot": 0
+        },
+        {
+          "name": "Joel Campbell",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 69,
+          "rarity": "common",
+          "slot": 2
+        },
+        {
+          "name": "Marco Ureña",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 68,
+          "rarity": "common",
+          "slot": 4
+        }
+      ],
+      "manager": {
+        "id": "manager_massimiliano_allegri",
+        "name": "Massimiliano Allegri",
+        "nation": "Italia"
+      }
+    },
+    {
       "id": "a7fd4c92-b510-450c-9336-e85dcbc0ce4a",
       "teamName": "Test",
       "nation": "River Plate",
@@ -1360,6 +1566,109 @@
       }
     },
     {
+      "id": "12670b89-8fa5-4624-9291-9bb6e0380b5f",
+      "teamName": "Leyendas",
+      "nation": "River Plate",
+      "floor": 6,
+      "createdAt": "2026-06-21T00:08:05.826Z",
+      "runId": "9b2a4c49-4231-4e6e-bbbe-e85c472b91ff",
+      "lineup": [
+        {
+          "name": "Santiago Cañizares",
+          "position": "GK",
+          "line": "GK",
+          "ovr": 87,
+          "rarity": "epic",
+          "slot": 0
+        },
+        {
+          "name": "Antolín Alcaraz",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 69,
+          "rarity": "common",
+          "slot": 0
+        },
+        {
+          "name": "Tony Sanneh",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 67,
+          "rarity": "common",
+          "slot": 1
+        },
+        {
+          "name": "Frankie Hejduk",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 67,
+          "rarity": "common",
+          "slot": 3
+        },
+        {
+          "name": "Claudio Morel",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 67,
+          "rarity": "common",
+          "slot": 4
+        },
+        {
+          "name": "Jon Dahl Tomasson",
+          "position": "FWD",
+          "line": "MID",
+          "ovr": 78,
+          "rarity": "rare",
+          "slot": 5
+        },
+        {
+          "name": "Peter Reid",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 86,
+          "rarity": "epic",
+          "slot": 6
+        },
+        {
+          "name": "Iván García",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 60,
+          "rarity": "common",
+          "slot": 7
+        },
+        {
+          "name": "Enrique Vera",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 65,
+          "rarity": "common",
+          "slot": 8
+        },
+        {
+          "name": "Paolo Conti",
+          "position": "FWD",
+          "line": "MID",
+          "ovr": 60,
+          "rarity": "common",
+          "slot": 9
+        },
+        {
+          "name": "Samuel Inkoom",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 66,
+          "rarity": "common",
+          "slot": 2
+        }
+      ],
+      "manager": {
+        "id": "manager_bruce_arena",
+        "name": "Bruce Arena",
+        "nation": "Estados Unidos"
+      }
+    },
+    {
       "id": "f0a9c4c2-c8b1-4617-9348-5f910e9e52b0",
       "teamName": "Leyendas",
       "nation": "River Plate",
@@ -1527,281 +1836,6 @@
           "rarity": "common"
         }
       ]
-    },
-    {
-      "id": "bdda8a3d-a2cc-4984-adb1-4ea1a7ce5e00",
-      "teamName": "River Plate",
-      "nation": "River Plate",
-      "floor": 5,
-      "createdAt": "2026-06-14T15:59:57.086Z",
-      "runId": "05f5eef9-923d-4c68-ae30-1e962aea471d",
-      "formation": "4-2-3-1",
-      "lineup": [
-        {
-          "name": "Paul Robinson",
-          "position": "GK",
-          "line": "GK",
-          "ovr": 82,
-          "rarity": "rare"
-        },
-        {
-          "name": "Cristian Romero",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 93,
-          "rarity": "legend"
-        },
-        {
-          "name": "Edinho",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 91,
-          "rarity": "legend"
-        },
-        {
-          "name": "Lucas Hernández",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 90,
-          "rarity": "epic"
-        },
-        {
-          "name": "Omar Daf",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Yeltsin Tejeda",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 69,
-          "rarity": "common"
-        },
-        {
-          "name": "Aleksandr Golovin",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 68,
-          "rarity": "common",
-          "expelled": true
-        },
-        {
-          "name": "Celso Borges",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Emil Forsberg",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 67,
-          "rarity": "common"
-        },
-        {
-          "name": "Nelson Haedo Valdez",
-          "position": "FWD",
-          "line": "MID",
-          "ovr": 67,
-          "rarity": "common"
-        },
-        {
-          "name": "Salvatore Schillaci",
-          "position": "FWD",
-          "line": "FWD",
-          "ovr": 78,
-          "rarity": "common"
-        }
-      ]
-    },
-    {
-      "id": "8ca80d35-b5d7-402c-8047-6e3130e831b2",
-      "teamName": "Leyendas",
-      "nation": "River Plate",
-      "floor": 5,
-      "createdAt": "2026-06-16T01:32:32.007Z",
-      "runId": "1cb32219-da50-402e-b777-813e99ba54cb",
-      "formation": "4-2-3-1",
-      "lineup": [
-        {
-          "name": "Hugo Lloris",
-          "position": "GK",
-          "line": "GK",
-          "ovr": 88,
-          "rarity": "epic"
-        },
-        {
-          "name": "Victor Lindelöf",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 69,
-          "rarity": "common"
-        },
-        {
-          "name": "Sergei Ignashevich",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Paulo da Silva",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Fedor Kudryashov",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 66,
-          "rarity": "common"
-        },
-        {
-          "name": "Kevin De Bruyne",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 91,
-          "rarity": "legend"
-        },
-        {
-          "name": "Sami Khedira",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 89,
-          "rarity": "epic"
-        },
-        {
-          "name": "Sulley Muntari",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 69,
-          "rarity": "common"
-        },
-        {
-          "name": "Albin Ekdal",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 69,
-          "rarity": "common"
-        },
-        {
-          "name": "Joel Campbell",
-          "position": "FWD",
-          "line": "MID",
-          "ovr": 69,
-          "rarity": "common"
-        },
-        {
-          "name": "Clint Mathis",
-          "position": "FWD",
-          "line": "FWD",
-          "ovr": 69,
-          "rarity": "common"
-        }
-      ],
-      "manager": {
-        "id": "manager_joachim_low",
-        "name": "Joachim Löw",
-        "nation": "Alemania"
-      }
-    },
-    {
-      "id": "94256804-595e-445b-8662-bd50d5a25b5e",
-      "teamName": "Leyendas",
-      "nation": "River Plate",
-      "floor": 5,
-      "createdAt": "2026-06-16T12:02:08.654Z",
-      "runId": "7876c74e-6de0-4936-b880-dd43feef23f0",
-      "formation": "4-2-4",
-      "lineup": [
-        {
-          "name": "Tony Sylva",
-          "position": "GK",
-          "line": "GK",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Miranda",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 90,
-          "rarity": "legend"
-        },
-        {
-          "name": "Danny Blind",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 85,
-          "rarity": "epic"
-        },
-        {
-          "name": "Paulo da Silva",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Sergei Ignashevich",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Costinha",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 87,
-          "rarity": "epic"
-        },
-        {
-          "name": "Albin Ekdal",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 69,
-          "rarity": "common"
-        },
-        {
-          "name": "Sulley Muntari",
-          "position": "MID",
-          "line": "FWD",
-          "ovr": 69,
-          "rarity": "common"
-        },
-        {
-          "name": "Miroslav Klose",
-          "position": "FWD",
-          "line": "FWD",
-          "ovr": 91,
-          "rarity": "legend"
-        },
-        {
-          "name": "Patrick Kluivert",
-          "position": "FWD",
-          "line": "FWD",
-          "ovr": 94,
-          "rarity": "legend"
-        },
-        {
-          "name": "Aleksandr Samedov",
-          "position": "FWD",
-          "line": "FWD",
-          "ovr": 67,
-          "rarity": "common"
-        }
-      ],
-      "manager": {
-        "id": "manager_valeri_nepomnyashchy",
-        "name": "Valeri Nepomnyashchy",
-        "nation": "Camerún"
-      }
     }
   ]
 }

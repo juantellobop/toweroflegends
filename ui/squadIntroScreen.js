@@ -42,9 +42,9 @@ function field(state) {
 }
 
 function ratings(state) {
-  // Equipo del usuario: el Físico es la media real del atributo (1-99), tope 100;
-  // los 4 ratings mantienen el tope 200.
-  return `<div class="scout-ratings arcade-panel">
+  // Mismo contenedor (.ratings-glass) que el radar del rival/armado para reciclar
+  // sus estilos. Equipo del usuario: el Físico es la media real (1-99), tope 100.
+  return `<div class="ratings-glass glass">
     ${teamRadarHTML(liveRadar(state), { color: state.team?.color || 'var(--arcade-cyan)', physicalMax: 100 })}
   </div>`;
 }
@@ -84,29 +84,39 @@ export function renderSquadIntro(root, state, handlers) {
         </div>` : '';
 
   root.innerHTML = `
-    <section class="screen scouting-screen pixel-screen squad-intro-screen">
-      <header class="scout-hero" style="--team-primary:${esc(state.team.color)};--team-secondary:${esc(state.team.color)}">
-        <div>
-          <div class="scout-eyebrow">
-            <div class="level-badge">${t('generic.level', { level: state.level })}</div>
-            <p class="scout-kicker">${t('squadIntro.kicker')}</p>
+    <section class="screen scouting-screen pixel-screen team-select-screen squad-intro-screen" style="--team-primary:${esc(state.team.color)};--team-secondary:${esc(state.team.color)}">
+      <div class="team-layout">
+        <main class="team-field-panel arcade-panel">
+          <div class="team-panel-head">
+            <div><h2>${t('squadIntro.eleven')}</h2></div>
           </div>
-          <h1 class="large-title">${esc(state.team.name)}</h1>
-        </div>
-        ${flagHTML}
-      </header>
-      ${ratings(state)}
-      <h2 class="section-title">${t('squadIntro.eleven')}</h2>
-      ${field(state)}
-      <div class="team-roster arcade-panel">
-        <div class="team-panel-head roster-head">
-          <div>
-            <h2>${t('squadIntro.bench')}</h2>
+          ${field(state)}
+        </main>
+
+        <aside class="team-side">
+          <header class="scout-hero">
+            <div>
+              <div class="scout-eyebrow">
+                <div class="level-badge">${t('generic.level', { level: state.level })}</div>
+                <p class="scout-kicker">${t('squadIntro.kicker')}</p>
+              </div>
+              <h1 class="large-title">${esc(state.team.name)}</h1>
+            </div>
+            ${flagHTML}
+          </header>
+          <div class="team-header-row">${ratings(state)}</div>
+          <div class="team-roster arcade-panel">
+            <div class="team-panel-head roster-head">
+              <div>
+                <h2>${t('squadIntro.bench')}</h2>
+              </div>
+            </div>
+            ${benchStrip(subs)}
           </div>
-        </div>
-        ${benchStrip(subs)}
+          <p class="scout-note">${t('squadIntro.note')}</p>
+        </aside>
       </div>
-      <p class="scout-note">${t('squadIntro.note')}</p>
+
       <div class="play-bar action-bar">
         <button id="squad-continue" class="primary big glass-cta">${t('squadIntro.continue')}</button>
       </div>
