@@ -850,6 +850,12 @@ const DICTIONARIES = {
           ({ inName }) => `El banquillo respondió de inmediato con la entrada de ${inName}.`,
           ({ inName }) => `${inName} entró al campo para tomar el relevo sobre la marcha.`,
         ],
+        injuryWarmup: [
+          ({ player, team, type }) => `${player} se rompió en el calentamiento por ${type} y se quedó sin jugar: ${team} pierde un efectivo antes incluso del pitido inicial.`,
+          ({ player, team, type }) => `Contratiempo para ${team} antes de empezar: ${player} se resintió de ${type} en el calentamiento y cayó de la convocatoria sin pisar el campo.`,
+          ({ player, team, type }) => `${team} perdió a ${player} en la previa: una molestia de ${type} durante el calentamiento lo dejó fuera del partido sin haber jugado.`,
+          ({ player, team, type }) => `Mala suerte para ${player}, lesionado de ${type} mientras calentaba en la banda; ${team} se quedó con un suplente menos antes de empezar.`,
+        ],
         subSwap: [
           ({ inName, outName, cause, minute }) => `Para tapar el hueco que dejó ${cause}, ${inName} entró desde el banquillo al ${minute}' y ${outName} dejó su puesto para rearmar la zaga.`,
           ({ inName, outName, cause, minute }) => `Obligado por la baja de ${cause}, el banquillo movió ficha al ${minute}': entró ${inName} y ${outName} cedió su sitio para recomponer la defensa.`,
@@ -1486,6 +1492,12 @@ const DICTIONARIES = {
           ({ inName }) => `The bench responded at once with ${inName}.`,
           ({ inName }) => `${inName} came on to take over on the spot.`,
         ],
+        injuryWarmup: [
+          ({ player, team, type }) => `${player} broke down in the warm-up with ${type} and never made it onto the pitch: ${team} lost a man before kick-off.`,
+          ({ player, team, type }) => `Bad news for ${team} before a ball was kicked: ${player} pulled up with ${type} during the warm-up and was withdrawn without playing.`,
+          ({ player, team, type }) => `${team} lost ${player} in the warm-up, where ${type} ruled him out of the match before it even began.`,
+          ({ player, team, type }) => `Hard luck for ${player}, sidelined by ${type} while warming up; ${team} were a substitute short before the whistle.`,
+        ],
         subSwap: [
           ({ inName, outName, cause, minute }) => `To cover the gap left by ${cause}, ${inName} came off the bench on ${minute}' and ${outName} gave up his spot to patch up the back line.`,
           ({ inName, outName, cause, minute }) => `With ${cause} down, the coach reshaped the board on ${minute}': ${inName} came on and ${outName} gave up his place to prop up an emergency defence.`,
@@ -1768,6 +1780,12 @@ const DICTIONARIES = {
           ({ inName }) => `À sa place est entré ${inName}.`,
           ({ inName }) => `Le banc a répondu aussitôt avec ${inName}.`,
           ({ inName }) => `${inName} est entré pour prendre le relais sur-le-champ.`,
+        ],
+        injuryWarmup: [
+          ({ player, team, type }) => `${player} s’est blessé à l’échauffement (${type}) et n’est jamais entré sur le terrain : ${team} perd un élément avant même le coup d’envoi.`,
+          ({ player, team, type }) => `Coup dur pour ${team} avant le match : ${player} s’est ressenti de ${type} à l’échauffement et a déclaré forfait sans jouer.`,
+          ({ player, team, type }) => `${team} a perdu ${player} à l’échauffement, où ${type} l’a écarté de la rencontre avant le début.`,
+          ({ player, team, type }) => `Malchance pour ${player}, touché par ${type} en s’échauffant ; ${team} s’est retrouvé avec un remplaçant en moins.`,
         ],
         subSwap: [
           ({ inName, outName, cause, minute }) => `Pour combler le vide laissé par ${cause}, ${inName} est entré en jeu à la ${minute}e et ${outName} a cédé sa place pour reconstruire la défense.`,
@@ -2052,6 +2070,12 @@ const DICTIONARIES = {
           ({ inName }) => `O banco respondeu na hora com ${inName}.`,
           ({ inName }) => `${inName} entrou para assumir o posto na hora.`,
         ],
+        injuryWarmup: [
+          ({ player, team, type }) => `${player} se machucou no aquecimento por ${type} e nem chegou a entrar em campo: ${team} perde uma peça antes mesmo do apito inicial.`,
+          ({ player, team, type }) => `Contratempo para ${team} antes de começar: ${player} sentiu ${type} no aquecimento e ficou de fora da partida sem jogar.`,
+          ({ player, team, type }) => `${team} perdeu ${player} na preliminar: ${type} durante o aquecimento o tirou do jogo antes do início.`,
+          ({ player, team, type }) => `Azar de ${player}, lesionado por ${type} ao aquecer; ${team} ficou com um reserva a menos antes do apito.`,
+        ],
         subSwap: [
           ({ inName, outName, cause, minute }) => `Para tapar o buraco deixado por ${cause}, ${inName} entrou do banco aos ${minute}' e ${outName} cedeu seu lugar para refazer a defesa.`,
           ({ inName, outName, cause, minute }) => `Sem ${cause}, o treinador refez o quadro aos ${minute}': entrou ${inName} e ${outName} cedeu o lugar para escorar uma defesa de emergência.`,
@@ -2334,6 +2358,12 @@ const DICTIONARIES = {
           ({ inName }) => `${inName} ha preso il suo posto dalla panchina.`,
           ({ inName }) => `La panchina ha risposto subito con ${inName}.`,
           ({ inName }) => `${inName} è entrato per rilevarlo all’istante.`,
+        ],
+        injuryWarmup: [
+          ({ player, team, type }) => `${player} si è fatto male nel riscaldamento per ${type} e non è mai sceso in campo: ${team} perde un effettivo prima ancora del fischio d’inizio.`,
+          ({ player, team, type }) => `Contrattempo per ${team} prima di cominciare: ${player} ha accusato ${type} nel riscaldamento ed è uscito dalla gara senza giocare.`,
+          ({ player, team, type }) => `${team} ha perso ${player} nel pre-partita: ${type} durante il riscaldamento lo ha tagliato fuori prima dell’inizio.`,
+          ({ player, team, type }) => `Sfortuna per ${player}, fermato da ${type} mentre si scaldava; ${team} è rimasto con una riserva in meno prima del fischio.`,
         ],
         subSwap: [
           ({ inName, outName, cause, minute }) => `Per coprire il vuoto lasciato da ${cause}, ${inName} è entrato dalla panchina al ${minute}' e ${outName} ha ceduto il posto per ricomporre la difesa.`,

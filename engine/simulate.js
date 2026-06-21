@@ -134,30 +134,14 @@ function rollInjurySeverity(rng) {
   return 'simple';
 }
 
-// Sorteo ponderado: cada elemento concursa con el peso que le da weightOf. Lo
-// usa la elección de la víctima de la lesión para que un jugador "Roto" pese más
-// (CONFIG.INJURY_ROTO_RISK_MULT). Consume un único rng.next(); con pesos todos a
-// 1 equivale al sorteo uniforme anterior (reproducibilidad para equipos sin Roto).
-function weightedPick(list, weightOf, rng) {
-  if (!list.length) return null;
-  let total = 0;
-  for (const p of list) total += weightOf(p);
-  if (total <= 0) return list[Math.floor(rng.next() * list.length)];
-  let r = rng.next() * total;
-  for (const p of list) {
-    r -= weightOf(p);
-    if (r < 0) return p;
-  }
-  return list[list.length - 1];
-}
-
 // Lesiones de calentamiento del rasgo "Roto" (solo el equipo del jugador, lado
-// A): un suplente propenso puede romperse antes de saltar al campo, sin haber
-// jugado. No altera el once de hoy (estaba en el banquillo) pero pierde la
-// disponibilidad para los próximos partidos según la gravedad y se retira del
-// banco para no entrar como sustituto. Respeta la inmunidad por línea (nunca
-// deja una posición por debajo de su mínimo de disponibles). Devuelve la lista
-// de lesionados de calentamiento (minuto 0, marcados con warmup: true).
+// A): cada suplente propenso puede romperse antes de saltar al campo, sin haber
+// jugado, con prob. CONFIG.INJURY_ROTO_WARMUP_PROB. No altera el once de hoy
+// (estaba en el banquillo) pero pierde la disponibilidad para los próximos
+// partidos según la gravedad y se retira del banco para no entrar como
+// sustituto. Respeta la inmunidad por línea (nunca deja una posición por debajo
+// de su mínimo de disponibles). Devuelve la lista de lesionados de calentamiento
+// (minuto 0, marcados con warmup: true).
 function rollWarmupInjuries(A, rng) {
   const bench = A.bench || [];
   if (!bench.length) return [];
@@ -420,66 +404,82 @@ export function simularPartido(teamA, teamB, rng) {
   const stealAgainstA = B.matchBonuses.stealChance;
 
   // Lesiones de calentamiento (rasgo "Roto"): suplentes propensos que pueden
-  // romperse antes del pitido. Se sortean antes de la lesión del partido y se
+  // romperse antes del pitido. Se sortean antes de las lesiones de campo y se
   // registran como lesionados de minuto 0; si dejan baja, arrastran la sanción.
   const warmupInjuries = rollWarmupInjuries(A, rng);
   if (warmupInjuries.length) (A.lesionados || (A.lesionados = [])).push(...warmupInjuries);
 
-  // Lesión del partido (solo el equipo del jugador, lado A). Se sortea antes del
-  // bucle y se aplica al llegar su minuto: el suplente que entra recalcula
-  // ratings y química de A el resto del encuentro. La víctima se elige en ese
-  // momento entre los titulares en pie (refleja una posible expulsión previa).
-  const injury = rollInjury(rng);
-  const applyInjury = () => {
-    if (!injury) return;
-    // La víctima sale solo de los titulares en pie cuya línea NO es inmune (no
-    // ha caído al mínimo de disponibles). Si todos los que están en el campo son
-    // inmunes, el partido se salda sin lesión.
+  // Lesiones de campo del equipo del jugador (lado A), cada una con su minuto:
+  //  · La lesión genérica del encuentro (un único intento; víctima al azar entre
+  //    los titulares en pie al llegar su minuto, reflejando una posible roja).
+  //  · Una tirada PROPIA por cada titular "Roto" (CONFIG.INJURY_ROTO_FIELD_PROB):
+  //    si sale, la víctima es ese mismo jugador.
+  // Se aplican al alcanzar su minuto: el suplente que entra recalcula ratings y
+  // química de A el resto del encuentro.
+  const fieldInjuries = [];
+  const generic = rollInjury(rng);
+  if (generic) fieldInjuries.push({ ...generic, targetUid: null, applied: false });
+  for (const starter of LINES.flatMap((line) => A.starting11?.[line] || []).filter(Boolean)) {
+    if (!isInjuryProne(starter)) continue;
+    if (!rng.bernoulli(CONFIG.INJURY_ROTO_FIELD_PROB)) continue;
+    fieldInjuries.push({
+      targetUid: starter.uid,
+      minute: 1 + Math.floor(rng.next() * 90),
+      severity: rollInjurySeverity(rng),
+      typeIndex: Math.floor(rng.next() * CONFIG.INJURY_TYPE_COUNT),
+      applied: false,
+    });
+  }
+  fieldInjuries.sort((a, b) => a.minute - b.minute);
+
+  // Aplica una lesión de campo. La genérica elige víctima al azar entre los
+  // titulares en pie cuya línea NO es inmune; la de un "Roto" es él mismo, si
+  // sigue en el campo y su línea no es inmune. Sin víctima válida, no pasa nada.
+  const applyFieldInjury = (inj) => {
+    if (inj.applied) return;
+    inj.applied = true;
     const onField = LINES.flatMap((line) => A.starting11?.[line] || [])
       .filter((p) => p && !immuneForA(A, p.position));
-    // Víctima ponderada: un jugador "Roto" pesa más (33% más propenso).
-    const victim = weightedPick(
-      onField,
-      (p) => (isInjuryProne(p) ? CONFIG.INJURY_ROTO_RISK_MULT : 1),
-      rng,
-    );
-    if (victim) {
-      // Solo cuenta para la inmunidad si la lesión deja baja para los próximos
-      // partidos (las simples no: el jugador sigue disponible al siguiente).
-      if (A.immunityRemoved && (CONFIG.INJURY_BAN[injury.severity] || 0) > 0) {
-        A.immunityRemoved[victim.position] = (A.immunityRemoved[victim.position] || 0) + 1;
-      }
-      const sub = substituteInjured(A, victim);
-      applyInjurySwap(A);
-      (A.lesionados || (A.lesionados = [])).push({
-        uid: victim.uid,
-        name: victim.name,
-        position: victim.position,
-        minute: injury.minute,
-        severity: injury.severity,
-        typeIndex: injury.typeIndex,
-        inName: sub && sub.replacement ? sub.replacement.name : null,
-      });
-      // El cambio forzado por lesión también va a la lista de cambios (1-por-1:
-      // entra el suplente, sale el lesionado). reason='injury' lo distingue del
-      // cambio por roja para la crónica.
-      if (sub && sub.replacement) {
-        (A.sustituciones || (A.sustituciones = [])).push({
-          minute: injury.minute,
-          cause: victim.name,
-          inName: sub.replacement.name,
-          inPos: sub.replacement.position,
-          outName: victim.name,
-          outPos: victim.position,
-          reason: 'injury',
-        });
-      }
+    const victim = inj.targetUid
+      ? (onField.find((p) => p.uid === inj.targetUid) || null)
+      : (onField.length ? onField[Math.floor(rng.next() * onField.length)] : null);
+    if (!victim) return;
+    // Solo cuenta para la inmunidad si la lesión deja baja para los próximos
+    // partidos (las simples no: el jugador sigue disponible al siguiente).
+    if (A.immunityRemoved && (CONFIG.INJURY_BAN[inj.severity] || 0) > 0) {
+      A.immunityRemoved[victim.position] = (A.immunityRemoved[victim.position] || 0) + 1;
     }
-    injury.applied = true;
+    const sub = substituteInjured(A, victim);
+    applyInjurySwap(A);
+    (A.lesionados || (A.lesionados = [])).push({
+      uid: victim.uid,
+      name: victim.name,
+      position: victim.position,
+      minute: inj.minute,
+      severity: inj.severity,
+      typeIndex: inj.typeIndex,
+      inName: sub && sub.replacement ? sub.replacement.name : null,
+    });
+    // El cambio forzado por lesión también va a la lista de cambios (1-por-1:
+    // entra el suplente, sale el lesionado). reason='injury' lo distingue del
+    // cambio por roja para la crónica.
+    if (sub && sub.replacement) {
+      (A.sustituciones || (A.sustituciones = [])).push({
+        minute: inj.minute,
+        cause: victim.name,
+        inName: sub.replacement.name,
+        inPos: sub.replacement.position,
+        outName: victim.name,
+        outPos: victim.position,
+        reason: 'injury',
+      });
+    }
   };
 
   for (const { minute, side } of queue) {
-    if (injury && !injury.applied && minute >= injury.minute) applyInjury();
+    for (const inj of fieldInjuries) {
+      if (!inj.applied && minute >= inj.minute) applyFieldInjury(inj);
+    }
     const steal = side === 'A' ? stealAgainstA : stealAgainstB;
     const phaseHint = steal > 0 && rng.bernoulli(steal) ? 'high_press' : null;
     const event = makeHighlight({
@@ -498,8 +498,8 @@ export function simularPartido(teamA, teamB, rng) {
       maybeCounter(minute, side === 'A' ? 'B' : 'A', A, B, score, events, rng, () => `hl_${++eventSeq}`, cardTracker);
     }
   }
-  // Si ninguna jugada alcanzó el minuto de la lesión, se registra igualmente.
-  if (injury && !injury.applied) applyInjury();
+  // Si ninguna jugada alcanzó el minuto de alguna lesión, se registra igualmente.
+  for (const inj of fieldInjuries) if (!inj.applied) applyFieldInjury(inj);
 
   // Desempate por número de secuencia: comparar ids como texto ordenaría
   // "hl_10" antes que "hl_9" y desordenaría los marcadores acumulados.

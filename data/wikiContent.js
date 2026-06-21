@@ -32,7 +32,7 @@ export const WIKI_CONTENT = {
       Penalero: '×2,5 al peso de rematador en penaltis y +5 % de conversión.',
       Capitán: '+1 a la química de su línea.',
       Garra: '+4 en el duelo defensivo a partir del minuto 75.',
-      Roto: '33 % más de probabilidad de ser el lesionado del partido y, además, puede romperse en el calentamiento estando en el banquillo, sin haber jugado.',
+      Roto: 'En el campo: 30 % de probabilidad de lesionarse durante el partido. En el banquillo: 15 % de romperse en el calentamiento, sin haber jugado (figura entre los lesionados y se narra en La Gaceta de la Torre).',
     },
     sections: [
       { id: 'reglamento', nav: 'Reglamento', title: 'Reglamento', blocks: [
@@ -131,7 +131,7 @@ export const WIKI_CONTENT = {
       Penalero: '×2.5 finisher weight on penalties and +5% conversion.',
       Capitán: '+1 to the chemistry of its line.',
       Garra: '+4 in the defensive duel from minute 75 onwards.',
-      Roto: '33% more likely to be the player injured in the match and, on top of that, may break down during the warm-up while on the bench, without having played.',
+      Roto: 'On the pitch: 30% chance of getting injured during the match. On the bench: 15% chance of breaking down in the warm-up, without having played (listed among the injured and reported in the Tower Gazette).',
     },
     sections: [
       { id: 'reglamento', nav: 'Rules', title: 'Rules', blocks: [
@@ -230,7 +230,7 @@ export const WIKI_CONTENT = {
       Penalero: '×2,5 au poids de finisseur sur les penaltys et +5 % de conversion.',
       Capitán: '+1 à l\'alchimie de sa ligne.',
       Garra: '+4 dans le duel défensif à partir de la 75e minute.',
-      Roto: '33 % de risque en plus d’être le blessé du match et, en plus, peut se blesser à l’échauffement sur le banc, sans avoir joué.',
+      Roto: 'Sur le terrain : 30 % de risque de se blesser pendant le match. Sur le banc : 15 % de se blesser à l’échauffement, sans avoir joué (figure parmi les blessés et raconté dans La Gazette de la Tour).',
     },
     sections: [
       { id: 'reglamento', nav: 'Règles', title: 'Règles', blocks: [
@@ -329,7 +329,7 @@ export const WIKI_CONTENT = {
       Penalero: '×2,5 no peso de finalizador em pênaltis e +5% de conversão.',
       Capitán: '+1 na química da sua linha.',
       Garra: '+4 no duelo defensivo a partir do minuto 75.',
-      Roto: '33% mais de chance de ser o lesionado da partida e, além disso, pode se machucar no aquecimento estando no banco, sem ter jogado.',
+      Roto: 'Em campo: 30% de chance de se lesionar durante a partida. No banco: 15% de se machucar no aquecimento, sem ter jogado (consta entre os lesionados e é narrado na Gazeta da Torre).',
     },
     sections: [
       { id: 'reglamento', nav: 'Regras', title: 'Regras', blocks: [
@@ -428,7 +428,7 @@ export const WIKI_CONTENT = {
       Penalero: '×2,5 al peso di finalizzatore sui rigori e +5% di conversione.',
       Capitán: '+1 all\'intesa della sua linea.',
       Garra: '+4 nel duello difensivo dal minuto 75 in poi.',
-      Roto: '33% di probabilità in più di essere l’infortunato della partita e, inoltre, può farsi male nel riscaldamento stando in panchina, senza aver giocato.',
+      Roto: 'In campo: 30% di probabilità di infortunarsi durante la partita. In panchina: 15% di farsi male nel riscaldamento, senza aver giocato (compare tra gli infortunati ed è raccontato ne La Gazzetta della Torre).',
     },
     sections: [
       { id: 'reglamento', nav: 'Regole', title: 'Regole', blocks: [

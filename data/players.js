@@ -15533,5 +15533,25 @@ export const PLAYERS = [
     "gk": null,
     "trait": "Roto",
     "tacticalType": "posesion"
+  },
+  {
+    "id": "mid_fernando_gago",
+    "name": "Fernando Gago",
+    "nation": "Argentina",
+    "era": "2014",
+    "position": "MID",
+    "rarity": "legend",
+    "ovr": 89,
+    "stats": {
+      "pace": 90,
+      "shooting": 75,
+      "passing": 99,
+      "dribbling": 90,
+      "defending": 80,
+      "physical": 84
+    },
+    "gk": null,
+    "trait": "Roto",
+    "tacticalType": "posesion"
   }
 ];

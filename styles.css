@@ -5040,7 +5040,7 @@ select {
   max-height: min(82vh, 760px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 14px;
+  padding: 10px;
 }
 
 .squad-review-title {

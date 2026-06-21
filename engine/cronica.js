@@ -279,6 +279,15 @@ export function buildCronica(match, ctx) {
       }, rng));
     }
   }
+  // Lesiones de calentamiento (rasgo "Roto"): un suplente que se rompió antes del
+  // pitido. Se narra en la previa (minuto 0), sin minuto de juego ni cambio.
+  for (const injury of (match.lesionadosA || []).filter((inj) => inj.warmup).slice(0, 1)) {
+    push(0, tVariant('press.body.injuryWarmup', {
+      player: injury.name,
+      team: ctx.teamName,
+      type: tIndexed(`injury.types.${injury.severity}`, injury.typeIndex),
+    }, rng));
+  }
   // Cuatro rojas: el partido se da por perdido (incomparecencia).
   if (match.forfeit) {
     const lastRed = analysis.reds[analysis.reds.length - 1];
