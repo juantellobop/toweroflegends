@@ -370,7 +370,6 @@ function wire(root, choices, onPick, onOpen = null) {
 // y la elegida "vuela" antes de avanzar. Sin botón de confirmación.
 function wireChoice(root, choices, onPick, isOpen = () => true) {
   const cards = Array.from(root.querySelectorAll('.deal-card'));
-  const reduce = prefersReducedMotion();
   let chosen = false;
 
   function choose(card) {
@@ -379,15 +378,17 @@ function wireChoice(root, choices, onPick, isOpen = () => true) {
     const choice = choices.find((x) => x.id === card.dataset.id);
     if (!choice || choice.selectable === false) return;
     chosen = true;
+    // Marca la elegida (sube) y atenúa el resto: queda reflejado en el snapshot de
+    // salida de la transición de pantalla. SIN espera (antes había 360ms de delay
+    // para el "vuelo"): avanzamos ya y la propia transición de pantalla
+    // (renderRoute) da la fluidez del paso a la siguiente pantalla.
     cards.forEach((c) => {
       c.classList.toggle('selected', c === card);
       c.classList.toggle('receded', c !== card);
       if (c !== card) c.setAttribute('aria-disabled', 'true');
     });
-    card.classList.add('chosen', 'fly');
     haptic(16);
-    const delay = reduce ? 0 : 360;
-    setTimeout(() => onPick(choice), delay);
+    onPick(choice);
   }
 
   cards.forEach((card) => {

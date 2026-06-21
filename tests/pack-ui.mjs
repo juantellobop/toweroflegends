@@ -28,13 +28,12 @@ assert.match(disabled.textContent, /Ya en tu plantilla/);
 click(disabled);
 assert.equal(picked, null, 'una carta ya en plantilla no se puede elegir');
 
-// Selección directa: al tocar una carta válida se confirma sin botón aparte.
+// Selección directa: al tocar una carta válida se confirma sin botón aparte y
+// SIN delay (la fluidez la da la transición de pantalla, no una espera previa).
 const enabled = root.querySelector('.deal-card:not(.disabled-deal)');
 click(enabled);
-assert.ok(enabled.classList.contains('fly'), 'la carta elegida vuela al confirmarse');
-assert.equal(picked, null, 'el pick se difiere hasta terminar la animación');
-await new Promise((resolve) => setTimeout(resolve, 420));
-assert.equal(picked && picked.id, choices[1].id, 'tras la animación se entrega la carta elegida');
+assert.ok(enabled.classList.contains('selected'), 'la carta elegida se resalta (selected)');
+assert.equal(picked && picked.id, choices[1].id, 'la elección se entrega de inmediato, sin esperar animación');
 
 console.log('UI de repetidas: OK');
 
