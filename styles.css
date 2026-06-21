@@ -5411,6 +5411,15 @@ button.primary:active:not(:disabled),
   padding-bottom: calc(108px + env(safe-area-inset-bottom));
 }
 
+@media (max-width: 1023px) and (min-width: 768px) {
+.team-select-screen .team-layout{
+  grid-template-columns: minmax(0,1fr) 270px;
+}
+.team-select-screen .team-panel-head {
+  grid-template-columns: 1fr;
+}
+}
+
 @media (max-width: 767px) {
   .team-select-screen .build-nav {
     flex-direction: row;
@@ -5573,13 +5582,19 @@ button.primary:active:not(:disabled),
     margin-top: 14px;
   }
 
-  /* Cabecera del banco en una sola fila: título "Suplentes" a la izquierda y
-     el filtro por línea a la derecha (la cabecera genérica mobile se apila en
-     columna, pero aquí desperdiciaba una fila entera). */
+  /* Cabecera del banco: en móvil el título "Suplentes" se oculta (regla genérica
+     div:has(h2)), así que los filtros (posición + país) ocupan TODO el ancho en
+     una sola columna del grid en vez de quedar comprimidos en la celda 1fr. */
   .roster-head {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    grid-template-columns: 1fr;
+  }
+  .roster-head .bench-filters {
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    gap: 8px;
+  }
+  .roster-head .bench-filter {
+    width: 100%;
   }
 
   .build-screen .items-fold summary {
