@@ -25,6 +25,12 @@ export const CONFIG = {
   DIRECT_RED_PROB: 0.105, // prob. de roja directa por falta
   YELLOW_PROB: 0.62, // prob. de que una falta se sancione con amarilla (si no es roja directa)
   DANGEROUS_FOUL_MULT: 1.8, // las faltas peligrosas (tiro libre) multiplican el riesgo de tarjeta
+  // Quién comete la falta: por defecto defensas y medios (los que más cortan). Los
+  // delanteros (replegando) cometen pocas y el portero muy rara vez. Son pesos
+  // RELATIVOS al rating de cada jugador dentro del sorteo del infractor (no alteran
+  // el duelo defensivo, que sigue resolviéndolo el defensor de la jugada).
+  FOUL_FWD_WEIGHT: 0.22, // delantero: ~1/5 de un defensa de igual rating
+  FOUL_GK_WEIGHT: 0.03, // portero: testimonial
 
   // --- Lesiones ---
   // Un solo sorteo por partido reparte estas bandas (mutuamente excluyentes): a
@@ -170,7 +176,10 @@ export const CONFIG = {
   CORRUPTO_SELL_MATCHES: 7,
   CORRUPTO_SHINY_BOOST: 10,
   // Naciones del sobre Shiny: el mejor jugador no poseído de cada una.
-  SHINY_NATIONS: ['Argentina', 'Brasil', 'España', 'Italia', 'Alemania', 'Uruguay', 'Portugal', 'Francia'],
+  SHINY_NATIONS: [
+    'Argentina', 'Brasil', 'España', 'Italia', 'Alemania', 'Uruguay', 'Portugal', 'Francia',
+    'Inglaterra', 'Países Bajos', 'Croacia', 'Bélgica',
+  ],
 
 };
 

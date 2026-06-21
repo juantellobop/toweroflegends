@@ -255,6 +255,29 @@ export function simulateHighlight(ctx) {
     }
   }
 
+  // Infractor de la falta: se elige APARTE del defensor del duelo (que ya resolvió
+  // la jugada) para no tocar el cálculo ni el balance. Pool ponderado por línea:
+  // defensas y medios al peso completo de su rating, delanteros (replegando) muy
+  // reducidos (FOUL_FWD_WEIGHT) y el portero testimonial (FOUL_GK_WEIGHT). Solo se
+  // sortea cuando hay falta → no consume RNG en jugadas sin falta. Sincroniza el
+  // nombre del defensor de la falta (narración) con el infractor real (tarjeta).
+  let offender = null;
+  if (terminal === 'falta') {
+    const foulPool = [
+      ...(def.defenders || []),
+      ...(def.midfielders || []),
+      ...(def.attackers || [])
+        .filter((p) => p.position === 'FWD')
+        .map((p) => ({ ...p, weight: (p.weight || p.rating || 1) * CONFIG.FOUL_FWD_WEIGHT })),
+      ...(keeperActor
+        ? [{ ...keeperActor, weight: (keeperActor.weight || keeperActor.rating || 1) * CONFIG.FOUL_GK_WEIGHT }]
+        : []),
+    ];
+    const o = actorFrom(foulPool, rng, `${def.name} ${t('narrator.player')}`);
+    actors.defender = nameOf(o); // la narración de la falta nombra al infractor
+    offender = { name: nameOf(o), uid: o.uid ?? null, position: o.naturalPosition || 'DEF', rarity: o.rarity ?? null };
+  }
+
   const scores = scoreAfter(score, side, terminal);
   const pattern = patternFor(terminal, phase, rng);
   return {
@@ -277,9 +300,7 @@ export function simulateHighlight(ctx) {
     // Infractor de la falta (el defensor que comete la entrada): el lado que
     // defiende es quien comete la falta. uid/posición permiten la tarjeta, la
     // sustitución y la sanción del jugador real (null en el rival sintético).
-    offender: terminal === 'falta'
-      ? { name: actors.defender, uid: defender.uid ?? null, position: defender.naturalPosition || 'DEF', rarity: defender.rarity ?? null }
-      : null,
+    offender,
     counter: phase === 'counter',
   };
 }

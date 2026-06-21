@@ -15633,5 +15633,65 @@ export const PLAYERS = [
     "gk": null,
     "trait": null,
     "tacticalType": "presion"
+  },
+  {
+    "id": "mid_tim_payne",
+    "name": "Tim Payne",
+    "nation": "Nueva Zelanda",
+    "era": "2026",
+    "position": "DEF",
+    "rarity": "corrupto",
+    "ovr": 68,
+    "stats": {
+      "pace": 72,
+      "shooting": 42,
+      "passing": 48,
+      "dribbling": 55,
+      "defending": 71,
+      "physical": 79
+    },
+    "gk": null,
+    "trait": null,
+    "tacticalType": null
+  },
+  {
+    "id": "mid_santiago_maratea",
+    "name": "Santiago Maratea",
+    "nation": "Argentina",
+    "era": "2025",
+    "position": "MID",
+    "rarity": "corrupto",
+    "ovr": 64,
+    "stats": {
+      "pace": 71,
+      "shooting": 55,
+      "passing": 62,
+      "dribbling": 66,
+      "defending": 60,
+      "physical": 70
+    },
+    "gk": null,
+    "trait": null,
+    "tacticalType": null
+  },
+  {
+    "id": "mid_spreen",
+    "name": "Spreen",
+    "nation": "Argentina",
+    "era": "2024",
+    "position": "MID",
+    "rarity": "corrupto",
+    "ovr": 54,
+    "stats": {
+      "pace": 60,
+      "shooting": 55,
+      "passing": 50,
+      "dribbling": 55,
+      "defending": 50,
+      "physical": 60
+    },
+    "gk": null,
+    "trait": null,
+    "tacticalType": null
   }
 ];
