@@ -848,6 +848,10 @@ select {
     margin-top: 0;
     padding-top: 0;
   }
+  /* El sobre SIEMPRE centrado en el viewport: las cartas ocultas NO reservan su
+     alto (que empujaba el sobre hacia abajo cuando superaban la pantalla). Al
+     abrir, las cartas aparecen y el contenido crece/scrollea con normalidad. */
+  .pack-screen .pack-reveal > .pack-deal[hidden] { display: none !important; }
 }
 /* Sobre y cartas comparten celda de la rejilla → al ocultarse el sobre, las
    cartas quedan en su lugar sin saltos de layout durante la animación. */
@@ -6043,7 +6047,7 @@ button.primary:active:not(:disabled),
    rejilla 2-col .pack-screen .deal-card, y esta debe ganar) → se limita al
    @media de escritorio. El alto sale de la proporción 2:3. */
 @media (min-width: 768px) {
-  .deal-card:has(.tdl-card) { min-width: 256px; }
+  .deal-card:has(.tdl-card) { min-width: 230px; }
 }
 .deal-card[role="button"] .tdl-card { cursor: pointer; }
 .deal-card.selected .tdl-card {
