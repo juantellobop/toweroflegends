@@ -6,8 +6,9 @@ import {
   CONFIG, FORMATIONS, LINES, RARITIES, RARITY_BIAS, managerRarityBias,
   formationLineSlots, slotAcceptsPosition, LINE_CAPACITY, GRID_COLS, FORMATION_TYPE,
   FORMATION_TEMPLATES, templateSlots, MANAGER_STYLES, detectFormation, CUSTOM_FORMATION,
+  isCorrupto, isSpecialRarity,
 } from '../data/config.js';
-import { getPlayableRoster } from '../data/playableRoster.js';
+import { getPlayableRoster, clonePlayer } from '../data/playableRoster.js';
 import { ITEMS } from '../data/items.js';
 import { MANAGERS } from '../data/managers.js';
 import { RNG, randomSeed } from '../engine/rng.js';
@@ -136,12 +137,15 @@ function ownedKeySet(squad) {
 export function drawPlayerPack(catalog, squad, size, weights, rng) {
   const ownedKeys = ownedKeySet(squad);
   const owns = (card) => ownedKeys.has(dupKey(card));
+  // Las rarezas especiales (Corrupto/Shiny) nunca salen en los sobres normales:
+  // el Corrupto solo llega vía el item y el Shiny vía su sobre de recompensa.
+  const pool = catalog.filter((p) => !isSpecialRarity(p));
   if (CONFIG.ALLOW_DUPLICATE_PLAYERS || !CONFIG.PACK_GUARANTEE_SELECTABLE) {
-    return drawByBand(catalog, size, weights, rng)
+    return drawByBand(pool, size, weights, rng)
       .map((card) => ({ ...card, selectable: CONFIG.ALLOW_DUPLICATE_PLAYERS || !owns(card) }));
   }
-  const unowned = catalog.filter((p) => !owns(p));
-  const owned = catalog.filter((p) => owns(p));
+  const unowned = pool.filter((p) => !owns(p));
+  const owned = pool.filter((p) => owns(p));
   const cards = drawByBand(unowned, Math.min(size, unowned.length), weights, rng);
   if (cards.length < size) {
     cards.push(...drawByBand(owned, Math.min(size - cards.length, owned.length), weights, rng));
@@ -165,7 +169,8 @@ export function generateStarterSquad(catalog, formation, config, rng, maxLegends
   const noMoreLegends = (c) => c.rarity === 'legend';
 
   for (const line of LINES) {
-    const byBand = groupByBand(catalog.filter((p) => p.position === line));
+    // Excluye las rarezas especiales (Corrupto/Shiny) de la plantilla de arranque.
+    const byBand = groupByBand(catalog.filter((p) => p.position === line && !isSpecialRarity(p)));
     for (let i = 0; i < slots[line] + (bench[line] || 0); i++) {
       const exclude = legendCount >= maxLegends ? noMoreLegends : null;
       const picked = pickFromBand(byBand, weights, occupied, rng, exclude);
@@ -359,6 +364,8 @@ function firstOpenSlotForPlayer(state, player) {
 function evaluatePlacement(state, player, line, slotIndex = 0) {
   if (!player || !LINES.includes(line)) return null;
   const currentLine = starterLineFor(state, player);
+  // El Corrupto alineado está sellado: no se puede mover de su hueco.
+  if (isCorrupto(player) && currentLine) return null;
   // Un suplente no puede entrar si ya hay otra copia suya alineada.
   if (!currentLine && hasAlignedDuplicate(state, player)) return null;
 
@@ -368,6 +375,8 @@ function evaluatePlacement(state, player, line, slotIndex = 0) {
   if (!slotAcceptsPosition(state.formation, line, targetIndex, player.position)) return null;
 
   const occupant = occupantAt(state, line, targetIndex);
+  // Nadie puede desalojar al Corrupto de su hueco (ni por intercambio).
+  if (occupant && isCorrupto(occupant)) return null;
 
   // --- Titular A sobre otro titular B → intercambio de posiciones ---
   // Solo es válido si B puede jugar en el hueco que deja A; si no, se rechaza
@@ -450,9 +459,22 @@ export function autoFillStarting11(state) {
     const slot = formationLineSlots(state.formation, cell.line)[cell.slotIndex];
     return { line: cell.line, slotIndex: cell.slotIndex, accepts: slot.accepts, gridRow: slot.gridRow };
   });
+  // Los Corruptos (sellados) se FIJAN primero en una celda de su línea natural;
+  // el relleno normal no puede tocar ni su jugador ni su hueco.
+  const pinned = new Set();
+  for (const corrupto of state.squad.filter(isCorrupto)) {
+    const key = (c) => `${c.line}:${c.slotIndex}`;
+    const cell = cells.find((c) => !pinned.has(key(c)) && c.line === corrupto.position && c.accepts.includes(corrupto.position))
+      || cells.find((c) => !pinned.has(key(c)) && c.accepts.includes(corrupto.position));
+    if (!cell) continue;
+    eleven[cell.line][cell.slotIndex] = corrupto;
+    used.add(corrupto.id);
+    pinned.add(key(cell));
+  }
   for (const cell of cells.slice().sort((a, b) => a.accepts.length - b.accepts.length)) {
+    if (pinned.has(`${cell.line}:${cell.slotIndex}`)) continue;
     const player = state.squad
-      .filter((p) => cell.accepts.includes(p.position) && !used.has(p.id) && !isUnavailable(p))
+      .filter((p) => cell.accepts.includes(p.position) && !used.has(p.id) && !isUnavailable(p) && !isCorrupto(p))
       .sort((a, b) =>
         (playerOVR(b) - playerOVR(a)) ||
         ((b.position === cell.line ? 1 : 0) - (a.position === cell.line ? 1 : 0))
@@ -479,6 +501,8 @@ export function isLineupComplete(state) {
 
 // Coloca/quita un jugador del once (toggle). Respeta la capacidad de la línea.
 export function togglePlayerInLineup(state, player) {
+  // El Corrupto está sellado en el once: ni se quita ni se mueve.
+  if (isCorrupto(player)) return { placed: false, sealed: true };
   const currentLine = starterLineFor(state, player);
   if (currentLine) {
     const arr = state.starting11[currentLine];
@@ -601,6 +625,8 @@ function nationTeamsFrom(catalog, squad) {
   const ownedKeys = ownedKeySet(squad);
   const groups = new Map();
   for (const player of catalog) {
+    // Las rarezas especiales (Corrupto/Shiny) no entran en el sobre de selecciones.
+    if (isSpecialRarity(player)) continue;
     const id = `${player.nation}|${player.era}`;
     if (!groups.has(id)) groups.set(id, { id, nation: player.nation, era: player.era, players: [] });
     groups.get(id).players.push(player);
@@ -639,13 +665,30 @@ export function rollNationPack(state) {
   return chosen;
 }
 
+// ¿Toca ofrecer GARANTIZADO el item "Representante corrupto" en este nivel?
+// (14, 28, 42…). Se entrega una sola vez por ciclo y nunca sale al azar.
+export function isCorruptoItemLevel(level) {
+  const every = CONFIG.CORRUPTO_ITEM_EVERY;
+  return every > 0 && level > 0 && level % every === 0;
+}
+
 // Genera el sobre de objeto del nivel actual.
 export function rollItemPack(state) {
   // Los extras de reliquias ya están incluidos en pendingItemPack (los aplica
   // rewardFor al calcular la recompensa); aquí no se vuelven a sumar.
   const count = state.pendingItemPack ?? CONFIG.ITEM_PACK_BASE;
   const bias = state.pendingBias || RARITY_BIAS.inicial;
-  state.itemChoices = drawCards(ITEMS, count, bias, state.rng);
+  // El item especial (special) nunca entra en el pool aleatorio de objetos.
+  const pool = ITEMS.filter((it) => !it.special);
+  // Garantizado cada CORRUPTO_ITEM_EVERY niveles, salvo que ya tengas un Corrupto
+  // activo (no se acumulan dos a la vez): en ese caso, sobre de objetos normal.
+  if (isCorruptoItemLevel(state.level) && !state.squad.some(isCorrupto)) {
+    const corruptoItem = ITEMS.find((it) => it.special === 'corrupto');
+    const rest = drawCards(pool, Math.max(0, count - 1), bias, state.rng);
+    state.itemChoices = corruptoItem ? [corruptoItem, ...rest] : rest;
+  } else {
+    state.itemChoices = drawCards(pool, count, bias, state.rng);
+  }
   return state.itemChoices;
 }
 
@@ -681,6 +724,109 @@ export function chooseItemCard(state, template) {
 // Descarta el sobre de objeto sin llevarse ninguno: cierra el sobre y continúa.
 export function discardItemPack(state) {
   state.itemChoices = null;
+}
+
+// === Sobre Corrupto (item "Representante corrupto") ===
+
+// Sortea UN jugador de rareza Corrupto del roster (no poseído) al azar. Devuelve
+// [card] (una sola carta; no hay elección múltiple), o [] si no hay candidatos
+// (el usuario crea los Corruptos desde el editor: sin ellos, el sobre va vacío).
+export function rollCorruptoPack(state) {
+  const ownedKeys = ownedKeySet(state.squad);
+  const pool = (state.roster || getPlayableRoster())
+    .filter((p) => isCorrupto(p) && !ownedKeys.has(dupKey(p)));
+  state.corruptoChoices = pool.length ? [{ ...state.rng.pick(pool), selectable: true }] : [];
+  return state.corruptoChoices;
+}
+
+// Añade el Corrupto elegido a la plantilla y lo ubica SELLADO en su posición
+// natural (no se podrá retirar). Arranca su contador de partidos en 0.
+export function chooseCorruptoCard(state, template) {
+  if (!template) return null;
+  const card = { ...instantiate(template), corruptoMatches: 0 };
+  delete card.selectable;
+  state.squad.push(card);
+  forcePlaceSealed(state, card);
+  state.corruptoChoices = null;
+  return card;
+}
+
+// Coloca al Corrupto (sellado) en un hueco de su LÍNEA natural y garantiza que
+// entra al once. Con el once lleno (11), ocupa el hueco del titular más flojo de
+// su línea, que pasa al banquillo; si su línea no tiene a nadie de su posición,
+// libera al titular global más flojo. Con menos de 11, ocupa un hueco vacío.
+function forcePlaceSealed(state, player) {
+  const line = player.position;
+  const slots = formationLineSlots(state.formation, line).filter((s) => s.accepts.includes(player.position));
+  if (!slots.length) return;
+  const arr = lineSlotArray(state, line);
+  const occupied = slots.filter((s) => arr[s.slotIndex]);
+  const total = LINES.reduce((n, l) => n + (state.starting11[l] || []).filter(Boolean).length, 0);
+
+  let target;
+  if (total >= 11) {
+    if (occupied.length) {
+      target = occupied.sort((a, b) => playerOVR(arr[a.slotIndex]) - playerOVR(arr[b.slotIndex]))[0];
+    } else {
+      // Su línea no tiene titulares de su posición: deja sitio liberando al
+      // titular global más flojo (de otra línea) y ocupa un hueco vacío.
+      const weakest = LINES.flatMap((l) => (state.starting11[l] || []).filter(Boolean).map((p) => ({ l, p })))
+        .filter(({ p }) => !isCorrupto(p))
+        .sort((a, b) => playerOVR(a.p) - playerOVR(b.p))[0];
+      if (weakest) clearLineupSlot(state, weakest.p.uid);
+      target = slots.find((s) => !arr[s.slotIndex]) || slots[0];
+    }
+  } else {
+    target = slots.find((s) => !arr[s.slotIndex]) || occupied[0] || slots[0];
+  }
+  if (!target) return;
+  arr[target.slotIndex] = player;
+  state.starting11[line] = arr;
+  state.formation = detectFormation(state.starting11);
+}
+
+// === Sobre Shiny (recompensa por vender al Corrupto) ===
+
+// El mejor jugador NO poseído de cada nación de SHINY_NATIONS, clonado como Shiny
+// con +CORRUPTO_SHINY_BOOST a TODAS sus stats. Omite naciones sin candidato libre
+// (devuelve ≤ SHINY_NATIONS.length cartas).
+export function rollShinyPack(state) {
+  const ownedKeys = ownedKeySet(state.squad);
+  const roster = state.roster || getPlayableRoster();
+  const boost = CONFIG.CORRUPTO_SHINY_BOOST;
+  const choices = [];
+  for (const nation of CONFIG.SHINY_NATIONS) {
+    const best = roster
+      .filter((p) => p.nation === nation && !isSpecialRarity(p) && !ownedKeys.has(dupKey(p)))
+      .sort((a, b) => playerOVR(b) - playerOVR(a))[0];
+    if (!best) continue;
+    const shiny = clonePlayer(best);
+    shiny.rarity = 'shiny';
+    if (shiny.stats) for (const k in shiny.stats) shiny.stats[k] += boost;
+    if (shiny.gk) for (const k in shiny.gk) shiny.gk[k] += boost;
+    shiny.selectable = true;
+    choices.push(shiny);
+  }
+  state.shinyChoices = choices;
+  return choices;
+}
+
+// El jugador elige un Shiny del sobre: entra a la plantilla (al banquillo, como un
+// fichaje normal). Cierra siempre la venta del Corrupto (lo retira de la plantilla),
+// incluso si no se elige carta (sobre vacío).
+export function chooseShinyCard(state, template) {
+  const card = template ? instantiate(template) : null;
+  if (card) state.squad.push(card);
+  state.shinyChoices = null;
+  finalizeCorruptoSale(state);
+  return card;
+}
+
+// Retira de la plantilla al Corrupto vendido y cierra la venta pendiente.
+function finalizeCorruptoSale(state) {
+  const uid = state.pendingShinySale?.soldUid;
+  if (uid) state.squad = state.squad.filter((p) => p.uid !== uid);
+  state.pendingShinySale = null;
 }
 
 // === Director técnico (DT) ===
@@ -888,8 +1034,24 @@ export function applyResult(state) {
     return { ...reward, gameOver: false, survivedLoss: true };
   }
 
+  // Avance de nivel (victoria o empate): cuenta un partido para el Corrupto.
+  maybeAdvanceCorrupto(state);
+
   state.phase = 'continue';
   return { ...reward, gameOver: false };
+}
+
+// Cuenta un partido superado (avance de nivel) para el Corrupto activo. Tras
+// CONFIG.CORRUPTO_SELL_MATCHES avances se vende: queda pendiente el sobre Shiny y
+// se vacía su hueco del once (sigue en plantilla hasta que se resuelve el sobre,
+// para que el resumen del último partido lo muestre en su sitio).
+function maybeAdvanceCorrupto(state) {
+  const corrupto = state.squad.find(isCorrupto);
+  if (!corrupto) return;
+  corrupto.corruptoMatches = (corrupto.corruptoMatches || 0) + 1;
+  if (corrupto.corruptoMatches < CONFIG.CORRUPTO_SELL_MATCHES) return;
+  state.pendingShinySale = { soldName: corrupto.name, soldUid: corrupto.uid };
+  clearLineupSlot(state, corrupto.uid);
 }
 
 // Prepara el siguiente nivel: guarda el sesgo/tamaño de sobre de la recompensa.
@@ -964,6 +1126,10 @@ export function createRun(opts = {}) {
     nationChoices: null,
     itemChoices: null,
     managerChoices: null,
+    corruptoChoices: null,
+    shinyChoices: null,
+    // Venta del Corrupto pendiente de abrir el sobre Shiny: { soldName, soldUid }.
+    pendingShinySale: null,
     lastMatch: null,
     lastReward: null,
     opponent: null,
@@ -1055,6 +1221,8 @@ export function serializeRun(state) {
     pendingManagerPack: state.pendingManagerPack ?? false,
     pendingBias: state.pendingBias,
     pendingReward: state.pendingReward ?? null,
+    // Venta del Corrupto pendiente del sobre Shiny (los sobres se regeneran solos).
+    pendingShinySale: state.pendingShinySale ?? null,
     // Rival y partido en curso: necesarios para retomar en scouting, partido,
     // resultado, gaceta y gameover (esas pantallas los leen, no los recalculan).
     opponent: state.opponent ?? null,
@@ -1126,10 +1294,13 @@ export function rehydrateRun(data) {
       pendingManagerPack: data.pendingManagerPack ?? false,
       pendingBias: data.pendingBias,
       pendingReward: data.pendingReward ?? null,
+      pendingShinySale: data.pendingShinySale ?? null,
       playerChoices: null,
       nationChoices: null,
       itemChoices: null,
       managerChoices: null,
+      corruptoChoices: null,
+      shinyChoices: null,
       opponent: data.opponent ?? null,
       lastMatch: data.lastMatch ?? null,
       lastReward: data.lastReward ?? null,

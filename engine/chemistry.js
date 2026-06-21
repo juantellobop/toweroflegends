@@ -10,7 +10,7 @@
 // (premia construir el XI en torno a 1-2 naciones) y una "cohesión táctica" (premia
 // que tus jugadores encajen con el ESTILO elegido). Ambos modestos.
 
-import { CONFIG, LINES, geometricLinks } from '../data/config.js';
+import { CONFIG, LINES, geometricLinks, isCorrupto } from '../data/config.js';
 
 // Naciones históricas que cuentan como la misma selección a efectos de química
 // (y de enlaces en el campo): Alemania Occidental ≡ Alemania.
@@ -60,13 +60,16 @@ export function computeChemistry(starting11, formation = null, manager = null) {
     const pa = at(a[0], a[1]);
     const pb = at(b[0], b[1]);
     if (!pa || !pb) continue;
+    // El Corrupto no enlaza con nadie: ignora cualquier arista que lo toque.
+    if (isCorrupto(pa) || isCorrupto(pb)) continue;
     const half = pairChem(pa, pb) / 2;
     chem[a[0]] += half;
     chem[b[0]] += half;
   }
   const managerNation = manager && manager.nation ? chemNation(manager.nation) : null;
   for (const line of LINES) {
-    const players = (starting11[line] || []).filter(Boolean);
+    // El Corrupto tampoco aporta capitanía ni conexión con el DT.
+    const players = (starting11[line] || []).filter((p) => p && !isCorrupto(p));
     if (players.some((p) => p.trait === 'Capitán')) chem[line] += 1;
     if (managerNation) {
       const connationals = players.filter((p) => p.nation && chemNation(p.nation) === managerNation).length;
@@ -83,8 +86,9 @@ export function computeChemistry(starting11, formation = null, manager = null) {
 //  - attackMid: "cohesión táctica" — si la mayoría de tus jugadores de campo con
 //    tacticalType definido coincide con el tipo del dibujo, sube ataque y medio.
 export function computeTeamChem(starting11, style = null) {
+  // El Corrupto queda fuera de TODA la química: ni núcleo nacional ni cohesión.
   const all = [];
-  for (const line of LINES) for (const p of starting11[line] || []) if (p) all.push(p);
+  for (const line of LINES) for (const p of starting11[line] || []) if (p && !isCorrupto(p)) all.push(p);
 
   // Núcleo nacional: cuenta los jugadores de cada nación del XI.
   const byNation = {};

@@ -1669,6 +1669,109 @@
       }
     },
     {
+      "id": "95b50e9e-3bfa-44f5-804c-5cbe867ab6b9",
+      "teamName": "Leyendas",
+      "nation": "River Plate",
+      "floor": 6,
+      "createdAt": "2026-06-21T18:48:08.738Z",
+      "runId": "b6e1f9ac-3f2f-41d5-97e1-14642be4d395",
+      "lineup": [
+        {
+          "name": "Tiago Costa",
+          "position": "GK",
+          "line": "GK",
+          "ovr": 61,
+          "rarity": "common",
+          "slot": 0
+        },
+        {
+          "name": "José María Giménez",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 85,
+          "rarity": "epic",
+          "slot": 0
+        },
+        {
+          "name": "Fernando Meira",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 87,
+          "rarity": "epic",
+          "slot": 1
+        },
+        {
+          "name": "Thomas Berthold",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 96,
+          "rarity": "legend",
+          "slot": 3
+        },
+        {
+          "name": "Marcelo",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 92,
+          "rarity": "legend",
+          "slot": 4
+        },
+        {
+          "name": "Alemão",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 93,
+          "rarity": "legend",
+          "slot": 1
+        },
+        {
+          "name": "Andreas Möller",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 90,
+          "rarity": "epic",
+          "slot": 2
+        },
+        {
+          "name": "Albin Ekdal",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 69,
+          "rarity": "common",
+          "slot": 3
+        },
+        {
+          "name": "Oleh Shelayev",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 70,
+          "rarity": "common",
+          "slot": 6
+        },
+        {
+          "name": "Raí",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 90,
+          "rarity": "legend",
+          "slot": 8
+        },
+        {
+          "name": "Marco Ureña",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 68,
+          "rarity": "common",
+          "slot": 2
+        }
+      ],
+      "manager": {
+        "id": "manager_oleh_blojin",
+        "name": "Oleh Blojín",
+        "nation": "URSS"
+      }
+    },
+    {
       "id": "f0a9c4c2-c8b1-4617-9348-5f910e9e52b0",
       "teamName": "Leyendas",
       "nation": "River Plate",
@@ -1745,94 +1848,6 @@
           "position": "MID",
           "line": "FWD",
           "ovr": 68,
-          "rarity": "common"
-        }
-      ]
-    },
-    {
-      "id": "8632d96a-59d2-4c8c-bb26-c6d40e31426d",
-      "teamName": "Test",
-      "nation": "River Plate",
-      "floor": 5,
-      "createdAt": "2026-06-13T17:40:14.422Z",
-      "runId": "192fc46b-3d8b-4a97-93f2-579df34c6fe4",
-      "formation": "4-3-3",
-      "lineup": [
-        {
-          "name": "Justo Villar",
-          "position": "GK",
-          "line": "GK",
-          "ovr": 67,
-          "rarity": "common"
-        },
-        {
-          "name": "Mikael Lustig",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Omar Daf",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Tony Sanneh",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 67,
-          "rarity": "common"
-        },
-        {
-          "name": "Fedor Kudryashov",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 66,
-          "rarity": "common"
-        },
-        {
-          "name": "Yeltsin Tejeda",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 69,
-          "rarity": "common"
-        },
-        {
-          "name": "Sebastian Larsson",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Emil Forsberg",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 67,
-          "rarity": "common"
-        },
-        {
-          "name": "Aleksandr Samedov",
-          "position": "FWD",
-          "line": "FWD",
-          "ovr": 67,
-          "rarity": "common"
-        },
-        {
-          "name": "Marco Ureña",
-          "position": "FWD",
-          "line": "FWD",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Christian Bolaños",
-          "position": "FWD",
-          "line": "FWD",
-          "ovr": 67,
           "rarity": "common"
         }
       ]

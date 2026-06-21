@@ -6,12 +6,13 @@ import {
   discardPlayerPack, discardItemPack,
   isNationPackLevel, rollNationPack,
   rollManagerPack, chooseManagerCard, discardManagerPack,
+  rollCorruptoPack, chooseCorruptoCard, rollShinyPack, chooseShinyCard,
   playMatch, applyResult, advanceLevel, prepareOpponent, retryLevel,
   togglePlayerInLineup, placePlayerInLineup, setFormation, setStyle, assignLineToSlots,
   serializeRun, rehydrateRun,
 } from './state/run.js';
 import { acquireRunLock, releaseRunLock } from './state/sesion.js';
-import { renderPlayerPack, renderItemPack, renderNationPack, renderManagerPack } from './ui/packScreen.js';
+import { renderPlayerPack, renderItemPack, renderNationPack, renderManagerPack, renderCorruptoPack, renderShinyPack } from './ui/packScreen.js';
 import { renderSquadIntro } from './ui/squadIntroScreen.js';
 import { renderBuild } from './ui/buildScreen.js';
 import { renderScouting } from './ui/scoutingScreen.js';
@@ -58,10 +59,12 @@ const ROUTE_ORDER = {
   playerPack: 3,
   managerPack: 4,
   itemPack: 5,
+  corruptoPack: 5.5,
   scouting: 6,
   build: 7,
   match: 8,
   result: 9,
+  shinyPack: 9.5,
   gameover: 10,
 };
 
@@ -516,6 +519,13 @@ function render(navHint = 'auto') {
           render('forward');
         };
         renderItemPack(root, state, rollItemPack(state), (tpl) => {
+          // El "Representante corrupto" no es un objeto pasivo: abre el sobre
+          // Corrupto en lugar de añadirse al inventario.
+          if (tpl.special === 'corrupto') {
+            state.phase = 'corruptoPack';
+            render('forward');
+            return;
+          }
           chooseItemCard(state, tpl);
           toScouting();
         }, () => {
@@ -525,6 +535,40 @@ function render(navHint = 'auto') {
         });
       }, navHint);
       break;
+
+    case 'corruptoPack': {
+      // Sobre del item: entrega un jugador Corrupto que se autoubica sellado en
+      // el once. Sin candidatos (el usuario aún no creó Corruptos), se continúa.
+      const corruptoChoices = rollCorruptoPack(state);
+      const toScouting = () => {
+        prepareOpponent(state);
+        state.phase = 'scouting';
+        render('forward');
+      };
+      if (!corruptoChoices.length) { toScouting(); break; }
+      renderRoute('corruptoPack', () => {
+        renderCorruptoPack(root, state, corruptoChoices, (tpl) => {
+          chooseCorruptoCard(state, tpl);
+          toScouting();
+        });
+      }, navHint);
+      break;
+    }
+
+    case 'shinyPack': {
+      // Tras vender al Corrupto: sobre con el mejor jugador no poseído de cada
+      // país (+10 a todas las stats). Sin candidatos, se cierra la venta y avanza.
+      const shinyChoices = rollShinyPack(state);
+      const proceed = () => { advanceLevel(state); render('forward'); };
+      if (!shinyChoices.length) { chooseShinyCard(state, null); proceed(); break; }
+      renderRoute('shinyPack', () => {
+        renderShinyPack(root, state, shinyChoices, (tpl) => {
+          chooseShinyCard(state, tpl);
+          proceed();
+        }, { soldName: state.pendingShinySale?.soldName || '' });
+      }, navHint);
+      break;
+    }
 
     case 'scouting':
       prepareOpponent(state);
@@ -582,6 +626,10 @@ function render(navHint = 'auto') {
               render('forward');
             } else if (state.pendingReward.survivedLoss) {
               retryLevel(state);
+              render('forward');
+            } else if (state.pendingShinySale) {
+              // Corrupto vendido: antes de avanzar, el sobre Shiny de recompensa.
+              state.phase = 'shinyPack';
               render('forward');
             } else {
               advanceLevel(state);

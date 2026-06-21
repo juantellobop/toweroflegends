@@ -16,7 +16,7 @@ import { teamRadarHTML } from './radar.js';
 import { playerOVR } from '../engine/ovr.js';
 import { chemNation, managerNationStatBonus } from '../engine/chemistry.js';
 import { chemTeamBonus } from '../engine/items.js';
-import { FORMATIONS, LINES, geometricLinks, formationLineSlots, MANAGER_STYLES, CUSTOM_FORMATION } from '../data/config.js';
+import { FORMATIONS, LINES, geometricLinks, formationLineSlots, MANAGER_STYLES, CUSTOM_FORMATION, isCorrupto } from '../data/config.js';
 import { countTo } from '../match/feedback.js';
 import { playerInitials, playerSurname, portraitPathForPlayer, artworkPathForItem } from '../data/playerAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
@@ -82,6 +82,8 @@ function webLinks(positions, starting11) {
     const a = at(refA);
     const b = at(refB);
     if (!a || !b) continue;
+    // El Corrupto no enlaza con nadie: no se pinta ninguna arista que lo toque.
+    if (isCorrupto(a.player) || isCorrupto(b.player)) continue;
     const nation = chemNation(a.player.nation) === chemNation(b.player.nation);
     const era = a.player.era === b.player.era;
     links.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, nation, era });
@@ -116,10 +118,12 @@ function fieldSVG(positions, starting11, boost = false) {
 function chipHTML(p, line, slotIndex, manager) {
   const ovr = playerOVR(p, manager);
   const boosted = managerNationStatBonus(p, manager) > 0;
+  // El Corrupto va sellado: no arrastrable, con candado y aria propia.
+  const sealed = isCorrupto(p);
   return `
-    <button class="field-chip filled lineup-draggable rarity-${p.rarity}" data-uid="${p.uid}"
-            data-line="${line}" data-slot="${slotIndex}" draggable="true"
-            aria-label="${esc(t('build.playerDragAria', { name: p.name }))}">
+    <button class="field-chip filled rarity-${p.rarity}${sealed ? ' field-chip--sealed' : ' lineup-draggable'}" data-uid="${p.uid}"
+            data-line="${line}" data-slot="${slotIndex}"${sealed ? '' : ' draggable="true"'}
+            aria-label="${esc(sealed ? t('build.playerSealedAria', { name: p.name }) : t('build.playerDragAria', { name: p.name }))}">
       <span class="chip-face" aria-hidden="true">
         <img src="${esc(portraitPathForPlayer(p))}" alt="" draggable="false" loading="eager" decoding="async" data-hide-on-error="true" />
         <span>${esc(playerInitials(p.name))}</span>
@@ -127,6 +131,7 @@ function chipHTML(p, line, slotIndex, manager) {
       </span>
       <span class="chip-ovr${boosted ? ' chip-ovr--mgr' : ''}">${ovr}</span>
       <span class="chip-name" title="${esc(p.name)}">${esc(playerSurname(p.name))}</span>
+      ${sealed ? '<span class="chip-lock" aria-hidden="true"></span>' : ''}
       <span class="chip-info" role="button" tabindex="0" data-info-uid="${p.uid}" aria-label="${esc(t('build.viewStatsAria', { name: p.name }))}">i</span>
     </button>`;
 }

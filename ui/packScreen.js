@@ -36,6 +36,16 @@ const COPY = {
     hint: 'pack.managerHint',
     open: 'pack.managerOpen',
   },
+  corrupto: {
+    title: 'pack.corruptoTitle',
+    hint: 'pack.corruptoHint',
+    open: 'pack.corruptoOpen',
+  },
+  shiny: {
+    title: 'pack.shinyTitle',
+    hint: 'pack.shinyHint',
+    open: 'pack.shinyOpen',
+  },
 };
 
 // Sobre sellado + dorso de carta por tipo (arte original de cromos).
@@ -49,7 +59,7 @@ function cardBack(kind) {
   return kind === 'item' || kind === 'manager' ? UI_ASSETS.cards.backItem : UI_ASSETS.cards.backPlayer;
 }
 
-function shell(state, kind, count, body) {
+function shell(state, kind, count, body, notice = '') {
   const copy = COPY[kind];
   const title = t(copy.title);
   const hint = t(copy.hint);
@@ -60,6 +70,7 @@ function shell(state, kind, count, body) {
         <div class="level-badge">${t('generic.level', { level: state.level })}</div>
         <h1 class="large-title">${title}</h1>
         <p class="hint">${t('pack.chooseOne', { count, hint })}</p>
+        ${notice ? `<p class="pack-notice">${esc(notice)}</p>` : ''}
         ${reviewButtons(state, kind)}
       </header>
 
@@ -247,6 +258,35 @@ export function renderManagerPack(root, state, choices, onPick, onDiscard) {
   // es obligatorio), oculta hasta abrir el sobre.
   const onReveal = attachDiscardBar(root, t('pack.managerDiscard'), onDiscard);
   wire(root, choices, onPick, onReveal);
+}
+
+// === Sobre Corrupto (item "Representante corrupto") ===
+// Una sola carta: al abrirlo entra el jugador Corrupto. Sin descarte (la elección
+// es obligatoria). El fondo de la carta sale por la rareza 'corrupto'.
+export function renderCorruptoPack(root, state, choices, onPick) {
+  preloadImages([
+    ...choices.map((c) => portraitPathForPlayer(c)),
+    ...choices.map((c) => flagSrcForNation(c.nation)),
+  ], { priority: 'high' });
+  const body = choices.map((c, i) =>
+    dealCard(playerShowcaseHTML(c, { idValue: c.id }), c.id, i, 'corrupto')
+  ).join('');
+  root.innerHTML = shell(state, 'corrupto', choices.length, body);
+  wire(root, choices, onPick);
+}
+
+// === Sobre Shiny (recompensa por vender al Corrupto) ===
+// Muestra el mensaje de venta y un jugador Shiny por país (mejor no poseído, +10).
+export function renderShinyPack(root, state, choices, onPick, { soldName } = {}) {
+  preloadImages([
+    ...choices.map((c) => portraitPathForPlayer(c)),
+    ...choices.map((c) => flagSrcForNation(c.nation)),
+  ], { priority: 'high' });
+  const body = choices.map((c, i) =>
+    dealCard(playerShowcaseHTML(c, { idValue: c.id }), c.id, i, 'shiny')
+  ).join('');
+  root.innerHTML = shell(state, 'shiny', choices.length, body, t('pack.shinySale', { name: soldName || '' }));
+  wire(root, choices, onPick);
 }
 
 // === Sobre especial de selecciones (cada 5 niveles) ===

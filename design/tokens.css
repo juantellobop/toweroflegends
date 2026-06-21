@@ -41,6 +41,9 @@
   --rarity-rare:   #0A84FF;
   --rarity-epic:   #BF5AF2;
   --rarity-legend: #FFD60A;
+  /* Rarezas especiales (item "Representante corrupto" y su recompensa Shiny) */
+  --rarity-corrupto: #E5484D;
+  --rarity-shiny:    #34E2D6;
 
   /* Cristal (reflejo especular + hairline) */
   --glass-bg:        rgba(28,28,30,0.55);
@@ -135,6 +138,8 @@
   --rare:   var(--arcade-cyan);
   --epic:   var(--arcade-magenta);
   --legend: var(--arcade-yellow);
+  --corrupto: var(--rarity-corrupto);
+  --shiny:    var(--rarity-shiny);
 
   /* Colores semánticos reutilizados en varias pantallas (fuente única). */
   --red-card:    #d11a1a;   /* tarjeta roja (banco, carta, resumen) */

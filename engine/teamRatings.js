@@ -395,6 +395,9 @@ function normalizeLinePlayer(player, line, ratings, opts = {}) {
     naturalPosition: player?.position ?? (opts.role || line),
     position: opts.role || line,
     trait: player?.trait || null,
+    // Rareza del jugador real: la usa la inmunidad a rojas del Corrupto (su falta
+    // nunca pasa de amarilla) en recordEvent. Null para el rival sintético.
+    rarity: player?.rarity ?? null,
     rating,
     passing: s?.passing ?? rating,
     shooting: s?.shooting ?? rating,

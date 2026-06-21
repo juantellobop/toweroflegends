@@ -33,6 +33,9 @@ export const UI_ASSETS = {
       playerRare: 'assets/ui/cards/card-rara-player-dt.jpg',
       playerEpic: 'assets/ui/cards/card-epica-player-dt.jpg',
       playerLegend: 'assets/ui/cards/card-leyenda-player-dt.jpg',
+      // Rarezas especiales (item "Representante corrupto" y su recompensa Shiny).
+      playerCorrupto: 'assets/ui/cards/card-corrupto-player.jpg',
+      playerShiny: 'assets/ui/cards/card-shiny-player.jpg',
       itemCommon: 'assets/ui/cards/card-comun-item.jpg',
       itemRare: 'assets/ui/cards/card-rara-item.jpg',
       itemEpic: 'assets/ui/cards/card-epica-item.jpg',

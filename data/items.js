@@ -270,4 +270,16 @@ export const ITEMS = [
     desc: '+2 de química de equipo: la grada empuja.',
     effects: [{ target: 'chem', stat: 'teamAll', op: 'add', value: 2 }],
   },
+
+  // ===== Especial: disparador de flujo (no es una reliquia pasiva) =====
+  // `special: 'corrupto'` marca que, al elegirlo, NO se añade al inventario sino
+  // que abre el sobre Corrupto (ver state/run.js y main.js). `effects: []` → no
+  // toca ratings. Se ofrece garantizado cada CORRUPTO_ITEM_EVERY niveles y queda
+  // FUERA del pool aleatorio de objetos (filtrado por `special` en rollItemPack).
+  {
+    id: 'representante_corrupto', name: 'Representante corrupto', type: 'reliquia',
+    rarity: 'legend', special: 'corrupto',
+    desc: 'Un jugador utilizará tu equipo como trampolín. Asegúrate de que sea vendido, su representante te recompensará.',
+    effects: [],
+  },
 ];

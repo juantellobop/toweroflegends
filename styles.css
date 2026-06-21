@@ -5272,7 +5272,7 @@ button.primary:active:not(:disabled),
 
 .field-chip .chip-name {
   width: calc(100% - 4px);
-  max-width: none;
+  max-width: none;U
   padding: 3px 0px;
   color: #fff;
   font-weight: 900;
@@ -5282,6 +5282,7 @@ button.primary:active:not(:disabled),
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.05;
+  opacity: .5;
 }
 
 /* === Once rival (scouting) y plantilla inicial: el campo se dimensiona aquí,
@@ -5889,6 +5890,8 @@ button.primary:active:not(:disabled),
 .tdl-rar-rare   { --accent: #5fd2ff; --accent-rgb: 95,210,255; }
 .tdl-rar-epic   { --accent: #e884ff; --accent-rgb: 232,132,255; }
 .tdl-rar-legend { --accent: #f4c64a; --accent-rgb: 244,198,74; }
+.tdl-rar-corrupto { --accent: #ff5b60; --accent-rgb: 255,91,96; }
+.tdl-rar-shiny    { --accent: #5cf0e4; --accent-rgb: 92,240,228; }
 
 .tdl-content { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 6% 6.5%; }
 
@@ -6045,3 +6048,42 @@ button.primary:active:not(:disabled),
 .player-modal-card:has(.tdl-card) { width: min(340px, 92vw, calc((100dvh - 96px) / 1.5)); }
 .player-modal-card .tdl-slot { width: 100%; }
 .player-modal-card .tdl-card { cursor: default; }
+
+/* === Rarezas especiales: Corrupto (item "Representante corrupto") y Shiny ===
+   Mismo tratamiento de borde/glow que la leyenda, con sus propios colores, en las
+   superficies de carta compacta. La carta escaparate ya sale por el JPG de fondo
+   (UI_ASSETS.cards.bg) y el acento por .tdl-rar-corrupto/.tdl-rar-shiny. */
+.card.rarity-corrupto { border-top-color: var(--corrupto); box-shadow: 0 0 22px rgba(229,72,77,.30); }
+.card.rarity-shiny    { border-top-color: var(--shiny);    box-shadow: 0 0 22px rgba(52,226,214,.32); }
+.card.rarity-corrupto { --card-border: var(--corrupto); }
+.card.rarity-shiny    { --card-border: var(--shiny); }
+.board-item.rarity-corrupto { border-color: var(--corrupto); }
+.board-item.rarity-shiny    { border-color: var(--shiny); }
+.squad-chip.rarity-corrupto { border-left-color: var(--corrupto); }
+.squad-chip.rarity-shiny    { border-left-color: var(--shiny); }
+.field-chip.filled.rarity-corrupto { border-color: var(--rarity-corrupto); box-shadow: 0 0 14px rgba(229,72,77,.42); }
+.field-chip.filled.rarity-shiny    { border-color: var(--rarity-shiny);    box-shadow: 0 0 14px rgba(52,226,214,.42); }
+.bench-item.rarity-corrupto { border-top-color: var(--corrupto); border-color: var(--corrupto); }
+.bench-item.rarity-shiny    { border-top-color: var(--shiny);    border-color: var(--shiny); }
+
+/* Candado del Corrupto: marca su ficha como sellada en el once (no se puede
+   mover ni quitar). Va en la esquina de la ficha del campo. */
+.field-chip--sealed { cursor: default; }
+.field-chip--sealed .chip-lock {
+  position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+  border-radius: 4px; background: var(--corrupto);
+  box-shadow: 0 0 8px rgba(229,72,77,.55);
+  -webkit-mask: var(--lock-mask) center/72% no-repeat; mask: var(--lock-mask) center/72% no-repeat;
+}
+/* Cerrojo en SVG embebido (sin assets extra). */
+.field-chip--sealed .chip-lock {
+  --lock-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z'/></svg>");
+}
+
+/* Aviso de venta sobre el sobre Shiny (mensaje del representante). */
+.pack-notice {
+  margin: .35rem auto 0; max-width: 42rem; padding: .5rem .75rem;
+  border: 1px solid color-mix(in srgb, var(--shiny) 55%, transparent);
+  border-radius: 10px; background: color-mix(in srgb, var(--shiny) 12%, transparent);
+  color: var(--text, #fff); font-size: .9rem; line-height: 1.35; text-align: center;
+}

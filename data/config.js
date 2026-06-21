@@ -154,6 +154,22 @@ export const CONFIG = {
   NATION_PACK_TEAMS: 3, // selecciones a elegir en el sobre especial
   NATION_PACK_MIN_PLAYERS: 4, // cartas nuevas mínimas para entrar al sorteo
 
+  // --- Item "Representante corrupto" (rareza Corrupto/Shiny) ---
+  // El item se ofrece GARANTIZADO cada CORRUPTO_ITEM_EVERY niveles (14, 28…).
+  // Al elegirlo entra un jugador Corrupto que, mientras esté en plantilla, puede
+  // lesionar compañeros: una tirada de entrenamiento y otra de partido, cada una
+  // con su probabilidad, hasta un máximo de víctimas por encuentro. Tras
+  // CORRUPTO_SELL_MATCHES avances de nivel (victoria o empate) se vende y abre el
+  // sobre Shiny. Los Shiny suman CORRUPTO_SHINY_BOOST a todas las stats.
+  CORRUPTO_ITEM_EVERY: 14,
+  CORRUPTO_INJURE_TRAIN: 0.30,
+  CORRUPTO_INJURE_MATCH: 0.30,
+  CORRUPTO_MAX_VICTIMS: 2,
+  CORRUPTO_SELL_MATCHES: 7,
+  CORRUPTO_SHINY_BOOST: 10,
+  // Naciones del sobre Shiny: el mejor jugador no poseído de cada una.
+  SHINY_NATIONS: ['Argentina', 'Brasil', 'España', 'Italia', 'Alemania', 'Uruguay', 'Portugal', 'Francia'],
+
 };
 
 // Fuerza objetivo del rival histórico en un nivel dado. La dificultad es plana
@@ -300,6 +316,20 @@ export function formationType(formation) {
 
 export const LINES = ['GK', 'DEF', 'MID', 'FWD'];
 export const RARITIES = ['common', 'rare', 'epic', 'legend'];
+// Rarezas ESPECIALES fuera de banda: NO entran en RARITIES (ese array de 4
+// indexa los vectores de sesgo RARITY_BIAS/managerRarityBias y rollRarity, así
+// que ampliarlo rompería los sorteos). Solo afectan al render de carta, a la
+// exclusión de los sobres normales, al editor admin y a la mecánica especial.
+//  · corrupto: jugador parásito que entrega el item "Representante corrupto"
+//    (lo crea el usuario desde el editor; sellado en el once, sin química,
+//    inmune a lesiones/rojas y capaz de lesionar compañeros).
+//  · shiny: jugador modificado (+10 a todas las stats) del sobre de recompensa.
+export const SPECIAL_RARITIES = ['corrupto', 'shiny'];
+// Lista completa para validación del editor admin y referencias de estilo.
+export const PLAYER_RARITIES = [...RARITIES, ...SPECIAL_RARITIES];
+export const isCorrupto = (p) => p?.rarity === 'corrupto';
+export const isShiny = (p) => p?.rarity === 'shiny';
+export const isSpecialRarity = (p) => isCorrupto(p) || isShiny(p);
 // Estilos de juego de un DT (coinciden con los valores de FORMATION_TYPE).
 export const MANAGER_STYLES = ['posesion', 'presion', 'contra'];
 

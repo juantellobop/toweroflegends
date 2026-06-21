@@ -3,7 +3,7 @@
 // un evento compacto. La presentación se apoya en escenas pixelart estáticas,
 // no en una simulación continua de jugadores.
 
-import { CONFIG } from '../data/config.js';
+import { CONFIG, isCorrupto } from '../data/config.js';
 import { buildBattleTeam } from './teamRatings.js';
 import { ratio, simulateHighlight } from './highlights.js';
 import { createCardTracker, resolveFoul } from './cards.js';
@@ -147,6 +147,8 @@ function rollWarmupInjuries(A, rng) {
   if (!bench.length) return [];
   const hurt = [];
   for (const p of bench) {
+    // El Corrupto es inmune a lesiones (nunca se rompe).
+    if (isCorrupto(p)) continue;
     if (!isInjuryProne(p) || immuneForA(A, p.position)) continue;
     if (!rng.bernoulli(CONFIG.INJURY_ROTO_WARMUP_PROB)) continue;
     const severity = rollInjurySeverity(rng);
@@ -310,8 +312,10 @@ function recordEvent(event, A, B, score, events, tracker, rng) {
       ? (event.offender.naturalPosition || event.offender.position)
       : null;
     // El equipo del jugador (lado A) no recibe rojas que lo dejen por debajo del
-    // mínimo de su línea: esas faltas se quedan en amarilla.
-    const immune = foulSide === 'A' && immuneForA(A, offenderPos);
+    // mínimo de su línea: esas faltas se quedan en amarilla. El Corrupto, además,
+    // nunca es expulsado: su falta jamás pasa de amarilla.
+    const immune = foulSide === 'A'
+      && (immuneForA(A, offenderPos) || event.offender?.rarity === 'corrupto');
     const { card, secondYellow } = resolveFoul({
       side: foulSide,
       offender: event.offender,
@@ -430,6 +434,40 @@ export function simularPartido(teamA, teamB, rng) {
       applied: false,
     });
   }
+
+  // Lesiones provocadas por un jugador Corrupto del equipo del jugador (lado A):
+  // una tirada de "entrenamiento" (minuto 0) y otra de "partido" (minuto al azar),
+  // cada una con su probabilidad, hasta CORRUPTO_MAX_VICTIMS víctimas DISTINTAS
+  // por encuentro. Se inyectan como fieldInjuries con targetUid prefijado, así
+  // reutilizan la sustitución, el recálculo de ratings y el registro de lesionados.
+  // La víctima se descuenta de la inmunidad por línea para no dejar una posición
+  // por debajo de su mínimo de disponibles.
+  const hasCorrupto = LINES.flatMap((line) => A.starting11?.[line] || []).some((p) => p && isCorrupto(p));
+  if (hasCorrupto) {
+    const chosen = new Set();
+    const pickVictim = () => {
+      const pool = LINES.flatMap((line) => A.starting11?.[line] || [])
+        .filter((p) => p && !isCorrupto(p) && !immuneForA(A, p.position) && !chosen.has(p.uid));
+      if (!pool.length) return null;
+      const victim = pool[Math.floor(rng.next() * pool.length)];
+      chosen.add(victim.uid);
+      return victim;
+    };
+    for (const [when, prob] of [['train', CONFIG.CORRUPTO_INJURE_TRAIN], ['match', CONFIG.CORRUPTO_INJURE_MATCH]]) {
+      if (chosen.size >= CONFIG.CORRUPTO_MAX_VICTIMS) break;
+      if (!rng.bernoulli(prob)) continue;
+      const victim = pickVictim();
+      if (!victim) continue;
+      fieldInjuries.push({
+        targetUid: victim.uid,
+        minute: when === 'train' ? 0 : 1 + Math.floor(rng.next() * 90),
+        severity: rollInjurySeverity(rng),
+        typeIndex: Math.floor(rng.next() * CONFIG.INJURY_TYPE_COUNT),
+        applied: false,
+        warmup: when === 'train',
+      });
+    }
+  }
   fieldInjuries.sort((a, b) => a.minute - b.minute);
 
   // Aplica una lesión de campo. La genérica elige víctima al azar entre los
@@ -439,7 +477,8 @@ export function simularPartido(teamA, teamB, rng) {
     if (inj.applied) return;
     inj.applied = true;
     const onField = LINES.flatMap((line) => A.starting11?.[line] || [])
-      .filter((p) => p && !immuneForA(A, p.position));
+      // El Corrupto nunca es víctima: es inmune a lesiones.
+      .filter((p) => p && !immuneForA(A, p.position) && !isCorrupto(p));
     const victim = inj.targetUid
       ? (onField.find((p) => p.uid === inj.targetUid) || null)
       : (onField.length ? onField[Math.floor(rng.next() * onField.length)] : null);
@@ -459,6 +498,9 @@ export function simularPartido(teamA, teamB, rng) {
       severity: inj.severity,
       typeIndex: inj.typeIndex,
       inName: sub && sub.replacement ? sub.replacement.name : null,
+      // Lesión de "entrenamiento" provocada por el Corrupto: se rotula como
+      // calentamiento (minuto 0) en el resumen, igual que las del rasgo "Roto".
+      ...(inj.warmup ? { warmup: true } : {}),
     });
     // El cambio forzado por lesión también va a la lista de cambios (1-por-1:
     // entra el suplente, sale el lesionado). reason='injury' lo distingue del

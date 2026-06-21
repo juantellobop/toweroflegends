@@ -15553,5 +15553,65 @@ export const PLAYERS = [
     "gk": null,
     "trait": "Roto",
     "tacticalType": "posesion"
+  },
+  {
+    "id": "fwd_alexander_woiski",
+    "name": "Alexander Woiski",
+    "nation": "Argentina",
+    "era": "2025",
+    "position": "FWD",
+    "rarity": "corrupto",
+    "ovr": 68,
+    "stats": {
+      "pace": 75,
+      "shooting": 71,
+      "passing": 60,
+      "dribbling": 66,
+      "defending": 3,
+      "physical": 73
+    },
+    "gk": null,
+    "trait": null,
+    "tacticalType": "presion"
+  },
+  {
+    "id": "mid_matheus_fernandes",
+    "name": "Matheus Fernandes",
+    "nation": "Brasil",
+    "era": "2020",
+    "position": "MID",
+    "rarity": "corrupto",
+    "ovr": 67,
+    "stats": {
+      "pace": 80,
+      "shooting": 60,
+      "passing": 72,
+      "dribbling": 70,
+      "defending": 70,
+      "physical": 44
+    },
+    "gk": null,
+    "trait": null,
+    "tacticalType": null
+  },
+  {
+    "id": "mid_gorka_elustondo",
+    "name": "Gorka Elustondo",
+    "nation": "España",
+    "era": "2015",
+    "position": "DEF",
+    "rarity": "corrupto",
+    "ovr": 69,
+    "stats": {
+      "pace": 75,
+      "shooting": 50,
+      "passing": 55,
+      "dribbling": 57,
+      "defending": 72,
+      "physical": 70
+    },
+    "gk": null,
+    "trait": null,
+    "tacticalType": "posesion"
   }
 ];

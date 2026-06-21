@@ -12,19 +12,24 @@ export const FIELD_OVR_WEIGHTS = {
 
 export const GK_OVR_WEIGHTS = { reflexes: 0.36, handling: 0.32, positioning: 0.32 };
 
-function clampOVR(value) {
-  return Math.max(1, Math.min(99, Math.round(value)));
+// Sin tope superior: el OVR refleja el valor REAL de los atributos. Para
+// jugadores normales (stats ≤ 99 y pesos que suman 1) la media nunca pasa de 99,
+// así que el resultado es idéntico al de siempre; solo los Shiny (+10 a todas las
+// stats) y cualquier bonus de química/DT lo elevan por encima de 99. Floor en 1.
+function normalizeOVR(value) {
+  return Math.max(1, Math.round(value));
 }
 
 function weightedRating(values, weights) {
   if (!values) return null;
   let score = 0;
   for (const key in weights) score += (Number(values[key]) || 0) * weights[key];
-  return clampOVR(score);
+  return normalizeOVR(score);
 }
 
-// Con `manager` connacional, suma MANAGER_NATION_STAT_BONUS al OVR (sin tope: +3
-// a cada stat sube la media ponderada exactamente +3, así que puede pasar de 99).
+// Con `manager` connacional, suma MANAGER_NATION_STAT_BONUS (química del DT) al
+// OVR: +3 a cada stat sube la media ponderada exactamente +3 y, sin tope, se
+// acumula sobre el valor real (un Shiny de 105 con DT connacional muestra 108).
 // Sin `manager` el resultado es idéntico al de siempre (ordenaciones/autofill).
 export function playerOVR(player, manager = null) {
   if (!player) return 1;
@@ -34,7 +39,7 @@ export function playerOVR(player, manager = null) {
   }
   const statsRating = weightedRating(player.stats, FIELD_OVR_WEIGHTS[player.position] || FIELD_OVR_WEIGHTS.MID);
   if (statsRating !== null) return statsRating + bonus;
-  if (typeof player.ovr === 'number') return clampOVR(player.ovr) + bonus;
+  if (typeof player.ovr === 'number') return normalizeOVR(player.ovr) + bonus;
   return 1;
 }
 

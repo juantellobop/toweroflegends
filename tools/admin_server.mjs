@@ -6,7 +6,7 @@ import fs from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { FORMATIONS, LINES, RARITIES } from '../data/config.js';
+import { FORMATIONS, LINES, PLAYER_RARITIES } from '../data/config.js';
 import { playerOVR } from '../engine/ovr.js';
 import { sanitizeTeamName } from '../data/teamName.js';
 
@@ -32,7 +32,9 @@ const PRESENCE_MAX = 5000;
 const presence = new Map();
 // POSITIONS/RARITY_SET los usa el saneado del ranking (y, si está, el panel admin).
 const POSITIONS = new Set(LINES);
-const RARITY_SET = new Set(RARITIES);
+// Incluye las rarezas especiales (corrupto/shiny) para que el editor pueda
+// guardar jugadores Corrupto sin que el saneado los degrade a 'common'.
+const RARITY_SET = new Set(PLAYER_RARITIES);
 const INDEX_FILE = path.join(ROOT, 'index.html');
 const SOURCE_VERSION_PATHS = [
   'index.html',
