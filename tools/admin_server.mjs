@@ -444,7 +444,11 @@ function sanitizeRankingLineup(raw) {
     const ovr = Math.max(0, Math.min(199, Math.round(Number(player?.ovr) || 0)));
     const rarity = RARITY_SET.has(player?.rarity) ? player.rarity : '';
     const expelled = player?.expelled === true;
-    return { name, position: player.position, line, ovr, rarity, ...(expelled ? { expelled: true } : {}) };
+    // Hueco del grid (line+slot): imprescindible para reconstruir el dibujo exacto
+    // en el modal del ranking (tácticas personalizadas, líneas de 5 ENG, etc.).
+    // Sin esto el render cae a un reparto aproximado (p. ej. 5 ENG → 3 MED + 2 ENG).
+    const slot = Number.isInteger(player?.slot) ? Math.max(0, Math.min(9, player.slot)) : null;
+    return { name, position: player.position, line, ovr, rarity, ...(slot != null ? { slot } : {}), ...(expelled ? { expelled: true } : {}) };
   }).filter(Boolean);
   return players.length ? players : null;
 }
