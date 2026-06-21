@@ -490,9 +490,8 @@ select {
 }
 .match-pitch.scene-pitch-host {
   width: 100%;
-  max-width: 800px;
   aspect-ratio: 4 / 3;
-  max-height: none;
+  max-height: 768px;
   background: #111;
   border: 2px solid color-mix(in srgb, var(--brand) 35%, var(--separator));
 }
@@ -2862,7 +2861,7 @@ select {
   width: min(100%, 80vh, 860px);
   max-width: none;
   height: min(84vh, 880px, calc(100vh - 205px));
-  max-height: 820px;
+  max-height: 768px;
   min-height: 520px;
   aspect-ratio: 3 / 4;
   margin: 0 auto;
