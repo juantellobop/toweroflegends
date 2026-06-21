@@ -5274,13 +5274,9 @@ button.primary:active:not(:disabled),
   max-width: none;
   padding: 3px 0px;
   color: #fff;
-  background: rgba(3,8,38,.62);
   font-weight: 900;
   text-align: center;
   text-shadow: 1px 1px 0 var(--arcade-blue-900);
-  /* Apellido en una sola línea (sin cortar a mitad de palabra): el chip más
-     grande y la tipografía más marcada hacen que el nombre destaque, y si no
-     entra se recorta limpio con puntos suspensivos. */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

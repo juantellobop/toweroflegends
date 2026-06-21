@@ -15513,5 +15513,25 @@ export const PLAYERS = [
     "gk": null,
     "trait": "Roto",
     "tacticalType": null
+  },
+  {
+    "id": "mid_thiago_alcantara",
+    "name": "Thiago Alcántara",
+    "nation": "España",
+    "era": "2018",
+    "position": "MID",
+    "rarity": "legend",
+    "ovr": 88,
+    "stats": {
+      "pace": 90,
+      "shooting": 80,
+      "passing": 99,
+      "dribbling": 89,
+      "defending": 74,
+      "physical": 82
+    },
+    "gk": null,
+    "trait": "Roto",
+    "tacticalType": "posesion"
   }
 ];
