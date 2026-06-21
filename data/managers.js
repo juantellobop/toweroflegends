@@ -458,7 +458,7 @@ export const MANAGERS = [
     "rarity": "rare",
     "style": "posesion",
     "mods": {
-      "attack": -3,
+      "attack": -2,
       "midfield": 4,
       "defense": 0
     }

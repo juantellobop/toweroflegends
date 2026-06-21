@@ -1446,7 +1446,13 @@ export const OPPONENTS = [
         "ovr": 92
       }
     ],
-    "bench": [],
+    "bench": [
+      {
+        "name": "Fernando Gago",
+        "position": "MID",
+        "ovr": 89
+      }
+    ],
     "managerId": "manager_alejandro_sabella",
     "stage": "quarterfinal-or-better"
   },
