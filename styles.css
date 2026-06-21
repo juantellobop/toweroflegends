@@ -5062,8 +5062,8 @@ select {
 
 .squad-review-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(172px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 1px;
 }
 
 .squad-review-grid .card {
@@ -5403,7 +5403,7 @@ button.primary:active:not(:disabled),
 
 @media (max-width: 1023px) and (min-width: 768px) {
 .team-select-screen .team-layout{
-  grid-template-columns: minmax(0,1fr) 270px;
+  grid-template-columns: minmax(0,1fr) 245px;
 }
 .team-select-screen .team-panel-head {
   grid-template-columns: 1fr;
