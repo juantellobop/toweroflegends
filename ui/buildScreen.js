@@ -134,7 +134,6 @@ function emptyHTML(line, slotIndex, role) {
   const label = role === 'ENG' ? t('card.line.ENG').toLowerCase() : LINE_LABEL[line];
   return `
     <button class="field-chip empty" data-line="${line}" data-slot="${slotIndex}" aria-label="${esc(t('build.emptyAria', { label }))}">
-      <span class="chip-plus">+</span>
       <span class="chip-name">${slotLabel(line, role)}</span>
     </button>`;
 }

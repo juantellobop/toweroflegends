@@ -3104,7 +3104,7 @@ export const PLAYERS = [
       "physical": 85
     },
     "gk": null,
-    "trait": "Velocista",
+    "trait": "Roto",
     "tacticalType": null
   },
   {
@@ -3695,7 +3695,7 @@ export const PLAYERS = [
       "physical": 89
     },
     "gk": null,
-    "trait": null,
+    "trait": "Roto",
     "tacticalType": null
   },
   {
@@ -5260,7 +5260,7 @@ export const PLAYERS = [
       "physical": 87
     },
     "gk": null,
-    "trait": "Cañón",
+    "trait": "Roto",
     "tacticalType": null
   },
   {
@@ -7462,7 +7462,7 @@ export const PLAYERS = [
       "physical": 89
     },
     "gk": null,
-    "trait": "Cañón",
+    "trait": "Roto",
     "tacticalType": null
   },
   {
@@ -15294,7 +15294,7 @@ export const PLAYERS = [
       "physical": 90
     },
     "gk": null,
-    "trait": "Maestro",
+    "trait": "Roto",
     "tacticalType": "posesion"
   },
   {
@@ -15473,5 +15473,45 @@ export const PLAYERS = [
     "gk": null,
     "trait": "Muro",
     "tacticalType": "presion"
+  },
+  {
+    "id": "fwd_ansu_fati",
+    "name": "Ansu Fati",
+    "nation": "España",
+    "era": "2018",
+    "position": "FWD",
+    "rarity": "epic",
+    "ovr": 85,
+    "stats": {
+      "pace": 90,
+      "shooting": 80,
+      "passing": 80,
+      "dribbling": 95,
+      "defending": 60,
+      "physical": 80
+    },
+    "gk": null,
+    "trait": "Roto",
+    "tacticalType": "presion"
+  },
+  {
+    "id": "mid_riqui_puig",
+    "name": "Riqui Puig",
+    "nation": "España",
+    "era": "2018",
+    "position": "MID",
+    "rarity": "rare",
+    "ovr": 81,
+    "stats": {
+      "pace": 80,
+      "shooting": 70,
+      "passing": 92,
+      "dribbling": 90,
+      "defending": 60,
+      "physical": 78
+    },
+    "gk": null,
+    "trait": "Roto",
+    "tacticalType": null
   }
 ];

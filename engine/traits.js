@@ -6,7 +6,7 @@
 export const TRAITS = [
   'Francotirador', 'Cañón', 'Muro', 'Motor', 'Maestro', 'Líbero',
   'Paradón', 'Mariscal', 'Killer', 'Velocista', 'Especialista',
-  'Penalero', 'Capitán', 'Garra',
+  'Penalero', 'Capitán', 'Garra', 'Roto',
 ];
 
 // Bonus aditivos a stats de campo según rasgo (antes de calcular líneas).
@@ -87,4 +87,12 @@ export function duelBonus(actor, ctx = {}) {
 // Prob. extra de convertir un penalti si lo lanza un Penalero.
 export function penaltyConvertBonus(actor) {
   return actor && actor.trait === 'Penalero' ? 0.05 : 0;
+}
+
+// Roto: jugador propenso a lesiones. Pesa más al elegir la víctima de la lesión
+// del partido y, además, puede romperse en el calentamiento estando en el
+// banquillo. Los valores numéricos viven en CONFIG (balance centralizado); aquí
+// solo se identifica el rasgo. Ver simulate.js (rollWarmupInjuries / applyInjury).
+export function isInjuryProne(player) {
+  return Boolean(player && player.trait === 'Roto');
 }

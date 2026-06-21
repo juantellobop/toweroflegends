@@ -1393,8 +1393,7 @@ select {
   object-fit: cover;
   image-rendering: pixelated;
 }
-.field-chip.empty { background: rgba(0,0,0,0.18); border-style: dashed; border-color: rgba(255,255,255,0.25); }
-.chip-plus { font-size: 22px; font-weight: 300; line-height: 1; }
+.field-chip.empty { background: rgba(0,0,0,0.18); border-color: rgba(255,255,255,0.1); }
 
 .slot-picker { border-radius: var(--radius-l); padding: 0px; margin-top: var(--space-4); }
 .slot-picker.glass-thick{border: 0px; box-shadow: none;}
@@ -2900,6 +2899,7 @@ select {
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
+  justify-content: center;
 }
 
 /* El retrato baja su suelo a 32px: sin esto el min de 52px impedía que la carta

@@ -118,9 +118,12 @@ function injuriesRowHTML(injuries) {
   const items = injuries.map((inj) => {
     const type = tIndexed(`injury.types.${inj.severity}`, inj.typeIndex);
     const ban = CONFIG.INJURY_BAN[inj.severity] || 0;
+    // Las lesiones de calentamiento (rasgo "Roto") no tienen minuto: se rotuló
+    // "calent." en lugar del minuto de juego.
+    const when = inj.warmup ? t('result.warmup') : `${inj.minute}'`;
     return `<span class="result-injury">
         <span class="result-injury-badge" title="${esc(t('result.injuryMatchesTitle', { n: ban }))}"><span class="result-injury-cross" aria-hidden="true"></span><span class="result-injury-count">${ban}</span></span>
-        ${esc(inj.name)} <small>${inj.minute}'</small> <small>${esc(type)}</small>
+        ${esc(inj.name)} <small>${esc(when)}</small> <small>${esc(type)}</small>
       </span>`;
   }).join('');
   return `

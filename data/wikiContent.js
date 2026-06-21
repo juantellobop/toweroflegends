@@ -16,7 +16,7 @@ export const WIKI_CONTENT = {
     langLabel: 'Idioma',
     indexTitle: 'Índice',
     traitsHead: ['Rasgo', 'Tipo', 'Efecto'],
-    traitType: { atk: 'Ataque', mid: 'Medio', def: 'Defensa', gk: 'Portero', lead: 'Liderazgo' },
+    traitType: { atk: 'Ataque', mid: 'Medio', def: 'Defensa', gk: 'Portero', lead: 'Liderazgo', fis: 'Físico' },
     traitEffects: {
       Francotirador: '+4 tiro · ×1,35 al peso para ser el rematador.',
       Cañón: '+3 tiro, +2 físico · ×1,2 al peso de rematador.',
@@ -32,6 +32,7 @@ export const WIKI_CONTENT = {
       Penalero: '×2,5 al peso de rematador en penaltis y +5 % de conversión.',
       Capitán: '+1 a la química de su línea.',
       Garra: '+4 en el duelo defensivo a partir del minuto 75.',
+      Roto: '33 % más de probabilidad de ser el lesionado del partido y, además, puede romperse en el calentamiento estando en el banquillo, sin haber jugado.',
     },
     sections: [
       { id: 'reglamento', nav: 'Reglamento', title: 'Reglamento', blocks: [
@@ -77,7 +78,7 @@ export const WIKI_CONTENT = {
           ['Contraataque', '5-3-2 · 4-4-2 · 4-2-4'],
         ] } },      ] },
       { id: 'rasgos', nav: 'Rasgos', title: 'Rasgos de los jugadores', blocks: [
-        { p: 'Cada jugador puede tener un rasgo: un efecto pasivo especial. Estos son los 14 disponibles.' },
+        { p: 'Cada jugador puede tener un rasgo: un efecto pasivo especial. Estos son los 15 disponibles.' },
         { traits: true },
       ] },
       { id: 'objetos', nav: 'Objetos y sobres', title: 'Objetos y sobres', blocks: [
@@ -114,7 +115,7 @@ export const WIKI_CONTENT = {
     langLabel: 'Language',
     indexTitle: 'Index',
     traitsHead: ['Trait', 'Type', 'Effect'],
-    traitType: { atk: 'Attack', mid: 'Midfield', def: 'Defence', gk: 'Goalkeeper', lead: 'Leadership' },
+    traitType: { atk: 'Attack', mid: 'Midfield', def: 'Defence', gk: 'Goalkeeper', lead: 'Leadership', fis: 'Physical' },
     traitEffects: {
       Francotirador: '+4 shooting · ×1.35 weight to be the finisher.',
       Cañón: '+3 shooting, +2 physical · ×1.2 finisher weight.',
@@ -130,6 +131,7 @@ export const WIKI_CONTENT = {
       Penalero: '×2.5 finisher weight on penalties and +5% conversion.',
       Capitán: '+1 to the chemistry of its line.',
       Garra: '+4 in the defensive duel from minute 75 onwards.',
+      Roto: '33% more likely to be the player injured in the match and, on top of that, may break down during the warm-up while on the bench, without having played.',
     },
     sections: [
       { id: 'reglamento', nav: 'Rules', title: 'Rules', blocks: [
@@ -175,7 +177,7 @@ export const WIKI_CONTENT = {
           ['Counter-attack', '5-3-2 · 4-4-2 · 4-2-4'],
         ] } },      ] },
       { id: 'rasgos', nav: 'Traits', title: 'Player traits', blocks: [
-        { p: 'Each player can have one trait: a special passive effect. These are the 14 available.' },
+        { p: 'Each player can have one trait: a special passive effect. These are the 15 available.' },
         { traits: true },
       ] },
       { id: 'objetos', nav: 'Items and packs', title: 'Items and packs', blocks: [
@@ -212,7 +214,7 @@ export const WIKI_CONTENT = {
     langLabel: 'Langue',
     indexTitle: 'Sommaire',
     traitsHead: ['Trait', 'Type', 'Effet'],
-    traitType: { atk: 'Attaque', mid: 'Milieu', def: 'Défense', gk: 'Gardien', lead: 'Leadership' },
+    traitType: { atk: 'Attaque', mid: 'Milieu', def: 'Défense', gk: 'Gardien', lead: 'Leadership', fis: 'Physique' },
     traitEffects: {
       Francotirador: '+4 tir · ×1,35 au poids pour être le finisseur.',
       Cañón: '+3 tir, +2 physique · ×1,2 au poids de finisseur.',
@@ -228,6 +230,7 @@ export const WIKI_CONTENT = {
       Penalero: '×2,5 au poids de finisseur sur les penaltys et +5 % de conversion.',
       Capitán: '+1 à l\'alchimie de sa ligne.',
       Garra: '+4 dans le duel défensif à partir de la 75e minute.',
+      Roto: '33 % de risque en plus d’être le blessé du match et, en plus, peut se blesser à l’échauffement sur le banc, sans avoir joué.',
     },
     sections: [
       { id: 'reglamento', nav: 'Règles', title: 'Règles', blocks: [
@@ -273,7 +276,7 @@ export const WIKI_CONTENT = {
           ['Contre-attaque', '5-3-2 · 4-4-2 · 4-2-4'],
         ] } },      ] },
       { id: 'rasgos', nav: 'Traits', title: 'Traits des joueurs', blocks: [
-        { p: 'Chaque joueur peut avoir un trait : un effet passif spécial. Voici les 14 disponibles.' },
+        { p: 'Chaque joueur peut avoir un trait : un effet passif spécial. Voici les 15 disponibles.' },
         { traits: true },
       ] },
       { id: 'objetos', nav: 'Objets et paquets', title: 'Objets et paquets', blocks: [
@@ -310,7 +313,7 @@ export const WIKI_CONTENT = {
     langLabel: 'Idioma',
     indexTitle: 'Índice',
     traitsHead: ['Traço', 'Tipo', 'Efeito'],
-    traitType: { atk: 'Ataque', mid: 'Meio-campo', def: 'Defesa', gk: 'Goleiro', lead: 'Liderança' },
+    traitType: { atk: 'Ataque', mid: 'Meio-campo', def: 'Defesa', gk: 'Goleiro', lead: 'Liderança', fis: 'Físico' },
     traitEffects: {
       Francotirador: '+4 finalização · ×1,35 no peso para ser o finalizador.',
       Cañón: '+3 finalização, +2 físico · ×1,2 no peso de finalizador.',
@@ -326,6 +329,7 @@ export const WIKI_CONTENT = {
       Penalero: '×2,5 no peso de finalizador em pênaltis e +5% de conversão.',
       Capitán: '+1 na química da sua linha.',
       Garra: '+4 no duelo defensivo a partir do minuto 75.',
+      Roto: '33% mais de chance de ser o lesionado da partida e, além disso, pode se machucar no aquecimento estando no banco, sem ter jogado.',
     },
     sections: [
       { id: 'reglamento', nav: 'Regras', title: 'Regras', blocks: [
@@ -371,7 +375,7 @@ export const WIKI_CONTENT = {
           ['Contra-ataque', '5-3-2 · 4-4-2 · 4-2-4'],
         ] } },      ] },
       { id: 'rasgos', nav: 'Traços', title: 'Traços dos jogadores', blocks: [
-        { p: 'Cada jogador pode ter um traço: um efeito passivo especial. Estes são os 14 disponíveis.' },
+        { p: 'Cada jogador pode ter um traço: um efeito passivo especial. Estes são os 15 disponíveis.' },
         { traits: true },
       ] },
       { id: 'objetos', nav: 'Objetos e pacotes', title: 'Objetos e pacotes', blocks: [
@@ -408,7 +412,7 @@ export const WIKI_CONTENT = {
     langLabel: 'Lingua',
     indexTitle: 'Indice',
     traitsHead: ['Tratto', 'Tipo', 'Effetto'],
-    traitType: { atk: 'Attacco', mid: 'Centrocampo', def: 'Difesa', gk: 'Portiere', lead: 'Leadership' },
+    traitType: { atk: 'Attacco', mid: 'Centrocampo', def: 'Difesa', gk: 'Portiere', lead: 'Leadership', fis: 'Fisico' },
     traitEffects: {
       Francotirador: '+4 tiro · ×1,35 al peso per essere il finalizzatore.',
       Cañón: '+3 tiro, +2 fisico · ×1,2 al peso di finalizzatore.',
@@ -424,6 +428,7 @@ export const WIKI_CONTENT = {
       Penalero: '×2,5 al peso di finalizzatore sui rigori e +5% di conversione.',
       Capitán: '+1 all\'intesa della sua linea.',
       Garra: '+4 nel duello difensivo dal minuto 75 in poi.',
+      Roto: '33% di probabilità in più di essere l’infortunato della partita e, inoltre, può farsi male nel riscaldamento stando in panchina, senza aver giocato.',
     },
     sections: [
       { id: 'reglamento', nav: 'Regole', title: 'Regole', blocks: [
@@ -469,7 +474,7 @@ export const WIKI_CONTENT = {
           ['Contropiede', '5-3-2 · 4-4-2 · 4-2-4'],
         ] } },      ] },
       { id: 'rasgos', nav: 'Tratti', title: 'Tratti dei giocatori', blocks: [
-        { p: 'Ogni giocatore può avere un tratto: un effetto passivo speciale. Questi sono i 14 disponibili.' },
+        { p: 'Ogni giocatore può avere un tratto: un effetto passivo speciale. Questi sono i 15 disponibili.' },
         { traits: true },
       ] },
       { id: 'objetos', nav: 'Oggetti e pacchetti', title: 'Oggetti e pacchetti', blocks: [

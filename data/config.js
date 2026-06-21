@@ -35,6 +35,15 @@ export const CONFIG = {
   INJURY_BAN: { simple: 0, moderada: 1, grave: 3, muy_grave: 6 },
   INJURY_TYPE_COUNT: 4, // tipos de lesión por grado (rango del typeIndex guardado)
 
+  // Rasgo "Roto": jugador propenso a lesiones (ver engine/traits.js).
+  //  · RISK_MULT: peso extra al elegir la víctima de la lesión del partido
+  //    (1.33 = 33% más probable que un compañero de salir lesionado).
+  //  · WARMUP_PROB: prob. por jugador "Roto" en el banquillo de romperse en el
+  //    calentamiento, sin haber jugado. La gravedad se reparte como una lesión
+  //    normal y, si deja baja, arrastra la sanción al próximo partido.
+  INJURY_ROTO_RISK_MULT: 1.33,
+  INJURY_ROTO_WARMUP_PROB: 0.08,
+
   // Inmunidad por línea: número mínimo de jugadores DISPONIBLES por posición en
   // toda la plantilla. Cuando una línea cae a su mínimo, sus jugadores quedan
   // inmunes a lesiones y expulsiones hasta que vuelva a haber más (así nunca te

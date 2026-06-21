@@ -8,6 +8,7 @@ import { buildBattleTeam } from './teamRatings.js';
 import { ratio, simulateHighlight } from './highlights.js';
 import { createCardTracker, resolveFoul } from './cards.js';
 import { playerOVR } from './ovr.js';
+import { isInjuryProne } from './traits.js';
 
 export { ratio };
 
@@ -115,6 +116,77 @@ function rollInjury(rng) {
     minute: 1 + Math.floor(rng.next() * 90),
     typeIndex: Math.floor(rng.next() * CONFIG.INJURY_TYPE_COUNT),
   };
+}
+
+// Elige la gravedad de una lesión que YA ha ocurrido, repartiendo según los
+// pesos relativos de CONFIG.INJURY_PROB (normalizados, sin la banda "sin
+// lesión"). Lo usa la lesión de calentamiento del rasgo "Roto", donde el "se ha
+// roto" ya está decidido y solo falta saber cómo de grave.
+function rollInjurySeverity(rng) {
+  const p = CONFIG.INJURY_PROB;
+  const grades = ['muy_grave', 'grave', 'moderada', 'simple'];
+  const total = grades.reduce((s, g) => s + (p[g] || 0), 0) || 1;
+  let r = rng.next() * total;
+  for (const g of grades) {
+    r -= p[g] || 0;
+    if (r < 0) return g;
+  }
+  return 'simple';
+}
+
+// Sorteo ponderado: cada elemento concursa con el peso que le da weightOf. Lo
+// usa la elección de la víctima de la lesión para que un jugador "Roto" pese más
+// (CONFIG.INJURY_ROTO_RISK_MULT). Consume un único rng.next(); con pesos todos a
+// 1 equivale al sorteo uniforme anterior (reproducibilidad para equipos sin Roto).
+function weightedPick(list, weightOf, rng) {
+  if (!list.length) return null;
+  let total = 0;
+  for (const p of list) total += weightOf(p);
+  if (total <= 0) return list[Math.floor(rng.next() * list.length)];
+  let r = rng.next() * total;
+  for (const p of list) {
+    r -= weightOf(p);
+    if (r < 0) return p;
+  }
+  return list[list.length - 1];
+}
+
+// Lesiones de calentamiento del rasgo "Roto" (solo el equipo del jugador, lado
+// A): un suplente propenso puede romperse antes de saltar al campo, sin haber
+// jugado. No altera el once de hoy (estaba en el banquillo) pero pierde la
+// disponibilidad para los próximos partidos según la gravedad y se retira del
+// banco para no entrar como sustituto. Respeta la inmunidad por línea (nunca
+// deja una posición por debajo de su mínimo de disponibles). Devuelve la lista
+// de lesionados de calentamiento (minuto 0, marcados con warmup: true).
+function rollWarmupInjuries(A, rng) {
+  const bench = A.bench || [];
+  if (!bench.length) return [];
+  const hurt = [];
+  for (const p of bench) {
+    if (!isInjuryProne(p) || immuneForA(A, p.position)) continue;
+    if (!rng.bernoulli(CONFIG.INJURY_ROTO_WARMUP_PROB)) continue;
+    const severity = rollInjurySeverity(rng);
+    const typeIndex = Math.floor(rng.next() * CONFIG.INJURY_TYPE_COUNT);
+    // Solo cuenta para la inmunidad si la lesión deja baja futura (las simples no).
+    if (A.immunityRemoved && (CONFIG.INJURY_BAN[severity] || 0) > 0) {
+      A.immunityRemoved[p.position] = (A.immunityRemoved[p.position] || 0) + 1;
+    }
+    hurt.push({
+      uid: p.uid,
+      name: p.name,
+      position: p.position,
+      minute: 0,
+      severity,
+      typeIndex,
+      inName: null,
+      warmup: true,
+    });
+  }
+  if (hurt.length) {
+    const hurtUids = new Set(hurt.map((h) => h.uid));
+    A.bench = bench.filter((p) => !hurtUids.has(p.uid));
+  }
+  return hurt;
 }
 
 // Quita por nombre a un jugador de todos los pools de actores del equipo de
@@ -347,6 +419,12 @@ export function simularPartido(teamA, teamB, rng) {
   const stealAgainstB = A.matchBonuses.stealChance; // A presiona → B pierde más
   const stealAgainstA = B.matchBonuses.stealChance;
 
+  // Lesiones de calentamiento (rasgo "Roto"): suplentes propensos que pueden
+  // romperse antes del pitido. Se sortean antes de la lesión del partido y se
+  // registran como lesionados de minuto 0; si dejan baja, arrastran la sanción.
+  const warmupInjuries = rollWarmupInjuries(A, rng);
+  if (warmupInjuries.length) (A.lesionados || (A.lesionados = [])).push(...warmupInjuries);
+
   // Lesión del partido (solo el equipo del jugador, lado A). Se sortea antes del
   // bucle y se aplica al llegar su minuto: el suplente que entra recalcula
   // ratings y química de A el resto del encuentro. La víctima se elige en ese
@@ -359,7 +437,12 @@ export function simularPartido(teamA, teamB, rng) {
     // inmunes, el partido se salda sin lesión.
     const onField = LINES.flatMap((line) => A.starting11?.[line] || [])
       .filter((p) => p && !immuneForA(A, p.position));
-    const victim = onField.length ? onField[Math.floor(rng.next() * onField.length)] : null;
+    // Víctima ponderada: un jugador "Roto" pesa más (33% más propenso).
+    const victim = weightedPick(
+      onField,
+      (p) => (isInjuryProne(p) ? CONFIG.INJURY_ROTO_RISK_MULT : 1),
+      rng,
+    );
     if (victim) {
       // Solo cuenta para la inmunidad si la lesión deja baja para los próximos
       // partidos (las simples no: el jugador sigue disponible al siguiente).

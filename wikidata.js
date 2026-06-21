@@ -13,11 +13,12 @@ const DEFAULT_LANG = 'es';
 const TRAIT_TYPE = {
   Francotirador: 'atk', Cañón: 'atk', Muro: 'def', Motor: 'mid', Maestro: 'mid',
   Líbero: 'def', Paradón: 'gk', Mariscal: 'gk', Killer: 'atk', Velocista: 'atk',
-  Especialista: 'atk', Penalero: 'atk', Capitán: 'lead', Garra: 'def',
+  Especialista: 'atk', Penalero: 'atk', Capitán: 'lead', Garra: 'def', Roto: 'fis',
 };
 
-// Orden de presentación de la tabla de rasgos: liderazgo, portero, defensa, medio, ataque.
-const TYPE_ORDER = ['lead', 'gk', 'def', 'mid', 'atk'];
+// Orden de presentación de la tabla de rasgos: liderazgo, portero, defensa,
+// medio, ataque y, al final, los rasgos físicos/de condición (p. ej. Roto).
+const TYPE_ORDER = ['lead', 'gk', 'def', 'mid', 'atk', 'fis'];
 
 const nav = document.getElementById('wiki-nav');
 const content = document.getElementById('wiki-content');

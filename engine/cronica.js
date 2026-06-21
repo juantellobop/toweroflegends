@@ -263,7 +263,7 @@ export function buildCronica(match, ctx) {
   // Lesión del partido (siempre del equipo del jugador → ctx.teamName). El tipo
   // se resuelve por typeIndex para que coincida con la pantalla de resultado.
   // Si entró un suplente, se narra también su entrada.
-  for (const injury of (match.lesionadosA || []).slice(0, 1)) {
+  for (const injury of (match.lesionadosA || []).filter((inj) => !inj.warmup).slice(0, 1)) {
     push(injury.minute, tVariant(`press.body.injury.${injury.severity}`, {
       player: injury.name,
       team: ctx.teamName,
