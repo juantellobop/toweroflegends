@@ -681,8 +681,9 @@ export function rollItemPack(state) {
   // El item especial (special) nunca entra en el pool aleatorio de objetos.
   const pool = ITEMS.filter((it) => !it.special);
   // Garantizado cada CORRUPTO_ITEM_EVERY niveles, salvo que ya tengas un Corrupto
-  // activo (no se acumulan dos a la vez): en ese caso, sobre de objetos normal.
-  if (isCorruptoItemLevel(state.level) && !state.squad.some(isCorrupto)) {
+  // activo (no se acumulan dos a la vez) o que ya no queden corruptos por entregar
+  // (todos usados): en esos casos, sobre de objetos normal.
+  if (isCorruptoItemLevel(state.level) && !state.squad.some(isCorrupto) && availableCorruptos(state).length) {
     const corruptoItem = ITEMS.find((it) => it.special === 'corrupto');
     const rest = drawCards(pool, Math.max(0, count - 1), bias, state.rng);
     state.itemChoices = corruptoItem ? [corruptoItem, ...rest] : rest;
@@ -728,24 +729,34 @@ export function discardItemPack(state) {
 
 // === Sobre Corrupto (item "Representante corrupto") ===
 
-// Sortea UN jugador de rareza Corrupto del roster (no poseído) al azar. Devuelve
-// [card] (una sola carta; no hay elección múltiple), o [] si no hay candidatos
-// (el usuario crea los Corruptos desde el editor: sin ellos, el sobre va vacío).
-export function rollCorruptoPack(state) {
+// Corruptos del roster que se pueden entregar AÚN: rareza corrupto, que no tengas
+// en plantilla y que NO se hayan entregado ya en esta run. Cada Corrupto entra una
+// sola vez: una vez elegido queda registrado en state.usedCorruptoIds y nunca
+// vuelve a salir, ni siquiera tras venderlo.
+export function availableCorruptos(state) {
   const ownedKeys = ownedKeySet(state.squad);
-  const pool = (state.roster || getPlayableRoster())
-    .filter((p) => isCorrupto(p) && !ownedKeys.has(dupKey(p)));
+  const used = new Set(state.usedCorruptoIds || []);
+  return (state.roster || getPlayableRoster())
+    .filter((p) => isCorrupto(p) && !ownedKeys.has(dupKey(p)) && !used.has(dupKey(p)));
+}
+
+// Sortea UN jugador de rareza Corrupto disponible al azar. Devuelve [card] (una
+// sola carta; no hay elección múltiple), o [] si no quedan corruptos por entregar.
+export function rollCorruptoPack(state) {
+  const pool = availableCorruptos(state);
   state.corruptoChoices = pool.length ? [{ ...state.rng.pick(pool), selectable: true }] : [];
   return state.corruptoChoices;
 }
 
 // Añade el Corrupto elegido a la plantilla y lo ubica SELLADO en su posición
-// natural (no se podrá retirar). Arranca su contador de partidos en 0.
+// natural (no se podrá retirar). Arranca su contador de partidos en 0 y lo marca
+// como entregado para que NO pueda volver a salir en esta run.
 export function chooseCorruptoCard(state, template) {
   if (!template) return null;
   const card = { ...instantiate(template), corruptoMatches: 0 };
   delete card.selectable;
   state.squad.push(card);
+  (state.usedCorruptoIds || (state.usedCorruptoIds = [])).push(dupKey(card));
   forcePlaceSealed(state, card);
   state.corruptoChoices = null;
   return card;
@@ -804,6 +815,12 @@ export function rollShinyPack(state) {
     shiny.rarity = 'shiny';
     if (shiny.stats) for (const k in shiny.stats) shiny.stats[k] += boost;
     if (shiny.gk) for (const k in shiny.gk) shiny.gk[k] += boost;
+    // Recalcula el OVR base desde las stats ya potenciadas: el jugador del roster
+    // arrastra un `ovr` heredado (p. ej. 98) que NO refleja el +10. Sin esto, los
+    // consumidores que leen player.ovr directamente (displayOVR del tablero, y la
+    // rama de respaldo de playerOVR) mostrarían el valor viejo —y con un DT
+    // connacional darían 98+3=101 en vez de 108+3=111—.
+    shiny.ovr = playerOVR(shiny);
     shiny.selectable = true;
     choices.push(shiny);
   }
@@ -1130,6 +1147,8 @@ export function createRun(opts = {}) {
     shinyChoices: null,
     // Venta del Corrupto pendiente de abrir el sobre Shiny: { soldName, soldUid }.
     pendingShinySale: null,
+    // Corruptos ya entregados en la run (dupKey): no se repiten aunque se vendan.
+    usedCorruptoIds: [],
     lastMatch: null,
     lastReward: null,
     opponent: null,
@@ -1223,6 +1242,8 @@ export function serializeRun(state) {
     pendingReward: state.pendingReward ?? null,
     // Venta del Corrupto pendiente del sobre Shiny (los sobres se regeneran solos).
     pendingShinySale: state.pendingShinySale ?? null,
+    // Corruptos ya entregados: persisten para que no se repitan en la run.
+    usedCorruptoIds: state.usedCorruptoIds ?? [],
     // Rival y partido en curso: necesarios para retomar en scouting, partido,
     // resultado, gaceta y gameover (esas pantallas los leen, no los recalculan).
     opponent: state.opponent ?? null,
@@ -1295,6 +1316,7 @@ export function rehydrateRun(data) {
       pendingBias: data.pendingBias,
       pendingReward: data.pendingReward ?? null,
       pendingShinySale: data.pendingShinySale ?? null,
+      usedCorruptoIds: Array.isArray(data.usedCorruptoIds) ? data.usedCorruptoIds : [],
       playerChoices: null,
       nationChoices: null,
       itemChoices: null,
