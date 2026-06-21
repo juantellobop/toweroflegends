@@ -12457,26 +12457,6 @@ export const PLAYERS = [
     "tacticalType": null
   },
   {
-    "id": "gen_fwd_thomas-bein",
-    "name": "Uwe Bein",
-    "nation": "Alemania Occidental",
-    "era": "1990",
-    "position": "MID",
-    "rarity": "legend",
-    "ovr": 88,
-    "stats": {
-      "pace": 91,
-      "shooting": 88,
-      "passing": 88,
-      "dribbling": 88,
-      "defending": 81,
-      "physical": 95
-    },
-    "gk": null,
-    "trait": null,
-    "tacticalType": null
-  },
-  {
     "id": "gen_gk_sergio-goycochea",
     "name": "Sergio Goycochea",
     "nation": "Argentina",
@@ -15689,6 +15669,26 @@ export const PLAYERS = [
       "dribbling": 55,
       "defending": 50,
       "physical": 60
+    },
+    "gk": null,
+    "trait": null,
+    "tacticalType": null
+  },
+  {
+    "id": "fwd_uwe_bein",
+    "name": "Uwe Bein",
+    "nation": "Alemania Occidental",
+    "era": "1990",
+    "position": "FWD",
+    "rarity": "legend",
+    "ovr": 88,
+    "stats": {
+      "pace": 90,
+      "shooting": 90,
+      "passing": 88,
+      "dribbling": 84,
+      "defending": 60,
+      "physical": 89
     },
     "gk": null,
     "trait": null,

@@ -5192,9 +5192,9 @@ export const OPPONENTS = [
         "ovr": 98
       },
       {
-        "name": "Thomas Bein",
+        "name": "Uwe Bein",
         "position": "FWD",
-        "ovr": 99
+        "ovr": 88
       }
     ],
     "bench": [],
