@@ -5282,9 +5282,9 @@ button.primary:active:not(:disabled),
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.05;
-  opacity: .5;
 }
 
+.field-chip .empty .chip-name { opacity: .5; }
 /* === Once rival (scouting) y plantilla inicial: el campo se dimensiona aquí,
    pero las cartas son las del tablero compartido (.lineup-board): idéntico
    esquema al armado de equipo, sin estilos propios. */
