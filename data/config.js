@@ -155,13 +155,15 @@ export const CONFIG = {
   NATION_PACK_MIN_PLAYERS: 4, // cartas nuevas mínimas para entrar al sorteo
 
   // --- Item "Representante corrupto" (rareza Corrupto/Shiny) ---
-  // El item se ofrece GARANTIZADO cada CORRUPTO_ITEM_EVERY niveles (14, 28…).
+  // El item se ofrece GARANTIZADO por primera vez en el nivel CORRUPTO_ITEM_FIRST
+  // (14) y, a partir de ahí, cada CORRUPTO_ITEM_EVERY niveles (42, 70, 98…).
   // Al elegirlo entra un jugador Corrupto que, mientras esté en plantilla, puede
   // lesionar compañeros: una tirada de entrenamiento y otra de partido, cada una
   // con su probabilidad, hasta un máximo de víctimas por encuentro. Tras
   // CORRUPTO_SELL_MATCHES avances de nivel (victoria o empate) se vende y abre el
   // sobre Shiny. Los Shiny suman CORRUPTO_SHINY_BOOST a todas las stats.
-  CORRUPTO_ITEM_EVERY: 14,
+  CORRUPTO_ITEM_FIRST: 14,
+  CORRUPTO_ITEM_EVERY: 28,
   CORRUPTO_INJURE_TRAIN: 0.30,
   CORRUPTO_INJURE_MATCH: 0.30,
   CORRUPTO_MAX_VICTIMS: 2,

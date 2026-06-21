@@ -15613,5 +15613,25 @@ export const PLAYERS = [
     "gk": null,
     "trait": null,
     "tacticalType": "posesion"
+  },
+  {
+    "id": "fwd_alphonse_tchami",
+    "name": "Alphonse Tchami",
+    "nation": "Camerún",
+    "era": "1996",
+    "position": "FWD",
+    "rarity": "corrupto",
+    "ovr": 65,
+    "stats": {
+      "pace": 75,
+      "shooting": 70,
+      "passing": 50,
+      "dribbling": 54,
+      "defending": 22,
+      "physical": 72
+    },
+    "gk": null,
+    "trait": null,
+    "tacticalType": "presion"
   }
 ];

@@ -666,10 +666,12 @@ export function rollNationPack(state) {
 }
 
 // ¿Toca ofrecer GARANTIZADO el item "Representante corrupto" en este nivel?
-// (14, 28, 42…). Se entrega una sola vez por ciclo y nunca sale al azar.
+// Primera vez en CORRUPTO_ITEM_FIRST (14) y luego cada CORRUPTO_ITEM_EVERY (28):
+// 14, 42, 70, 98… Nunca sale al azar fuera de estos niveles.
 export function isCorruptoItemLevel(level) {
+  const first = CONFIG.CORRUPTO_ITEM_FIRST;
   const every = CONFIG.CORRUPTO_ITEM_EVERY;
-  return every > 0 && level > 0 && level % every === 0;
+  return level >= first && (level - first) % every === 0;
 }
 
 // Genera el sobre de objeto del nivel actual.

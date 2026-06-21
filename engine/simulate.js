@@ -312,10 +312,10 @@ function recordEvent(event, A, B, score, events, tracker, rng) {
       ? (event.offender.naturalPosition || event.offender.position)
       : null;
     // El equipo del jugador (lado A) no recibe rojas que lo dejen por debajo del
-    // mínimo de su línea: esas faltas se quedan en amarilla. El Corrupto, además,
-    // nunca es expulsado: su falta jamás pasa de amarilla.
-    const immune = foulSide === 'A'
-      && (immuneForA(A, offenderPos) || event.offender?.rarity === 'corrupto');
+    // mínimo de su línea: esas faltas se quedan en amarilla.
+    const immune = foulSide === 'A' && immuneForA(A, offenderPos);
+    // El Corrupto es inmune a TODA tarjeta: ni amarilla ni roja, nunca expulsado.
+    const neverBooked = event.offender?.rarity === 'corrupto';
     const { card, secondYellow } = resolveFoul({
       side: foulSide,
       offender: event.offender,
@@ -323,6 +323,7 @@ function recordEvent(event, A, B, score, events, tracker, rng) {
       rng,
       tracker,
       immune,
+      neverBooked,
     });
     event.card = card;
     event.secondYellow = secondYellow;

@@ -278,7 +278,7 @@ export function simulateHighlight(ctx) {
     // defiende es quien comete la falta. uid/posición permiten la tarjeta, la
     // sustitución y la sanción del jugador real (null en el rival sintético).
     offender: terminal === 'falta'
-      ? { name: actors.defender, uid: defender.uid ?? null, position: defender.naturalPosition || 'DEF' }
+      ? { name: actors.defender, uid: defender.uid ?? null, position: defender.naturalPosition || 'DEF', rarity: defender.rarity ?? null }
       : null,
     counter: phase === 'counter',
   };
