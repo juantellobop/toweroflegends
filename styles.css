@@ -6022,10 +6022,9 @@ button.primary:active:not(:disabled),
   border: 2px solid rgba(var(--accent-rgb), .8);
 }
 .tdl-stack {
-  position: absolute; top: 7%; right: 7%;
-  font-size: 1.05em; font-weight: 800; color: #08121f;
+  position: absolute; top: 10px; right: 10px;
+  font-size: 1.3em; font-weight: 800; color: #08121f;
   background: var(--accent); padding: .12em .45em; border-radius: .4em;
-  box-shadow: 0 2px 0 rgba(0,0,0,.35);
 }
 
 /* ============================================================================

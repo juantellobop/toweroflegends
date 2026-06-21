@@ -43,6 +43,7 @@ const FLAG_PNG = new Set([
   'dinamarca', 'espana', 'estados-unidos', 'francia', 'ghana', 'inglaterra', 'irlanda',
   'italia', 'liberia', 'marruecos', 'mexico', 'paraguay', 'paises-bajos', 'portugal',
   'rumania', 'rusia', 'senegal', 'suecia', 'turquia', 'ucrania', 'uruguay',
+  'nueva-zelanda', 'japon',
 ]);
 const FLAG_SVG_FILE = { urss: 'urss.svg', yugoslavia: 'yugoslavia.svg' };
 
@@ -65,6 +66,7 @@ export const FLAG_NATIONS = [
   'Países Bajos', 'Portugal', 'Bélgica', 'Croacia', 'Dinamarca', 'Suecia', 'Irlanda',
   'Rusia', 'Ucrania', 'Rumanía', 'Bulgaria', 'Turquía', 'Corea del Sur', 'Marruecos',
   'Senegal', 'Camerún', 'Ghana', 'Liberia', 'URSS', 'Yugoslavia', 'Checoslovaquia',
+  'Japón', 'Nueva Zelanda',
   'Nacional', 'Peñarol', 'Defensor Sporting', 'Platense',
 ];
 
@@ -84,6 +86,7 @@ const NATION_ACCENT = {
   rusia: '#0039a6', ucrania: '#ffd700', rumania: '#fcd116', bulgaria: '#00966e',
   turquia: '#e30a17', 'corea-del-sur': '#cd2e3a', marruecos: '#c1272d', senegal: '#00853f',
   camerun: '#007a5e', ghana: '#fcd116', liberia: '#bf0a30', urss: '#cc0000',
+  'nueva-zelanda': '#00247d', japon: '#bc002d',
   yugoslavia: '#d22630', checoslovaquia: '#11457e', 'alemania-occidental': '#ffce00',
   nacional: '#0047ab', penarol: '#f6c500', 'defensor-sporting': '#6f2b8f', platense: '#7a4a2b',
 };
