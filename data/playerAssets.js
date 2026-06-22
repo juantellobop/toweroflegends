@@ -72,22 +72,22 @@ export function playerByDisplayName(name) {
 export function portraitPathForPlayer(player) {
   if (!player) return null;
   if (player.portraitDataUrl) return player.portraitDataUrl;
-  if (player.id) return `${PORTRAIT_DIR}/${player.id}.png${PORTRAIT_SUFFIX}`;
+  if (player.id) return `${PORTRAIT_DIR}/${player.id}.webp${PORTRAIT_SUFFIX}`;
   return portraitPathForName(player.name);
 }
 
 export function portraitPathForName(name) {
   const known = playerByDisplayName(name);
   if (known) return portraitPathForPlayer(known);
-  return `${PORTRAIT_DIR}/by-name/${slugifyName(name)}.png${PORTRAIT_SUFFIX}`;
+  return `${PORTRAIT_DIR}/by-name/${slugifyName(name)}.webp${PORTRAIT_SUFFIX}`;
 }
 
-// Retrato del DT: formato distinto al de jugadores (JPG, prefijo manager_),
-// guardado en el mismo directorio. {id}.jpg, con id = manager_<nombre>_<apellido>.
+// Retrato del DT: mismo directorio que los jugadores, con prefijo manager_.
+// {id}.webp, con id = manager_<nombre>_<apellido>.
 export function portraitPathForManager(manager) {
   if (!manager) return null;
   if (manager.portraitDataUrl) return manager.portraitDataUrl;
-  if (manager.id) return `${PORTRAIT_DIR}/${manager.id}.jpg${PORTRAIT_SUFFIX}`;
+  if (manager.id) return `${PORTRAIT_DIR}/${manager.id}.webp${PORTRAIT_SUFFIX}`;
   return null;
 }
 
@@ -102,5 +102,5 @@ export function artworkPathForItem(item) {
   if (!item) return null;
   if (item.artDataUrl) return item.artDataUrl;
   const id = item.id || slugifyName(item.name);
-  return `${ITEM_ART_DIR}/${id}.png${PORTRAIT_SUFFIX}`;
+  return `${ITEM_ART_DIR}/${id}.webp${PORTRAIT_SUFFIX}`;
 }

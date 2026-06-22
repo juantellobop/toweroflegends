@@ -42,7 +42,7 @@ try {
   assert.equal(versionedCss.status, 200);
   assert.equal(versionedCss.headers['cache-control'], 'public, max-age=31536000, immutable');
   assert.ok(versionedCss.headers.etag);
-  assert.match(versionedCss.body, new RegExp(`assets/ui/background\\.jpg\\?v=${BUILD_VERSION}`));
+  assert.match(versionedCss.body, new RegExp(`assets/ui/background\\.webp\\?v=${BUILD_VERSION}`));
 
   const versionedMain = await request(port, `/main.js?v=${BUILD_VERSION}`);
   assert.equal(versionedMain.status, 200);
@@ -65,16 +65,16 @@ try {
   assert.equal(revalidated.status, 304);
   assert.equal(revalidated.body, '');
 
-  const portrait = await request(port, '/assets/player-portraits/base_def_vidal.png');
+  const portrait = await request(port, '/assets/player-portraits/base_def_vidal.webp');
   assert.equal(portrait.status, 200);
   assert.equal(portrait.headers['cache-control'], 'public, max-age=604800, stale-while-revalidate=2592000');
   assert.ok(portrait.headers.etag);
 
-  const versionedPortrait = await request(port, `/assets/player-portraits/base_def_vidal.png?v=${BUILD_VERSION}`);
+  const versionedPortrait = await request(port, `/assets/player-portraits/base_def_vidal.webp?v=${BUILD_VERSION}`);
   assert.equal(versionedPortrait.status, 200);
   assert.equal(versionedPortrait.headers['cache-control'], 'public, max-age=31536000, immutable');
 
-  const versionedImage = await request(port, `/assets/ui/background.jpg?v=${BUILD_VERSION}`);
+  const versionedImage = await request(port, `/assets/ui/background.webp?v=${BUILD_VERSION}`);
   assert.equal(versionedImage.status, 200);
   assert.equal(versionedImage.headers['cache-control'], 'public, max-age=31536000, immutable');
 

@@ -115,13 +115,13 @@ export function displayOVR(player) {
 
 // Carta estática de jugador, con el esquema exacto del tablero táctico pero
 // sin edición. `interactive` la convierte en botón (abre la ficha completa).
-export function staticChipHTML(player, { portraitSrc, flagSrc, chipClass = '', interactive = false, ariaLabel = '' } = {}) {
+export function staticChipHTML(player, { portraitSrc, flagSrc, chipClass = '', interactive = false, ariaLabel = '', loading = 'eager' } = {}) {
   const rarity = player.rarity ? ` rarity-${player.rarity}` : '';
   const inner = `
       <span class="chip-face" aria-hidden="true">
-        <img src="${esc(portraitSrc)}" alt="" draggable="false" loading="eager" decoding="async" data-hide-on-error="true" />
+        <img src="${esc(portraitSrc)}" alt="" draggable="false" loading="${loading}" decoding="async" data-hide-on-error="true" />
         <span>${esc(playerInitials(player.name))}</span>
-        ${flagSrc ? `<img class="chip-flag" src="${esc(flagSrc)}" alt="" draggable="false" loading="eager" decoding="async" />` : ''}
+        ${flagSrc ? `<img class="chip-flag" src="${esc(flagSrc)}" alt="" draggable="false" loading="${loading}" decoding="async" />` : ''}
       </span>
       <span class="chip-ovr">${displayOVR(player)}</span>
       <span class="chip-name" title="${esc(player.name)}">${esc(playerSurname(player.name))}</span>`;

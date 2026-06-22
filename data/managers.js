@@ -1,7 +1,7 @@
 // Torre de Leyendas — Catálogo de directores técnicos (DT / manager).
 // Esta es la fuente de verdad de los DT jugables. El panel admin local lo
 // reescribe directamente al crear/editar/eliminar.
-// Retratos: assets/player-portraits/{id}.jpg (id = manager_<nombre>_<apellido>).
+// Retratos: assets/player-portraits/{id}.webp (id = manager_<nombre>_<apellido>).
 //
 // "year" es el año (época) del DT. Si su nation + year coinciden con una
 // selección rival (p. ej. Argentina 1986 → Bilardo), ese DT dirige al rival y

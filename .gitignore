@@ -6,6 +6,10 @@ node_modules/
 .env
 .env.*
 
+# Backups de assets (no se sirven; solo inflan el deploy y el hash de versión).
+*.bak
+.*-bak/
+
 # Panel admin / editor de jugadores (playeredit) y su tooling de retratos:
 # viven solo en local y NUNCA se publican en GitHub. El juego funciona sin esto;
 # el admin solo está disponible en local vía `npm run serve`.

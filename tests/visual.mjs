@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { uiAssetList } from '../data/uiAssets.js';
+import { uiAssetGroup, UI_ASSETS } from '../data/uiAssets.js';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const PORT = 8091;
@@ -36,8 +36,15 @@ async function playToBuild(page) {
       .map((entry) => new URL(entry.name).pathname.replace(/^\//, ''))
       .filter((pathname) => pathname.startsWith('assets/ui/'))
   ));
-  for (const asset of uiAssetList()) {
-    assert.ok(requestedUiAssets.has(asset), `UI asset must preload on initial page load: ${asset}`);
+  // El arranque solo precarga el grupo 'core' (fondo del título): el resto de
+  // assets/ui se difiere a su escena. Verificamos que core SÍ se precarga…
+  for (const asset of uiAssetGroup('core')) {
+    assert.ok(requestedUiAssets.has(asset), `UI core asset must preload on initial page load: ${asset}`);
+  }
+  // …y que el arte PESADO de sobres (cromos, 3.9 MB) NO se baja al arrancar:
+  // esa es precisamente la optimización que evita el ~9 MB inicial.
+  for (const heavy of Object.values(UI_ASSETS.packs)) {
+    assert.ok(!requestedUiAssets.has(heavy), `Heavy pack art must NOT preload at boot: ${heavy}`);
   }
   await page.waitForTimeout(350);
   await page.click('.flag-opt');

@@ -144,7 +144,7 @@ export function managerShowcaseHTML(manager, opts = {}) {
 
 // === Carta de objeto ========================================================
 // opts: { idValue } la identifica, { stack } (>1) muestra ×N. El hueco .art
-// recibe el arte cuadrado del objeto (assets/items/{id}.png); si no hay imagen,
+// recibe el arte cuadrado del objeto (assets/items/{id}.webp); si no hay imagen,
 // el hueco queda vacío (sin icono ni placeholder).
 export function itemShowcaseHTML(item, opts = {}) {
   const overlay = opts.stack > 1

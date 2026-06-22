@@ -3,22 +3,23 @@
 
 export const UI_ASSETS = {
   backgrounds: {
-    // Fondos fotográficos (pixel-art) para las pantallas principales.
-    title: 'assets/ui/background-3.jpg',       // pantalla de inicio
-    pitch: 'assets/ui/background.jpg',         // armar equipo / sobres / scouting
-    celebration: 'assets/ui/background-2.jpg', // resultado al ganar
-    managerPack: 'assets/ui/background-4.jpg', // apertura del sobre de DT
+    // Fondos fotográficos (pixel-art) para las pantallas principales. WebP-only
+    // (target Safari 16.2+): convertidos con tools/convert_to_webp.mjs.
+    title: 'assets/ui/background-3.webp',       // pantalla de inicio
+    pitch: 'assets/ui/background.webp',         // armar equipo / sobres / scouting
+    celebration: 'assets/ui/background-2.webp', // resultado al ganar
+    managerPack: 'assets/ui/background-4.webp', // apertura del sobre de DT
   },
   // Sobres sellados (arte de cromos) para la pantalla de apertura.
   packs: {
-    player: 'assets/ui/cromos-jugadores.png',
-    item: 'assets/ui/cromos-items.png',
-    manager: 'assets/ui/cromos-managers.png',
+    player: 'assets/ui/cromos-jugadores.webp',
+    item: 'assets/ui/cromos-items.webp',
+    manager: 'assets/ui/cromos-managers.webp',
   },
   cards: {
     packBack: 'assets/ui/pixel/pack-back.svg',
-    backPlayer: 'assets/ui/item-player.jpg', // dorso de carta de jugador
-    backItem: 'assets/ui/item-back.jpg',     // dorso de carta de objeto (y de DT)
+    backPlayer: 'assets/ui/item-player.webp', // dorso de carta de jugador
+    backItem: 'assets/ui/item-back.webp',     // dorso de carta de objeto (y de DT)
     frames: {
       common: 'assets/ui/pixel/card-frame-common.svg',
       rare: 'assets/ui/pixel/card-frame-rare.svg',
@@ -29,17 +30,17 @@ export const UI_ASSETS = {
     // tipo y rareza. Jugador y DT comparten el fondo player-dt; el objeto usa
     // el suyo. Nombres de archivo en castellano (comun/rara/epica/leyenda).
     bg: {
-      playerCommon: 'assets/ui/cards/card-comun-player-dt.jpg',
-      playerRare: 'assets/ui/cards/card-rara-player-dt.jpg',
-      playerEpic: 'assets/ui/cards/card-epica-player-dt.jpg',
-      playerLegend: 'assets/ui/cards/card-leyenda-player-dt.jpg',
+      playerCommon: 'assets/ui/cards/card-comun-player-dt.webp',
+      playerRare: 'assets/ui/cards/card-rara-player-dt.webp',
+      playerEpic: 'assets/ui/cards/card-epica-player-dt.webp',
+      playerLegend: 'assets/ui/cards/card-leyenda-player-dt.webp',
       // Rarezas especiales (item "Representante corrupto" y su recompensa Shiny).
-      playerCorrupto: 'assets/ui/cards/card-corrupto-player.jpg',
-      playerShiny: 'assets/ui/cards/card-shiny-player.jpg',
-      itemCommon: 'assets/ui/cards/card-comun-item.jpg',
-      itemRare: 'assets/ui/cards/card-rara-item.jpg',
-      itemEpic: 'assets/ui/cards/card-epica-item.jpg',
-      itemLegend: 'assets/ui/cards/card-leyenda-item.jpg',
+      playerCorrupto: 'assets/ui/cards/card-corrupto-player.webp',
+      playerShiny: 'assets/ui/cards/card-shiny-player.webp',
+      itemCommon: 'assets/ui/cards/card-comun-item.webp',
+      itemRare: 'assets/ui/cards/card-rara-item.webp',
+      itemEpic: 'assets/ui/cards/card-epica-item.webp',
+      itemLegend: 'assets/ui/cards/card-leyenda-item.webp',
     },
   },
   icons: {
@@ -49,9 +50,9 @@ export const UI_ASSETS = {
     gk: 'assets/ui/pixel/stat-gk.svg',
   },
   results: {
-    cup: 'assets/ui/copa.jpg',     // copa (póster de victoria)
-    tower: 'assets/ui/torre.jpg',  // torre (progreso / fin de run)
-    win: 'assets/ui/copa.jpg',
+    cup: 'assets/ui/copa.webp',     // copa (póster de victoria)
+    tower: 'assets/ui/torre.webp',  // torre (progreso / fin de run)
+    win: 'assets/ui/copa.webp',
     winBadge: 'assets/ui/pixel/result-win.svg',
     loss: 'assets/ui/pixel/result-loss.svg',
   },
@@ -64,6 +65,24 @@ function collectAssetPaths(value, output) {
   }
   if (!value || typeof value !== 'object') return;
   Object.values(value).forEach((entry) => collectAssetPaths(entry, output));
+}
+
+// Grupos de precarga por escena. Antes se bajaban los ~9 MB de assets/ui al
+// arrancar (preloadUiAssets aplanaba TODO); ahora cada grupo se calienta cuando
+// se entra en su pantalla. La unión de los grupos cubre todo UI_ASSETS, así que
+// uiAssetList() (suma total, para el test de cobertura) no cambia.
+const ASSET_GROUPS = {
+  core: [UI_ASSETS.backgrounds.title],                 // pantalla de inicio
+  build: [UI_ASSETS.backgrounds.pitch],                // build / scouting / sobres
+  managerPack: [UI_ASSETS.backgrounds.managerPack],    // background-4 (0.7 MB)
+  packs: [UI_ASSETS.packs, UI_ASSETS.cards, UI_ASSETS.icons], // cromos + cartas
+  result: [UI_ASSETS.backgrounds.celebration, UI_ASSETS.results],
+};
+
+export function uiAssetGroup(name) {
+  const paths = [];
+  collectAssetPaths(ASSET_GROUPS[name], paths);
+  return [...new Set(paths)];
 }
 
 export function uiAssetList() {
@@ -91,9 +110,15 @@ export function preloadImages(srcs, { priority = 'low', ImageCtor = globalThis.I
   return images;
 }
 
+// Precarga del grupo de una escena (bajo demanda). Devuelve los Image creados
+// para conservar sus referencias. Idempotencia/deduplicación las gestiona quien
+// llama (main.js warmUiGroup) o la propia caché HTTP del navegador.
+export function preloadUiGroup(name, { ImageCtor = globalThis.Image, priority = 'low' } = {}) {
+  return preloadImages(uiAssetGroup(name), { ImageCtor, priority });
+}
+
+// Al arrancar solo se calienta lo de la pantalla de inicio (background del
+// título, prioridad alta). El resto de assets/ui se difiere a su escena.
 export function preloadUiAssets(ImageCtor = globalThis.Image) {
-  return preloadImages(uiAssetList(), {
-    ImageCtor,
-    priority: (src) => (src === UI_ASSETS.backgrounds.title ? 'high' : 'low'),
-  });
+  return preloadImages(uiAssetGroup('core'), { ImageCtor, priority: 'high' });
 }

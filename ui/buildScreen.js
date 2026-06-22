@@ -251,9 +251,9 @@ function bench(state) {
       <button class="bench-item${blocked ? '' : ' lineup-draggable'} rarity-${p.rarity}${stateClass}" data-uid="${p.uid}" data-line="${p.position}" data-nation="${esc(p.nation)}"${blocked ? ' data-suspended="1"' : ' draggable="true"'}
               aria-label="${esc(ariaLabel)}">
         <span class="bench-face" aria-hidden="true">
-          <img src="${esc(portraitPathForPlayer(p))}" alt="" draggable="false" loading="eager" decoding="async" data-hide-on-error="true" />
+          <img src="${esc(portraitPathForPlayer(p))}" alt="" draggable="false" loading="lazy" decoding="async" data-hide-on-error="true" />
           <span>${esc(playerInitials(p.name))}</span>
-          <img class="chip-flag" src="${esc(flagSrcForNation(p.nation))}" alt="" draggable="false" loading="eager" decoding="async" />
+          <img class="chip-flag" src="${esc(flagSrcForNation(p.nation))}" alt="" draggable="false" loading="lazy" decoding="async" />
           ${injured ? `<span class="bench-injury" title="${esc(t('build.injured'))}" aria-hidden="true"></span><span class="bench-injury-count" title="${esc(t('result.injuryMatchesTitle', { n: p.injuryMatches }))}" aria-hidden="true">${p.injuryMatches}</span>` : ''}
           ${suspended ? `<span class="bench-red-card" title="${esc(t('build.suspended'))}" aria-hidden="true"></span>` : ''}
         </span>
@@ -273,7 +273,7 @@ function bench(state) {
 // Objeto en el tablero (items-fold): chip compacto con icono (arte) + título y
 // botón "i" —igual que los jugadores— que abre la carta completa en el modal.
 // `count` (>1) muestra ×N (copias acumuladas). El icono usa el arte del objeto
-// (assets/items/{id}.png); si falta, queda el marco vacío (data-hide-on-error).
+// (assets/items/{id}.webp); si falta, queda el marco vacío (data-hide-on-error).
 function itemBoardHTML(item, count) {
   const name = localizeItem(item, 'name');
   return `

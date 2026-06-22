@@ -4734,14 +4734,14 @@ select {
 .scouting-screen::before {
   background-image:
     radial-gradient(125% 85% at 50% 42%, rgba(5,12,44,.34), rgba(5,12,44,.84) 92%),
-    url('assets/ui/background.jpg');
+    url('assets/ui/background.webp');
 }
 
 /* Celebración (copa) al ganar: scrim más suave para que se vea la escena. */
 .result-screen.result-win::before {
   background-image:
     linear-gradient(180deg, rgba(5,12,44,.42), rgba(5,12,44,.80)),
-    url('assets/ui/background-2.jpg');
+    url('assets/ui/background-2.webp');
 }
 
 /* Derrota / empate / fin de partida: estadio oscurecido y desaturado. */
@@ -4750,7 +4750,7 @@ select {
 .gameover-screen::before {
   background-image:
     linear-gradient(180deg, rgba(5,12,44,.82), rgba(3,6,22,.93)),
-    url('assets/ui/background.jpg');
+    url('assets/ui/background.webp');
   filter: grayscale(.45) brightness(.85);
 }
 
@@ -5093,7 +5093,7 @@ select {
   background-repeat: no-repeat;
   background-image:
     linear-gradient(180deg, rgba(5,12,44,.06), rgba(5,12,44,.74) 72%, #050C2C),
-    url('assets/ui/background-3.jpg');
+    url('assets/ui/background-3.webp');
   filter: saturate(1.12) contrast(1.04);
 }
 
@@ -5109,7 +5109,7 @@ select {
   background-image:
     radial-gradient(circle at 35% 42%, rgba(255,49,84,.18), transparent 30%),
     linear-gradient(180deg, rgba(5,12,44,.02), rgba(5,12,44,.22) 42%, rgba(5,12,44,.72)),
-    url('assets/ui/background-3.jpg');
+    url('assets/ui/background-3.webp');
   filter: saturate(1.28) contrast(1.14) brightness(1.08);
 }
 
@@ -5128,7 +5128,7 @@ select {
 #app[data-route="match"]::before {
   background-image:
     radial-gradient(125% 85% at 50% 42%, rgba(5,12,44,.34), rgba(5,12,44,.84) 92%),
-    url('assets/ui/background.jpg');
+    url('assets/ui/background.webp');
   filter: saturate(1.02) brightness(.94);
 }
 
@@ -5136,14 +5136,14 @@ select {
 #app[data-route="managerPack"]::before {
   background-image:
     radial-gradient(125% 85% at 50% 42%, rgba(5,12,44,.34), rgba(5,12,44,.84) 92%),
-    url('assets/ui/background-4.jpg');
+    url('assets/ui/background-4.webp');
   filter: saturate(1.02) brightness(.94);
 }
 
 #app[data-route="result"][data-result="win"]::before {
   background-image:
     linear-gradient(180deg, rgba(5,12,44,.42), rgba(5,12,44,.80)),
-    url('assets/ui/background-2.jpg');
+    url('assets/ui/background-2.webp');
   filter: saturate(1.06) brightness(.98);
 }
 
@@ -5152,7 +5152,7 @@ select {
 #app[data-route="gameover"]::before {
   background-image:
     linear-gradient(180deg, rgba(5,12,44,.82), rgba(3,6,22,.93)),
-    url('assets/ui/background.jpg');
+    url('assets/ui/background.webp');
   filter: grayscale(.45) brightness(.85);
 }
 

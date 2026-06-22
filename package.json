@@ -1,6 +1,6 @@
 {
   "name": "torre-de-leyendas",
-  "version": "0.13.9",
+  "version": "0.13.10",
   "description": "Roguelike de fútbol: escala una torre infinita armando tu selección con sobres de cartas.",
   "type": "module",
   "scripts": {
@@ -22,6 +22,9 @@
     "visual": "node tests/visual.mjs",
     "portraits:dry": "python3 local/tools/generate_player_portraits.py --dry-run --limit 10",
     "portraits": "python3 local/tools/generate_player_portraits.py",
+    "webp:dry": "node tools/convert_to_webp.mjs --dry-run",
+    "webp": "node tools/convert_to_webp.mjs --replace",
+    "webp:portraits": "node tools/convert_to_webp.mjs --replace --only=portraits",
     "serve": "node tools/admin_server.mjs",
     "version:patch": "node tools/bump_version.mjs patch",
     "version:minor": "node tools/bump_version.mjs minor",

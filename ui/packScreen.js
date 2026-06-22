@@ -117,7 +117,10 @@ function reviewButtons(state, kind) {
 
 // Estructura común de un modal de revisión: backdrop + panel con scroll interno
 // + botón de cerrar fijo en la esquina (igual que "Revisar mi equipo").
-function reviewModalShell(id, title, body) {
+// Shell del modal SIN cuerpo: el grid de cartas (con sus retratos/fondos) se
+// construye bajo demanda al abrirlo (wireReviews). Así un sobre no descarga
+// ~25-30 retratos + fondos de una plantilla que el usuario quizá nunca revisa.
+function reviewModalShell(id, title) {
   return `
     <div class="player-modal squad-review-modal review-modal" id="${id}" hidden>
       <div class="player-modal-backdrop" data-close></div>
@@ -127,7 +130,6 @@ function reviewModalShell(id, title, body) {
         </button>
         <div class="squad-review-panel arcade-panel">
           <h2 class="squad-review-title">${esc(title)}</h2>
-          ${body}
         </div>
       </div>
     </div>`;
@@ -159,24 +161,39 @@ function itemsReviewBody(state) {
 function reviewModals(state, kind) {
   let html = '';
   if (state.squad?.length) {
-    html += reviewModalShell('reviewSquad', t('pack.reviewTitle', { count: state.squad.length }), squadReviewBody(state));
+    html += reviewModalShell('reviewSquad', t('pack.reviewTitle', { count: state.squad.length }));
   }
   if (kind === 'manager' && state.manager) {
-    html += reviewModalShell('reviewManager', t('pack.reviewManagerTitle'),
-      `<div class="squad-review-grid review-grid--single">${managerShowcaseHTML(state.manager)}</div>`);
+    html += reviewModalShell('reviewManager', t('pack.reviewManagerTitle'));
   }
   if (kind === 'item' && state.items?.length) {
-    html += reviewModalShell('reviewItems', t('pack.reviewItemsTitle', { count: state.items.length }), itemsReviewBody(state));
+    html += reviewModalShell('reviewItems', t('pack.reviewItemsTitle', { count: state.items.length }));
   }
   return html;
 }
 
-function wireReviews(root) {
+// Cuerpo del modal, construido la primera vez que se abre (diferido). Devuelve el
+// HTML del grid de cartas según el modal; vacío si no aplica.
+function reviewBodyHTML(id, state) {
+  if (id === 'reviewSquad') return squadReviewBody(state);
+  if (id === 'reviewManager') return `<div class="squad-review-grid review-grid--single">${managerShowcaseHTML(state.manager)}</div>`;
+  if (id === 'reviewItems') return itemsReviewBody(state);
+  return '';
+}
+
+function wireReviews(root, state) {
   const close = (modal) => { if (modal) modal.hidden = true; };
   root.querySelectorAll('.review-btn[data-review]').forEach((btn) => {
     const modal = root.querySelector(`#${btn.dataset.review}`);
     if (!modal) return;
-    btn.addEventListener('click', () => { modal.hidden = false; });
+    btn.addEventListener('click', () => {
+      // Construcción perezosa e idempotente del cuerpo: solo al primer abrir.
+      if (!modal.dataset.built) {
+        modal.querySelector('.squad-review-panel')?.insertAdjacentHTML('beforeend', reviewBodyHTML(modal.id, state));
+        modal.dataset.built = '1';
+      }
+      modal.hidden = false;
+    });
     modal.querySelectorAll('[data-close]').forEach((node) => node.addEventListener('click', () => close(modal)));
   });
   document.addEventListener('keydown', function onEsc(e) {
@@ -225,7 +242,7 @@ export function renderPlayerPack(root, state, choices, onPick, onDiscard) {
   ).join('');
   root.innerHTML = shell(state, 'player', choices.length, body);
   const onReveal = attachDiscardBar(root, t('pack.playerDiscard'), onDiscard);
-  wire(root, choices, onPick, onReveal);
+  wire(root, state, choices, onPick, onReveal);
 }
 
 export function renderItemPack(root, state, choices, onPick, onDiscard) {
@@ -239,7 +256,7 @@ export function renderItemPack(root, state, choices, onPick, onDiscard) {
   ).join('');
   root.innerHTML = shell(state, 'item', choices.length, body);
   const onReveal = attachDiscardBar(root, t('pack.itemDiscard'), onDiscard);
-  wire(root, choices, onPick, onReveal);
+  wire(root, state, choices, onPick, onReveal);
 }
 
 // Sobre de director técnico: 3 opciones; elegir reemplaza al DT activo. Si se
@@ -257,7 +274,7 @@ export function renderManagerPack(root, state, choices, onPick, onDiscard) {
   // Barra de descartar: solo cuando se permite descartar (en el nivel 1 elegir DT
   // es obligatorio), oculta hasta abrir el sobre.
   const onReveal = attachDiscardBar(root, t('pack.managerDiscard'), onDiscard);
-  wire(root, choices, onPick, onReveal);
+  wire(root, state, choices, onPick, onReveal);
 }
 
 // === Sobre Corrupto (item "Representante corrupto") ===
@@ -272,7 +289,7 @@ export function renderCorruptoPack(root, state, choices, onPick) {
     dealCard(playerShowcaseHTML(c, { idValue: c.id }), c.id, i, 'corrupto')
   ).join('');
   root.innerHTML = shell(state, 'corrupto', choices.length, body);
-  wire(root, choices, onPick);
+  wire(root, state, choices, onPick);
 }
 
 // === Sobre Shiny (recompensa por vender al Corrupto) ===
@@ -286,7 +303,7 @@ export function renderShinyPack(root, state, choices, onPick, { soldName } = {})
     dealCard(playerShowcaseHTML(c, { idValue: c.id }), c.id, i, 'shiny')
   ).join('');
   root.innerHTML = shell(state, 'shiny', choices.length, body, t('pack.shinySale', { name: soldName || '' }));
-  wire(root, choices, onPick);
+  wire(root, state, choices, onPick);
 }
 
 // === Sobre especial de selecciones (cada 5 niveles) ===
@@ -324,7 +341,7 @@ export function renderNationPack(root, state, teams, onPick, onDiscard) {
   ).join('');
   root.innerHTML = shell(state, 'nation', teams.length, body);
   const onReveal = attachDiscardBar(root, t('pack.playerDiscard'), onDiscard);
-  wire(root, teams, (team) => renderNationRoster(root, state, team, onPick), onReveal);
+  wire(root, state, teams, (team) => renderNationRoster(root, state, team, onPick), onReveal);
 }
 
 // Segunda etapa: plantel completo de la selección elegida. Las cartas brotan
@@ -352,10 +369,10 @@ function renderNationRoster(root, state, team, onPick) {
     </section>`;
   window.scrollTo(0, 0);
   wireChoice(root, team.players, onPick);
-  wireReviews(root);
+  wireReviews(root, state);
 }
 
-function wire(root, choices, onPick, onOpen = null) {
+function wire(root, state, choices, onPick, onOpen = null) {
   const opener = root.querySelector('#opener');
   const openBar = root.querySelector('#openBar');
   const deal = root.querySelector('#deal');
@@ -402,7 +419,7 @@ function wire(root, choices, onPick, onOpen = null) {
   root.querySelector('#openBtn').addEventListener('click', openPack);
 
   wireChoice(root, choices, onPick, () => opened);
-  wireReviews(root);
+  wireReviews(root, state);
 }
 
 // --- Elección de carta (solo tras abrir el sobre) ---

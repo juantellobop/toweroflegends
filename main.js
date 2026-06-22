@@ -22,7 +22,7 @@ import { renderCarryover } from './ui/carryoverScreen.js';
 import { fetchLeaderboard, fetchWeeklyLeaderboard, openLeaderboardLineup, renderLeaderboard, submitLeaderboardEntry, submitWeeklyLeaderboardEntry } from './ui/leaderboard.js';
 import { CONFIG, LINES } from './data/config.js';
 import { playerOVR } from './engine/ovr.js';
-import { preloadUiAssets, UI_ASSETS } from './data/uiAssets.js';
+import { preloadUiAssets, preloadUiGroup, UI_ASSETS } from './data/uiAssets.js';
 import { flagSrcForNation, FLAG_NATIONS } from './data/flags.js';
 import {
   TEAM_NAME_MAX_LENGTH,
@@ -48,8 +48,16 @@ const liveStatsReady = import('./data/comunidad.js')
 const root = document.getElementById('app');
 initLanguage();
 // Conservamos las referencias para que todas las descargas de UI iniciadas al
-// entrar terminen y queden disponibles en la caché HTTP del navegador.
+// entrar terminen y queden disponibles en la caché HTTP del navegador. Al
+// arrancar solo se calienta el grupo 'core' (fondo del título); el resto de
+// assets/ui se difiere a su escena vía warmUiGroup (idempotente por sesión).
 const preloadedUiImages = preloadUiAssets();
+const warmedUiGroups = new Set();
+function warmUiGroup(name) {
+  if (warmedUiGroups.has(name)) return;
+  warmedUiGroups.add(name);
+  preloadedUiImages.push(...preloadUiGroup(name));
+}
 const BEST_KEY = 'tdl_best';
 const ROUTE_ORDER = {
   menu: 0,
@@ -464,6 +472,10 @@ function render(navHint = 'auto') {
   switch (state.phase) {
     case 'squadIntro':
       // Arranque de la run: el equipo completo se presenta antes del primer sobre.
+      // Calentamos ya el arte de sobres/cartas y el fondo de juego: la cadena de
+      // sobres viene inmediatamente después y así el flip llega con la caché lista.
+      warmUiGroup('packs');
+      warmUiGroup('build');
       renderRoute('squadIntro', () => {
         renderSquadIntro(root, state, {
           onContinue: () => {
@@ -475,6 +487,11 @@ function render(navHint = 'auto') {
       break;
 
     case 'playerPack':
+      // Cubre el caso de reanudar un save directamente en la cadena de sobres
+      // (sin pasar por squadIntro): garantiza que cromos/cartas y fondo estén
+      // calentándose. Idempotente, así que no repite descargas.
+      warmUiGroup('packs');
+      warmUiGroup('build');
       renderRoute('playerPack', () => {
         const advance = () => {
           // El sobre de DT (nivel 1 y cada 7) va justo después del de jugadores.
@@ -496,6 +513,9 @@ function render(navHint = 'auto') {
       break;
 
     case 'managerPack':
+      // El sobre de DT usa su propio fondo (background-4, ~0.7 MB): solo se
+      // descarga cuando realmente hay sobre de DT (nivel 1 y cada 7), no antes.
+      warmUiGroup('managerPack');
       renderRoute('managerPack', () => {
         renderManagerPack(root, state, rollManagerPack(state), (tpl) => {
           chooseManagerCard(state, tpl);
@@ -618,6 +638,7 @@ function render(navHint = 'auto') {
       break;
 
     case 'result':
+      warmUiGroup('result');
       renderRoute('result', () => {
         renderResult(root, state, state.pendingReward, {
           onNext: () => {
@@ -646,6 +667,7 @@ function render(navHint = 'auto') {
 
     case 'gameover':
       setBest(state.level);
+      warmUiGroup('result');
       renderRoute('gameover', () => {
         renderGameOver(root, state, getBest(), {
           leaderboard: submitGameOverRanking(),

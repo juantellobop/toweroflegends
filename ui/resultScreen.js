@@ -71,6 +71,9 @@ function lastTacticHTML(state) {
       portraitSrc: portraitPathForPlayer(slot.player),
       flagSrc: flagSrcForNation(slot.player.nation),
       chipClass: chipClassFor(slot.player.uid),
+      // Tablero del último partido en el gameover: va al fondo del scroll, así
+      // que sus 11 retratos + banderas se cargan al entrar en viewport, no eager.
+      loading: 'lazy',
     }),
   });
   // DT que dirigió este partido (snapshot del lastMatch), junto al once.

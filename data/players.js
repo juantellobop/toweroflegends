@@ -1,7 +1,7 @@
 // Torre de Leyendas — Base directa de jugadores.
 // Este archivo es la fuente de verdad del roster jugable. El panel admin lo
 // reescribe directamente cuando se guardan estadisticas o metadatos.
-// Retratos: assets/player-portraits/{id}.png.
+// Retratos: assets/player-portraits/{id}.webp.
 
 export const PLAYERS = [
   {
