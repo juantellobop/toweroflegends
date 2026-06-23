@@ -1466,7 +1466,7 @@ select {
    más compacta que el flex anterior. .scout-team-meta se vuelve transparente
    para que sus dos hijos sean columnas del hero (en móvil vuelve a ser grid). */
 .scouting-screen .scout-hero{
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
 }
 .scouting-screen .scout-team-meta{
   justify-content: center;
@@ -1511,20 +1511,6 @@ select {
 .result-screen { position: relative; overflow: hidden; }
 .final-score { font-family: var(--font-rounded); font-variant-numeric: tabular-nums; }
 .gameover-screen .big-num { font-family: var(--font-rounded); }
-
-/* === Responsive === */
-@media (max-width: 767px) {
-  .build-body { grid-template-columns: 1fr; }
-  .logo h1 { font-size: 34px; }
-  .card { width: 150px; }
-  .pitch-slot .card, .pitch-slot.empty, .bench-item .card { width: 132px; }
-  .final-score { font-size: 48px; }
-  .build-head .primary { margin-left: 0; width: 100%; }
-  .match-pitch { max-height: 48vh; }
-  .scout-hero { padding: 1px; }
-  .scout-hero .large-title{font-size: 1.2rem;padding: 6px; margin: 0}
-  .scout-ratings { gap: var(--space-2); }
-}
 
 /* ============================================================= *
  *  Pixelart Premium arcade redesign                             *
@@ -6064,4 +6050,18 @@ button.primary:active:not(:disabled),
   border: 1px solid color-mix(in srgb, var(--shiny) 55%, transparent);
   border-radius: 10px; background: color-mix(in srgb, var(--shiny) 12%, transparent);
   color: var(--text, #fff); font-size: .9rem; line-height: 1.35; text-align: center;
+}
+
+/* === Responsive === */
+@media (max-width: 767px) {
+  .build-body { grid-template-columns: 1fr; }
+  .logo h1 { font-size: 34px; }
+  .card { width: 150px; }
+  .pitch-slot .card, .pitch-slot.empty, .bench-item .card { width: 132px; }
+  .final-score { font-size: 48px; }
+  .build-head .primary { margin-left: 0; width: 100%; }
+  .match-pitch { max-height: 48vh; }
+  .scout-hero { padding: 1px; grid-template-columns: 1fr 1fr;}
+  .scout-hero .large-title{font-size: 1.2rem;padding: 6px; margin: 0}
+  .scout-ratings { gap: var(--space-2); }
 }
