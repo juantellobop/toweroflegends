@@ -3112,8 +3112,10 @@ select {
   grid-column: 1 / -1;
   max-width: 100%;
   white-space: normal;
-  line-height: 1.2;
+  line-height: 1.05;
   padding-right: 22px;
+  font-weight: 900;
+  text-shadow: 1px 1px 0 var(--arcade-blue-900);
   /* Dos líneas máximo, con recorte limpio. */
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -4951,7 +4953,6 @@ select {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
 }
 .player-modal[hidden] { display: none; }
 .player-modal-backdrop {
@@ -4984,11 +4985,12 @@ select {
    marino, cruz en SVG nítida y centrada. 44px = mínimo táctil de la app. */
 .player-modal-close {
   position: absolute;
-  top: -14px;
-  right: -14px;
+  top: 0px;
+  right: 0px;
   z-index: 2;
-  width: 44px;
-  height: 44px;
+  width: 24px;
+  height: 24px;
+  min-height: 0;
   display: grid;
   place-items: center;
   padding: 0;
@@ -5001,10 +5003,9 @@ select {
 }
 .player-modal-close svg {
   display: block;
-  width: 16px;
-  height: 16px;
+  width: 9px;
+  height: 9px;
 }
-.player-modal-close:hover { transform: scale(1.08); }
 
 @media (prefers-reduced-motion: reduce) {
   .player-modal-backdrop, .player-modal-card { animation: none; }

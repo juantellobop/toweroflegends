@@ -947,7 +947,23 @@ function openPicker(root, state, line, slotIndex, handlers) {
   picker.querySelectorAll('.tdl-card.clickable').forEach((node) => {
     node.addEventListener('click', () => {
       const player = state.squad.find((p) => p.uid === node.dataset.id);
-      if (player) handlers.onPlace(player, line, slotIndex); // re-render cierra el selector
+      if (player) {
+        handlers.onPlace(player, line, slotIndex); // re-render cierra el selector
+        scrollToField(root); // subir al campo para ver la ficha recién colocada
+      }
     });
+  });
+}
+
+// Tras colocar una carta desde el selector, el re-render ('refresh') conserva el
+// scroll en la posición del picker (abajo). Subimos suavemente al campo para que
+// se vea la ficha recién ubicada. requestAnimationFrame: el #field es un nodo
+// nuevo del re-render; esperamos a que el layout esté calculado antes del scroll
+// suave (ease-in-out nativo del navegador). Respeta prefers-reduced-motion.
+function scrollToField(root) {
+  const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  requestAnimationFrame(() => {
+    const field = root.querySelector('#field');
+    field?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
   });
 }
