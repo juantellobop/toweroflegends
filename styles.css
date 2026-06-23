@@ -1466,7 +1466,7 @@ select {
    más compacta que el flex anterior. .scout-team-meta se vuelve transparente
    para que sus dos hijos sean columnas del hero (en móvil vuelve a ser grid). */
 .scouting-screen .scout-hero{
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
 }
 .scouting-screen .scout-team-meta{
   justify-content: center;
@@ -1484,7 +1484,7 @@ select {
 .scout-eyebrow .scout-kicker { margin: 0; }
 .scout-kicker { margin: var(--space-3) 0 0; color: var(--label-secondary); font-size: var(--t-caption-1); text-transform: uppercase; letter-spacing: .8px; }
 .scouting-screen .section-title { text-align: center; }
-.scout-strength { display: flex; flex-direction: column; align-items: center; padding: var(--space-3); min-width: 82px; border-radius: var(--radius-m); background: rgba(0,0,0,.22); color: #fff; }
+.scout-strength { display: flex; flex-direction: column; align-items: center; color: #fff; }
 .scout-strength span { font-size: var(--t-caption-2); text-transform: uppercase; }
 .scout-strength b { font-family: var(--font-rounded); font-size: var(--t-title-1); }
 /* Con DT del rival, ratings y carta del DT comparten fila (igual que el tablero):
@@ -1521,7 +1521,8 @@ select {
   .final-score { font-size: 48px; }
   .build-head .primary { margin-left: 0; width: 100%; }
   .match-pitch { max-height: 48vh; }
-  .scout-hero { padding: var(--space-4); }
+  .scout-hero { padding: 1px; }
+  .scout-hero .large-title{font-size: 1.2rem;padding: 6px; margin: 0}
   .scout-ratings { gap: var(--space-2); }
 }
 
@@ -3144,19 +3145,9 @@ select {
   color: var(--arcade-yellow);
 }
 
-.scout-team-card {
-  display: grid;
-  place-items: center;
-  gap: 8px;
-  min-width: 92px;
-  padding: 10px;
-  background: rgba(7,20,89,.78);
-  border: 2px solid rgba(255,255,255,.8);
-}
-
 .scout-team-card img {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   image-rendering: pixelated;
 }
 
@@ -3165,12 +3156,6 @@ select {
   height: 44px;
   border: 2px solid #fff;
   box-shadow: 0 0 0 3px var(--arcade-blue-900);
-}
-
-.scout-strength {
-  border-radius: 0;
-  background: var(--arcade-blue-900);
-  border: 2px solid var(--arcade-yellow);
 }
 
 .scout-strength span,
@@ -5466,8 +5451,8 @@ button.primary:active:not(:disabled),
   }
 
   .team-select-screen .field[data-formation] {
-    width: calc(100% + 16px);
-    margin-inline: -8px;
+    width: 100%;
+    margin-inline: 0px;
     height: min(calc((100vw - 20px) * 1.32), calc(100svh - 225px), 505px);
     min-height: 450px;
     aspect-ratio: auto;
@@ -5668,13 +5653,8 @@ button.primary:active:not(:disabled),
     height: 44px;
   }
 
-  .scout-team-meta .scout-strength {
-    min-width: 92px;
-    padding: 7px 10px;
-  }
-
   .scout-team-meta .scout-strength b {
-    font-size: 1.45rem;
+    font-size: 1.2rem;
   }
 
   .scouting-screen .scout-ratings {
