@@ -935,6 +935,110 @@
       }
     },
     {
+      "id": "a240f802-ff9a-45cb-bd71-b48f58fd7f26",
+      "teamName": "Leyendas",
+      "nation": "River Plate",
+      "floor": 9,
+      "createdAt": "2026-06-23T21:01:33.667Z",
+      "runId": "3ea0c319-81fe-4fef-a228-41cd7c469690",
+      "lineup": [
+        {
+          "name": "Maarten Stekelenburg",
+          "position": "GK",
+          "line": "GK",
+          "ovr": 88,
+          "rarity": "epic",
+          "slot": 0
+        },
+        {
+          "name": "Kyle Walker",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 85,
+          "rarity": "epic",
+          "slot": 1
+        },
+        {
+          "name": "Sergei Ignashevich",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 68,
+          "rarity": "common",
+          "slot": 3
+        },
+        {
+          "name": "Darío Verón",
+          "position": "DEF",
+          "line": "DEF",
+          "ovr": 67,
+          "rarity": "common",
+          "slot": 4
+        },
+        {
+          "name": "Karlheinz Förster",
+          "position": "DEF",
+          "line": "MID",
+          "ovr": 94,
+          "rarity": "legend",
+          "slot": 0
+        },
+        {
+          "name": "Kevin-Prince Boateng",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 68,
+          "rarity": "common",
+          "slot": 2
+        },
+        {
+          "name": "Celso Borges",
+          "position": "MID",
+          "line": "MID",
+          "ovr": 68,
+          "rarity": "common",
+          "slot": 3,
+          "expelled": true
+        },
+        {
+          "name": "Ronaldinho",
+          "position": "FWD",
+          "line": "MID",
+          "ovr": 96,
+          "rarity": "legend",
+          "slot": 7
+        },
+        {
+          "name": "Juan Cuadrado",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 74,
+          "rarity": "common",
+          "slot": 0
+        },
+        {
+          "name": "Brian McBride",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 68,
+          "rarity": "common",
+          "slot": 2
+        },
+        {
+          "name": "Christian Bolaños",
+          "position": "FWD",
+          "line": "FWD",
+          "ovr": 67,
+          "rarity": "common",
+          "slot": 4
+        }
+      ],
+      "manager": {
+        "id": "manager_caruso_lombardi",
+        "name": "Caruso Lombardi",
+        "nation": "Argentina"
+      }
+    },
+    {
       "id": "7d9593a1-35d2-45ec-bc8e-3e428c3dc06c",
       "teamName": "Leyendas",
       "nation": "River Plate",
@@ -1770,87 +1874,6 @@
         "name": "Oleh Blojín",
         "nation": "URSS"
       }
-    },
-    {
-      "id": "f0a9c4c2-c8b1-4617-9348-5f910e9e52b0",
-      "teamName": "Leyendas",
-      "nation": "River Plate",
-      "floor": 5,
-      "createdAt": "2026-06-13T17:11:59.545Z",
-      "runId": "6302fa7c-7abc-4ce4-a066-ec788d7b2937",
-      "formation": "4-3-3",
-      "lineup": [
-        {
-          "name": "Tony Sylva",
-          "position": "GK",
-          "line": "GK",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Per Mertesacker",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 88,
-          "rarity": "epic"
-        },
-        {
-          "name": "Denzel Dumfries",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 82,
-          "rarity": "rare"
-        },
-        {
-          "name": "Tony Sanneh",
-          "position": "DEF",
-          "line": "DEF",
-          "ovr": 67,
-          "rarity": "common"
-        },
-        {
-          "name": "Morten Wieghorst",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 77,
-          "rarity": "rare"
-        },
-        {
-          "name": "Claudio Reyna",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 69,
-          "rarity": "common"
-        },
-        {
-          "name": "Kevin-Prince Boateng",
-          "position": "MID",
-          "line": "MID",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Viktor Claesson",
-          "position": "MID",
-          "line": "FWD",
-          "ovr": 67,
-          "rarity": "common"
-        },
-        {
-          "name": "Marco Ureña",
-          "position": "FWD",
-          "line": "FWD",
-          "ovr": 68,
-          "rarity": "common"
-        },
-        {
-          "name": "Celso Borges",
-          "position": "MID",
-          "line": "FWD",
-          "ovr": 68,
-          "rarity": "common"
-        }
-      ]
     }
   ]
 }
