@@ -1,6 +1,6 @@
 {
   "name": "torre-de-leyendas",
-  "version": "0.13.12",
+  "version": "0.13.13",
   "description": "Roguelike de fútbol: escala una torre infinita armando tu selección con sobres de cartas.",
   "type": "module",
   "scripts": {

@@ -1988,8 +1988,6 @@ select {
 
 .lineup-modal-panel {
   display: grid;
-  gap: 14px;
-  padding: 16px;
   color: #fff;
   text-align: left;
   border-color: var(--arcade-yellow);
@@ -2000,6 +1998,7 @@ select {
   align-items: center;
   gap: 12px;
   font-family: var(--font-pixel);
+  padding: 16px;
 }
 
 .lineup-modal-head div {
