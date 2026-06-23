@@ -6061,7 +6061,7 @@ button.primary:active:not(:disabled),
   .final-score { font-size: 48px; }
   .build-head .primary { margin-left: 0; width: 100%; }
   .match-pitch { max-height: 48vh; }
-  .scouting-screen .scout-hero{ { padding: 1px; grid-template-columns: 1fr 1fr;}
+  .scouting-screen .scout-hero { padding: 1px; grid-template-columns: 1fr 1fr;}
   .scout-hero .large-title{font-size: 1.2rem;padding: 6px; margin: 0}
   .scout-ratings { gap: var(--space-2); }
 }
