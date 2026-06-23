@@ -71,14 +71,14 @@ body {
 .app-footer {
   text-align: center;
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--t-caption-2);
   padding: 10px;
   border-top: 1px solid var(--line);
   opacity: 0.7;
   display: none;
 }
 
-h1, h2, h3, h4 { margin: 0 0 8px; }
+h1, h2, h3, h4 { margin: 0 0 var(--space-2); }
 .screen {
   position: relative;
   transform-origin: 50% 48%;
@@ -128,7 +128,7 @@ button {
   font: inherit;
   cursor: pointer;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-s);
   padding: 10px 18px;
   background: var(--panel2);
   color: var(--text);
@@ -151,6 +151,12 @@ textarea:focus-visible,
   outline: 3px solid var(--arcade-yellow, var(--accent));
   outline-offset: 4px;
 }
+/* Pulsación. La capa arcade ANULA este transform (transform:none !important) más
+   abajo, en el bloque button:active/.is-pressing (busca "Reset de pulsación"),
+   para que el botón fijo de la barra de acción no se convierta en bloque
+   contenedor de descendientes `position: fixed` (ver §1 .screen). Los dos
+   !important (este y el del reset) deben permanecer; el reset gana por ir DESPUÉS
+   en el archivo. El `filter` de abajo sobrevive al reset a propósito. */
 button.is-pressing:not(:disabled),
 .deal-card.is-pressing,
 .card.clickable.is-pressing {
@@ -169,13 +175,13 @@ button.ready { animation: pulse 1.2s infinite; }
   color: #1a1300;
   font-weight: 800;
   padding: 3px 12px;
-  border-radius: 999px;
-  font-size: 13px;
+  border-radius: var(--radius-pill);
+  font-size: var(--t-footnote);
   letter-spacing: 0.5px;
   text-align: center;
 }
-.hint { color: var(--muted); font-size: 13px; margin: 4px 0 0; }
-.empty-note { color: var(--muted); font-size: 13px; }
+.hint { color: var(--muted); font-size: var(--t-footnote); margin: 4px 0 0; }
+.empty-note { color: var(--muted); font-size: var(--t-footnote); }
 
 /* === Menú === */
 .menu-screen { text-align: center; padding-top: 6vh; }
@@ -227,7 +233,7 @@ select {
 
 .card-head { display: flex; align-items: center; gap: 8px; }
 .card-ovr { font-size: 26px; font-weight: 800; color: var(--accent); line-height: 1; }
-.card-pos { font-size: 12px; font-weight: 700; background: var(--bg2); padding: 2px 7px; border-radius: 6px; }
+.card-pos { font-size: var(--t-caption-1); font-weight: 700; background: var(--bg2); padding: 2px 7px; border-radius: 6px; }
 .card-rarity { margin-left: auto; font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); }
 .card-portrait {
   position: relative;
@@ -258,16 +264,16 @@ select {
   color: color-mix(in srgb, var(--brand) 72%, #fff);
   text-shadow: 0 2px 10px rgba(0,0,0,.45);
 }
-.card-name { font-weight: 700; font-size: 15px; margin: 8px 0 6px; }
-.card-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
-.chip { font-size: 10px; padding: 2px 7px; border-radius: 999px; background: var(--bg2); color: var(--muted); }
+.card-name { font-weight: 700; font-size: var(--t-subhead); margin: 8px 0 6px; }
+.card-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: var(--space-2); }
+.chip { font-size: 10px; padding: 2px 7px; border-radius: var(--radius-pill); background: var(--bg2); color: var(--muted); }
 .chip.trait { background: rgba(212,175,55,.18); color: var(--accent); }
 /* Sinergia ítem↔táctica: el ítem rinde más si el dibujo comparte su estilo. */
 .item-synergy { margin-top: 6px; }
 .chip.synergy { background: rgba(96,165,250,.16); color: var(--rare, #60a5fa);}
 
 .card-stats { display: flex; flex-direction: column; gap: 3px; }
-.stat { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+.stat { display: flex; align-items: center; gap: 6px; font-size: var(--t-caption-2); }
 .stat-label { width: 24px; color: var(--muted); }
 .stat-bar { flex: 1; height: 5px; background: var(--bg2); border-radius: 3px; overflow: hidden; }
 .stat-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--accent2), var(--green)); }
@@ -276,7 +282,7 @@ select {
 /* Carta de objeto */
 .item-card { width: 200px; }
 .item-type { margin-left: auto; font-size: 10px; text-transform: uppercase; color: var(--muted); letter-spacing: .5px; }
-.item-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.item-desc { font-size: var(--t-caption-1); color: var(--muted); line-height: 1.4; }
 
 /* === Pantalla de armar equipo === */
 .build-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -392,7 +398,7 @@ select {
 .final-score { font-size: 64px; font-weight: 800; }
 .vs-line { color: var(--muted); margin-bottom: 18px; }
 .reward-box { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin: 0 auto 18px; max-width: 460px; }
-.tier-tag { display: inline-block; font-weight: 800; padding: 4px 14px; border-radius: 999px; margin-bottom: 8px; }
+.tier-tag { display: inline-block; font-weight: 800; padding: 4px 14px; border-radius: var(--radius-pill); margin-bottom: 8px; }
 .tier-goleada { background: var(--legend); color: #2a1c00; }
 .tier-amplia { background: var(--epic); color: #fff; }
 .tier-ajustada { background: var(--rare); color: #fff; }
@@ -405,12 +411,12 @@ select {
 .gameover-screen { text-align: center; max-width: 680px; margin: 0 auto; }
 .final-level { display: flex; flex-direction: column; align-items: center; margin: 10px 0; }
 .big-num { font-size: 80px; font-weight: 900; color: var(--accent); line-height: 1; }
-.big-label { color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-size: 13px; }
+.big-label { color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-size: var(--t-footnote); }
 .record { font-size: 20px; font-weight: 700; color: var(--green); margin: 6px 0; }
 .record.muted { color: var(--muted); font-weight: 400; font-size: 14px; }
 .go-stat { color: var(--muted); }
 .path { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 4px; max-width: 420px; margin: 0 auto 18px; }
-.path-item { display: grid; grid-template-columns: 60px 60px 1fr; gap: 8px; padding: 7px 12px; border-radius: 8px; background: var(--panel); font-size: 13px; text-align: left; }
+.path-item { display: grid; grid-template-columns: 60px 60px 1fr; gap: 8px; padding: 7px 12px; border-radius: 8px; background: var(--panel); font-size: var(--t-footnote); text-align: left; }
 .path-item.result-win { border-left: 3px solid var(--green); }
 .path-item.result-draw { border-left: 3px solid var(--muted); }
 .path-item.result-loss { border-left: 3px solid var(--red); }
@@ -418,7 +424,7 @@ select {
 .path-score { font-weight: 700; font-variant-numeric: tabular-nums; }
 .path-opp { color: var(--muted); }
 .squad-final { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 22px; }
-.squad-chip { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: var(--panel); }
+.squad-chip { font-size: var(--t-caption-1); padding: 4px 10px; border-radius: var(--radius-pill); background: var(--panel); }
 .squad-chip.rarity-rare { border-left-color: var(--rare); }
 .squad-chip.rarity-epic { border-left-color: var(--epic); }
 .squad-chip.rarity-legend { border-left-color: var(--legend); }
@@ -680,6 +686,8 @@ select {
 .ctl:disabled { opacity: 0.4; }
 .ctl.primary-ctl { background: var(--accent); color: #fff; }
 .ctl.primary-ctl:disabled { background: var(--fill-secondary); color: var(--label-secondary); }
+/* Hay DOS botones id="continue" (menú y partido); este pulso .ready solo aplica
+   al de partido (matchScreen). Si se migra #continue a clase, apuntar a ese. */
 #continue.ready { animation: ctlpulse 1.4s var(--ease-standard) infinite; }
 @keyframes ctlpulse { 0%,100% { box-shadow: 0 0 0 0 rgba(10,132,255,.45);} 50% { box-shadow: 0 0 0 8px rgba(10,132,255,0);} }
 
@@ -807,7 +815,7 @@ select {
   /* En flujo, justo debajo de las cartas (no fijada abajo del todo). */
   display: flex; align-items: center; gap: var(--space-4);
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
-  border-radius: var(--radius-pill); z-index: 20; max-width: 92vw;
+  border-radius: var(--radius-pill); max-width: 92vw;
 }
 .confirm-label { font-weight: 600; font-size: var(--t-callout); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -1142,7 +1150,7 @@ select {
 .radar-items { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-top: 6px; }
 .ri-chip {
   font-size: var(--t-caption-2); font-weight: 700; line-height: 1;
-  padding: 2px 6px; border-radius: 999px;
+  padding: 2px 6px; border-radius: var(--radius-pill);
   background: var(--fill-secondary);
 }
 .ri-chip.up { color: var(--arcade-green, #6cf08a); }
@@ -1229,10 +1237,10 @@ select {
   display: flex; flex-direction: column; gap: 5px;
 }
 .manager-glass .manager-card .card-name {
-  margin: 0; text-align: left; font-size: 13px; line-height: 1.15;
+  margin: 0; text-align: left; font-size: var(--t-footnote); line-height: 1.15;
 }
 .manager-glass .manager-card .card-meta { margin: 0; gap: 4px; }
-.manager-glass .manager-card .card-meta .chip { font-size: 11px; padding: 1px 5px; }
+.manager-glass .manager-card .card-meta .chip { font-size: var(--t-caption-2); padding: 1px 5px; }
 .manager-glass .manager-card .chip.nation .flag-img { width: 14px; height: 9px; }
 .manager-glass .manager-card .manager-mods {
   grid-template-columns: 1fr 1fr 1fr; gap: 3px; width: 100%; margin: 2px 0 0;
@@ -2375,7 +2383,7 @@ select {
 
 .item-card {
   width: 260px;
-  min-height: 320px;
+  min-height: 216px;
   padding: 24px 22px;
   display: grid;
   grid-template-rows: auto auto 1fr;
@@ -2398,7 +2406,7 @@ select {
 
 .item-card .card-rarity,
 .item-card .item-type {
-  font-size: 13px;
+  font-size: var(--t-footnote);
   line-height: 1.1;
   text-align: left;
   text-shadow: 2px 2px 0 var(--arcade-blue-900);
@@ -2422,10 +2430,6 @@ select {
   color: rgba(255,255,255,.86);
   font-size: 17px;
   line-height: 1.45;
-}
-
-.item-card {
-  min-height: 216px;
 }
 
 .item-desc {
@@ -3608,7 +3612,7 @@ select {
 }
 
 .reward-box > img {
-  width: 100%;
+  display: block;
   max-height: 112px;
   object-fit: cover;
   image-rendering: pixelated;
@@ -4340,7 +4344,7 @@ select {
   }
 
   .card-name {
-    font-size: 13px;
+    font-size: var(--t-footnote);
   }
 
   .match-controls {
@@ -4426,7 +4430,7 @@ select {
   flex-direction: column;
   gap: 12px;
   padding: 14px 16px;
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
   text-align: left;
 }
 .ti-head { display: flex; align-items: stretch; gap: 12px; }
@@ -4462,7 +4466,7 @@ select {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 13px;
+  font-size: var(--t-footnote);
   color: var(--muted);
 }
 .team-identity input[type="text"] {
@@ -4500,7 +4504,7 @@ select {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 30%, transparent);
 }
 .ti-label {
-  font-size: 11px;
+  font-size: var(--t-caption-2);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .8px;
@@ -4597,7 +4601,7 @@ select {
   border: 1px solid color-mix(in srgb, var(--tone, #cbd5e1) 70%, rgba(255,255,255,.3));
   box-shadow: 0 0 12px -2px var(--tone, transparent);
   color: #fff;
-  font-size: 11px;
+  font-size: var(--t-caption-2);
   font-weight: 900;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -5149,6 +5153,12 @@ select {
   display: none !important;
 }
 
+/* Reset de pulsación (recíproco del transform de la pulsación, más arriba). Anula
+   el transform en :active/.is-pressing para que el botón fijo de la barra de
+   acción NUNCA reciba transform: un ancestro/elemento fixed con transform se
+   vuelve bloque contenedor y descoloca la barra (ver §1 .screen). DEBE quedar
+   DESPUÉS en el archivo para ganar por cascada; no reordenar ni quitar el
+   !important. */
 button:hover:not(:disabled),
 button:active:not(:disabled),
 button.is-pressing:not(:disabled),
@@ -5242,7 +5252,7 @@ button.primary:active:not(:disabled),
 
 .field-chip .chip-name {
   width: calc(100% - 4px);
-  max-width: none;U
+  max-width: none;
   padding: 3px 0px;
   color: #fff;
   font-weight: 900;
@@ -5286,7 +5296,7 @@ button.primary:active:not(:disabled),
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .bench-target {
@@ -5415,7 +5425,7 @@ button.primary:active:not(:disabled),
   .team-field-panel .team-panel-head {
     gap: 8px;
     margin-bottom: 8px;
-    display: grid !important;
+    display: grid;
     grid-template-columns: 1fr;
   }
 
@@ -6048,7 +6058,7 @@ button.primary:active:not(:disabled),
 .pack-notice {
   margin: .35rem auto 0; max-width: 42rem; padding: .5rem .75rem;
   border: 1px solid color-mix(in srgb, var(--shiny) 55%, transparent);
-  border-radius: 10px; background: color-mix(in srgb, var(--shiny) 12%, transparent);
+  border-radius: var(--radius-s); background: color-mix(in srgb, var(--shiny) 12%, transparent);
   color: var(--text, #fff); font-size: .9rem; line-height: 1.35; text-align: center;
 }
 
