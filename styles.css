@@ -2024,12 +2024,12 @@ select {
   display: flex; align-items: center; gap: 8px; margin-left: auto;
 }
 .lineup-modal-manager-face {
-  width: 34px; height: 34px; border-radius: 8px; object-fit: cover;
+  width: 52px; height: 52px; object-fit: cover;
   image-rendering: pixelated; border: 1px solid var(--separator);
 }
 .lineup-modal-manager span { display: grid; gap: 1px; }
 .lineup-modal-manager small { font-size: 10px; text-transform: uppercase; letter-spacing: .4px; color: rgba(255,255,255,.6); }
-.lineup-modal-manager b { font-size: 13px; }
+.lineup-modal-manager b { font-size: 13px; color: white;}
 
 /* El tablero 3/4 no debe desbordar el alto del viewport: su ancho se limita
    también en función del alto disponible (ancho = alto * 0.75). */
