@@ -455,12 +455,12 @@ export const MANAGERS = [
     "name": "Luis de la Fuente",
     "nation": "España",
     "year": 2026,
-    "rarity": "rare",
+    "rarity": "legend",
     "style": "posesion",
     "mods": {
-      "attack": -2,
+      "attack": 0,
       "midfield": 4,
-      "defense": 0
+      "defense": 4
     }
   },
   {
