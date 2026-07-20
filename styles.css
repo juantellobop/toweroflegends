@@ -5130,10 +5130,7 @@ select {
 #app[data-route="result"][data-result="loss"]::before,
 #app[data-route="result"][data-result="draw"]::before,
 #app[data-route="gameover"]::before {
-  background-image:
-    linear-gradient(180deg, rgba(5,12,44,.82), rgba(3,6,22,.93)),
-    url('assets/ui/background.webp');
-  filter: grayscale(.45) brightness(.85);
+  filter: grayscale(.75);
 }
 
 .pixel-title-screen {
