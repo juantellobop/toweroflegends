@@ -587,21 +587,14 @@ export function isStarter(state, player) {
   return Boolean(starterLineFor(state, player));
 }
 
-// Aplica una plantilla: rellena el grid con la formación elegida y fija su estilo
-// por defecto (que el usuario puede cambiar luego con setStyle). La "formación"
-// queda como etiqueta; el grid se puede deformar libremente después.
+// Aplica una plantilla: rellena el grid con la formación elegida. La "formación"
+// queda como etiqueta; el grid se puede deformar libremente después. El estilo
+// lo dicta el DT activo; solo sin DT se hereda el del dibujo como provisional.
 export function setFormation(state, formation) {
   if (!FORMATIONS[formation]) return;
   state.formation = formation;
-  state.style = FORMATION_TYPE[formation] || state.style || 'posesion';
+  if (!state.manager) state.style = FORMATION_TYPE[formation] || state.style || 'posesion';
   autoFillStarting11(state);
-}
-
-// Cambia el estilo táctico (Posesión/Presión/Contra), elección libre del usuario
-// independiente de la formación. Alimenta las sinergias de química, objetos y DT.
-export function setStyle(state, style) {
-  if (!MANAGER_STYLES.includes(style)) return;
-  state.style = style;
 }
 
 // === Ratings y química en vivo (para la pantalla de armar equipo) ===
@@ -923,9 +916,12 @@ export function rollManagerPack(state) {
 }
 
 // El jugador elige un DT del sobre: reemplaza al anterior (un solo DT activo).
+// El estilo del equipo pasa a ser el del DT elegido: no hay selector manual,
+// cambiar de DT es la única forma de cambiar de estilo.
 export function chooseManagerCard(state, template) {
   if (!template) return null;
   state.manager = { ...template, uid: template.uid || freshId(template.id) };
+  if (MANAGER_STYLES.includes(state.manager.style)) state.style = state.manager.style;
   state.managerChoices = null;
   state.pendingManagerPack = false;
   return state.manager;
@@ -1164,7 +1160,8 @@ export function createRun(opts = {}) {
     lives: livesMax,
     livesMax,
     formation,
-    // Estilo táctico inicial: el del dibujo de arranque; el usuario lo cambia libre.
+    // Estilo táctico inicial: el del dibujo de arranque, provisional hasta que
+    // el jugador elija su primer DT (el estilo siempre lo dicta el DT activo).
     style: FORMATION_TYPE[formation] || 'posesion',
     squad: [],
     roster,
@@ -1334,7 +1331,11 @@ export function rehydrateRun(data) {
     }
     // La etiqueta real sale del dibujo: plantilla coincidente o "Personalizada".
     const formation = detectFormation(starting11);
-    const style = data.style || FORMATION_TYPE[baseFormation] || 'posesion';
+    // El estilo lo dicta el DT: se rederiva al cargar (migra saves donde el
+    // estilo era elección libre del usuario). Sin DT, el del dibujo.
+    const style = (data.manager?.style && MANAGER_STYLES.includes(data.manager.style))
+      ? data.manager.style
+      : (data.style || FORMATION_TYPE[baseFormation] || 'posesion');
 
     return {
       runId: data.runId || freshRunId(),

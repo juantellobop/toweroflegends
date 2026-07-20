@@ -8,7 +8,7 @@ import {
   rollManagerPack, chooseManagerCard, discardManagerPack,
   rollCorruptoPack, chooseCorruptoCard, rollShinyPack, chooseShinyCard,
   playMatch, applyResult, advanceLevel, prepareOpponent, retryLevel,
-  togglePlayerInLineup, placePlayerInLineup, setFormation, setStyle, assignLineToSlots,
+  togglePlayerInLineup, placePlayerInLineup, setFormation, assignLineToSlots,
   serializeRun, rehydrateRun,
 } from './state/run.js';
 import { acquireRunLock, releaseRunLock } from './state/sesion.js';
@@ -608,7 +608,6 @@ function render(navHint = 'auto') {
           onToggle: (player) => { togglePlayerInLineup(state, player); render('refresh'); },
           onPlace: (player, line, slotIndex) => { placePlayerInLineup(state, player, line, slotIndex); render('refresh'); },
           onSetFormation: (f) => { setFormation(state, f); render('refresh'); },
-          onSetStyle: (s) => { setStyle(state, s); render('refresh'); },
           onScout: () => { state.phase = 'scouting'; render('back'); },
           onPlay: () => {
             // El partido se simula aquí (fija state.lastMatch y el rival) y se

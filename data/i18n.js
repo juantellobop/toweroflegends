@@ -559,6 +559,7 @@ const DICTIONARIES = {
     ratings: { attack: 'ATA', midfield: 'MED', defense: 'DEF', gk: 'POR', physical: 'FÍS' },
     tactics: {
       style: 'Estilo',
+      styleFromManager: 'Lo marca tu director técnico',
       custom: 'Personalizada',
     },
     match: {
@@ -1237,6 +1238,7 @@ const DICTIONARIES = {
     ratings: { attack: 'ATT', midfield: 'MID', defense: 'DEF', gk: 'GK', physical: 'PHY' },
     tactics: {
       style: 'Style',
+      styleFromManager: 'Set by your manager',
       custom: 'Custom',
     },
     match: {

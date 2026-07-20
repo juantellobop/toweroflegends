@@ -458,9 +458,9 @@ export const MANAGERS = [
     "rarity": "legend",
     "style": "posesion",
     "mods": {
-      "attack": 0,
-      "midfield": 4,
-      "defense": 4
+      "attack": 1,
+      "midfield": 6,
+      "defense": 1
     }
   },
   {

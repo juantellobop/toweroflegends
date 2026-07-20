@@ -16,7 +16,7 @@ import { teamRadarHTML } from './radar.js';
 import { playerOVR } from '../engine/ovr.js';
 import { chemNation, managerNationStatBonus } from '../engine/chemistry.js';
 import { chemTeamBonus } from '../engine/items.js';
-import { FORMATIONS, LINES, geometricLinks, formationLineSlots, MANAGER_STYLES, CUSTOM_FORMATION, isCorrupto } from '../data/config.js';
+import { FORMATIONS, LINES, geometricLinks, formationLineSlots, CUSTOM_FORMATION, isCorrupto } from '../data/config.js';
 import { countTo } from '../match/feedback.js';
 import { playerInitials, playerSurname, portraitPathForPlayer, artworkPathForItem } from '../data/playerAssets.js';
 import { flagSrcForNation } from '../data/flags.js';
@@ -152,9 +152,8 @@ function fieldNodes(positions, manager) {
 }
 
 // Controles del tablero: selector de PLANTILLA (formación que rellena el grid),
-// selector de ESTILO (Posesión / Presión / Contra — elección libre del usuario,
-// alimenta sinergias de química/objetos/DT) y la Química total. Ambos dropdowns
-// reutilizan el estilo de .bench-filter.
+// el ESTILO del equipo (Posesión / Presión / Contra — lo dicta el DT activo, no
+// es editable; alimenta sinergias de química/objetos/DT) y la Química total.
 function tacticControls(state) {
   const chemTotal = liveChemistry(state).total;
   // Si el dibujo no coincide con ninguna plantilla, se muestra "Personalizada"
@@ -165,12 +164,14 @@ function tacticControls(state) {
     : '';
   const formationOptions = customOption + Object.keys(FORMATIONS)
     .map((f) => `<option value="${f}"${f === state.formation ? ' selected' : ''}>${f}</option>`).join('');
-  const styleOptions = MANAGER_STYLES
-    .map((s) => `<option value="${s}"${s === state.style ? ' selected' : ''}>${esc(t(`admin.tactical.${s}`))}</option>`).join('');
+  const styleTip = state.manager ? esc(t('tactics.styleFromManager')) : '';
   return `
     <div class="tactic-controls">
       <select id="formationSelect" class="bench-filter formation-select" aria-label="${esc(t('build.formationAria'))}">${formationOptions}</select>
-      <select id="styleSelect" class="bench-filter style-select" aria-label="${esc(t('tactics.style'))}">${styleOptions}</select>
+      <div class="chem-pill tactic-pill" ${styleTip ? `title="${styleTip}"` : ''}>
+        <span>${esc(t('tactics.style'))}</span>
+        <b>${esc(t(`admin.tactical.${state.style}`))}</b>
+      </div>
       <div class="chem-pill">
         <span>${t('build.chemistry')}</span>
         <b class="tabular" id="chemTotal" data-val="${chemTotal}">0</b>
@@ -395,11 +396,6 @@ export function renderBuild(root, state, handlers) {
   // === Plantilla (dropdown de formación) ===
   root.querySelector('#formationSelect')?.addEventListener('change', (e) => {
     handlers.onSetFormation(e.target.value);
-  });
-
-  // === Estilo táctico (dropdown libre) ===
-  root.querySelector('#styleSelect')?.addEventListener('change', (e) => {
-    handlers.onSetStyle(e.target.value);
   });
 
   // === Fichas del campo: filled → quitar; empty → abrir selector ===

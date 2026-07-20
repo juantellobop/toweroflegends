@@ -211,9 +211,11 @@ function applyChemistry(ratings, starting11, style, items = [], manager = null) 
 }
 
 // Director técnico: aplica sus modificadores porcentuales a ataque/medio/defensa
-// (el portero no se toca). Con sinergia —el estilo del DT coincide con el ESTILO
-// elegido del equipo— sus modificadores positivos se amplifican (MANAGER_SYNERGY_MULT)
-// y sus costes (negativos) se anulan, igual que la sinergia táctica de los objetos.
+// (el portero no se toca). Con sinergia —el estilo del DT coincide con el estilo
+// del equipo— sus modificadores positivos se amplifican (MANAGER_SYNERGY_MULT) y
+// sus costes (negativos) se anulan, igual que la sinergia táctica de los objetos.
+// Para el jugador el estilo LO DICTA su DT, así que su sinergia es siempre activa;
+// en rivales (estilo del dibujo) solo si su DT casa con su formación.
 function applyManagerModifiers(ratings, manager, style) {
   if (!manager || !manager.mods) return ratings;
   const synergy = Boolean(style && manager.style === style);
@@ -227,9 +229,10 @@ function applyManagerModifiers(ratings, manager, style) {
   return out;
 }
 
-// Estilo táctico efectivo del equipo: el elegido por el usuario (team.style) o, en
-// su defecto, el del dibujo (rivales históricos: FORMATION_TYPE de su formación).
-// Alimenta las sinergias de química, objetos y DT. Sin modificadores de formación.
+// Estilo táctico efectivo del equipo: el de team.style (para el jugador lo fija
+// su DT activo en state/run.js) o, en su defecto, el del dibujo (rivales
+// históricos: FORMATION_TYPE de su formación). Alimenta las sinergias de
+// química, objetos y DT. Sin modificadores de formación.
 function teamStyle(team) {
   return team.style || formationType(team.formation) || null;
 }

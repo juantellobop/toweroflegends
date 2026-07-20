@@ -1304,6 +1304,7 @@ select {
   padding: 1px 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.35);
 }
 .item-stack-note { margin-top: 4px; font-size: var(--t-caption-2); color: var(--label-secondary); font-style: italic; }
+/* Píldora de ESTILO del tablero (solo lectura: el estilo lo dicta el DT). */
 .tactic-pill b { color: var(--label-primary); font-size: var(--t-callout); }
 
 .opponent-brief {
