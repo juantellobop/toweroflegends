@@ -7,6 +7,7 @@
 
 import { esc } from './dom.js';
 import { playerOVR } from '../engine/ovr.js';
+import { managerNationStatBonus } from '../engine/chemistry.js';
 import { playerInitials, playerSurname } from '../data/playerAssets.js';
 import { PITCH_MARKINGS } from './pitchArt.js';
 
@@ -109,21 +110,24 @@ export function layoutInformative(slots) {
 }
 
 // OVR a mostrar: el precalculado (onces rivales) o el del motor (cartas propias).
-export function displayOVR(player) {
-  return Number.isFinite(player.ovr) ? player.ovr : playerOVR(player);
+// Con `manager` (DT connacional) el OVR de las cartas propias sube y se tiñe.
+export function displayOVR(player, manager = null) {
+  return Number.isFinite(player.ovr) ? player.ovr : playerOVR(player, manager);
 }
 
 // Carta estática de jugador, con el esquema exacto del tablero táctico pero
 // sin edición. `interactive` la convierte en botón (abre la ficha completa).
-export function staticChipHTML(player, { portraitSrc, flagSrc, chipClass = '', interactive = false, ariaLabel = '', loading = 'eager' } = {}) {
+// `manager` aplica el boost del DT connacional al OVR (solo cartas propias).
+export function staticChipHTML(player, { portraitSrc, flagSrc, chipClass = '', interactive = false, ariaLabel = '', loading = 'eager', manager = null } = {}) {
   const rarity = player.rarity ? ` rarity-${player.rarity}` : '';
+  const boosted = !Number.isFinite(player.ovr) && managerNationStatBonus(player, manager) > 0;
   const inner = `
       <span class="chip-face" aria-hidden="true">
         <img src="${esc(portraitSrc)}" alt="" draggable="false" loading="${loading}" decoding="async" data-hide-on-error="true" />
         <span>${esc(playerInitials(player.name))}</span>
         ${flagSrc ? `<img class="chip-flag" src="${esc(flagSrc)}" alt="" draggable="false" loading="${loading}" decoding="async" />` : ''}
       </span>
-      <span class="chip-ovr">${displayOVR(player)}</span>
+      <span class="chip-ovr${boosted ? ' chip-ovr--mgr' : ''}">${displayOVR(player, manager)}</span>
       <span class="chip-name" title="${esc(player.name)}">${esc(playerSurname(player.name))}</span>`;
   if (interactive) {
     return `<button class="field-chip filled${rarity} ${chipClass}" data-uid="${esc(player.uid || '')}"

@@ -235,7 +235,10 @@ function managerHeader(state) {
 }
 
 function bench(state) {
-  const subs = state.squad.filter((p) => !isStarter(state, p)).sort((a, b) => playerOVR(b) - playerOVR(a));
+  // Orden por OVR mostrado: con el boost del DT connacional incluido, para que
+  // la tira no quede desordenada respecto a los números que ve el jugador.
+  const subs = state.squad.filter((p) => !isStarter(state, p))
+    .sort((a, b) => playerOVR(b, state.manager) - playerOVR(a, state.manager));
   if (!subs.length) return `<p class="empty-note">${t('build.noSubs')}</p>`;
   return `<div class="bench-strip">
     ${subs.map((p) => {
@@ -912,7 +915,7 @@ function openPicker(root, state, line, slotIndex, handlers) {
   const label = slot?.role === 'ENG' ? t('card.line.ENG') : LINE_LABEL[line];
   const candidates = state.squad
     .filter((p) => !isStarter(state, p) && canPlacePlayerInSlot(state, p, line, slotIndex))
-    .sort((a, b) => playerOVR(b) - playerOVR(a));
+    .sort((a, b) => playerOVR(b, state.manager) - playerOVR(a, state.manager));
 
   if (!candidates.length) {
     picker.innerHTML = `<p class="empty-note">${esc(t('build.noCandidates', { label }))}</p>

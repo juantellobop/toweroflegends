@@ -12,7 +12,8 @@ import { CONFIG, FORMATIONS, LINES, CUSTOM_FORMATION } from '../data/config.js';
 import { assignLineToSlots } from '../state/run.js';
 import { portraitPathForPlayer } from '../data/playerAssets.js';
 import { lineupFieldHTML, positionSlots, staticChipHTML } from './lineupBoard.js';
-import { POSITION_LABEL, managerCardHTML } from './cards.js';
+import { POSITION_LABEL } from './cards.js';
+import { managerShowcaseHTML } from './showcaseCard.js';
 
 function localizeHistoryOpponent(value) {
   const text = String(value || '');
@@ -63,6 +64,9 @@ function lastTacticHTML(state) {
   const chipClassFor = (uid) => expelled.has(uid)
     ? 'scout-chip chip-expelled'
     : injured.has(uid) ? 'scout-chip chip-injured' : 'scout-chip';
+  // DT que dirigió este partido (snapshot del lastMatch): su carta va junto al
+  // once y su boost connacional tiñe el OVR de las fichas, igual que en el tablero.
+  const manager = m?.manager || state.manager;
   const field = lineupFieldHTML({
     formation: state.formation,
     slots,
@@ -71,17 +75,16 @@ function lastTacticHTML(state) {
       portraitSrc: portraitPathForPlayer(slot.player),
       flagSrc: flagSrcForNation(slot.player.nation),
       chipClass: chipClassFor(slot.player.uid),
+      manager,
       // Tablero del último partido en el gameover: va al fondo del scroll, así
       // que sus 11 retratos + banderas se cargan al entrar en viewport, no eager.
       loading: 'lazy',
     }),
   });
-  // DT que dirigió este partido (snapshot del lastMatch), junto al once.
-  const manager = m?.manager || state.manager;
   const managerHTML = manager
     ? `<div class="gameover-manager">
         <span class="gameover-manager-label">${t('result.manager')}</span>
-        ${managerCardHTML(manager)}
+        ${managerShowcaseHTML(manager)}
       </div>`
     : '';
   return `

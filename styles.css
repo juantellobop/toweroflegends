@@ -3813,7 +3813,8 @@ select {
   font-size: var(--t-caption-2); font-weight: 700; letter-spacing: .5px;
   text-transform: uppercase; color: var(--label-secondary);
 }
-.gameover-manager .manager-card { width: min(100%, 230px); }
+/* Carta escaparate del DT (.tdl-slot lleva la container query: basta el ancho). */
+.gameover-manager .tdl-slot { width: min(100%, 230px); }
 
 /* Carta del expulsado en la táctica: atenuada y con una tarjeta roja arriba a la
    derecha (la franja inferior ::after ya marca la rareza, así que la roja va en

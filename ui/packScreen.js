@@ -140,7 +140,7 @@ function squadReviewBody(state) {
   const starterUids = new Set(starters.map((p) => p.uid));
   const subs = state.squad
     .filter((p) => !starterUids.has(p.uid))
-    .sort((a, b) => playerOVR(b) - playerOVR(a));
+    .sort((a, b) => playerOVR(b, state.manager) - playerOVR(a, state.manager));
   const grid = (players) => `<div class="squad-review-grid">${players.map((p) => playerShowcaseHTML(p, { manager: state.manager })).join('')}</div>`;
   return `
     ${starters.length ? `<h3 class="squad-review-sub">${t('squadIntro.eleven')}</h3>${grid(starters)}` : ''}
