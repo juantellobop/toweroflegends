@@ -64,6 +64,17 @@ try {
   click(root.querySelector('#scout-continue'));
   console.log('6. Armar equipo:', show(), '| play activo:', !root.querySelector('#play')?.disabled, '| ratings:', root.querySelectorAll('.rating-row').length);
 
+  // Telaraña de química: una línea por arista (web estática + aristas con
+  // química por categoría con desfase --i; conteos exactos dependen del sorteo).
+  if (!root.querySelectorAll('.chem-link.web').length) errors.push('tablero sin telaraña base (.chem-link.web)');
+  if (root.querySelectorAll('.chem-link.strong, .chem-link.halo, .chem-link.core, .chem-link.flow').length) {
+    errors.push('clases legado de chem-link presentes (strong/halo/core/flow)');
+  }
+  for (const el of root.querySelectorAll('.chem-link.nation, .chem-link.era, .chem-link.boost')) {
+    if (el.style.getPropertyValue('--i') === '') { errors.push('enlace de química sin desfase --i'); break; }
+  }
+  if (!root.querySelector('.cl-swatch.nation')) errors.push('leyenda sin swatch de nación');
+
   // toggle un suplente dentro/fuera para probar el handler
   const sub = root.querySelector('.bench-item');
   if (sub) { click(sub); console.log('   (toggle suplente ok, pantalla:', show()+')'); }

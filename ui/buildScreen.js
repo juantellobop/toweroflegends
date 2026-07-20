@@ -91,23 +91,23 @@ function webLinks(positions, starting11) {
   return links;
 }
 
+// Telaraña de química: UNA línea por arista. Las aristas con química llevan el
+// color de su categoría y un latido de opacidad desfasado (--i, ver CSS); el
+// resto es la web tenue estática. Orden de apilado de abajo a arriba: web →
+// época (celeste) → boost (violeta, solo los que activa el Duodécimo) → nación
+// (dorado, SIEMPRE arriba). Sin filtros SVG: feGaussianBlur fallaba en
+// WebKit/iOS y dejaba enlaces sin pintar — líneas planas, robustas en todo
+// navegador.
 function fieldSVG(positions, starting11, boost = false) {
   const links = webLinks(positions, starting11);
-  const lineEl = (l, cls) => `<line x1="${l.x1}" y1="${l.y1}" x2="${l.x2}" y2="${l.y2}" class="chem-link ${cls}" />`;
-  // Glow neón SIN filtro SVG: el `feGaussianBlur`/`userSpaceOnUse` fallaba de
-  // forma intermitente en WebKit/iOS y dejaba los enlaces de color sin pintar
-  // (el dorado "no aparecía" en móvil). En su lugar, cada enlace con química se
-  // pinta como un HALO ancho translúcido + un trazo sólido encima (puro stroke,
-  // robusto en todo navegador). Orden de apilado de abajo a arriba: web tenue →
-  // época (celeste) → boost (violeta, solo los que activa el Duodécimo) → nación
-  // (dorado, SIEMPRE arriba). Dentro de cada capa, primero los halos y luego los
-  // trazos para que ningún halo tape un trazo de su misma capa.
-  const layer = (sel, cls) =>
-    sel.map((l) => lineEl(l, `halo ${cls}`)).join('') + sel.map((l) => lineEl(l, cls)).join('');
+  const lineEl = (l, cls, i) =>
+    `<line x1="${l.x1}" y1="${l.y1}" x2="${l.x2}" y2="${l.y2}" class="chem-link ${cls}"${i != null ? ` style="--i:${i}"` : ''} />`;
   const web = links.map((l) => lineEl(l, 'web')).join('');
+  let i = 0;
+  const layer = (sel, cls) => sel.map((l) => lineEl(l, cls, i++)).join('');
   const era = layer(links.filter((l) => l.era && !l.nation), 'era');
   const boostLinks = boost ? layer(links.filter((l) => !l.nation && !l.era), 'boost') : '';
-  const nation = layer(links.filter((l) => l.nation), 'strong');
+  const nation = layer(links.filter((l) => l.nation), 'nation');
   return `
     <svg class="field-bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
       ${PITCH_MARKINGS}

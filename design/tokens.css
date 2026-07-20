@@ -175,6 +175,9 @@
   --red-card:    #d11a1a;   /* tarjeta roja (banco, carta, resumen) */
   --injury-ink:  #140a0a;   /* fondo del contador de partidos de baja */
   --chem-boost:  #7e36ff;   /* enlace de química del "Duodécimo jugador" */
+  --chem-nation: var(--arcade-yellow);  /* enlace de química por nación (dorado) */
+  --chem-era:    var(--arcade-cyan);    /* enlace de química por época (celeste) */
+  --chem-web:    var(--arcade-cyan);    /* telaraña base tenue del tablero */
   --mgr-boost:   var(--arcade-green);   /* +stats del DT a sus connacionales (carta/OVR) */
   --press-paper: #F6EDD5;   /* crónica de prensa: papel envejecido */
   --press-ink:   #1C1408;   /* crónica de prensa: tinta serifa */
