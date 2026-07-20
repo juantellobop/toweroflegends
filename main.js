@@ -370,9 +370,6 @@ function updateMenuWeeklyLeaderboard() {
 // once actual.
 function lineupSnapshot(run) {
   const m = run.lastMatch;
-  // DT que dirigió ese partido: su boost connacional entra en el OVR guardado,
-  // para que el modal del ranking muestre los mismos números que vio el jugador.
-  const manager = m?.manager || run.manager || null;
   const byUid = new Map((run.squad || []).map((p) => [p.uid, p]));
   const kickoff = m?.kickoff11;
   const lineFor = (line) => kickoff
@@ -390,7 +387,10 @@ function lineupSnapshot(run) {
         // Hueco del grid (line+slot) para reconstruir el dibujo exacto en el
         // ranking, incluidas tácticas personalizadas y líneas de 5.
         slot: slot.slotIndex,
-        ovr: playerOVR(slot.player, manager),
+        // OVR BASE (sin DT): el boost connacional lo recalcula el modal del
+        // ranking al pintar (nación por nombre + DT de la entrada), así las
+        // entradas antiguas también lo muestran y nunca se suma dos veces.
+        ovr: playerOVR(slot.player),
         rarity: slot.player.rarity || '',
         ...(expelled.has(slot.player.uid) ? { expelled: true } : {}),
         ...(injured.has(slot.player.uid) ? { injured: true } : {}),

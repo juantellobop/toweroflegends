@@ -2,6 +2,8 @@ import { esc } from './dom.js';
 import { requestJson } from '../data/api.js';
 import { flagSrcForNation } from '../data/flags.js';
 import { sanitizeTeamName } from '../data/teamName.js';
+import { ROSTER } from '../data/roster.js';
+import { managerNationStatBonus } from '../engine/chemistry.js';
 import { t } from '../data/i18n.js';
 import { FORMATIONS, LINES, FORMATION_TEMPLATES, formationLineSlots, CUSTOM_FORMATION } from '../data/config.js';
 import { playerInitials, playerSurname, portraitPathForName, portraitPathForManager } from '../data/playerAssets.js';
@@ -176,14 +178,26 @@ export function renderLeaderboard(entries, options = {}) {
 
 // === Modal con el once del último partido de una entrada del top 20 ===
 
-function lineupChip(player) {
+// Nación por nombre para el boost del DT connacional: el snapshot del ranking
+// solo guarda nombre/posición/OVR base, así que la nación se resuelve contra el
+// roster local (verificado: sin nombres repetidos con nación distinta). Mejor
+// esfuerzo: un nombre fuera del roster (p. ej. Corrupto) queda sin boost.
+const nationByName = new Map(ROSTER.map((p) => [p.name, p.nation]));
+
+// `manager` (DT de la entrada): si el jugador es connacional, el OVR guardado
+// (base) se muestra con el boost sumado y teñido, igual que en el juego.
+function lineupChip(player, manager = null) {
+  const nation = nationByName.get(player.name);
+  const bonus = (manager && nation && Number.isFinite(player.ovr) && player.ovr > 0)
+    ? managerNationStatBonus({ nation }, manager)
+    : 0;
   return `
     <div class="field-chip scout-chip${player.rarity ? ` filled rarity-${esc(player.rarity)}` : ''}${player.expelled ? ' chip-expelled' : player.injured ? ' chip-injured' : ''}">
       <span class="chip-face" aria-hidden="true">
         <img src="${esc(portraitPathForName(player.name))}" alt="" loading="eager" decoding="async" data-hide-on-error="true" />
         <span>${esc(playerInitials(player.name))}</span>
       </span>
-      <span class="chip-ovr">${player.ovr || '—'}</span>
+      <span class="chip-ovr${bonus > 0 ? ' chip-ovr--mgr' : ''}">${player.ovr ? player.ovr + bonus : '—'}</span>
       <span class="chip-init">${POSITION_LABEL[player.position]}</span>
       <span class="chip-name" title="${esc(player.name)}">${esc(playerSurname(player.name))}</span>
     </div>`;
@@ -239,25 +253,25 @@ function lineupSlots(lineup, formation) {
   return slots;
 }
 
-function lineupField(lineup, formation) {
+function lineupField(lineup, formation, manager = null) {
   const slots = lineupSlots(lineup, formation);
-  if (!slots.length) return flatLineupField(lineup);
+  if (!slots.length) return flatLineupField(lineup, manager);
   layoutInformative(slots);
   return lineupFieldHTML({
     formation: formation || '',
     slots,
     fieldClass: 'lineup-modal-field',
-    chip: (slot) => lineupChip(slot.player),
+    chip: (slot) => lineupChip(slot.player, manager),
   });
 }
 
 // Respaldo para entradas sin formación guardada: reparto plano por línea jugada.
-function flatLineupField(lineup) {
+function flatLineupField(lineup, manager = null) {
   const nodes = LINES.flatMap((line) => {
     const players = lineup.filter((p) => (p.line || p.position) === line);
     const xs = lineSpreadX(players.length);
     return players.map((player, i) => `
-      <div class="chip-anchor" style="left:${xs[i]}%;top:${LINE_TOP[line]}%">${lineupChip(player)}</div>`);
+      <div class="chip-anchor" style="left:${xs[i]}%;top:${LINE_TOP[line]}%">${lineupChip(player, manager)}</div>`);
   }).join('');
   return `
     <div class="field lineup-board lineup-modal-field">
@@ -299,7 +313,7 @@ export function openLeaderboardLineup(entryId) {
             <span><small>${esc(t('result.manager'))}</small><b>${esc(entry.manager.name)}</b></span>
           </div>` : ''}
         </header>
-        ${lineupField(entry.lineup, entry.formation)}
+        ${lineupField(entry.lineup, entry.formation, entry.manager || null)}
       </section>
     </div>`;
 
