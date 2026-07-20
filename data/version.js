@@ -5,4 +5,4 @@
 // Es independiente del hash de build para caché (BUILD_VERSION en
 // tools/admin_server.mjs).
 
-export const GAME_VERSION = '0.13.30';
+export const GAME_VERSION = '0.13.31';

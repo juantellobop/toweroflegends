@@ -70,7 +70,9 @@ const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.svg', '.ic
 // Caché en memoria del CSS/JS ya minificado: clave fichero+mtime+versión, valor
 // el Buffer servido. En producción los ficheros son estáticos (se procesan una
 // vez por proceso); en local el mtime invalida la entrada al editar. Solo texto
-// (~80 módulos): memoria despreciable, sin riesgo de OOM.
+// (~80 módulos): memoria despreciable, sin riesgo de OOM. El texto cacheado
+// incluye los hashes de imagen inyectados (fileVersion/mediaVersions), que son
+// constantes por proceso: tras cambiar una imagen en local, reinicia el server.
 const minifiedCache = new Map();
 
 function normalizedVersion(value) {
@@ -100,6 +102,68 @@ function sourceHashVersion() {
     hashSourcePath(hash, path.join(ROOT, relativePath), relativePath);
   }
   return hash.digest('hex').slice(0, 12);
+}
+
+// Versionado por contenido de imágenes: el ?v= global de build cambia con cada
+// deploy e invalida a la vez la caché del navegador y la de la CDN para todas
+// las imágenes aunque no hayan cambiado (MISS sistemático en hCDN). Las
+// imágenes se versionan aparte: hash del propio archivo en las referencias
+// estáticas reescritas (HTML, url() de CSS, literales de JS) y hash por
+// directorio (pv/iv/fv) para las URLs que el cliente construye en runtime por
+// id. Ambos son constantes durante la vida del proceso (los deploys reinician
+// Passenger); en local, reinicia el servidor tras cambiar una imagen.
+const fileVersionCache = new Map(); // absPath -> { key: `${size}:${mtimeMs}`, version }
+
+export function fileVersion(absPath, stat = null) {
+  try {
+    const st = stat || statSync(absPath);
+    const key = `${st.size}:${st.mtimeMs}`;
+    const hit = fileVersionCache.get(absPath);
+    if (hit && hit.key === key) return hit.version;
+    const version = crypto.createHash('sha256').update(readFileSync(absPath)).digest('hex').slice(0, 12);
+    fileVersionCache.set(absPath, { key, version });
+    return version;
+  } catch (_) {
+    return null;
+  }
+}
+
+// Lazy para no leer ~1000 archivos en el arranque en frío de Passenger; si un
+// directorio faltara, ese grupo cae a BUILD_VERSION (comportamiento previo).
+export const MEDIA_VERSION_DIRS = { pv: 'assets/player-portraits', iv: 'assets/items', fv: 'assets/flags' };
+let mediaVersionsCache = null;
+
+export function mediaVersions() {
+  if (!mediaVersionsCache) {
+    const versions = {};
+    for (const [key, relativePath] of Object.entries(MEDIA_VERSION_DIRS)) {
+      try {
+        const hash = crypto.createHash('sha256');
+        hashSourcePath(hash, path.join(ROOT, relativePath), relativePath);
+        versions[key] = hash.digest('hex').slice(0, 12);
+      } catch (_) {
+        versions[key] = BUILD_VERSION;
+      }
+    }
+    mediaVersionsCache = versions;
+  }
+  return mediaVersionsCache;
+}
+
+function mediaDirVersionFor(filePath) {
+  const relative = path.relative(ROOT, filePath);
+  for (const [key, dir] of Object.entries(MEDIA_VERSION_DIRS)) {
+    if (relative.startsWith(dir + path.sep)) return mediaVersions()[key];
+  }
+  return null;
+}
+
+function withFileVersion(assetPath, baseDir = ROOT) {
+  const clean = assetPath.split('?')[0];
+  const absolute = path.normalize(path.join(baseDir, clean));
+  if (!absolute.startsWith(ROOT + path.sep)) return withBuildVersion(assetPath);
+  const version = fileVersion(absolute);
+  return version ? `${clean}?v=${version}` : withBuildVersion(assetPath);
 }
 
 function resolveBuildVersion() {
@@ -138,12 +202,18 @@ function resolveBuildVersion() {
 export const BUILD_VERSION = resolveBuildVersion();
 
 function versionedIndexHtml(source) {
-  // El favicon también va versionado: los navegadores cachean los iconos con
-  // especial insistencia y sin ?v= seguirían mostrando el viejo tras cambiarlo.
-  return source.replace(
-    /\b(href|src)="(design\/tokens\.css|styles\.css|main\.js|assets\/favicon\.png)(?:\?[^"]*)?"/g,
-    (_, attribute, asset) => `${attribute}="${asset}?v=${BUILD_VERSION}"`
-  );
+  // CSS/JS de entrada van con la versión de build; las imágenes (favicon,
+  // preloads) con el hash de su propio archivo, para que sus URLs sobrevivan a
+  // los deploys que no las tocan y coincidan con las que reescriben JS/CSS.
+  return source
+    .replace(
+      /\b(href|src)="(design\/tokens\.css|styles\.css|main\.js)(?:\?[^"]*)?"/g,
+      (_, attribute, asset) => `${attribute}="${asset}?v=${BUILD_VERSION}"`
+    )
+    .replace(
+      /\b(href|src)="(assets\/[^"?]+\.(?:ico|jpe?g|png|svg|webp))(?:\?[^"]*)?"/gi,
+      (_, attribute, asset) => `${attribute}="${withFileVersion(asset)}"`
+    );
 }
 
 function withBuildVersion(resource) {
@@ -152,9 +222,22 @@ function withBuildVersion(resource) {
   return `${resource}${separator}v=${BUILD_VERSION}`;
 }
 
+// Los módulos que construyen URLs de imagen en runtime reciben además la
+// versión del directorio correspondiente (pv/iv/fv) en su propio specifier y
+// la leen de import.meta.url. Todos los importadores pasan por esta misma
+// reescritura, así que el módulo resuelve a una única URL (una sola instancia).
+function moduleMediaParams(specifier) {
+  if (specifier.endsWith('data/playerAssets.js')) {
+    const media = mediaVersions();
+    return `&pv=${media.pv}&iv=${media.iv}`;
+  }
+  if (specifier.endsWith('data/flags.js')) return `&fv=${mediaVersions().fv}`;
+  return '';
+}
+
 function versionedJavaScript(source) {
   const rewrite = (_, prefix, quote, specifier) =>
-    `${prefix}${quote}${withBuildVersion(specifier)}${quote}`;
+    `${prefix}${quote}${withBuildVersion(specifier)}${moduleMediaParams(specifier)}${quote}`;
 
   // El ?v= se inyecta sobre el código aún con espacios (sus regex esperan
   // `import ... from`); los comentarios se eliminan AL FINAL.
@@ -173,7 +256,7 @@ function versionedJavaScript(source) {
     )
     .replace(
       /(['"])((?:assets|scenes)\/[^'"`\s)]+\.(?:ico|jpe?g|png|svg|webp)(?:\?[^'"]*)?)\1/gi,
-      (_, quote, asset) => `${quote}${withBuildVersion(asset)}${quote}`
+      (_, quote, asset) => `${quote}${withFileVersion(asset)}${quote}`
     );
   return stripJsComments(versioned);
 }
@@ -350,24 +433,39 @@ function stripJsComments(src) {
   return out;
 }
 
-function versionedCss(source) {
+function versionedCss(source, cssFilePath) {
+  // Las url() de CSS son relativas al propio archivo CSS, no a la raíz.
+  const baseDir = cssFilePath ? path.dirname(cssFilePath) : ROOT;
   return minifyCss(source).replace(
     /url\(\s*(['"]?)(?!data:|https?:|#)([^'")]+)\1\s*\)/gi,
-    (_, quote, asset) => `url(${quote}${withBuildVersion(asset.trim())}${quote})`
+    (_, quote, asset) => `url(${quote}${withFileVersion(asset.trim(), baseDir)}${quote})`
   );
 }
 
-function cacheControlFor(filePath, url) {
+function cacheControlFor(filePath, url, stat = null) {
   if (filePath === INDEX_FILE || path.extname(filePath).toLowerCase() === '.html') {
     return 'no-store, max-age=0';
   }
 
-  if (url.searchParams.get('v') === BUILD_VERSION) {
-    return 'public, max-age=31536000, immutable';
-  }
+  const version = url.searchParams.get('v');
 
   if (IMAGE_EXTENSIONS.has(path.extname(filePath).toLowerCase())) {
+    // Immutable solo si el ?v= es el hash vigente del archivo (referencias
+    // estáticas reescritas), el de su directorio (URLs construidas en cliente)
+    // o el BUILD_VERSION legacy. Versiones viejas o ausentes caen al bucket de
+    // una semana con SWR, que revalida barato con el ETag.
+    if (version && (
+      version === fileVersion(filePath, stat) ||
+      version === mediaDirVersionFor(filePath) ||
+      version === BUILD_VERSION
+    )) {
+      return 'public, max-age=31536000, immutable';
+    }
     return 'public, max-age=604800, stale-while-revalidate=2592000';
+  }
+
+  if (version === BUILD_VERSION) {
+    return 'public, max-age=31536000, immutable';
   }
 
   // ES module imports and CSS-referenced assets keep stable paths, so every
@@ -710,7 +808,7 @@ async function serveStatic(req, res) {
       if (!body) {
         const source = await fs.readFile(filePath, 'utf8');
         const text = extension === '.css'
-          ? versionedCss(source)
+          ? versionedCss(source, filePath)
           : versionedJavaScript(source);
         body = Buffer.from(text, 'utf8');
         minifiedCache.set(cacheKey, body);
@@ -731,7 +829,7 @@ async function serveStatic(req, res) {
     const headers = securityHeaders({
       'Content-Type': MIME[path.extname(filePath).toLowerCase()] || 'application/octet-stream',
       'Content-Length': stat.size,
-      'Cache-Control': cacheControlFor(filePath, url),
+      'Cache-Control': cacheControlFor(filePath, url, stat),
       'ETag': etag,
       'Last-Modified': stat.mtime.toUTCString(),
       'X-App-Version': BUILD_VERSION,

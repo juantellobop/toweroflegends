@@ -21,6 +21,13 @@ function slugFor(name) {
 }
 
 const FLAG_DIR = 'assets/flags';
+
+// El servidor reescribe el import de este módulo con &fv=<hash del contenido
+// de assets/flags>: las banderas se cachean immutable y sus URLs solo cambian
+// cuando cambia alguna imagen del directorio. Sin tag (tests en Node, apertura
+// directa, servidor antiguo) las rutas quedan sin sufijo, como siempre.
+const FLAG_TAG = new URL(import.meta.url).searchParams.get('fv');
+const FLAG_SUFFIX = FLAG_TAG ? `?v=${FLAG_TAG}` : '';
 const FLAG_FILE_ALIAS = {
   'river-plate': 'riverplate.png',
   'san-lorenzo': 'sanlorenzo.png',
@@ -49,9 +56,9 @@ const FLAG_SVG_FILE = { urss: 'urss.svg', yugoslavia: 'yugoslavia.svg' };
 
 function flagFileFor(name) {
   const slug = slugFor(name);
-  if (FLAG_FILE_ALIAS[slug]) return `${FLAG_DIR}/${FLAG_FILE_ALIAS[slug]}`;
-  if (FLAG_SVG_FILE[slug]) return `${FLAG_DIR}/${FLAG_SVG_FILE[slug]}`;
-  if (FLAG_PNG.has(slug)) return `${FLAG_DIR}/${slug}.png`;
+  if (FLAG_FILE_ALIAS[slug]) return `${FLAG_DIR}/${FLAG_FILE_ALIAS[slug]}${FLAG_SUFFIX}`;
+  if (FLAG_SVG_FILE[slug]) return `${FLAG_DIR}/${FLAG_SVG_FILE[slug]}${FLAG_SUFFIX}`;
+  if (FLAG_PNG.has(slug)) return `${FLAG_DIR}/${slug}.png${FLAG_SUFFIX}`;
   return null;
 }
 

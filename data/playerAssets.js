@@ -3,12 +3,18 @@ import { ROSTER } from './roster.js';
 
 export const PORTRAIT_DIR = 'assets/player-portraits';
 
-// El servidor reescribe los imports de módulos con ?v=<build>; reutilizar ese
-// mismo tag en los retratos hace que cada deploy invalide la caché de caras
-// y que entre deploys el navegador las conserve como immutable. Sin tag
-// (tests en Node, apertura directa) las rutas quedan como siempre.
-const BUILD_TAG = new URL(import.meta.url).searchParams.get('v');
-const PORTRAIT_SUFFIX = BUILD_TAG ? `?v=${BUILD_TAG}` : '';
+// El servidor reescribe el import de este módulo con ?v=<build>&pv=<hash de
+// assets/player-portraits>&iv=<hash de assets/items>. Usar el hash del
+// directorio (y no el de build) hace que las URLs de retratos e items
+// sobrevivan a los deploys de solo código: la CDN y el navegador conservan la
+// caché immutable, y solo se invalida cuando de verdad cambian las imágenes.
+// Fallback a ?v= (servidor antiguo) y a vacío (tests en Node, apertura directa).
+const MODULE_URL = new URL(import.meta.url);
+const BUILD_TAG = MODULE_URL.searchParams.get('v');
+const PORTRAIT_TAG = MODULE_URL.searchParams.get('pv') || BUILD_TAG;
+const ITEM_TAG = MODULE_URL.searchParams.get('iv') || BUILD_TAG;
+const PORTRAIT_SUFFIX = PORTRAIT_TAG ? `?v=${PORTRAIT_TAG}` : '';
+const ITEM_SUFFIX = ITEM_TAG ? `?v=${ITEM_TAG}` : '';
 
 export function normalizeName(name) {
   return String(name || '')
@@ -102,5 +108,5 @@ export function artworkPathForItem(item) {
   if (!item) return null;
   if (item.artDataUrl) return item.artDataUrl;
   const id = item.id || slugifyName(item.name);
-  return `${ITEM_ART_DIR}/${id}.webp${PORTRAIT_SUFFIX}`;
+  return `${ITEM_ART_DIR}/${id}.webp${ITEM_SUFFIX}`;
 }
