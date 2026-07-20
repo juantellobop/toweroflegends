@@ -109,9 +109,12 @@ export function layoutInformative(slots) {
   return slots;
 }
 
-// OVR a mostrar: el precalculado (onces rivales) o el del motor (cartas propias).
-// Con `manager` (DT connacional) el OVR de las cartas propias sube y se tiñe.
+// OVR a mostrar: para cartas propias (traen stats/gk) SIEMPRE el del motor —así
+// el boost del DT connacional entra al pasar `manager`, aunque la carta lleve un
+// ovr precalculado del roster—; para onces rivales/snapshots (sin stats), el
+// precalculado.
 export function displayOVR(player, manager = null) {
+  if (player.stats || player.gk) return playerOVR(player, manager);
   return Number.isFinite(player.ovr) ? player.ovr : playerOVR(player, manager);
 }
 
@@ -120,7 +123,7 @@ export function displayOVR(player, manager = null) {
 // `manager` aplica el boost del DT connacional al OVR (solo cartas propias).
 export function staticChipHTML(player, { portraitSrc, flagSrc, chipClass = '', interactive = false, ariaLabel = '', loading = 'eager', manager = null } = {}) {
   const rarity = player.rarity ? ` rarity-${player.rarity}` : '';
-  const boosted = !Number.isFinite(player.ovr) && managerNationStatBonus(player, manager) > 0;
+  const boosted = Boolean(player.stats || player.gk) && managerNationStatBonus(player, manager) > 0;
   const inner = `
       <span class="chip-face" aria-hidden="true">
         <img src="${esc(portraitSrc)}" alt="" draggable="false" loading="${loading}" decoding="async" data-hide-on-error="true" />
