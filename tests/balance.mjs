@@ -59,13 +59,15 @@ assert.ok(Math.abs(starterPct('low') - 80) <= 6, `starter low% = ${starterPct('l
 assert.ok(Math.abs(starterPct('mid') - 15) <= 6, `starter mid% = ${starterPct('mid').toFixed(1)}`);
 assert.ok(Math.abs(starterPct('high') - 5) <= 4, `starter high% = ${starterPct('high').toFixed(1)}`);
 
-// Objetos: escala global, serie geométrica y topes por rating.
+// Objetos: escala global, serie geométrica (DR_RATE 0.8: −20% por copia) y topes.
 const gloves = item('guantes_magicos');
-assert.deepEqual(effectiveItemEffects([gloves, gloves, gloves]).map((e) => e.value), [3, 1.5, 0.75]);
-assert.equal(applyItemsToRatings({ attack: 50, midfield: 50, defense: 50, gk: 50 }, [gloves, gloves, gloves]).gk, 55.25);
+const glovesVals = effectiveItemEffects([gloves, gloves, gloves]).map((e) => e.value);
+assert.ok(glovesVals.length === 3 && near(glovesVals[0], 3) && near(glovesVals[1], 2.4) && near(glovesVals[2], 1.92),
+  `serie de guantes = ${glovesVals.join(', ')}`);
+assert.ok(near(applyItemsToRatings({ attack: 50, midfield: 50, defense: 50, gk: 50 }, [gloves, gloves, gloves]).gk, 57.32));
 const pressure = item('presion_alta');
-// 0.08 × ITEM_POWER_SCALE (0.5) × serie geométrica de copias (1 + 0.5 + 0.25) = 0.07.
-assert.ok(Math.abs(matchStealBonus([pressure, pressure, pressure]) - 0.07) < 1e-9,
+// 0.08 × ITEM_POWER_SCALE (0.5) × serie geométrica de copias (1 + 0.8 + 0.64) = 0.0976.
+assert.ok(Math.abs(matchStealBonus([pressure, pressure, pressure]) - 0.0976) < 1e-9,
   `robo de 3 presión alta = ${matchStealBonus([pressure, pressure, pressure])}`);
 assert.equal(item('suplentes_lujo'), undefined);
 assert.equal(item('ojeador'), undefined);
@@ -103,9 +105,9 @@ assert.ok(near(applyItemsToRatings(base, [tikitaka]).midfield, 52), 'sin estilo,
 assert.ok(near(applyItemsToRatings(base, [tikitaka], 'posesion').midfield, 53), 'posesión activa la sinergia');
 assert.ok(near(applyItemsToRatings(base, [tikitaka], 'contra').midfield, 52), 'contra no la activa');
 
-// Reliquia de química: +2 de equipo, con decaimiento en copias.
+// Reliquia de química: +2 de equipo, con decaimiento en copias (2 + 2×0.8).
 assert.equal(chemTeamBonus([item('duodecimo_jugador')]), 2);
-assert.equal(chemTeamBonus([item('duodecimo_jugador'), item('duodecimo_jugador')]), 3);
+assert.ok(near(chemTeamBonus([item('duodecimo_jugador'), item('duodecimo_jugador')]), 3.6));
 // Sin topes de acumulación: cada objeto distinto suma entero (tras el nerfeo
 // ×0.5); el decaimiento solo aplica a copias del mismo objeto.
 const hugeAdds = Array.from({ length: 3 }, (_, i) => ({

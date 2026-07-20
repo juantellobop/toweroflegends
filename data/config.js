@@ -78,9 +78,10 @@ export const CONFIG = {
   // --- Objetos ---
   // Sin topes de acumulación: cada objeto suma entero. El apilamiento lo
   // modera el nerfeo de potencia (ITEM_POWER_SCALE) y el decaimiento por
-  // copia repetida (DR_RATE).
+  // copia repetida (DR_RATE: cada copia rinde ese factor de la anterior;
+  // 0.8 = decae un 20% por copia).
   ITEM_POWER_SCALE: 0.5,
-  DR_RATE: 0.5,
+  DR_RATE: 0.8,
   DR_BY_STAT: false,
   // Sinergia ítem↔táctica: si el synergyType del ítem coincide con el tipo
   // del dibujo (posesión/presión/contra), su efecto se aplica multiplicado.

@@ -490,7 +490,7 @@ const DICTIONARIES = {
       owned: 'Ya en tu plantilla',
       manager: { badge: 'DT' },
       itemStack: ({ n }) => `×${n} copias acumuladas`,
-      itemStackNote: 'Cada copia extra rinde la mitad',
+      itemStackNote: 'Cada copia extra rinde un 20% menos',
       rarity: { common: 'Común', rare: 'Rara', epic: 'Épica', legend: 'Leyenda', corrupto: 'Corrupto', shiny: 'Shiny' },
       position: { GK: 'POR', DEF: 'DEF', MID: 'MED', FWD: 'DEL', ENG: 'ENG' },
       line: { GK: 'Portería', DEF: 'Defensa', MID: 'Mediocampo', FWD: 'Ataque', ENG: 'Enganche' },
@@ -1172,7 +1172,7 @@ const DICTIONARIES = {
     card: {
       owned: 'Already in your squad',
       itemStack: ({ n }) => `×${n} copies stacked`,
-      itemStackNote: 'Each extra copy is worth half',
+      itemStackNote: 'Each extra copy is worth 20% less',
       rarity: { common: 'Common', rare: 'Rare', epic: 'Epic', legend: 'Legend', corrupto: 'Corrupt', shiny: 'Shiny' },
       position: { GK: 'GK', DEF: 'DEF', MID: 'MID', FWD: 'FWD', ENG: 'AM' },
       line: { GK: 'Goal', DEF: 'Defense', MID: 'Midfield', FWD: 'Attack', ENG: 'Playmaker' },
